@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://cybermaps.dev/"><img src="docs/cybermaps-icon.png" width="112" alt="Cybermaps logo"></a>
+  <a href="https://cybermaps.dev/"><img src=".wordpress-org/icon-128x128.png" width="112" alt="Cybermaps logo"></a>
 </p>
 
 <h1 align="center">CYBERMAPS</h1>
@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://cybermaps.dev/"><img src="docs/cybermaps-social-card.png" width="100%" alt="Cybermaps — publish, verify, and improve WordPress XML sitemaps, llms.txt, Markdown, and JSON discovery"></a>
+  <a href="https://cybermaps.dev/"><img src=".wordpress-org/banner-1544x500.png" width="100%" alt="Cybermaps — publish, verify, and improve WordPress XML sitemaps, llms.txt, Markdown, and JSON discovery"></a>
 </p>
 
 <p align="center">
