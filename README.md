@@ -105,8 +105,9 @@ without executing shortcodes or dynamic blocks.
 The open beta is ready for use on live WordPress sites. Feedback and bug reports
 are welcome.
 
-1. Download the versioned **`cybermaps_<version>.zip`** release asset. GitHub's
-   automatic “Source code” archives are development copies.
+1. Open the [releases page](https://github.com/Alex9001/cybermaps/releases), choose
+   the newest release, and download **`cybermaps_<version>.zip`** from its assets.
+   GitHub's automatic “Source code” archives are development copies.
 2. In WordPress, open **Plugins → Add New Plugin → Upload Plugin**.
 3. Select the ZIP, install it, and activate **Cybermaps**.
 
@@ -197,8 +198,8 @@ composer run release:github -- --stable # Publish a stable release
 
 Running either command authorizes immediate publication after verification.
 The command runs PHPUnit, release standards/generated-input checks, the complexity
-gate, and the local builder. It reads the plugin version automatically: `7.4.0`
-becomes `v7.4.0`, with `clean/cybermaps_7.4.0.zip` and its `.sha256` file.
+gate, and the local builder. It reads the plugin version automatically to create
+the `v<version>` tag, `clean/cybermaps_<version>.zip`, and its `.sha256` file.
 Release notes use the matching `changelog.txt` section, requirements, installation
 instructions, and the diagnostic support bundle reporting instructions.
 
