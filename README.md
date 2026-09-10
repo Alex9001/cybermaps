@@ -19,6 +19,7 @@
   <a href="#install"><img src="https://img.shields.io/badge/WordPress-7.1%2B-21759b?style=flat" alt="WordPress 7.1 or newer"></a>
   <a href="#install"><img src="https://img.shields.io/badge/PHP-8.2%2B-777bb4?style=flat" alt="PHP 8.2 or newer"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--2.0--or--later-6366f1?style=flat" alt="GPL-2.0-or-later license"></a>
+  <a href="https://deepwiki.com/Alex9001/cybermaps"><img src="https://img.shields.io/badge/DeepWiki-Ask-0ea5e9?style=flat" alt="Ask DeepWiki about Cybermaps"></a>
 </p>
 
 <p align="center">
