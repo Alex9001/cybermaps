@@ -1,0 +1,484 @@
+Cybermaps release history
+=========================
+
+7.4.0
+-----
+
+* Added opt-in managed .htaccess delivery with ownership-safe removal and routing diagnostics.
+* Added per-publication server-side evidence and manual public inspection links.
+* Corrected Cloudflare media types and root publication coverage.
+* Fixed report comparison SQL parameters and exception handling.
+* Fixed LLMS inventory pagination and expanded bounded full-corpus publication.
+
+7.3.4
+-----
+
+* Isolated `/ai-discovery` from cross-site origin caches with an owned Cloudflare request-transform rule.
+
+7.3.3
+-----
+
+* Added `/ai-discovery` to the ownership-safe default static inventory.
+* Prevented stale nginx/FastCGI path caches from overriding the canonical discovery index on compatibility-mode sites.
+
+7.3.2
+-----
+
+* Added a hashed installation identity to every Cybermaps APCu, Redis, Memcached, and object-cache key.
+* Prevented independent WordPress installations that both use blog ID 1 from exchanging derived discovery payloads.
+
+7.3.1
+-----
+
+* Fixed the invalid Cloudflare eligibility visibility helper that caused Advanced settings to fatal.
+* Fixed automatic detection to hide and restore the complete manual-confirmation row.
+
+7.3.0
+-----
+
+* Renamed System Status to Debugging and added opt-in, time-bounded diagnostic logging.
+* Added redacted GitHub support bundles with copy, download, retention, and clear controls.
+* Added aggregate static-publication and plugin-fatal instrumentation without collecting request analytics or credentials.
+
+7.2.2
+-----
+
+* Added an exact-host Cloudflare eligibility gate that disables OAuth and API
+  token mutations unless proxy traffic is detected or an administrator makes
+  a page-scoped, nonce-protected manual confirmation.
+* Added browser detection, distinct checking/failure/manual states, accessible
+  guidance, and OAuth transaction host binding.
+
+7.2.1
+-----
+
+* Fixed Cloudflare OAuth completion recovery and automatically verify public
+  discovery resources from the administrator's browser with bounded retries.
+* Added canonical subdirectory/headless paths, per-resource diagnostics, a
+  Cloudflare execution marker, and complete OAuth metadata cache bypass.
+
+7.2.0
+-----
+
+* Added public Cloudflare OAuth with PKCE, account consent, automatic combined
+  rule installation, immediate token revocation, and no stored credential.
+* Added a bounded open-source callback relay, ambiguity-safe zone selection,
+  OAuth lifecycle status, and a collapsed one-time-token fallback.
+* Added self-managed Cloudflare OAuth with a site-local callback, PKCE/state
+  handoff, public-client settings, and exact registration guidance.
+
+7.1.0
+-----
+
+* Added a System Status submenu that separates stack availability from the
+  optimizations Cybermaps is actively using.
+* Added one-time-token Cloudflare response-header and cache-safety rule
+  management without storing edge credentials.
+* Added independent default-on LiteSpeed and APCu controls, shared delivery
+  diagnostics, and Cybermaps-scoped cache invalidation.
+
+7.0.1
+-----
+
+* Added ownership-safe canonical `.well-known` body fallbacks for origins that
+  bypass WordPress, without misreporting static media types as conformant.
+* Unified OAuth metadata generation, bounded LLMS traversal, and normalized
+  duplicate public response headers in discovery diagnostics.
+
+7.0.0
+-----
+
+* Raised the minimum supported WordPress version to 7.1 and established one
+  public Ability graph for native REST execution, MCP, WebMCP, OpenAPI, RFC
+  9727 API Catalog discovery, and ARD capability discovery.
+* Replaced the nested `/.well-known/.htaccess` writer with exact routes in
+  WordPress's global rewrite layer. Apache and LiteSpeed rules are emitted
+  before filesystem checks, while avoiding a physical well-known directory
+  lets standard nginx front-controller routing reach WordPress.
+* Added ownership-safe removal of the old marker block, one-time rewrite
+  schema refresh, canonical protocol probes, and explicit delivery state.
+
+6.6.1
+-----
+
+* Added an ownership-safe, automatically managed `/.well-known/.htaccess`
+  routing bridge for header-sensitive discovery endpoints on compatible Apache,
+  LiteSpeed, and OpenLiteSpeed origins.
+* Added scheduled canonical API Catalog GET/HEAD verification, cache
+  invalidation, and blocked-before-WordPress diagnostics.
+* Kept nginx and other non-`.htaccess` servers untouched and refused to treat an
+  extensionless wrong-MIME static API Catalog as RFC 9727 conformance.
+
+6.6.0
+-----
+
+* Enriched the standardized RFC 9727 API Catalog with RFC 9264 Linksets for
+  each advertised public API and added a bounded public health endpoint at
+  `GET /wp-json/cybermaps/v1/health`.
+* Published OAuth authorization-server and protected-resource metadata as pure
+  OAuth metadata. Cybermaps does not claim OpenID Connect, emit fabricated OIDC
+  discovery, or expose a fake JWKS.
+* Added default-off user-claimed OAuth registration using RFC 8628 device
+  approval and logged-in WordPress review. Auth.md publication is separately
+  opt-in; no account or credential is created before user approval.
+* Added the current experimental MCP Server Card at
+  `GET /wp-json/cybermaps/v1/mcp/server-card` and requested scanner
+  compatibility at `/.well-known/mcp/server-card.json`. Optional MCP remains
+  separately advertised and disabled by default.
+* Added the draft Agentic Resource Discovery catalog at
+  `/.well-known/ai-catalog.json`, with `/ai-catalog.json` as a compatibility
+  alias and only currently active capabilities in its payload.
+* Added default-off, read-only WebMCP registration for site search, same-origin
+  page Markdown, and discovery-resource listing. Unsupported browsers safely
+  receive no registration.
+* Added visible maturity badges, exact helper guidance, authoritative links,
+  and accessible descriptions for standardized, draft, experimental, and
+  vendor-convention controls.
+* Added copy-ready nginx, Apache/OpenLiteSpeed, LiteSpeed Cache, Varnish, and
+  reverse proxy/CDN rules. Cybermaps never writes deployment configuration.
+* Added status language that separates Configured, Advertised, and Publicly
+  verified state and identifies likely canonical `/.well-known/` interception
+  when a compatibility alias works but the canonical URL does not.
+
+6.5.0
+-----
+
+* Added explicit, RFC-aware `Accept: text/markdown` negotiation for eligible
+  canonical singular, homepage, blog, and public archive views.
+* Added bounded stored-content collection summaries, token estimates,
+  representation-specific validators, cache separation, native/edge status
+  diagnostics, analytics classification, and medium-tier throttling.
+* Added LiteSpeed request safeguards and deployment guidance for LiteSpeed,
+  OpenLiteSpeed, nginx, Varnish, Cloudflare, and remote headless frontends.
+
+6.4.1
+-----
+
+* Enforced a maximum cyclomatic complexity of 10 across shipped PHP and split
+  high-branching sitemap, discovery, static-publication, migration, analytics,
+  and administration paths into bounded collaborators.
+* Expanded characterization tests for configuration imports and sanitizers,
+  publication ownership and routing, reports, crawler policy, and sitemap
+  request handling while preserving the complete public feature surface.
+
+6.4.0
+-----
+
+* Added 20 researched crawler identities across AI search, conventional search,
+  SEO, archival, diagnostic, feed, and content-indexing services.
+* Separated request recognition from robots-policy capability so analytics can
+  identify services that do not expose a meaningful robots.txt control.
+* Corrected User-Agent product-token parsing for versioned or unversioned tokens
+  followed by an operator documentation URL.
+* Added a sanitized audit matrix and regression coverage while retaining generic,
+  unsupported, example, and unverifiable agents as unidentified traffic.
+
+6.3.0
+-----
+
+* Added generation-fenced WordPress Cache API groups so internal publication,
+  registry, route, and diagnostic caches can be invalidated by generation
+  instead of broad transient deletion.
+* Added automatic Redis and Memcached acceleration through conforming
+  `object-cache.php` drop-ins without a direct vendor dependency; Cybermaps
+  treats the WordPress Object Cache API as acceleration, not as a source of
+  durability.
+* Added optional APCu L1 acceleration for disposable per-process values. APCu
+  is never used as an authoritative queue, lock, or ownership store.
+* Moved IndexNow submission state to a durable database queue with dedupe,
+  bounded retry metadata, and safe batching for enabled same-host URLs.
+* Added edge-cache policy support aligned with RFC 9111 plus RFC 9530
+  Repr-Digest diagnostics for public machine publications.
+* Added LiteSpeed Cache integration that applies Cybermaps cache tags and
+  purges owned publication URLs automatically when the LiteSpeed Cache plugin
+  is present.
+* Added protected, opt-in exact-URL Varnish PURGE integration. Cybermaps does
+  not claim portable nginx purge support and does not mutate server config.
+* Added advisory nginx, Apache, OpenLiteSpeed, Varnish, and CDN configuration
+  snippets plus diagnostics that distinguish automatic plugin behavior from
+  operator-managed cache/server routing.
+* Added default-off trusted-proxy settings for a selected forwarded-IP header
+  and trusted CIDR list; arbitrary forwarded headers remain untrusted.
+
+6.2.0
+-----
+
+* Added a revision-pinned Cybermaps AI Discovery Protocol 3.0 Level 3 profile
+  and canonical OpenAPI 3.2.0 contract with retained 3.1.2 negotiation.
+* Added opt-in MCP 2026-07-28 stateless discovery and operations with OAuth 2.1
+  PKCE authorization, consent, scoped tokens, and five bounded tools.
+* Added opt-in AIPREF Content-Usage publication alongside preserved
+  Content-Signal declarations, plus same-host IndexNow queue batching and
+  bounded retry handling.
+* Added static body-versus-header parity diagnostics and clarified that
+  `ai-actions.json` is descriptive metadata, never automatically executable;
+  MCP exposes no content, settings, or general administration mutation.
+
+6.1.0
+-----
+
+* Restored support for WordPress 7.0 and PHP 8.2, with scoped compatibility for
+  the WordPress 7.1 toggletip and editor-control sizing changes.
+* Unified audit remediation: term-exclusion parser, atomic minute counters,
+  publication request guards, handler resolution, and generation-scoped sitemap
+  page occupancy.
+* Scaled static synchronization with ownership-safe continuation, bounded sync
+  reports, connection-bound database fencing, and a durable write/delete
+  recovery journal with explicit administrator resolution.
+* Lease-bound Core upgrade and fresh-install coordination plus monotonic,
+  target-owned translation-registry schema migration that preserves newer
+  release state.
+* Operator diagnostics: competing-sitemap warnings, PHP-path checks, and
+  headless IndexNow key verification.
+* Performance work on LLMS-TLDR traversal, configuration memoization, and batched
+  publication inventory priming.
+* Formal plugin title: CYBERMAPS: XML Sitemaps & llms.txt.
+
+6.0.0
+-----
+
+* Raised the minimum runtime to WordPress 7.1 and PHP 8.3.
+* Modernized editor, accessibility, request-routing, migration, static-file,
+  throttling, caching, and release-validation foundations.
+* Preserved existing public routes, settings, privacy controls, and owned
+  publications through an explicit upgrade path.
+* Added literal per-resource Markdown alternates, standard page discovery
+  relations, and bounded `llms.txt` links with explicit coverage reporting.
+* Identified `/ai.json` as the Cybermaps AI Discovery Manifest 1.0 vendor
+  extension instead of presenting it as an outside protocol.
+
+5.5.0
+-----
+
+* Added an optional Guided Setup workspace launched from Overview with
+  site-structure recommendations and independent Keep, Configure, and Reset
+  decisions for strategy, sitemap publishing, AI publishing, identity,
+  analytics, delivery, and reports.
+* Bound every wizard change to the canonical configuration registry and the
+  existing preview/import transaction, preserving unmanaged settings and
+  requiring review acknowledgements for high-impact and reset operations.
+* Added guarded automatic-catalog editing that verifies a public parent Page
+  and preserves manual and unrelated automatic catalogs.
+
+5.4.0
+-----
+
+* Replaced the underspecified editable AI template with a self-contained,
+  site-aware AI Configuration Brief covering every supported non-secret field.
+* Included current non-secret configuration, route and publication state, public
+  identity/catalog context, detected integrations, content inventories,
+  crawler definitions, field guidance, dependencies, examples, and risk levels.
+* Added canonical Draft 2020-12 JSON Schema and field-catalog artifacts with
+  deterministic hashes, manifest metadata, drift checks, and versioned website
+  publication support.
+* Added a non-mutating server preview that reports current, proposed, normalized,
+  unchanged, and high-impact values before any setting is written.
+* Bound apply requests to both the reviewed file and destination configuration,
+  required acknowledgement for high-impact changes, and rejected stale reviews.
+* Added recursive validation for strict objects, native types, enums, bounds,
+  public URLs, catalog/contact/hour shapes, crawler IDs, identity compatibility,
+  and coupled chunk-size/overlap rules.
+* Preserved exact secret-bearing JSON backups and legacy template imports while
+  excluding API/IndexNow credentials and credential-bearing URL userinfo from
+  AI-facing files and previews.
+
+5.3.0
+-----
+
+* Promoted the HTML sitemap builder to its own top-level workspace with correct
+  settings ownership, save redirects, and workspace-scoped assets.
+* Reframed the Discovery Command Center as Content Discovery Strategy with
+  real-world site profiles, clearer content-group descriptions, explicit
+  Publish, Content Intent, Relative Weight, and Baseline/Custom semantics.
+* Added non-destructive site analysis: recommendations are shown with evidence
+  and require an explicit apply action before custom rows are reset.
+* Made analysis evidence explain the actual content structure and inventory
+  behind a suggestion, with database failures surfaced instead of being
+  mistaken for an empty site.
+* Separated disabled publication state from positive priority overrides so an
+  off/on cycle retains tuned weight, while migrating historical zero values.
+* Corrected profile-based intent fallback in runtime AI metadata and aligned
+  disabled groups across XML, AI, HTML, RSS, search, LLMS, and Knowledge Graph
+  inventories.
+* Kept the homepage and additional URLs in the miscellaneous sitemap independent
+  from the Pages Publish choice, and skipped JSON Feed queries when Posts are off.
+* Replaced implicit post exclusions in business presets with positive defaults,
+  covered common store, documentation, portfolio, and service content groups,
+  and clarified WordPress's Post Formats taxonomy.
+* Added real post-type and taxonomy wildcards to the HTML Sitemap builder and
+  runtime, clearer global-availability states, bounded inputs, and accessible
+  copy and validation feedback.
+* Promoted Site Identity to a dedicated Schema workspace, removed the crawler
+  policy accordion, and collapsed granular bot rows behind category bulk
+  actions so the common workflow stays compact.
+
+5.2.0
+-----
+
+* Completed a page-by-page and contract-level public-launch audit across the
+  administration interface, sitemap engine, AI publications, analytics,
+  reports, configuration exchange, lifecycle, and distribution metadata.
+* Centralized additional publication and post-type decisions so sitemaps,
+  discovery endpoints, chunks, REST responses, notifications, and reports use
+  consistent bounded inventories.
+* Hardened read-only public request handling, protocol response headers,
+  redirect and path validation, static-file reconciliation, and output
+  escaping.
+* Improved Identity Hub and offer-catalog editing, administration
+  accessibility, crawler and requester classification, client-IP evidence,
+  analytics exports, and report actions.
+* Corrected IndexNow, WebSub, JSON Feed, robots, sitemap, media, and discovery
+  behavior uncovered by cross-feature testing.
+* Removed obsolete classes and assets, consolidated duplicated implementation,
+  and expanded regression and contract coverage for public routes, settings,
+  lifecycle operations, and release behavior.
+
+5.1.1
+-----
+
+* Replaced the incomplete Markdown configuration backup with a versioned JSON
+  site-configuration backup that preserves nested, multiline, and secret
+  values.
+* Added checksum validation, safe Smart Merge and Full Replace behavior,
+  whole-import verification with rollback, and explicit rejection of malformed
+  or incomplete backups.
+* Separated exact JSON backups from the merge-only editable AI template and
+  retained safe legacy Markdown import compatibility.
+* Hardened analytics and report downloads with consistent no-cache and
+  content-type headers, stronger spreadsheet-formula protection, UTF-8 CSV
+  output, and clearer disabled-publication totals.
+* Centralized the publishable public post-type inventory so WordPress
+  attachment rows no longer leak into XML, AI, HTML, reporting, audit, status,
+  editor, or media-scan type lists.
+* Consolidated historical AI post-ID exclusions into one truthful global
+  control while retaining lossless backup/import compatibility, and applied
+  global term exclusions consistently by ID or slug.
+* Added matching save-time and runtime bounds for JSON Feed, AI sitemap,
+  external AI-sitemap links, and published action mappings; repaired legacy
+  lowercased Schema.org action types.
+* Kept Markdown and protocol-sensitive discovery routes dynamic where physical
+  files can receive incorrect server-controlled media types.
+
+5.1.0
+-----
+
+* Expanded Discovery Analytics with clearer request identity evidence for
+  registered endpoints and crawler-like content visits.
+* Classified User-Agent matches as claimed crawler signatures rather than
+  verified provider identities, with more precise product-token matching and
+  useful unknown-client categories.
+* Added trusted Cloudflare client-IP resolution without trusting arbitrary
+  forwarded headers, plus an integration filter for explicitly trusted proxies.
+* Added an administrator choice between default IPv4 `/24` or IPv6 `/64`
+  anonymization and full resolved-IP storage for future records only; existing
+  history remains untouched.
+* Added site-specific requester grouping, request method, accepted media family,
+  IP source/storage evidence, and numeric WordPress user IDs for logged-in
+  observations.
+
+5.0.3
+-----
+
+* Made `/ai-discovery` the canonical dynamic Discovery Index and added a
+  MIME-safe `/.well-known/ai-discovery.json` compatibility copy.
+* Made `/api-catalog` a dynamic Linkset API Catalog with the RFC 9727 profile
+  and registered link relation. Deployments that intercept `/.well-known/`
+  still need an explicit route to WordPress for the canonical location.
+* Removed the unreliable extensionless well-known publications and generated
+  rewrite helper.
+* Added ownership-safe cleanup for unchanged files produced by the retired
+  delivery design.
+* Added API Catalog discovery through standard HTTP Link headers.
+
+5.0.2
+-----
+
+* Corrected OpenLiteSpeed delivery of the extensionless Discovery Index and API
+  Catalog by publishing an ownership-safe directory-local rewrite file where
+  the server handles `/.well-known/`.
+* Preserved the physical endpoint representations while routing those two
+  requests through their protocol-aware handlers for the correct JSON media
+  types and API Catalog Link header.
+* Removed the ineffective document-root compatibility rule added in 5.0.1.
+
+5.0.1
+-----
+
+* Fixed Custom AI Instructions so shared publisher guidance appears in LLMS
+  output, the Site Guide, Cybermaps JSON discovery manifests, and the public
+  discovery REST response.
+* Preserved schema validity by limiting publisher guidance to formats that can
+  represent it.
+* Added upgrade-time discovery-cache invalidation and static-publication
+  reconciliation for the corrected output.
+* Added an OpenLiteSpeed rewrite for extensionless discovery metadata so
+  Cybermaps can emit the required JSON media types and API Catalog Link header.
+
+5.0.0
+-----
+
+* Established one standalone Core distribution without licensing, plan-gated
+  source mapping, or a coupled multi-edition build.
+* Rebuilt Cybermaps Core as one complete WordPress.org plugin with Extension API
+  2.0 for a future separate companion.
+* Added one publication-eligibility decision shared by sitemap, AI publication,
+  chunks, IndexNow, and review surfaces, including Genesis/Mai and supported
+  SEO-plugin signals.
+* Corrected Static File Engine mode handling, stale-file reconciliation,
+  origin-root well-known publication, and public delivery diagnostics.
+* Added PHP endpoint observations separately from recognized crawler traffic
+  and excluded status probes.
+* Merged the detailed Request Log, endpoint/content summaries, recording state,
+  retention, export, and clear-history controls into Discovery Analytics.
+* Fixed page-header asset loading and layout on Sitemap Status, AI Discovery
+  Status, and Discovery Analytics.
+* Replaced synthetic scores with preserved factual report runs, focused action
+  reports, themed HTML/CSV/JSON deliverables, and a validated AI Discovery
+  Publication Report.
+* Rebuilt `llms.txt`, optional literal `llms-full.txt`, and experimental
+  budgeted `llms-tldr.txt` around deterministic stored-content output.
+* Removed misleading OpenAI plugin, MCP server-card, and Agent Skills
+  publications.
+* Added explicit endpoint maturity, adoption, enablement, delivery, and
+  validation status.
+
+Historical upgrade notices
+==========================
+
+6.3.0
+-----
+
+Cybermaps 6.3.0 adds internal cache generation fencing, object-cache/APCu
+acceleration, durable IndexNow queueing, and edge-cache integrations. Redis or
+Memcached support depends on a conforming WordPress object-cache drop-in. APCu,
+trusted-proxy headers, and Varnish PURGE are optional and not durability
+authorities. Review the diagnostics before enabling protected edge purges.
+
+5.0.3
+-----
+
+Cybermaps replaces extensionless well-known publications with
+zero-configuration dynamic endpoints and MIME-safe JSON compatibility files.
+Unchanged files from the retired design are removed safely.
+
+5.0.2
+-----
+
+OpenLiteSpeed sites now receive a narrowly scoped, ownership-tracked
+`/.well-known/.htaccess` compatibility file so extensionless metadata is served
+with its required response headers.
+
+5.0.1
+-----
+
+Custom AI Instructions now publish consistently across compatible discovery
+outputs. Cybermaps clears cached discovery data and schedules owned static files
+for regeneration during the upgrade.
+
+5.0.0
+-----
+
+This is a deliberate reset to one standalone Core architecture.
+Removed pseudo-protocol URLs will return 404. Review AI Publishing settings,
+regenerate static files, validate public endpoints, and create a new Reports
+baseline after upgrading.

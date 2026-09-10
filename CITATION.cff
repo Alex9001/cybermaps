@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If Cybermaps supports your research or publication workflow, please cite the software."
+title: "CYBERMAPS: XML Sitemaps & llms.txt"
+type: software
+authors:
+  - family-names: "Oreshkin"
+    given-names: "Aleksandr"
+    affiliation: "CYBER BRAND"
+    website: "https://cyberbrand.net/about/"
+version: "7.4.0"
+date-released: "2026-09-07"
+license: "GPL-2.0-or-later"
+repository-code: "https://github.com/Alex9001/cybermaps"
+url: "https://cybermaps.dev/"
+keywords:
+  - WordPress
+  - sitemap
+  - llms.txt
+  - technical SEO

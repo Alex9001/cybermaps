@@ -1,0 +1,3502 @@
+{
+    "format": "cybermaps-ai-configuration-catalog",
+    "format_version": 2,
+    "plugin_version": "7.4.0",
+    "sections": [
+        {
+            "id": "core_settings",
+            "label": "Core Settings",
+            "purpose": "XML, RSS, media, language, notification, and HTML sitemap behavior."
+        },
+        {
+            "id": "ai_publishing",
+            "label": "AI Publishing",
+            "purpose": "Public AI discovery files, content selection, publisher guidance, and usage declarations."
+        },
+        {
+            "id": "reports_deliverables",
+            "label": "Reports & Deliverables",
+            "purpose": "Content-review thresholds and printable report presentation."
+        },
+        {
+            "id": "analytics",
+            "label": "Analytics",
+            "purpose": "Crawler request recording, privacy, and retention."
+        },
+        {
+            "id": "advanced_maintenance",
+            "label": "Advanced & Maintenance",
+            "purpose": "Static publication and alternate public-origin routing."
+        },
+        {
+            "id": "discovery_strategy",
+            "label": "Discovery Strategy",
+            "purpose": "Per-content-group publication, intent, and relative-weight strategy."
+        },
+        {
+            "id": "site_identity",
+            "label": "Identity Hub",
+            "purpose": "Public Schema.org identity, contact, location, hours, and offer catalogs."
+        },
+        {
+            "id": "robots_control",
+            "label": "Robots Control",
+            "purpose": "Virtual robots.txt ownership, crawler policies, and Content-Signal declarations."
+        }
+    ],
+    "fields": [
+        {
+            "id": "site_language",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "site_language",
+            "label": "Site language",
+            "purpose": "Sets the canonical BCP 47-style hreflang code used in sitemap and discovery output. A blank editable value inherits the WordPress site language; en is the final fallback.",
+            "json_type": "string",
+            "allowed": {
+                "pattern": "^(?:x-default|[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*)$",
+                "maxLength": 35,
+                "x-canonical-separator": "-",
+                "x-runtime-fallback": "WordPress site language, then en"
+            },
+            "effective_default": "en",
+            "dependencies": [],
+            "example": "en-US",
+            "risk": "medium"
+        },
+        {
+            "id": "sitemap_url_base",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "sitemap_url_base",
+            "label": "Sitemap URL base",
+            "purpose": "Sets the collision-safe public base slug for the primary XML sitemap.",
+            "json_type": "string",
+            "allowed": {
+                "pattern": "^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$",
+                "maxLength": 180
+            },
+            "effective_default": "sitemap",
+            "dependencies": [],
+            "example": "sitemap",
+            "risk": "high"
+        },
+        {
+            "id": "include_homepage",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "include_homepage",
+            "label": "Include homepage",
+            "purpose": "Includes the homepage in the miscellaneous XML sitemap.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [],
+            "example": false,
+            "risk": "low"
+        },
+        {
+            "id": "include_authors",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "include_authors",
+            "label": "Include author archives",
+            "purpose": "Includes public author archives in the sitemap inventory.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [],
+            "example": false,
+            "risk": "low"
+        },
+        {
+            "id": "include_archives",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "include_archives",
+            "label": "Include date archives",
+            "purpose": "Includes date archive pages in the sitemap inventory.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [],
+            "example": false,
+            "risk": "low"
+        },
+        {
+            "id": "include_empty_terms",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "include_empty_terms",
+            "label": "Include empty terms",
+            "purpose": "Allows empty public taxonomy terms to appear in sitemap output.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [],
+            "example": false,
+            "risk": "low"
+        },
+        {
+            "id": "update_comment_post",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "update_comment_post",
+            "label": "Comments update post modified time",
+            "purpose": "Updates a post modified timestamp when it receives a comment.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [],
+            "example": false,
+            "risk": "medium"
+        },
+        {
+            "id": "update_comment_page",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "update_comment_page",
+            "label": "Comments update page modified time",
+            "purpose": "Updates a page modified timestamp when it receives a comment.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [],
+            "example": false,
+            "risk": "medium"
+        },
+        {
+            "id": "inject_robots",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "inject_robots",
+            "label": "Advertise publications in robots.txt",
+            "purpose": "Adds Cybermaps sitemap and discovery locations to the virtual robots.txt response.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [],
+            "example": false,
+            "risk": "high"
+        },
+        {
+            "id": "enable_caching",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "enable_caching",
+            "label": "Cache dynamic sitemap responses",
+            "purpose": "Caches dynamically generated sitemap responses until relevant invalidation.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [],
+            "example": false,
+            "risk": "medium"
+        },
+        {
+            "id": "enable_translation_integrations",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "enable_translation_integrations",
+            "label": "Translation integrations",
+            "purpose": "Uses supported multilingual plugins to publish alternate-language sitemap relationships.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [],
+            "example": false,
+            "risk": "medium"
+        },
+        {
+            "id": "external_sitemaps",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "external_sitemaps",
+            "label": "External sitemap references",
+            "purpose": "Adds up to 100 unique absolute public HTTP or HTTPS URLs whose path ends in .xml to the sitemap index, one per line.",
+            "json_type": "string",
+            "allowed": {
+                "contentMediaType": "text/plain",
+                "x-line-schema": {
+                    "type": "string",
+                    "format": "uri",
+                    "pattern": "^https?://(?![^/?#]*@)[^/?#]+/[^?#]*\\.[xX][mM][lL](?:[?#].*)?$",
+                    "maxLength": 2048,
+                    "x-userinfo-allowed": false,
+                    "x-public-url": true
+                },
+                "x-max-lines": 100
+            },
+            "effective_default": "",
+            "dependencies": [],
+            "example": "https://example.com/store-sitemap.xml",
+            "risk": "medium"
+        },
+        {
+            "id": "external_pages",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "external_pages",
+            "label": "External pages",
+            "purpose": "Adds up to 1000 unique absolute public HTTP or HTTPS non-WordPress page URLs to the miscellaneous sitemap, one per line.",
+            "json_type": "string",
+            "allowed": {
+                "contentMediaType": "text/plain",
+                "x-line-schema": {
+                    "type": "string",
+                    "format": "uri",
+                    "pattern": "^https?://(?![^/?#]*@)[^/?#]+",
+                    "maxLength": 2048,
+                    "x-userinfo-allowed": false,
+                    "x-public-url": true
+                },
+                "x-max-lines": 1000
+            },
+            "effective_default": "",
+            "dependencies": [],
+            "example": "https://example.com/landing-page",
+            "risk": "medium"
+        },
+        {
+            "id": "exclude_post_ids",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "exclude_post_ids",
+            "label": "XML excluded post IDs",
+            "purpose": "Lists positive post IDs omitted from standard XML sitemap children. Supply the complete list; importing it replaces the existing list.",
+            "json_type": "array",
+            "allowed": {
+                "items": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "uniqueItems": true,
+                "maxItems": 1000,
+                "x-max-joined-bytes": 16384,
+                "x-join-separator": ", "
+            },
+            "effective_default": [],
+            "dependencies": [],
+            "example": [
+                12,
+                45,
+                89
+            ],
+            "risk": "medium"
+        },
+        {
+            "id": "exclude_categories",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "exclude_categories",
+            "label": "XML excluded categories",
+            "purpose": "Lists positive category IDs or canonical non-numeric slugs omitted from standard XML sitemap children. Supply the complete list; importing it replaces the existing list.",
+            "json_type": "array",
+            "allowed": {
+                "items": {
+                    "anyOf": [
+                        {
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        {
+                            "type": "string",
+                            "pattern": "^[a-z0-9_-]*[a-z_-][a-z0-9_-]*$",
+                            "maxLength": 191
+                        }
+                    ]
+                },
+                "uniqueItems": true,
+                "maxItems": 1000,
+                "x-max-joined-bytes": 16384,
+                "x-join-separator": ", "
+            },
+            "effective_default": [],
+            "dependencies": [],
+            "example": [
+                "private",
+                "archive"
+            ],
+            "risk": "medium"
+        },
+        {
+            "id": "enable_indexnow",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "enable_indexnow",
+            "label": "IndexNow notifications",
+            "purpose": "Notifies configured IndexNow services after eligible content changes.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [],
+            "example": false,
+            "risk": "high"
+        },
+        {
+            "id": "enable_websub",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "enable_websub",
+            "label": "WebSub notifications",
+            "purpose": "Sends publication notifications to configured WebSub hubs for the JSON Feed topic.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [
+                {
+                    "field": "enable_discovery_hub",
+                    "condition": "equals",
+                    "value": true
+                },
+                {
+                    "field": "websub_hubs",
+                    "condition": "non_empty",
+                    "value": true
+                }
+            ],
+            "example": false,
+            "risk": "high"
+        },
+        {
+            "id": "websub_hubs",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "websub_hubs",
+            "label": "WebSub hubs",
+            "purpose": "Lists up to 10 unique public HTTPS WebSub hub URLs without embedded credentials, one per line.",
+            "json_type": "string",
+            "allowed": {
+                "contentMediaType": "text/plain",
+                "x-line-schema": {
+                    "type": "string",
+                    "format": "uri",
+                    "pattern": "^https://(?![^/?#]*@)[^/?#]+",
+                    "maxLength": 2048,
+                    "x-userinfo-allowed": false,
+                    "x-public-url": true
+                },
+                "x-max-lines": 10
+            },
+            "effective_default": "https://pubsubhubbub.appspot.com/\nhttps://pubsubhubbub.superfeedr.com/",
+            "dependencies": [
+                {
+                    "field": "enable_websub",
+                    "condition": "equals",
+                    "value": true
+                }
+            ],
+            "example": "https://pubsubhubbub.appspot.com/",
+            "risk": "high"
+        },
+        {
+            "id": "enable_google_news",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "enable_google_news",
+            "label": "Google News sitemap",
+            "purpose": "Publishes a dedicated recent-news sitemap.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [],
+            "example": false,
+            "risk": "medium"
+        },
+        {
+            "id": "news_publication_name",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "news_publication_name",
+            "label": "News publication name",
+            "purpose": "Sets the publication name embedded in Google News sitemap entries; a blank editable value uses the WordPress site title.",
+            "json_type": "string",
+            "allowed": {
+                "maxLength": 256,
+                "x-runtime-fallback": "WordPress site title"
+            },
+            "effective_default": "",
+            "dependencies": [
+                {
+                    "field": "enable_google_news",
+                    "condition": "equals",
+                    "value": true
+                }
+            ],
+            "example": "Example Newsroom",
+            "risk": "medium"
+        },
+        {
+            "id": "news_sitemap_url_base",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "news_sitemap_url_base",
+            "label": "News sitemap URL base",
+            "purpose": "Sets the collision-safe base slug for the News sitemap.",
+            "json_type": "string",
+            "allowed": {
+                "pattern": "^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$",
+                "maxLength": 180
+            },
+            "effective_default": "sitemap-news",
+            "dependencies": [
+                {
+                    "field": "enable_google_news",
+                    "condition": "equals",
+                    "value": true
+                }
+            ],
+            "example": "sitemap-news",
+            "risk": "high"
+        },
+        {
+            "id": "redirect_wp_sitemap",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "redirect_wp_sitemap",
+            "label": "Redirect WordPress sitemaps",
+            "purpose": "Redirects WordPress Core sitemap routes to the Cybermaps sitemap.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": true,
+            "dependencies": [],
+            "example": true,
+            "risk": "high"
+        },
+        {
+            "id": "redirect_default_sitemap",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "redirect_default_sitemap",
+            "label": "Redirect conventional sitemap.xml",
+            "purpose": "Redirects /sitemap.xml when the configured primary route differs.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [],
+            "example": false,
+            "risk": "high"
+        },
+        {
+            "id": "redirect_news_sitemap",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "redirect_news_sitemap",
+            "label": "Redirect conventional News sitemap",
+            "purpose": "Redirects /sitemap-news.xml when the configured News route differs.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [],
+            "example": false,
+            "risk": "high"
+        },
+        {
+            "id": "enable_video_schema",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "enable_video_schema",
+            "label": "Video schema",
+            "purpose": "Publishes on-page VideoObject markup from eligible observed videos.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": true,
+            "dependencies": [
+                {
+                    "field": "media_discovery_intensity",
+                    "condition": "one_of",
+                    "value": [
+                        "standard",
+                        "advanced"
+                    ]
+                }
+            ],
+            "example": true,
+            "risk": "medium"
+        },
+        {
+            "id": "enable_rss_sitemap",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "enable_rss_sitemap",
+            "label": "RSS sitemap",
+            "purpose": "Publishes the configured recent-item RSS sitemap.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [],
+            "example": false,
+            "risk": "medium"
+        },
+        {
+            "id": "rss_sitemap_url_base",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "rss_sitemap_url_base",
+            "label": "RSS sitemap URL base",
+            "purpose": "Sets the collision-safe base slug for the RSS sitemap.",
+            "json_type": "string",
+            "allowed": {
+                "pattern": "^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$",
+                "maxLength": 180
+            },
+            "effective_default": "sitemap-rss",
+            "dependencies": [
+                {
+                    "field": "enable_rss_sitemap",
+                    "condition": "equals",
+                    "value": true
+                }
+            ],
+            "example": "sitemap-rss",
+            "risk": "high"
+        },
+        {
+            "id": "rss_sitemap_limit",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "rss_sitemap_limit",
+            "label": "RSS sitemap item limit",
+            "purpose": "Limits recent entries in the RSS sitemap.",
+            "json_type": "integer",
+            "allowed": {
+                "minimum": 1,
+                "maximum": 1000
+            },
+            "effective_default": 100,
+            "dependencies": [
+                {
+                    "field": "enable_rss_sitemap",
+                    "condition": "equals",
+                    "value": true
+                }
+            ],
+            "example": 100,
+            "risk": "medium"
+        },
+        {
+            "id": "rss_sitemap_types",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "rss_sitemap_types",
+            "label": "RSS sitemap content types",
+            "purpose": "Selects public post-type slugs eligible for the RSS sitemap. Supply the complete list; importing it replaces the existing list.",
+            "json_type": "array",
+            "allowed": {
+                "items": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9_-]+$",
+                    "maxLength": 191
+                },
+                "uniqueItems": true,
+                "maxItems": 100
+            },
+            "effective_default": [
+                "post"
+            ],
+            "dependencies": [
+                {
+                    "field": "enable_rss_sitemap",
+                    "condition": "equals",
+                    "value": true
+                }
+            ],
+            "example": [
+                "post",
+                "page"
+            ],
+            "risk": "medium"
+        },
+        {
+            "id": "enable_shortcode",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "enable_shortcode",
+            "label": "HTML sitemap shortcode",
+            "purpose": "Registers the cybermaps_sitemap shortcode for front-end HTML sitemap output.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [],
+            "example": false,
+            "risk": "medium"
+        },
+        {
+            "id": "media_discovery_intensity",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "media_discovery_intensity",
+            "label": "Media discovery depth",
+            "purpose": "Controls whether sitemap media discovery is off, attachment-based, or includes embedded media.",
+            "json_type": "string",
+            "allowed": {
+                "enum": [
+                    "none",
+                    "standard",
+                    "advanced"
+                ]
+            },
+            "effective_default": "none",
+            "dependencies": [],
+            "example": "standard",
+            "risk": "medium"
+        },
+        {
+            "id": "enable_multimodal_discovery",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "enable_multimodal_discovery",
+            "label": "AI media hints",
+            "purpose": "Publishes Cybermaps media hints in the AI sitemap.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": true,
+            "dependencies": [
+                {
+                    "field": "media_discovery_intensity",
+                    "condition": "one_of",
+                    "value": [
+                        "standard",
+                        "advanced"
+                    ]
+                }
+            ],
+            "example": true,
+            "risk": "medium"
+        },
+        {
+            "id": "enable_discovery_hub",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "enable_discovery_hub",
+            "label": "AI Publication Hub",
+            "purpose": "Master switch for Cybermaps public AI discovery publications and routes.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [],
+            "example": false,
+            "risk": "high"
+        },
+        {
+            "id": "mcp_mode",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "mcp_mode",
+            "label": "Model Context Protocol",
+            "purpose": "Explicit optional MCP access tier. MCP remains unavailable while the AI Publication Hub is disabled.",
+            "json_type": "string",
+            "allowed": {
+                "enum": [
+                    "off",
+                    "discovery",
+                    "read_only",
+                    "operations"
+                ]
+            },
+            "effective_default": "off",
+            "dependencies": [
+                {
+                    "field": "enable_discovery_hub",
+                    "condition": "equals",
+                    "value": true
+                }
+            ],
+            "example": "off",
+            "risk": "high"
+        },
+        {
+            "id": "agent_registration_mode",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "agent_registration_mode",
+            "label": "Agent registration",
+            "purpose": "Controls opt-in user-reviewed Auth.md agent registration.",
+            "json_type": "string",
+            "allowed": {
+                "enum": [
+                    "off",
+                    "user_claimed"
+                ]
+            },
+            "effective_default": "off",
+            "dependencies": [
+                {
+                    "field": "enable_discovery_hub",
+                    "condition": "equals",
+                    "value": true
+                }
+            ],
+            "example": "off",
+            "risk": "high"
+        },
+        {
+            "id": "enable_webmcp",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "enable_webmcp",
+            "label": "Browser WebMCP",
+            "purpose": "Registers read-only site tools in participating preview browsers.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [
+                {
+                    "field": "enable_discovery_hub",
+                    "condition": "equals",
+                    "value": true
+                }
+            ],
+            "example": false,
+            "risk": "medium"
+        },
+        {
+            "id": "enable_header_discovery",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "enable_header_discovery",
+            "label": "Header-based discovery",
+            "purpose": "Adds RFC 8288 Link headers for selected Cybermaps publications to eligible front-end responses.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [
+                {
+                    "field": "enable_discovery_hub",
+                    "condition": "equals",
+                    "value": true
+                }
+            ],
+            "example": false,
+            "risk": "medium"
+        },
+        {
+            "id": "enable_markdown_negotiation",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "enable_markdown_negotiation",
+            "label": "Markdown for Agents negotiation",
+            "purpose": "Serves bounded stored-content Markdown at eligible canonical URLs when text/markdown is explicitly preferred.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [
+                {
+                    "field": "enable_discovery_hub",
+                    "condition": "equals",
+                    "value": true
+                }
+            ],
+            "example": false,
+            "risk": "high"
+        },
+        {
+            "id": "enable_llms_full",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "enable_llms_full",
+            "label": "Complete LLMS publication",
+            "purpose": "Publishes llms-full.txt containing complete eligible literal content within the response safety bound.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [
+                {
+                    "field": "enable_discovery_hub",
+                    "condition": "equals",
+                    "value": true
+                }
+            ],
+            "example": false,
+            "risk": "high"
+        },
+        {
+            "id": "enable_llms_tldr",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "enable_llms_tldr",
+            "label": "Budgeted site briefing",
+            "purpose": "Publishes the experimental deterministic llms-tldr.txt site briefing.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [
+                {
+                    "field": "enable_discovery_hub",
+                    "condition": "equals",
+                    "value": true
+                }
+            ],
+            "example": false,
+            "risk": "medium"
+        },
+        {
+            "id": "enable_rag_chunks",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "enable_rag_chunks",
+            "label": "Literal text chunks",
+            "purpose": "Publishes overlapping literal content chunks for external retrieval workflows.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [
+                {
+                    "field": "enable_discovery_hub",
+                    "condition": "equals",
+                    "value": true
+                }
+            ],
+            "example": false,
+            "risk": "high"
+        },
+        {
+            "id": "enable_content_hints",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "enable_content_hints",
+            "label": "Metadata excerpts",
+            "purpose": "Builds transparent excerpts and stored-content hints for AI sitemap entries.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": true,
+            "dependencies": [
+                {
+                    "field": "enable_discovery_hub",
+                    "condition": "equals",
+                    "value": true
+                }
+            ],
+            "example": true,
+            "risk": "medium"
+        },
+        {
+            "id": "enable_multilingual_hub",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "enable_multilingual_hub",
+            "label": "Localized LLMS publications",
+            "purpose": "Creates localized LLMS routes for active WPML or Polylang languages.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [
+                {
+                    "field": "enable_discovery_hub",
+                    "condition": "equals",
+                    "value": true
+                },
+                {
+                    "field": "enable_translation_integrations",
+                    "condition": "equals",
+                    "value": true
+                }
+            ],
+            "example": false,
+            "risk": "medium"
+        },
+        {
+            "id": "llms_include_sitemap_link",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "llms_include_sitemap_link",
+            "label": "Include sitemap link in LLMS",
+            "purpose": "Includes a reference to the primary XML sitemap in llms.txt.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [
+                {
+                    "field": "enable_discovery_hub",
+                    "condition": "equals",
+                    "value": true
+                }
+            ],
+            "example": false,
+            "risk": "low"
+        },
+        {
+            "id": "llms_link_limit",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "llms_link_limit",
+            "label": "Concise LLMS link limit",
+            "purpose": "Limits the eligible resource links published in concise llms.txt. Overflow is disclosed and linked to the XML sitemap.",
+            "json_type": "integer",
+            "allowed": {
+                "minimum": 20,
+                "maximum": 500
+            },
+            "effective_default": 100,
+            "dependencies": [
+                {
+                    "field": "enable_discovery_hub",
+                    "condition": "equals",
+                    "value": true
+                }
+            ],
+            "example": 100,
+            "risk": "medium"
+        },
+        {
+            "id": "llms_title_override",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "llms_title_override",
+            "label": "LLMS site title",
+            "purpose": "Overrides the site title specifically for the LLMS publication family; a blank editable value uses the WordPress site title.",
+            "json_type": "string",
+            "allowed": {
+                "maxLength": 256,
+                "x-runtime-fallback": "WordPress site title"
+            },
+            "effective_default": "",
+            "dependencies": [],
+            "example": "Example Knowledge Center",
+            "risk": "medium"
+        },
+        {
+            "id": "llms_mission_statement",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "llms_mission_statement",
+            "label": "Site mission",
+            "purpose": "Publishes a concise mission or About statement for model context; a blank editable value uses the WordPress site tagline.",
+            "json_type": "string",
+            "allowed": {
+                "maxLength": 2048,
+                "x-runtime-fallback": "WordPress site tagline"
+            },
+            "effective_default": "",
+            "dependencies": [],
+            "example": "We publish practical, independently tested WordPress guidance.",
+            "risk": "medium"
+        },
+        {
+            "id": "llms_custom_instructions",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "llms_custom_instructions",
+            "label": "Custom AI instructions",
+            "purpose": "Publishes operator-authored citation, source-priority, and interpretation guidance across the discovery surface.",
+            "json_type": "string",
+            "allowed": {
+                "maxLength": 16384
+            },
+            "effective_default": "",
+            "dependencies": [],
+            "example": "Treat product documentation as authoritative and cite the canonical page URL.",
+            "risk": "high"
+        },
+        {
+            "id": "llms_content_license",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "llms_content_license",
+            "label": "Content license",
+            "purpose": "Publishes the operator-selected content license assertion.",
+            "json_type": "string",
+            "allowed": {
+                "enum": [
+                    "",
+                    "CC-BY-4.0",
+                    "CC-BY-SA-4.0",
+                    "CC-BY-NC-4.0",
+                    "CC0-1.0",
+                    "MIT",
+                    "GPL-3.0",
+                    "Apache-2.0",
+                    "Proprietary"
+                ]
+            },
+            "effective_default": "",
+            "dependencies": [],
+            "example": "CC-BY-4.0",
+            "risk": "high"
+        },
+        {
+            "id": "llms_pinned_ids",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "llms_pinned_ids",
+            "label": "Pinned briefing post IDs",
+            "purpose": "Pins up to 100 eligible post IDs into the budgeted briefing candidate set. Supply the complete list; importing it replaces the existing list.",
+            "json_type": "array",
+            "allowed": {
+                "items": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "uniqueItems": true,
+                "maxItems": 100
+            },
+            "effective_default": [],
+            "dependencies": [
+                {
+                    "field": "enable_llms_tldr",
+                    "condition": "equals",
+                    "value": true
+                }
+            ],
+            "example": [
+                12,
+                45
+            ],
+            "risk": "medium"
+        },
+        {
+            "id": "llms_exclude_ids",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "llms_exclude_ids",
+            "label": "Global AI excluded post IDs",
+            "purpose": "Excludes post IDs from all Cybermaps AI publication inventories, including the historical AI sitemap field. Supply the complete list; importing it replaces the existing list.",
+            "json_type": "array",
+            "allowed": {
+                "items": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "uniqueItems": true,
+                "maxItems": 1000,
+                "x-max-joined-bytes": 16384,
+                "x-join-separator": ", "
+            },
+            "effective_default": [],
+            "dependencies": [],
+            "example": [
+                12,
+                45
+            ],
+            "risk": "high"
+        },
+        {
+            "id": "llms_filter_taxonomies",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "llms_filter_taxonomies",
+            "label": "Taxonomy filter",
+            "purpose": "Restricts LLMS publication candidates to posts assigned at least one term in up to 100 comma-separated WordPress taxonomy names.",
+            "json_type": "string",
+            "allowed": {
+                "pattern": "^\\s*(?:[a-z0-9_-]{1,32}(?:\\s*,\\s*[a-z0-9_-]{1,32}){0,99})?\\s*$",
+                "maxLength": 3398,
+                "x-max-items": 100,
+                "x-item-max-length": 32,
+                "x-canonical-separator": ", "
+            },
+            "effective_default": "",
+            "dependencies": [],
+            "example": "category, post_tag",
+            "risk": "high"
+        },
+        {
+            "id": "llms_included_types",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "llms_included_types",
+            "label": "LLMS and search content types",
+            "purpose": "Selects public post types included in LLMS publications, public REST search, and suggestions. Supply the complete list; importing it replaces the existing list.",
+            "json_type": "array",
+            "allowed": {
+                "items": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9_-]+$",
+                    "maxLength": 191
+                },
+                "uniqueItems": true,
+                "maxItems": 100
+            },
+            "effective_default": [
+                "post",
+                "page"
+            ],
+            "dependencies": [],
+            "example": [
+                "post",
+                "page"
+            ],
+            "risk": "high"
+        },
+        {
+            "id": "llms_tldr_token_budget",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "llms_tldr_token_budget",
+            "label": "Briefing token budget",
+            "purpose": "Sets the approximate output token budget for llms-tldr.txt.",
+            "json_type": "integer",
+            "allowed": {
+                "minimum": 1000,
+                "maximum": 200000
+            },
+            "effective_default": 80000,
+            "dependencies": [
+                {
+                    "field": "enable_llms_tldr",
+                    "condition": "equals",
+                    "value": true
+                }
+            ],
+            "example": 40000,
+            "risk": "medium"
+        },
+        {
+            "id": "ai_business_description",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "ai_business_description",
+            "label": "AI persona summary",
+            "purpose": "Publishes a one-sentence site summary in the AI Discovery Manifest; a blank editable value uses the WordPress site tagline.",
+            "json_type": "string",
+            "allowed": {
+                "maxLength": 2048,
+                "x-runtime-fallback": "WordPress site tagline"
+            },
+            "effective_default": "",
+            "dependencies": [],
+            "example": "Independent tutorials and implementation guidance for WordPress professionals.",
+            "risk": "medium"
+        },
+        {
+            "id": "ai_topics",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "ai_topics",
+            "label": "Site topics",
+            "purpose": "Publishes a bounded list of unique topic labels in the AI manifest. The joined labels may use at most 2048 UTF-8 bytes. Supply the complete list; importing it replaces the existing list.",
+            "json_type": "array",
+            "allowed": {
+                "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": ".*\\S.*"
+                },
+                "maxItems": 25,
+                "uniqueItems": true,
+                "x-max-joined-bytes": 2048,
+                "x-join-separator": ", "
+            },
+            "effective_default": [],
+            "dependencies": [],
+            "example": [
+                "WordPress",
+                "technical SEO"
+            ],
+            "risk": "medium"
+        },
+        {
+            "id": "ai_capabilities",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "ai_capabilities",
+            "label": "Manifest capabilities",
+            "purpose": "Declares supported discovery capabilities in the AI manifest. Supply the complete list; importing it replaces the existing list.",
+            "json_type": "array",
+            "allowed": {
+                "items": {
+                    "type": "string",
+                    "enum": [
+                        "search_content",
+                        "read_articles",
+                        "extract_entities"
+                    ]
+                },
+                "maxItems": 3,
+                "uniqueItems": true
+            },
+            "effective_default": [],
+            "dependencies": [],
+            "example": [
+                "search_content",
+                "read_articles"
+            ],
+            "risk": "medium"
+        },
+        {
+            "id": "ai_action_mappings",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "ai_action_mappings",
+            "label": "Schema.org action mappings",
+            "purpose": "Publishes up to 100 truthful action URLs and Schema.org action types. Supply the complete list; importing it replaces the existing list.",
+            "json_type": "array",
+            "allowed": {
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "url": {
+                            "type": "string",
+                            "format": "uri",
+                            "pattern": "^https?://(?![^/?#]*@)[^/?#]+",
+                            "maxLength": 2048,
+                            "x-userinfo-allowed": false
+                        },
+                        "type": {
+                            "type": "string",
+                            "enum": [
+                                "ContactAction",
+                                "BuyAction",
+                                "ReserveAction",
+                                "SubscribeAction",
+                                "SearchAction"
+                            ]
+                        },
+                        "desc": {
+                            "type": "string",
+                            "maxLength": 256
+                        }
+                    },
+                    "additionalProperties": false,
+                    "required": [
+                        "url",
+                        "type"
+                    ]
+                },
+                "maxItems": 100
+            },
+            "effective_default": [],
+            "dependencies": [],
+            "example": [
+                {
+                    "url": "https://example.com/contact/",
+                    "type": "ContactAction",
+                    "desc": "Contact the editorial team."
+                }
+            ],
+            "risk": "high"
+        },
+        {
+            "id": "ai_manifest_endpoints",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "ai_manifest_endpoints",
+            "label": "Manifest endpoint inventory",
+            "purpose": "Selects optional publications advertised by the AI Discovery Manifest. Supply the complete list; importing it replaces the existing list.",
+            "json_type": "array",
+            "allowed": {
+                "items": {
+                    "type": "string",
+                    "enum": [
+                        "llms.txt",
+                        "llms-full.txt",
+                        "llms-tldr.txt",
+                        "skill.md",
+                        "ai-usage.json",
+                        "ai-actions.json",
+                        "knowledge-graph.json",
+                        "feed.json",
+                        "ai-sitemap.xml"
+                    ]
+                },
+                "maxItems": 9,
+                "uniqueItems": true
+            },
+            "effective_default": [
+                "llms.txt",
+                "feed.json",
+                "knowledge-graph.json",
+                "ai-sitemap.xml"
+            ],
+            "dependencies": [
+                {
+                    "field": "enable_discovery_hub",
+                    "condition": "equals",
+                    "value": true
+                }
+            ],
+            "example": [
+                "llms.txt",
+                "feed.json",
+                "knowledge-graph.json",
+                "ai-sitemap.xml"
+            ],
+            "risk": "high"
+        },
+        {
+            "id": "ai_sitemap_types",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "ai_sitemap_types",
+            "label": "AI sitemap content types",
+            "purpose": "Selects public post types eligible for AI sitemap and related inventories. Supply the complete list; importing it replaces the existing list.",
+            "json_type": "array",
+            "allowed": {
+                "items": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9_-]+$",
+                    "maxLength": 191
+                },
+                "uniqueItems": true,
+                "maxItems": 100
+            },
+            "effective_default": [
+                "post",
+                "page"
+            ],
+            "dependencies": [],
+            "example": [
+                "post",
+                "page"
+            ],
+            "risk": "high"
+        },
+        {
+            "id": "ai_sitemap_limit",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "ai_sitemap_limit",
+            "label": "AI sitemap item limit",
+            "purpose": "Limits eligible items per selected post type in AI sitemap output.",
+            "json_type": "integer",
+            "allowed": {
+                "minimum": 1,
+                "maximum": 2000
+            },
+            "effective_default": 100,
+            "dependencies": [],
+            "example": 250,
+            "risk": "medium"
+        },
+        {
+            "id": "ai_sitemap_exclude_terms",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "ai_sitemap_exclude_terms",
+            "label": "Global AI excluded terms",
+            "purpose": "Excludes positive term IDs or canonical non-numeric slugs from all Cybermaps AI content inventories. Supply the complete list; importing it replaces the existing list.",
+            "json_type": "array",
+            "allowed": {
+                "items": {
+                    "anyOf": [
+                        {
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        {
+                            "type": "string",
+                            "pattern": "^[a-z0-9_-]*[a-z_-][a-z0-9_-]*$",
+                            "maxLength": 191
+                        }
+                    ]
+                },
+                "uniqueItems": true,
+                "maxItems": 1000,
+                "x-max-joined-bytes": 16384,
+                "x-join-separator": ", "
+            },
+            "effective_default": [],
+            "dependencies": [],
+            "example": [
+                "members-only",
+                123
+            ],
+            "risk": "high"
+        },
+        {
+            "id": "ai_sitemap_custom_links",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "ai_sitemap_custom_links",
+            "label": "AI sitemap external links",
+            "purpose": "Adds up to 100 external HTTP or HTTPS resources to the AI sitemap with relative priority hints. Supply the complete list; importing it replaces the existing list.",
+            "json_type": "array",
+            "allowed": {
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "url": {
+                            "type": "string",
+                            "format": "uri",
+                            "pattern": "^https?://(?![^/?#]*@)[^/?#]+",
+                            "maxLength": 2048,
+                            "x-userinfo-allowed": false
+                        },
+                        "priority": {
+                            "type": "number",
+                            "minimum": 0.1,
+                            "maximum": 1.0
+                        }
+                    },
+                    "additionalProperties": false,
+                    "required": [
+                        "url"
+                    ]
+                },
+                "maxItems": 100
+            },
+            "effective_default": [],
+            "dependencies": [],
+            "example": [
+                {
+                    "url": "https://docs.example.com/",
+                    "priority": 0.8
+                }
+            ],
+            "risk": "high"
+        },
+        {
+            "id": "ai_feed_full_content",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "ai_feed_full_content",
+            "label": "Full JSON Feed content",
+            "purpose": "Includes complete eligible stored content rather than summaries in the JSON Feed.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [
+                {
+                    "field": "enable_discovery_hub",
+                    "condition": "equals",
+                    "value": true
+                }
+            ],
+            "example": false,
+            "risk": "high"
+        },
+        {
+            "id": "ai_feed_include_authors",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "ai_feed_include_authors",
+            "label": "JSON Feed authors",
+            "purpose": "Includes available author identity in JSON Feed items.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [
+                {
+                    "field": "enable_discovery_hub",
+                    "condition": "equals",
+                    "value": true
+                }
+            ],
+            "example": false,
+            "risk": "high"
+        },
+        {
+            "id": "ai_feed_limit",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "ai_feed_limit",
+            "label": "JSON Feed item limit",
+            "purpose": "Limits recent items returned by the JSON Feed.",
+            "json_type": "integer",
+            "allowed": {
+                "minimum": 1,
+                "maximum": 100
+            },
+            "effective_default": 10,
+            "dependencies": [],
+            "example": 20,
+            "risk": "medium"
+        },
+        {
+            "id": "ai_kg_expose_admin",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "ai_kg_expose_admin",
+            "label": "Knowledge Graph administrator",
+            "purpose": "Publishes a Person node for the WordPress user matching the site admin email when that account has a display name. The node exposes that display name and, when available, its public author-archive URL; it does not publish the email address.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [],
+            "example": false,
+            "risk": "high"
+        },
+        {
+            "id": "ai_kg_link_org",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "ai_kg_link_org",
+            "label": "Knowledge Graph identity link",
+            "purpose": "Links the Knowledge Graph WebSite node to the configured primary identity through its publisher property.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [
+                {
+                    "field": "identity_name",
+                    "condition": "non_empty",
+                    "value": true
+                }
+            ],
+            "example": false,
+            "risk": "high"
+        },
+        {
+            "id": "ai_licensing_email",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "ai_licensing_email",
+            "label": "Licensing contact email",
+            "purpose": "Publishes a licensing contact address in ai-usage.json; an empty string clears it.",
+            "json_type": "string",
+            "allowed": {
+                "anyOf": [
+                    {
+                        "const": ""
+                    },
+                    {
+                        "format": "email",
+                        "maxLength": 254
+                    }
+                ]
+            },
+            "effective_default": "",
+            "dependencies": [],
+            "example": "licensing@example.com",
+            "risk": "high"
+        },
+        {
+            "id": "ai_usage_rag",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "ai_usage_rag",
+            "label": "AI retrieval usage",
+            "purpose": "Publishes the operator declaration for retrieval and RAG use.",
+            "json_type": "string",
+            "allowed": {
+                "enum": [
+                    "allow",
+                    "forbid",
+                    "limited"
+                ]
+            },
+            "effective_default": "allow",
+            "dependencies": [],
+            "example": "limited",
+            "risk": "high"
+        },
+        {
+            "id": "ai_usage_training",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "ai_usage_training",
+            "label": "Model training usage",
+            "purpose": "Publishes the operator declaration for model-training use.",
+            "json_type": "string",
+            "allowed": {
+                "enum": [
+                    "allow",
+                    "forbid"
+                ]
+            },
+            "effective_default": "forbid",
+            "dependencies": [],
+            "example": "forbid",
+            "risk": "high"
+        },
+        {
+            "id": "ai_usage_commercial",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "ai_usage_commercial",
+            "label": "Commercial reuse",
+            "purpose": "Publishes the operator declaration for commercial reuse.",
+            "json_type": "string",
+            "allowed": {
+                "enum": [
+                    "allow",
+                    "forbid"
+                ]
+            },
+            "effective_default": "forbid",
+            "dependencies": [],
+            "example": "forbid",
+            "risk": "high"
+        },
+        {
+            "id": "rag_chunk_size",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "rag_chunk_size",
+            "label": "RAG chunk size",
+            "purpose": "Sets the maximum character count for each literal text segment.",
+            "json_type": "integer",
+            "allowed": {
+                "minimum": 100,
+                "maximum": 12000
+            },
+            "effective_default": 800,
+            "dependencies": [
+                {
+                    "field": "enable_rag_chunks",
+                    "condition": "equals",
+                    "value": true
+                }
+            ],
+            "example": 800,
+            "risk": "medium"
+        },
+        {
+            "id": "rag_chunk_overlap",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "rag_chunk_overlap",
+            "label": "RAG chunk overlap",
+            "purpose": "Sets adjacent-segment character overlap; runtime caps it at half the selected chunk size.",
+            "json_type": "integer",
+            "allowed": {
+                "minimum": 0,
+                "maximum": 6000,
+                "x-maximum-field": "rag_chunk_size / 2"
+            },
+            "effective_default": 100,
+            "dependencies": [
+                {
+                    "field": "enable_rag_chunks",
+                    "condition": "equals",
+                    "value": true
+                },
+                {
+                    "field": "rag_chunk_size",
+                    "condition": "maximum_fraction_of",
+                    "value": 0.5
+                }
+            ],
+            "example": 100,
+            "risk": "medium"
+        },
+        {
+            "id": "site_guide_instructions",
+            "section_id": "ai_publishing",
+            "section_label": "AI Publishing",
+            "option": "cybermaps_settings",
+            "field": "site_guide_instructions",
+            "label": "Additional Site Guide guidance",
+            "purpose": "Appends instructions only to skill.md after the shared custom AI instructions.",
+            "json_type": "string",
+            "allowed": {
+                "maxLength": 8192
+            },
+            "effective_default": "",
+            "dependencies": [],
+            "example": "Prefer technical documentation and use a formal tone.",
+            "risk": "high"
+        },
+        {
+            "id": "audit_post_min_words",
+            "section_id": "reports_deliverables",
+            "section_label": "Reports & Deliverables",
+            "option": "cybermaps_settings",
+            "field": "audit_post_min_words",
+            "label": "Post minimum words",
+            "purpose": "Sets the literal visible-word threshold used to flag thin posts.",
+            "json_type": "integer",
+            "allowed": {
+                "minimum": 1,
+                "maximum": 10000
+            },
+            "effective_default": 300,
+            "dependencies": [],
+            "example": 500,
+            "risk": "medium"
+        },
+        {
+            "id": "audit_post_max_age_days",
+            "section_id": "reports_deliverables",
+            "section_label": "Reports & Deliverables",
+            "option": "cybermaps_settings",
+            "field": "audit_post_max_age_days",
+            "label": "Post review interval",
+            "purpose": "Flags posts older than this many days; zero disables the age finding.",
+            "json_type": "integer",
+            "allowed": {
+                "minimum": 0,
+                "maximum": 36500
+            },
+            "effective_default": 365,
+            "dependencies": [],
+            "example": 365,
+            "risk": "medium"
+        },
+        {
+            "id": "audit_post_require_media",
+            "section_id": "reports_deliverables",
+            "section_label": "Reports & Deliverables",
+            "option": "cybermaps_settings",
+            "field": "audit_post_require_media",
+            "label": "Review posts without media",
+            "purpose": "Adds a finding for posts without an image or media block.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": true,
+            "dependencies": [],
+            "example": true,
+            "risk": "medium"
+        },
+        {
+            "id": "audit_page_min_words",
+            "section_id": "reports_deliverables",
+            "section_label": "Reports & Deliverables",
+            "option": "cybermaps_settings",
+            "field": "audit_page_min_words",
+            "label": "Page minimum words",
+            "purpose": "Sets the literal visible-word threshold used to flag thin pages.",
+            "json_type": "integer",
+            "allowed": {
+                "minimum": 1,
+                "maximum": 10000
+            },
+            "effective_default": 150,
+            "dependencies": [],
+            "example": 300,
+            "risk": "medium"
+        },
+        {
+            "id": "audit_page_max_age_days",
+            "section_id": "reports_deliverables",
+            "section_label": "Reports & Deliverables",
+            "option": "cybermaps_settings",
+            "field": "audit_page_max_age_days",
+            "label": "Page review interval",
+            "purpose": "Flags pages older than this many days; zero disables the age finding.",
+            "json_type": "integer",
+            "allowed": {
+                "minimum": 0,
+                "maximum": 36500
+            },
+            "effective_default": 0,
+            "dependencies": [],
+            "example": 730,
+            "risk": "medium"
+        },
+        {
+            "id": "audit_page_require_media",
+            "section_id": "reports_deliverables",
+            "section_label": "Reports & Deliverables",
+            "option": "cybermaps_settings",
+            "field": "audit_page_require_media",
+            "label": "Review pages without media",
+            "purpose": "Adds a finding for pages without an image or media block.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [],
+            "example": false,
+            "risk": "medium"
+        },
+        {
+            "id": "agency_name",
+            "section_id": "reports_deliverables",
+            "section_label": "Reports & Deliverables",
+            "option": "cybermaps_settings",
+            "field": "agency_name",
+            "label": "Prepared-by name",
+            "purpose": "Displays an optional professional or agency name in printable reports.",
+            "json_type": "string",
+            "allowed": {
+                "maxLength": 256
+            },
+            "effective_default": "",
+            "dependencies": [],
+            "example": "Example Studio",
+            "risk": "medium"
+        },
+        {
+            "id": "agency_url",
+            "section_id": "reports_deliverables",
+            "section_label": "Reports & Deliverables",
+            "option": "cybermaps_settings",
+            "field": "agency_url",
+            "label": "Prepared-by URL",
+            "purpose": "Links the prepared-by name in printable reports.",
+            "json_type": "string",
+            "allowed": {
+                "type": "string",
+                "pattern": "^(?:$|https?://(?![^/?#]*@)[^/?#]+)",
+                "anyOf": [
+                    {
+                        "const": ""
+                    },
+                    {
+                        "type": "string",
+                        "format": "uri",
+                        "pattern": "^https?://(?![^/?#]*@)[^/?#]+",
+                        "maxLength": 2048,
+                        "x-userinfo-allowed": false
+                    }
+                ]
+            },
+            "effective_default": "",
+            "dependencies": [
+                {
+                    "field": "agency_name",
+                    "condition": "non_empty",
+                    "value": true
+                }
+            ],
+            "example": "https://example.com/",
+            "risk": "medium"
+        },
+        {
+            "id": "agency_logo",
+            "section_id": "reports_deliverables",
+            "section_label": "Reports & Deliverables",
+            "option": "cybermaps_settings",
+            "field": "agency_logo",
+            "label": "Prepared-by logo URL",
+            "purpose": "Displays an optional public logo in printable reports.",
+            "json_type": "string",
+            "allowed": {
+                "type": "string",
+                "pattern": "^(?:$|https?://(?![^/?#]*@)[^/?#]+)",
+                "anyOf": [
+                    {
+                        "const": ""
+                    },
+                    {
+                        "type": "string",
+                        "format": "uri",
+                        "pattern": "^https?://(?![^/?#]*@)[^/?#]+",
+                        "maxLength": 2048,
+                        "x-userinfo-allowed": false
+                    }
+                ]
+            },
+            "effective_default": "",
+            "dependencies": [],
+            "example": "https://example.com/logo.png",
+            "risk": "medium"
+        },
+        {
+            "id": "site_name_override",
+            "section_id": "reports_deliverables",
+            "section_label": "Reports & Deliverables",
+            "option": "cybermaps_settings",
+            "field": "site_name_override",
+            "label": "Client site name",
+            "purpose": "Overrides the client-facing site name in printable reports; a blank editable value uses the WordPress site title.",
+            "json_type": "string",
+            "allowed": {
+                "maxLength": 256,
+                "x-runtime-fallback": "WordPress site title"
+            },
+            "effective_default": "",
+            "dependencies": [],
+            "example": "Example Client",
+            "risk": "medium"
+        },
+        {
+            "id": "report_theme",
+            "section_id": "reports_deliverables",
+            "section_label": "Reports & Deliverables",
+            "option": "cybermaps_settings",
+            "field": "report_theme",
+            "label": "Report theme",
+            "purpose": "Selects the visual theme used by printable content and discovery reports.",
+            "json_type": "string",
+            "allowed": {
+                "enum": [
+                    "swiss",
+                    "minimal",
+                    "mono",
+                    "midnight",
+                    "cyberbrand"
+                ]
+            },
+            "effective_default": "swiss",
+            "dependencies": [],
+            "example": "cyberbrand",
+            "risk": "low"
+        },
+        {
+            "id": "enable_analytics",
+            "section_id": "analytics",
+            "section_label": "Analytics",
+            "option": "cybermaps_settings",
+            "field": "enable_analytics",
+            "label": "Crawler analytics",
+            "purpose": "Records eligible discovery and crawler requests for operational analytics.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [],
+            "example": false,
+            "risk": "high"
+        },
+        {
+            "id": "anonymize_analytics_ips",
+            "section_id": "analytics",
+            "section_label": "Analytics",
+            "option": "cybermaps_settings",
+            "field": "anonymize_analytics_ips",
+            "label": "Anonymize crawler IP addresses",
+            "purpose": "Masks IP addresses before crawler analytics are stored.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": true,
+            "dependencies": [
+                {
+                    "field": "enable_analytics",
+                    "condition": "equals",
+                    "value": true
+                }
+            ],
+            "example": true,
+            "risk": "high"
+        },
+        {
+            "id": "log_retention_days",
+            "section_id": "analytics",
+            "section_label": "Analytics",
+            "option": "cybermaps_settings",
+            "field": "log_retention_days",
+            "label": "Analytics retention",
+            "purpose": "Sets how many days crawler request records are retained.",
+            "json_type": "integer",
+            "allowed": {
+                "minimum": 1,
+                "maximum": 365
+            },
+            "effective_default": 30,
+            "dependencies": [
+                {
+                    "field": "enable_analytics",
+                    "condition": "equals",
+                    "value": true
+                }
+            ],
+            "example": 30,
+            "risk": "high"
+        },
+        {
+            "id": "static_engine_mode",
+            "section_id": "advanced_maintenance",
+            "section_label": "Advanced & Maintenance",
+            "option": "cybermaps_settings",
+            "field": "static_engine_mode",
+            "label": "Static File Engine mode",
+            "purpose": "Controls physical publication: dynamic only, the small extension-bearing Core discovery files, or the full eligible publication cache. WordPress multisite is always resolved to dynamic-only off mode regardless of this saved value.",
+            "json_type": "string",
+            "allowed": {
+                "enum": [
+                    "off",
+                    "well_known",
+                    "all"
+                ],
+                "x-runtime-override": "off on WordPress multisite"
+            },
+            "effective_default": "well_known",
+            "dependencies": [],
+            "example": "well_known",
+            "risk": "high"
+        },
+        {
+            "id": "frontend_base_url",
+            "section_id": "advanced_maintenance",
+            "section_label": "Advanced & Maintenance",
+            "option": "cybermaps_settings",
+            "field": "frontend_base_url",
+            "label": "Front-end base URL",
+            "purpose": "Rewrites published canonical URLs for a separate public headless front end. Use an absolute HTTP or HTTPS base without credentials, query, or fragment; an empty string clears it.",
+            "json_type": "string",
+            "allowed": {
+                "type": "string",
+                "pattern": "^(?:$|https?://(?![^/?#]*@)[^/?#]+(?:/[^?#]*)?)$",
+                "anyOf": [
+                    {
+                        "const": ""
+                    },
+                    {
+                        "type": "string",
+                        "format": "uri",
+                        "pattern": "^https?://(?![^/?#]*@)[^/?#]+(?:/[^?#]*)?$",
+                        "maxLength": 2048,
+                        "x-userinfo-allowed": false,
+                        "x-query-allowed": false,
+                        "x-fragment-allowed": false
+                    }
+                ]
+            },
+            "effective_default": "",
+            "dependencies": [],
+            "example": "https://www.example.com",
+            "risk": "high"
+        },
+        {
+            "id": "cdn_enabled",
+            "section_id": "advanced_maintenance",
+            "section_label": "Advanced & Maintenance",
+            "option": "cybermaps_settings",
+            "field": "cdn_enabled",
+            "label": "Rewrite sitemap media URLs",
+            "purpose": "Rewrites same-site image and video URLs in eligible XML and AI sitemap entries to the configured CDN base. It does not move or serve XSLT, CSS, discovery endpoints, or generated files.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [
+                {
+                    "field": "cdn_base_url",
+                    "condition": "non_empty",
+                    "value": true
+                }
+            ],
+            "example": false,
+            "risk": "high"
+        },
+        {
+            "id": "cdn_base_url",
+            "section_id": "advanced_maintenance",
+            "section_label": "Advanced & Maintenance",
+            "option": "cybermaps_settings",
+            "field": "cdn_base_url",
+            "label": "Sitemap media CDN base URL",
+            "purpose": "Sets the replacement base for same-site image and video URLs in eligible XML and AI sitemap entries. Use an absolute HTTP or HTTPS base without credentials, query, or fragment; an empty string clears it.",
+            "json_type": "string",
+            "allowed": {
+                "type": "string",
+                "pattern": "^(?:$|https?://(?![^/?#]*@)[^/?#]+(?:/[^?#]*)?)$",
+                "anyOf": [
+                    {
+                        "const": ""
+                    },
+                    {
+                        "type": "string",
+                        "format": "uri",
+                        "pattern": "^https?://(?![^/?#]*@)[^/?#]+(?:/[^?#]*)?$",
+                        "maxLength": 2048,
+                        "x-userinfo-allowed": false,
+                        "x-query-allowed": false,
+                        "x-fragment-allowed": false
+                    }
+                ]
+            },
+            "effective_default": "",
+            "dependencies": [
+                {
+                    "field": "cdn_enabled",
+                    "condition": "equals",
+                    "value": true
+                }
+            ],
+            "example": "https://cdn.example.com",
+            "risk": "high"
+        },
+        {
+            "id": "trusted_proxy_header",
+            "section_id": "advanced_maintenance",
+            "section_label": "Advanced & Maintenance",
+            "option": "cybermaps_settings",
+            "field": "trusted_proxy_header",
+            "label": "Trusted proxy header",
+            "purpose": "Selects the only forwarding header Cybermaps may trust when the direct remote address falls inside a configured trusted-proxy CIDR. Off ignores forwarded client-IP headers entirely.",
+            "json_type": "string",
+            "allowed": {
+                "enum": [
+                    "off",
+                    "forwarded",
+                    "x_forwarded_for",
+                    "x_real_ip"
+                ]
+            },
+            "effective_default": "off",
+            "dependencies": [],
+            "example": "x_forwarded_for",
+            "risk": "high"
+        },
+        {
+            "id": "trusted_proxy_cidrs",
+            "section_id": "advanced_maintenance",
+            "section_label": "Advanced & Maintenance",
+            "option": "cybermaps_settings",
+            "field": "trusted_proxy_cidrs",
+            "label": "Trusted proxy CIDRs",
+            "purpose": "Defines up to 64 IPv4 or IPv6 CIDR ranges whose direct remote addresses may forward a client IP through the selected trusted proxy header. Supply the complete list; importing it replaces the existing list.",
+            "json_type": "array",
+            "allowed": {
+                "items": {
+                    "type": "string",
+                    "pattern": "^(?:(?:\\d{1,3}\\.){3}\\d{1,3}/(?:3[0-2]|[12]?\\d)|[0-9A-Fa-f:]+/(?:12[0-8]|1[01]\\d|\\d?\\d))$",
+                    "maxLength": 43
+                },
+                "maxItems": 64,
+                "uniqueItems": true
+            },
+            "effective_default": [],
+            "dependencies": [
+                {
+                    "field": "trusted_proxy_header",
+                    "condition": "one_of",
+                    "value": [
+                        "forwarded",
+                        "x_forwarded_for",
+                        "x_real_ip"
+                    ]
+                }
+            ],
+            "example": [
+                "10.0.0.0/8",
+                "2001:db8::/32"
+            ],
+            "risk": "high"
+        },
+        {
+            "id": "discovery_archetype",
+            "section_id": "discovery_strategy",
+            "section_label": "Discovery Strategy",
+            "option": "cybermaps_discovery_center",
+            "field": "archetype",
+            "label": "Starting profile",
+            "purpose": "Selects the baseline publication weights and intent assignments for public content groups.",
+            "json_type": "string",
+            "allowed": {
+                "enum": [
+                    "newspaper",
+                    "blog",
+                    "ecommerce",
+                    "knowledgebase",
+                    "corporate",
+                    "small-business",
+                    "medium-business"
+                ]
+            },
+            "effective_default": "medium-business",
+            "dependencies": [],
+            "example": "small-business",
+            "risk": "medium"
+        },
+        {
+            "id": "discovery_overrides",
+            "section_id": "discovery_strategy",
+            "section_label": "Discovery Strategy",
+            "option": "cybermaps_discovery_center",
+            "field": "overrides",
+            "label": "Publication weight overrides",
+            "purpose": "Maps content-group identities to explicit positive relative publication weights. Supply the complete map; importing it replaces the existing map.",
+            "json_type": "object",
+            "allowed": {
+                "propertyNames": {
+                    "pattern": "^(?:(?:post_type|taxonomy):)?[a-z0-9_-]+$"
+                },
+                "additionalProperties": {
+                    "type": "number",
+                    "minimum": 0.1,
+                    "maximum": 1.0
+                },
+                "maxProperties": 200
+            },
+            "effective_default": {},
+            "dependencies": [],
+            "example": {
+                "post_type:post": 0.9,
+                "taxonomy:category": 0.6
+            },
+            "risk": "high"
+        },
+        {
+            "id": "discovery_type_intents",
+            "section_id": "discovery_strategy",
+            "section_label": "Discovery Strategy",
+            "option": "cybermaps_discovery_center",
+            "field": "type_intents",
+            "label": "Content-group intents",
+            "purpose": "Maps content-group identities to informational or transactional discovery intent. Supply the complete map; importing it replaces the existing map.",
+            "json_type": "object",
+            "allowed": {
+                "propertyNames": {
+                    "pattern": "^(?:(?:post_type|taxonomy):)?[a-z0-9_-]+$"
+                },
+                "additionalProperties": {
+                    "type": "string",
+                    "enum": [
+                        "informational",
+                        "transactional"
+                    ]
+                },
+                "maxProperties": 200
+            },
+            "effective_default": {},
+            "dependencies": [],
+            "example": {
+                "post_type:product": "transactional"
+            },
+            "risk": "medium"
+        },
+        {
+            "id": "discovery_disabled",
+            "section_id": "discovery_strategy",
+            "section_label": "Discovery Strategy",
+            "option": "cybermaps_discovery_center",
+            "field": "disabled",
+            "label": "Disabled content groups",
+            "purpose": "Maps content-group identities excluded from Cybermaps XML, RSS, HTML, and AI publication eligibility. Every retained entry must be true; omit a key to enable that group. Supply the complete map because importing it replaces the existing map.",
+            "json_type": "object",
+            "allowed": {
+                "propertyNames": {
+                    "pattern": "^(?:(?:post_type|taxonomy):)?[a-z0-9_-]+$"
+                },
+                "additionalProperties": {
+                    "type": "boolean",
+                    "const": true
+                },
+                "maxProperties": 200
+            },
+            "effective_default": {},
+            "dependencies": [],
+            "example": {
+                "taxonomy:post_tag": true
+            },
+            "risk": "high"
+        },
+        {
+            "id": "identity_type",
+            "section_id": "site_identity",
+            "section_label": "Identity Hub",
+            "option": "cybermaps_identity_data",
+            "field": "type",
+            "label": "Primary identity type",
+            "purpose": "Sets the broad Schema.org identity type published for the site.",
+            "json_type": "string",
+            "allowed": {
+                "enum": [
+                    "Organization",
+                    "LocalBusiness",
+                    "Person"
+                ]
+            },
+            "effective_default": "Organization",
+            "dependencies": [],
+            "example": "Organization",
+            "risk": "high"
+        },
+        {
+            "id": "identity_precise_type",
+            "section_id": "site_identity",
+            "section_label": "Identity Hub",
+            "option": "cybermaps_identity_data",
+            "field": "precise_type",
+            "label": "Precise identity type",
+            "purpose": "Narrows an Organization or LocalBusiness to a compatible supported Schema.org subtype. Person requires an empty value, and LocalBusiness accepts only its supported business-family subtypes.",
+            "json_type": "string",
+            "allowed": {
+                "enum": [
+                    "",
+                    "Organization",
+                    "LocalBusiness",
+                    "Corporation",
+                    "Airline",
+                    "EducationalOrganization",
+                    "GovernmentOrganization",
+                    "MedicalOrganization",
+                    "NGO",
+                    "SportsOrganization",
+                    "ProfessionalService",
+                    "LegalService",
+                    "AccountingService",
+                    "RealEstateAgent",
+                    "MedicalBusiness",
+                    "Dentist",
+                    "GeneralContractor",
+                    "HomeAndConstructionBusiness",
+                    "AutomotiveBusiness",
+                    "Restaurant",
+                    "CafeOrCoffeeShop",
+                    "BarOrPub",
+                    "Hotel",
+                    "LodgingBusiness",
+                    "Store",
+                    "ShoppingCenter"
+                ]
+            },
+            "effective_default": "",
+            "dependencies": [
+                {
+                    "field": "identity_type",
+                    "condition": "one_of",
+                    "value": [
+                        "Organization",
+                        "LocalBusiness"
+                    ]
+                }
+            ],
+            "example": "ProfessionalService",
+            "risk": "high"
+        },
+        {
+            "id": "identity_name",
+            "section_id": "site_identity",
+            "section_label": "Identity Hub",
+            "option": "cybermaps_identity_data",
+            "field": "name",
+            "label": "Public identity name",
+            "purpose": "Publishes the canonical person, organization, or business name. An empty name suppresses the configured primary identity entity from public Schema.org output.",
+            "json_type": "string",
+            "allowed": {
+                "maxLength": 256
+            },
+            "effective_default": "",
+            "dependencies": [],
+            "example": "Example Studio",
+            "risk": "high"
+        },
+        {
+            "id": "identity_description",
+            "section_id": "site_identity",
+            "section_label": "Identity Hub",
+            "option": "cybermaps_identity_data",
+            "field": "description",
+            "label": "Public identity description",
+            "purpose": "Publishes the public Schema.org identity description.",
+            "json_type": "string",
+            "allowed": {
+                "maxLength": 8192
+            },
+            "effective_default": "",
+            "dependencies": [],
+            "example": "A specialist WordPress engineering and support studio.",
+            "risk": "high"
+        },
+        {
+            "id": "identity_image_id",
+            "section_id": "site_identity",
+            "section_label": "Identity Hub",
+            "option": "cybermaps_identity_data",
+            "field": "image_id",
+            "label": "Identity image attachment ID",
+            "purpose": "Selects a public WordPress image attachment for the identity image and organization logo.",
+            "json_type": "integer",
+            "allowed": {
+                "minimum": 0
+            },
+            "effective_default": 0,
+            "dependencies": [],
+            "example": 123,
+            "risk": "high"
+        },
+        {
+            "id": "identity_address_country",
+            "section_id": "site_identity",
+            "section_label": "Identity Hub",
+            "option": "cybermaps_identity_data",
+            "field": "address_country",
+            "label": "Country code",
+            "purpose": "Publishes the two-letter ISO-style country code in the public postal address; an empty string clears it.",
+            "json_type": "string",
+            "allowed": {
+                "anyOf": [
+                    {
+                        "const": ""
+                    },
+                    {
+                        "pattern": "^[A-Z]{2}$",
+                        "maxLength": 2
+                    }
+                ]
+            },
+            "effective_default": "",
+            "dependencies": [],
+            "example": "US",
+            "risk": "high"
+        },
+        {
+            "id": "identity_address",
+            "section_id": "site_identity",
+            "section_label": "Identity Hub",
+            "option": "cybermaps_identity_data",
+            "field": "address",
+            "label": "Street address",
+            "purpose": "Publishes the public street address for the configured identity.",
+            "json_type": "string",
+            "allowed": {
+                "maxLength": 256
+            },
+            "effective_default": "",
+            "dependencies": [],
+            "example": "123 Market Street",
+            "risk": "high"
+        },
+        {
+            "id": "identity_city",
+            "section_id": "site_identity",
+            "section_label": "Identity Hub",
+            "option": "cybermaps_identity_data",
+            "field": "city",
+            "label": "City",
+            "purpose": "Publishes the public address locality.",
+            "json_type": "string",
+            "allowed": {
+                "maxLength": 256
+            },
+            "effective_default": "",
+            "dependencies": [],
+            "example": "San Francisco",
+            "risk": "high"
+        },
+        {
+            "id": "identity_address_region",
+            "section_id": "site_identity",
+            "section_label": "Identity Hub",
+            "option": "cybermaps_identity_data",
+            "field": "address_region",
+            "label": "Region",
+            "purpose": "Publishes the public state, province, or address region.",
+            "json_type": "string",
+            "allowed": {
+                "maxLength": 256
+            },
+            "effective_default": "",
+            "dependencies": [],
+            "example": "CA",
+            "risk": "high"
+        },
+        {
+            "id": "identity_postal_code",
+            "section_id": "site_identity",
+            "section_label": "Identity Hub",
+            "option": "cybermaps_identity_data",
+            "field": "postal_code",
+            "label": "Postal code",
+            "purpose": "Publishes the public postal code.",
+            "json_type": "string",
+            "allowed": {
+                "maxLength": 256
+            },
+            "effective_default": "",
+            "dependencies": [],
+            "example": "94105",
+            "risk": "high"
+        },
+        {
+            "id": "identity_phone",
+            "section_id": "site_identity",
+            "section_label": "Identity Hub",
+            "option": "cybermaps_identity_data",
+            "field": "phone",
+            "label": "Public phone",
+            "purpose": "Publishes the primary public telephone number.",
+            "json_type": "string",
+            "allowed": {
+                "maxLength": 64
+            },
+            "effective_default": "",
+            "dependencies": [],
+            "example": "+1-415-555-0100",
+            "risk": "high"
+        },
+        {
+            "id": "identity_email",
+            "section_id": "site_identity",
+            "section_label": "Identity Hub",
+            "option": "cybermaps_identity_data",
+            "field": "email",
+            "label": "Public email",
+            "purpose": "Publishes the primary public email address; an empty string clears it.",
+            "json_type": "string",
+            "allowed": {
+                "anyOf": [
+                    {
+                        "const": ""
+                    },
+                    {
+                        "format": "email",
+                        "maxLength": 254
+                    }
+                ]
+            },
+            "effective_default": "",
+            "dependencies": [],
+            "example": "hello@example.com",
+            "risk": "high"
+        },
+        {
+            "id": "identity_latitude",
+            "section_id": "site_identity",
+            "section_label": "Identity Hub",
+            "option": "cybermaps_identity_data",
+            "field": "latitude",
+            "label": "Latitude",
+            "purpose": "Publishes geo only when both latitude and longitude are configured and the resolved Schema.org identity is in the LocalBusiness family; an empty string clears it.",
+            "json_type": "string",
+            "allowed": {
+                "anyOf": [
+                    {
+                        "const": ""
+                    },
+                    {
+                        "pattern": "^-?(?:(?:[0-8]?\\d)(?:\\.\\d+)?|\\.\\d+|90(?:\\.0+)?)$"
+                    }
+                ],
+                "x-numeric-minimum": -90,
+                "x-numeric-maximum": 90,
+                "x-paired-field": "identity_longitude"
+            },
+            "effective_default": "",
+            "dependencies": [
+                {
+                    "field": "identity_type",
+                    "condition": "resolved_type_is_local_business",
+                    "value": true
+                },
+                {
+                    "field": "identity_longitude",
+                    "condition": "paired_presence",
+                    "value": true
+                }
+            ],
+            "example": "37.7749",
+            "risk": "high"
+        },
+        {
+            "id": "identity_longitude",
+            "section_id": "site_identity",
+            "section_label": "Identity Hub",
+            "option": "cybermaps_identity_data",
+            "field": "longitude",
+            "label": "Longitude",
+            "purpose": "Publishes geo only when both longitude and latitude are configured and the resolved Schema.org identity is in the LocalBusiness family; an empty string clears it.",
+            "json_type": "string",
+            "allowed": {
+                "anyOf": [
+                    {
+                        "const": ""
+                    },
+                    {
+                        "pattern": "^-?(?:(?:[0-9]?\\d|1[0-7]\\d)(?:\\.\\d+)?|\\.\\d+|180(?:\\.0+)?)$"
+                    }
+                ],
+                "x-numeric-minimum": -180,
+                "x-numeric-maximum": 180,
+                "x-paired-field": "identity_latitude"
+            },
+            "effective_default": "",
+            "dependencies": [
+                {
+                    "field": "identity_type",
+                    "condition": "resolved_type_is_local_business",
+                    "value": true
+                },
+                {
+                    "field": "identity_latitude",
+                    "condition": "paired_presence",
+                    "value": true
+                }
+            ],
+            "example": "-122.4194",
+            "risk": "high"
+        },
+        {
+            "id": "identity_hours",
+            "section_id": "site_identity",
+            "section_label": "Identity Hub",
+            "option": "cybermaps_identity_data",
+            "field": "hours",
+            "label": "Opening hours",
+            "purpose": "Publishes opening-hour slots only when the resolved Schema.org identity is in the LocalBusiness family. Supply the complete weekday map; importing it replaces all existing hours.",
+            "json_type": "object",
+            "allowed": {
+                "type": "object",
+                "properties": {
+                    "monday": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "open": {
+                                    "type": "string",
+                                    "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$"
+                                },
+                                "close": {
+                                    "type": "string",
+                                    "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$"
+                                }
+                            },
+                            "additionalProperties": false,
+                            "required": [
+                                "open",
+                                "close"
+                            ],
+                            "x-fields-not-equal": [
+                                "open",
+                                "close"
+                            ]
+                        },
+                        "maxItems": 4
+                    },
+                    "tuesday": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "open": {
+                                    "type": "string",
+                                    "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$"
+                                },
+                                "close": {
+                                    "type": "string",
+                                    "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$"
+                                }
+                            },
+                            "additionalProperties": false,
+                            "required": [
+                                "open",
+                                "close"
+                            ],
+                            "x-fields-not-equal": [
+                                "open",
+                                "close"
+                            ]
+                        },
+                        "maxItems": 4
+                    },
+                    "wednesday": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "open": {
+                                    "type": "string",
+                                    "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$"
+                                },
+                                "close": {
+                                    "type": "string",
+                                    "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$"
+                                }
+                            },
+                            "additionalProperties": false,
+                            "required": [
+                                "open",
+                                "close"
+                            ],
+                            "x-fields-not-equal": [
+                                "open",
+                                "close"
+                            ]
+                        },
+                        "maxItems": 4
+                    },
+                    "thursday": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "open": {
+                                    "type": "string",
+                                    "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$"
+                                },
+                                "close": {
+                                    "type": "string",
+                                    "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$"
+                                }
+                            },
+                            "additionalProperties": false,
+                            "required": [
+                                "open",
+                                "close"
+                            ],
+                            "x-fields-not-equal": [
+                                "open",
+                                "close"
+                            ]
+                        },
+                        "maxItems": 4
+                    },
+                    "friday": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "open": {
+                                    "type": "string",
+                                    "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$"
+                                },
+                                "close": {
+                                    "type": "string",
+                                    "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$"
+                                }
+                            },
+                            "additionalProperties": false,
+                            "required": [
+                                "open",
+                                "close"
+                            ],
+                            "x-fields-not-equal": [
+                                "open",
+                                "close"
+                            ]
+                        },
+                        "maxItems": 4
+                    },
+                    "saturday": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "open": {
+                                    "type": "string",
+                                    "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$"
+                                },
+                                "close": {
+                                    "type": "string",
+                                    "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$"
+                                }
+                            },
+                            "additionalProperties": false,
+                            "required": [
+                                "open",
+                                "close"
+                            ],
+                            "x-fields-not-equal": [
+                                "open",
+                                "close"
+                            ]
+                        },
+                        "maxItems": 4
+                    },
+                    "sunday": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "open": {
+                                    "type": "string",
+                                    "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$"
+                                },
+                                "close": {
+                                    "type": "string",
+                                    "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$"
+                                }
+                            },
+                            "additionalProperties": false,
+                            "required": [
+                                "open",
+                                "close"
+                            ],
+                            "x-fields-not-equal": [
+                                "open",
+                                "close"
+                            ]
+                        },
+                        "maxItems": 4
+                    }
+                },
+                "additionalProperties": false
+            },
+            "effective_default": {},
+            "dependencies": [
+                {
+                    "field": "identity_type",
+                    "condition": "resolved_type_is_local_business",
+                    "value": true
+                }
+            ],
+            "example": {
+                "monday": [
+                    {
+                        "open": "09:00",
+                        "close": "17:00"
+                    }
+                ]
+            },
+            "risk": "high"
+        },
+        {
+            "id": "identity_catalogs",
+            "section_id": "site_identity",
+            "section_label": "Identity Hub",
+            "option": "cybermaps_identity_data",
+            "field": "catalogs",
+            "label": "Offer catalogs",
+            "purpose": "Publishes bounded manual or page-tree-derived Service or Product catalogs. Supply the complete list; importing it replaces all existing catalogs.",
+            "json_type": "array",
+            "allowed": {
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "mode": {
+                            "type": "string",
+                            "enum": [
+                                "manual",
+                                "auto"
+                            ]
+                        },
+                        "item_type": {
+                            "type": "string",
+                            "enum": [
+                                "Service",
+                                "Product"
+                            ]
+                        },
+                        "name": {
+                            "type": "string",
+                            "maxLength": 256
+                        },
+                        "items": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256,
+                                "pattern": ".*\\S.*"
+                            },
+                            "maxItems": 50
+                        },
+                        "parent_id": {
+                            "type": "integer",
+                            "minimum": 0
+                        }
+                    },
+                    "additionalProperties": false,
+                    "required": [
+                        "mode",
+                        "item_type"
+                    ],
+                    "allOf": [
+                        {
+                            "if": {
+                                "properties": {
+                                    "mode": {
+                                        "const": "manual"
+                                    }
+                                },
+                                "required": [
+                                    "mode"
+                                ]
+                            },
+                            "then": {
+                                "required": [
+                                    "items"
+                                ],
+                                "properties": {
+                                    "items": {
+                                        "minItems": 1
+                                    },
+                                    "parent_id": {
+                                        "const": 0
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "if": {
+                                "properties": {
+                                    "mode": {
+                                        "const": "auto"
+                                    }
+                                },
+                                "required": [
+                                    "mode"
+                                ]
+                            },
+                            "then": {
+                                "required": [
+                                    "parent_id"
+                                ],
+                                "properties": {
+                                    "items": {
+                                        "maxItems": 0
+                                    },
+                                    "parent_id": {
+                                        "minimum": 1
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                },
+                "maxItems": 12,
+                "x-max-total-items": 200
+            },
+            "effective_default": [],
+            "dependencies": [],
+            "example": [
+                {
+                    "mode": "manual",
+                    "item_type": "Service",
+                    "name": "Services",
+                    "items": [
+                        "Technical SEO audit"
+                    ],
+                    "parent_id": 0
+                }
+            ],
+            "risk": "high"
+        },
+        {
+            "id": "identity_social_profiles",
+            "section_id": "site_identity",
+            "section_label": "Identity Hub",
+            "option": "cybermaps_identity_data",
+            "field": "social_profiles",
+            "label": "Social profiles",
+            "purpose": "Publishes up to 20 unique public profile URLs as sameAs identity links. Supply the complete list; importing it replaces all existing profiles.",
+            "json_type": "array",
+            "allowed": {
+                "items": {
+                    "type": "string",
+                    "format": "uri",
+                    "pattern": "^https?://(?![^/?#]*@)[^/?#]+",
+                    "maxLength": 2048,
+                    "x-userinfo-allowed": false
+                },
+                "maxItems": 20,
+                "uniqueItems": true
+            },
+            "effective_default": [],
+            "dependencies": [],
+            "example": [
+                "https://www.linkedin.com/company/example/"
+            ],
+            "risk": "high"
+        },
+        {
+            "id": "identity_contact_points",
+            "section_id": "site_identity",
+            "section_label": "Identity Hub",
+            "option": "cybermaps_identity_data",
+            "field": "contact_points",
+            "label": "Contact points",
+            "purpose": "Publishes bounded public support, technical-support, or sales contacts. Supply the complete list; importing it replaces all existing contact points.",
+            "json_type": "array",
+            "allowed": {
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "enum": [
+                                "Customer Support",
+                                "Technical Support",
+                                "Sales"
+                            ]
+                        },
+                        "phone": {
+                            "type": "string",
+                            "maxLength": 64
+                        },
+                        "email": {
+                            "type": "string",
+                            "anyOf": [
+                                {
+                                    "const": ""
+                                },
+                                {
+                                    "format": "email",
+                                    "maxLength": 254
+                                }
+                            ]
+                        }
+                    },
+                    "additionalProperties": false,
+                    "required": [
+                        "type"
+                    ],
+                    "anyOf": [
+                        {
+                            "required": [
+                                "phone"
+                            ],
+                            "properties": {
+                                "phone": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "pattern": ".*\\S.*"
+                                }
+                            }
+                        },
+                        {
+                            "required": [
+                                "email"
+                            ],
+                            "properties": {
+                                "email": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "format": "email"
+                                }
+                            }
+                        }
+                    ]
+                },
+                "maxItems": 12
+            },
+            "effective_default": [],
+            "dependencies": [],
+            "example": [
+                {
+                    "type": "Customer Support",
+                    "phone": "+1-415-555-0100",
+                    "email": "support@example.com"
+                }
+            ],
+            "risk": "high"
+        },
+        {
+            "id": "takeover_enabled",
+            "section_id": "robots_control",
+            "section_label": "Robots Control",
+            "option": "cybermaps_robots_manager",
+            "field": "takeover_enabled",
+            "label": "Robots.txt takeover",
+            "purpose": "Replaces the public virtual robots.txt with Cybermaps-managed baseline and crawler policy output.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [],
+            "example": false,
+            "risk": "high"
+        },
+        {
+            "id": "manual_directives",
+            "section_id": "robots_control",
+            "section_label": "Robots Control",
+            "option": "cybermaps_robots_manager",
+            "field": "manual_directives",
+            "label": "Manual robots directives",
+            "purpose": "Appends bounded operator-authored robots.txt directives to the managed output.",
+            "json_type": "string",
+            "allowed": {
+                "maxLength": 32768,
+                "contentMediaType": "text/plain"
+            },
+            "effective_default": "",
+            "dependencies": [],
+            "example": "User-agent: ExampleBot\nDisallow: /private/",
+            "risk": "high"
+        },
+        {
+            "id": "crawler_overrides",
+            "section_id": "robots_control",
+            "section_label": "Robots Control",
+            "option": "cybermaps_robots_manager",
+            "field": "overrides",
+            "label": "Crawler overrides",
+            "purpose": "Maps registered crawler IDs to explicit robots permission, AI manifest-target permission, and requests-per-minute limits. Only crawler entries classified as AI training, AI search, or AI user agents can be manifest targets; other entries always store false for that value. Robots allow/deny directives are emitted only while robots.txt takeover is enabled; manifest-target permission and rate limits have independent runtime effects. Supply the complete map because importing it replaces all existing crawler overrides.",
+            "json_type": "object",
+            "allowed": {
+                "propertyNames": {
+                    "enum": [
+                        "gptbot",
+                        "chatgpt-user",
+                        "oai-adsbot",
+                        "claudebot",
+                        "claude-user",
+                        "claude-searchbot",
+                        "google-extended",
+                        "applebot-extended",
+                        "amazonbot",
+                        "amzn-searchbot",
+                        "amzn-user",
+                        "mistralai-user",
+                        "mistralai-index",
+                        "meta-externalagent",
+                        "meta-webindexer",
+                        "meta-externalfetcher",
+                        "meta-externalads",
+                        "duckassistbot",
+                        "cloudflare-ai-search",
+                        "linkupbot",
+                        "shapbot",
+                        "sofyabot",
+                        "youbot",
+                        "iboubot",
+                        "ccbot",
+                        "imagesiftbot",
+                        "diffbot",
+                        "perplexitybot",
+                        "perplexity-user",
+                        "oai-searchbot",
+                        "proximic",
+                        "archive-org-bot",
+                        "velen-crawler",
+                        "clueweb-crawler",
+                        "googlebot",
+                        "googlebot-news",
+                        "bingbot",
+                        "duckduckbot",
+                        "applebot",
+                        "yandexbot",
+                        "petalbot",
+                        "baiduspider",
+                        "sogou-spider",
+                        "mojeekbot",
+                        "qwantify",
+                        "naverbot",
+                        "coccocbot",
+                        "seekportbot",
+                        "ahrefsbot",
+                        "ahrefs-site-audit",
+                        "semrushbot",
+                        "dotbot",
+                        "mj12bot",
+                        "rogerbot",
+                        "siteauditbot",
+                        "lighthouse",
+                        "gtmetrix",
+                        "screaming-frog",
+                        "serpstatbot",
+                        "dataforseo-bot",
+                        "hubspot-crawler",
+                        "seojuice-searchbot",
+                        "seranking-backlinksbot",
+                        "poweredbybot",
+                        "pingdom",
+                        "uptimerobot",
+                        "cloudflare-check",
+                        "stripebot",
+                        "knowngood-verifier",
+                        "meta-externalhit",
+                        "twitterbot",
+                        "linkedinbot",
+                        "pinterestbot",
+                        "whatsapp",
+                        "discordbot",
+                        "slackbot",
+                        "telegrambot"
+                    ]
+                },
+                "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                        "robots": {
+                            "type": "boolean"
+                        },
+                        "llm": {
+                            "type": "boolean"
+                        },
+                        "tpm": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 10000
+                        }
+                    },
+                    "additionalProperties": false,
+                    "required": [
+                        "robots",
+                        "llm",
+                        "tpm"
+                    ]
+                },
+                "maxProperties": 77
+            },
+            "effective_default": {},
+            "dependencies": [],
+            "example": {
+                "gptbot": {
+                    "robots": true,
+                    "llm": true,
+                    "tpm": 60
+                }
+            },
+            "risk": "high"
+        },
+        {
+            "id": "content_signals",
+            "section_id": "robots_control",
+            "section_label": "Robots Control",
+            "option": "cybermaps_robots_manager",
+            "field": "content_signals",
+            "label": "Content-Signal declarations",
+            "purpose": "Publishes yes/no preferences for model training, search, and AI-input use in robots.txt. Supply the complete map; importing it replaces all existing signal declarations.",
+            "json_type": "object",
+            "allowed": {
+                "type": "object",
+                "properties": {
+                    "ai-train": {
+                        "type": "string",
+                        "enum": [
+                            "yes",
+                            "no"
+                        ]
+                    },
+                    "search": {
+                        "type": "string",
+                        "enum": [
+                            "yes",
+                            "no"
+                        ]
+                    },
+                    "ai-input": {
+                        "type": "string",
+                        "enum": [
+                            "yes",
+                            "no"
+                        ]
+                    }
+                },
+                "additionalProperties": false
+            },
+            "effective_default": {},
+            "dependencies": [],
+            "example": {
+                "ai-train": "no",
+                "search": "yes",
+                "ai-input": "yes"
+            },
+            "risk": "high"
+        }
+    ]
+}

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discovery Command Center Overhaul Mockup</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0f172a;
+            --accent: #2271b1;
+            --bg: #f4f7f9;
+            --card: #ffffff;
+            --text: #334155;
+            --border: #e2e8f0;
+            --low: #10b981;
+            --med: #f59e0b;
+            --high: #ef4444;
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding: 40px; margin: 0; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        h1 { color: var(--primary); margin-top: 0; }
+        .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 30px; }
+        .box { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .label { font-size: 14px; font-weight: 800; text-transform: uppercase; color: var(--accent); margin-bottom: 15px; display: block; }
+        
+        /* Old Grid Style */
+        .old-grid { display: grid; grid-template-columns: 100px repeat(11, 1fr); gap: 4px; }
+        .old-cell { height: 20px; background: #f1f5f9; border-radius: 2px; }
+        .old-cell.active { background: var(--accent); }
+        .old-cell.filled { background: var(--accent); opacity: 0.3; }
+
+        /* New SVG Style */
+        .svg-container { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; position: relative; }
+        .node-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding: 10px; background: #fff; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .node-info { flex: 1; }
+        .node-viz { flex: 2; height: 40px; }
+        
+        .type-pill { font-size: 11px; font-weight: 700; background: #eef2ff; color: #4338ca; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; }
+        
+        .benefit-tag { font-size: 12px; background: #f0fdf4; color: #15803d; padding: 10px 15px; border-radius: 8px; border-left: 4px solid #10b981; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Discovery Command Center Overhaul</h1>
+        <p>Using our SVG Math Engine to replace the legacy "Heatmap Grid" with high-fidelity visualization.</p>
+
+        <div class="comparison-grid">
+            <!-- Legacy Version -->
+            <div class="box">
+                <span class="label">Current Legacy Code</span>
+                <p style="font-size: 13px; margin-bottom: 20px;">Uses 100s of nested <code>&lt;div&gt;</code> squares, heavy CSS, and complex JS listeners for hover/active states.</p>
+                
+                <div class="old-grid">
+                    <div style="font-size: 10px; font-weight: 600;">Posts</div>
+                    <div class="old-cell active"></div><div class="old-cell filled"></div><div class="old-cell filled"></div><div class="old-cell filled"></div><div class="old-cell"></div><div class="old-cell"></div><div class="old-cell"></div><div class="old-cell"></div><div class="old-cell"></div><div class="old-cell"></div><div class="old-cell"></div>
+                </div>
+                <div class="old-grid" style="margin-top: 5px;">
+                    <div style="font-size: 10px; font-weight: 600;">Pages</div>
+                    <div class="old-cell filled"></div><div class="old-cell filled"></div><div class="old-cell filled"></div><div class="old-cell active"></div><div class="old-cell"></div><div class="old-cell"></div><div class="old-cell"></div><div class="old-cell"></div><div class="old-cell"></div><div class="old-cell"></div><div class="old-cell"></div>
+                </div>
+                <div class="old-grid" style="margin-top: 5px;">
+                    <div style="font-size: 10px; font-weight: 600;">Categories</div>
+                    <div class="old-cell filled"></div><div class="old-cell filled"></div><div class="old-cell active"></div><div class="old-cell"></div><div class="old-cell"></div><div class="old-cell"></div><div class="old-cell"></div><div class="old-cell"></div><div class="old-cell"></div><div class="old-cell"></div><div class="old-cell"></div>
+                </div>
+            </div>
+
+            <!-- SVG Overhaul -->
+            <div class="box" style="border-color: var(--accent);">
+                <span class="label">SVG Math Engine Redesign</span>
+                <p style="font-size: 13px; margin-bottom: 20px;">Mathematical curves and precise gradients. 90% less code, 100% better aesthetics.</p>
+                
+                <div class="node-row">
+                    <div class="node-info">
+                        <div style="font-weight: 800; font-size: 14px;">Posts</div>
+                        <span class="type-pill">Transactional</span>
+                    </div>
+                    <div class="node-viz">
+                        <!-- Simulated SVG Slider/Viz -->
+                        <svg width="100%" height="40" viewBox="0 0 300 40">
+                            <rect x="0" y="15" width="300" height="10" rx="5" fill="#f1f5f9" />
+                            <rect x="0" y="15" width="240" height="10" rx="5" fill="url(#grad1)" />
+                            <circle cx="240" cy="20" r="8" fill="#fff" stroke="#2271b1" stroke-width="3" />
+                            <defs>
+                                <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#2271b1;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="node-row">
+                    <div class="node-info">
+                        <div style="font-weight: 800; font-size: 14px;">Pages</div>
+                        <span class="type-pill">Informational</span>
+                    </div>
+                    <div class="node-viz">
+                        <svg width="100%" height="40" viewBox="0 0 300 40">
+                            <rect x="0" y="15" width="300" height="10" rx="5" fill="#f1f5f9" />
+                            <rect x="0" y="15" width="180" height="10" rx="5" fill="#10b981" />
+                            <circle cx="180" cy="20" r="8" fill="#fff" stroke="#10b981" stroke-width="3" />
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="benefit-tag">
+                    <strong>Zero-Library Math:</strong> No external JS chart libraries. All curves and interaction targets calculated via PHP/SVG logic.
+                </div>
+            </div>
+        </div>
+
+        <div class="box" style="margin-top: 40px; background: #fffbeb; border-color: #fef3c7;">
+            <h3 style="margin-top:0; color: #92400e;">Proposed "Deep Clean" Strategy:</h3>
+            <ul style="font-size: 14px; color: #92400e; line-height: 1.8;">
+                <li>Delete <code>assets/js/discovery-command-center.js</code> (Legacy JS)</li>
+                <li>Remove 150+ lines of <code>.priority-matrix</code> CSS from <code>admin-command-center.css</code></li>
+                <li>Implement <code>SVGMapper::render_matrix_slider()</code> to handle the new UI</li>
+                <li>Consolidate all "Archetype" and "Intent" logic into a single high-performance PHP class.</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

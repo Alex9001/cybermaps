@@ -1,0 +1,17 @@
+name = "cybermaps-cloudflare-oauth-relay"
+main = "src/index.js"
+compatibility_date = "2026-08-31"
+routes = [{ pattern = "connect.cybermaps.dev", custom_domain = true }]
+
+[[durable_objects.bindings]]
+name = "OAUTH_TRANSACTIONS"
+class_name = "OAuthTransaction"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["OAuthTransaction"]
+
+# Configure with wrangler secret put:
+# CLOUDFLARE_OAUTH_CLIENT_ID
+# CLOUDFLARE_OAUTH_SCOPES
+# CLOUDFLARE_OAUTH_REDIRECT_URI

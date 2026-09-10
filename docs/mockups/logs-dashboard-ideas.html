@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logs Dashboard Visualization Ideas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0f172a;
+            --primary-light: #1e293b;
+            --accent: #2271b1;
+            --bg: #f4f7f9;
+            --card: #ffffff;
+            --text: #334155;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding: 40px; margin: 0; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { color: var(--primary); margin-top: 0; }
+        .idea-section { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 30px; margin-bottom: 40px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .idea-title { font-size: 20px; font-weight: 800; color: var(--primary); margin: 0 0 15px 0; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
+        
+        /* Grid Layouts */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        
+        /* Placeholder styling for charts */
+        .chart-placeholder { background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; display: flex; align-items: center; justify-content: center; min-height: 200px; color: var(--text-muted); font-size: 14px; font-weight: 600; position: relative; overflow: hidden; }
+        
+        /* Sparkline mock */
+        .mock-sparkline { position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; opacity: 0.2; }
+        .mock-sparkline path { stroke: var(--accent); stroke-width: 3; fill: none; }
+        .mock-sparkline polygon { fill: var(--accent); }
+
+        /* Heatmap mock */
+        .mock-heatmap { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; padding: 20px; width: 100%; box-sizing: border-box; }
+        .heat-cell { aspect-ratio: 1; border-radius: 4px; background: #e2e8f0; }
+        .heat-1 { background: #bae6fd; }
+        .heat-2 { background: #38bdf8; }
+        .heat-3 { background: #0284c7; }
+        .heat-4 { background: #0369a1; }
+
+        /* KPI Cards */
+        .kpi-card { padding: 20px; background: #fff; border: 1px solid var(--border); border-radius: 8px; border-left: 4px solid var(--accent); }
+        .kpi-value { font-size: 32px; font-weight: 900; color: var(--primary); }
+        .kpi-label { font-size: 12px; text-transform: uppercase; font-weight: 700; color: var(--text-muted); }
+        
+        .desc { margin-bottom: 25px; line-height: 1.6; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Logs Visualization Concepts</h1>
+        
+        <div class="idea-section">
+            <h2 class="idea-title">Concept A: The "Velocity & Volume" View (Dashboard Replacement)</h2>
+            <p class="desc">Replace the simple bar/donut charts on the dashboard with a more dynamic timeline view that shows traffic over time, giving a sense of "velocity".</p>
+            <div class="grid-2">
+                <div>
+                    <div class="chart-placeholder" style="min-height: 250px;">
+                        <svg class="mock-sparkline" viewBox="0 0 100 50" preserveAspectRatio="none">
+                            <polygon points="0,50 0,30 20,40 40,10 60,20 80,5 100,25 100,50" />
+                            <path d="M0,30 L20,40 L40,10 L60,20 L80,5 L100,25" />
+                        </svg>
+                        <div style="z-index: 10; text-align: center;">
+                            <div style="font-size: 48px; font-weight: 900; color: var(--primary);">2,451</div>
+                            <div>Total Bot Hits (Last 30 Days)</div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="chart-placeholder" style="min-height: 250px;">
+                        <div>
+                            <div style="margin-bottom: 15px;"><strong>Knowledge Ingestion Trajectory</strong></div>
+                            <div style="display: flex; align-items: flex-end; gap: 8px; height: 120px; padding: 10px;">
+                                <!-- Bar graph mock -->
+                                <div style="width: 30px; height: 40%; background: #94a3b8; border-radius: 4px 4px 0 0;"></div>
+                                <div style="width: 30px; height: 60%; background: #94a3b8; border-radius: 4px 4px 0 0;"></div>
+                                <div style="width: 30px; height: 30%; background: #94a3b8; border-radius: 4px 4px 0 0;"></div>
+                                <div style="width: 30px; height: 80%; background: var(--accent); border-radius: 4px 4px 0 0;"></div>
+                                <div style="width: 30px; height: 100%; background: var(--accent); border-radius: 4px 4px 0 0;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="idea-section">
+            <h2 class="idea-title">Concept B: Top of the "Logs" Hub - Tactical KPIs</h2>
+            <p class="desc">Before diving into the scrolling activity feed, provide 3-4 high-level KPI cards at the top of the dedicated Logs page to summarize the data below it.</p>
+            <div class="grid-3">
+                <div class="kpi-card">
+                    <div class="kpi-value">482</div>
+                    <div class="kpi-label">AI Bot Requests (24h)</div>
+                </div>
+                <div class="kpi-card" style="border-left-color: #10b981;">
+                    <div class="kpi-value">/llms.txt</div>
+                    <div class="kpi-label">Most Requested Manifest</div>
+                </div>
+                <div class="kpi-card" style="border-left-color: #f59e0b;">
+                    <div class="kpi-value">ChatGPT-User</div>
+                    <div class="kpi-label">Most Active Agent</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="idea-section">
+            <h2 class="idea-title">Concept C: The "Crawl Activity Heatmap"</h2>
+            <p class="desc">A visual representation of when bots are most active on the site (like a GitHub contribution graph), replacing the standard donut chart.</p>
+            <div class="chart-placeholder">
+                <div class="mock-heatmap">
+                    <!-- Just a quick visual mock of cells -->
+                    <div class="heat-cell heat-1"></div><div class="heat-cell heat-3"></div><div class="heat-cell"></div><div class="heat-cell heat-2"></div><div class="heat-cell"></div><div class="heat-cell heat-4"></div><div class="heat-cell"></div>
+                    <div class="heat-cell"></div><div class="heat-cell heat-1"></div><div class="heat-cell heat-2"></div><div class="heat-cell heat-1"></div><div class="heat-cell"></div><div class="heat-cell heat-3"></div><div class="heat-cell"></div>
+                    <div class="heat-cell heat-2"></div><div class="heat-cell"></div><div class="heat-cell"></div><div class="heat-cell heat-4"></div><div class="heat-cell heat-1"></div><div class="heat-cell"></div><div class="heat-cell heat-2"></div>
+                </div>
+                <div style="position: absolute; bottom: 10px; right: 20px; font-size: 11px;">Activity by Day of Week</div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

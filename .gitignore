@@ -1,0 +1,44 @@
+# Generated build and packaging artifacts
+/clean/
+/freemius/
+
+# Dependencies
+/vendor/
+
+# Test caches
+/.phpunit.cache/
+
+# Local editor and development files
+/.cursor/
+/.deepseek/
+/.superpowers/
+/.idea/
+/.vscode/
+
+# Local environment and authentication files
+/.env
+/.env.*
+!/.env.example
+/auth.json
+
+# Private review correspondence
+/docs/*.eml
+
+# OS and runtime clutter
+.DS_Store
+Thumbs.db
+*.log
+/docs/launch/
+
+# Private development notes
+/.claude/
+/.agents/
+/.codex/
+/AGENTS.md
+/CLAUDE.md
+/docs/superpowers/
+/docs/dev/agent-tasks/
+/docs/audit/
+/docs/dev/REVIEW-HANDOFF.md
+/docs/dev/PUBLIC-LAUNCH-AUDIT.md
+/docs/dev/crawler-audit-2026-08-30.md

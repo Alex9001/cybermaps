@@ -1,0 +1,67 @@
+name = "cybermaps-cloudflare-oauth-relay"
+account_id = "d83f9f8d1bba7e32ca1104030a522f89"
+main = "src/index.js"
+compatibility_date = "2026-08-31"
+
+routes = [
+  { pattern = "connect.cybermaps.dev", custom_domain = true }
+]
+
+[vars]
+CLOUDFLARE_OAUTH_CLIENT_ID = "544b1a755ac5e65da02473537d92f915"
+CLOUDFLARE_OAUTH_SCOPES = "zone.read zone-transform-rules.write cache-settings.write"
+CLOUDFLARE_OAUTH_REDIRECT_URI = "https://connect.cybermaps.dev/cloudflare/callback"
+DAILY_TRANSACTION_LIMIT = "1500"
+MAX_TRANSACTION_POLLS = "48"
+
+[observability]
+enabled = true
+head_sampling_rate = 1.0
+
+[[durable_objects.bindings]]
+name = "OAUTH_TRANSACTIONS"
+class_name = "OAuthTransaction"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["OAuthTransaction"]
+
+[[ratelimits]]
+name = "CREATE_IP_RATE_LIMITER"
+namespace_id = "720010"
+
+  [ratelimits.simple]
+  limit = 5
+  period = 60
+
+[[ratelimits]]
+name = "CREATE_BURST_RATE_LIMITER"
+namespace_id = "720011"
+
+  [ratelimits.simple]
+  limit = 100
+  period = 60
+
+[[ratelimits]]
+name = "POLL_RATE_LIMITER"
+namespace_id = "720012"
+
+  [ratelimits.simple]
+  limit = 15
+  period = 60
+
+[[ratelimits]]
+name = "RELAY_IP_RATE_LIMITER"
+namespace_id = "720013"
+
+  [ratelimits.simple]
+  limit = 120
+  period = 60
+
+[[ratelimits]]
+name = "RELAY_BURST_RATE_LIMITER"
+namespace_id = "720014"
+
+  [ratelimits.simple]
+  limit = 300
+  period = 60

@@ -1,0 +1,124 @@
+/**
+ * Cybermaps — HTML Sitemap Shortcode Styles
+ *
+ * Minimal, dependency-free frontend CSS for the [cybermap] shortcode.
+ * Enqueued only when the shortcode renders.
+ */
+
+.cybermap-shortcode {
+    max-width: 100%;
+    font-family: system-ui, -apple-system, sans-serif;
+    color: #1e293b;
+}
+
+/* --- Section cards --- */
+.cybermap-section {
+    margin-bottom: 24px;
+}
+
+.cybermap-section-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 12px 0;
+    padding: 10px 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.cybermap-section-label {
+    flex: 1;
+}
+
+.cybermap-section-count {
+    font-size: 12px;
+    font-weight: 600;
+    background: #e2e8f0;
+    color: #475569;
+    padding: 2px 8px;
+    border-radius: 10px;
+    min-width: 20px;
+    text-align: center;
+}
+
+.cybermap-bare-section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+}
+
+/* --- Lists --- */
+.cybermap-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.cybermap-list.cybermap-flat {
+    column-count: 1;
+}
+
+.cybermap-item {
+    padding: 6px 0;
+    padding-inline-start: 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+.cybermap-item:last-child {
+    border-bottom: none;
+}
+
+.cybermap-item a {
+    color: #1e40af;
+    text-decoration: none;
+    font-size: 14px;
+    line-height: 1.5;
+}
+.cybermap-item a:hover {
+    color: #1d4ed8;
+    text-decoration: underline;
+}
+
+/* --- Tree indentation --- */
+.cybermap-tree,
+.cybermap-sublist {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.cybermap-tree > .cybermap-item {
+    padding-inline-start: 0;
+}
+.cybermap-sublist > .cybermap-item {
+    padding-inline-start: 20px;
+    border-bottom: none;
+    font-size: 13px;
+}
+.cybermap-sublist .cybermap-sublist > .cybermap-item {
+    padding-inline-start: 40px;
+}
+.cybermap-sublist .cybermap-sublist .cybermap-sublist > .cybermap-item {
+    padding-inline-start: 60px;
+}
+
+/* --- Two-column layout --- */
+@media (min-width: 768px) {
+    .cybermap-layout-columns {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px 30px;
+    }
+    .cybermap-layout-columns .cybermap-section {
+        break-inside: avoid;
+        margin-bottom: 0;
+    }
+}
+
+/* --- Empty state --- */
+.cybermap-empty p {
+    color: #94a3b8;
+    font-style: italic;
+}

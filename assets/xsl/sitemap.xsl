@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="1.0"
+	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+	xmlns:s="http://www.sitemaps.org/schemas/sitemap/0.9"
+	xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+	xmlns:video="http://www.google.com/schemas/sitemap-video/1.1"
+	xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"
+	exclude-result-prefixes="s image video news">
+<xsl:output method="html" encoding="UTF-8" indent="yes"/>
+
+<xsl:template name="formatDate">
+	<xsl:param name="value"/>
+	<xsl:choose>
+		<xsl:when test="string-length(normalize-space($value)) = 0">-</xsl:when>
+		<xsl:when test="contains($value, 'T')">
+			<xsl:value-of select="substring-before($value, 'T')"/>
+		</xsl:when>
+		<xsl:otherwise>
+			<xsl:value-of select="$value"/>
+		</xsl:otherwise>
+	</xsl:choose>
+</xsl:template>
+
+<xsl:template name="formatPriority">
+	<xsl:param name="value"/>
+	<xsl:choose>
+		<xsl:when test="string-length(normalize-space($value)) = 0">-</xsl:when>
+		<xsl:otherwise>
+			<xsl:value-of select="$value"/>
+		</xsl:otherwise>
+	</xsl:choose>
+</xsl:template>
+
+<xsl:template name="mediaCount">
+	<xsl:param name="url" select="."/>
+	<xsl:variable name="count" select="count($url/image:image) + count($url/video:video)"/>
+	<xsl:choose>
+		<xsl:when test="$count = 0">-</xsl:when>
+		<xsl:otherwise>
+			<xsl:value-of select="$count"/>
+		</xsl:otherwise>
+	</xsl:choose>
+</xsl:template>
+
+<xsl:template match="/">
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1"/>
+			<title>XML Sitemap</title>
+			<style>
+				* { box-sizing: border-box; }
+				body {
+					font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+					margin: 0;
+					padding: 2rem;
+					color: #0f172a;
+					background: #f1f5f9;
+					line-height: 1.5;
+				}
+				.sitemap-wrap { max-width: 1200px; margin: 0 auto; }
+				.sitemap-header {
+					border-top: 6px solid #0f172a;
+					padding-top: 12px;
+					margin-bottom: 8px;
+				}
+				.sitemap-header h1 {
+					font-size: 1.75rem;
+					font-weight: 800;
+					letter-spacing: -0.02em;
+					margin: 0;
+					text-transform: uppercase;
+					word-break: break-all;
+				}
+				.sitemap-count {
+					margin: 6px 0 0;
+					font-size: 13px;
+					color: #64748b;
+					font-weight: 600;
+				}
+				p.intro {
+					color: #475569;
+					margin: 0 0 1.25rem;
+					font-size: 14px;
+					max-width: 72ch;
+				}
+				p.intro--index { max-width: none; white-space: nowrap; }
+				.sitemap-table {
+					background: #fff;
+					border: 1px solid #e2e8f0;
+					border-radius: 8px;
+					overflow: hidden;
+				}
+				.sitemap-table-header,
+				.sitemap-row {
+					display: grid;
+					gap: 10px;
+					padding: 12px 16px;
+					font-size: 14px;
+					align-items: start;
+				}
+				.sitemap-table-header {
+					background: #f8fafc;
+					font-weight: 700;
+					font-size: 12px;
+					text-transform: uppercase;
+					letter-spacing: 0.04em;
+					color: #475569;
+					border-bottom: 2px solid #0f172a;
+				}
+				.sitemap-table-header--index,
+				.sitemap-row--index { grid-template-columns: 1fr 140px; }
+				.sitemap-table-header--urlset,
+				.sitemap-row--urlset { grid-template-columns: 1fr 120px 80px 80px; }
+				.sitemap-row { border-bottom: 1px solid #e2e8f0; }
+				.sitemap-row:last-child { border-bottom: none; }
+				.sitemap-row .loc a {
+					color: #0f172a;
+					font-weight: 600;
+					text-decoration: none;
+					word-break: break-all;
+				}
+				.sitemap-row .loc a:hover { color: #2563eb; text-decoration: underline; }
+				.sitemap-row .news-title {
+					display: block;
+					margin-top: 4px;
+					font-size: 12px;
+					font-weight: 400;
+					color: #64748b;
+				}
+				.sitemap-row .media { text-align: right; }
+					@media (max-width: 640px) {
+						body { padding: 1rem; }
+						.sitemap-table-header { display: none; }
+						.sitemap-row--index { grid-template-columns: 1fr; }
+						.sitemap-row--urlset {
+							grid-template-columns: repeat(3, minmax(0, 1fr));
+							gap: 12px 8px;
+						}
+						.sitemap-row--urlset .loc { grid-column: 1 / -1; }
+						.sitemap-row [data-label]::before {
+							content: attr(data-label);
+							display: block;
+							margin-bottom: 2px;
+							color: #64748b;
+							font-size: 10px;
+							font-weight: 700;
+							letter-spacing: 0.04em;
+							text-transform: uppercase;
+						}
+						.sitemap-row .media { text-align: left; }
+						p.intro--index { white-space: normal; }
+					}
+			</style>
+		</head>
+		<body>
+			<div class="sitemap-wrap">
+				<xsl:choose>
+					<xsl:when test="s:sitemapindex">
+						<header class="sitemap-header">
+							<h1>XML Sitemap Index</h1>
+							<p class="sitemap-count">
+								<xsl:value-of select="count(s:sitemapindex/s:sitemap)"/>
+								<xsl:text> sitemaps</xsl:text>
+							</p>
+						</header>
+						<p class="intro intro--index">
+							This sitemap index was generated by CYBER MAPS to help with search engine indexing.
+						</p>
+						<div class="sitemap-table">
+							<div class="sitemap-table-header sitemap-table-header--index">
+								<div>Location</div>
+								<div>Date</div>
+							</div>
+							<xsl:for-each select="s:sitemapindex/s:sitemap">
+								<div class="sitemap-row sitemap-row--index">
+									<div class="loc">
+										<a href="{s:loc}"><xsl:value-of select="s:loc"/></a>
+									</div>
+										<div class="date" data-label="Date">
+										<xsl:call-template name="formatDate">
+											<xsl:with-param name="value" select="string(s:lastmod)"/>
+										</xsl:call-template>
+									</div>
+								</div>
+							</xsl:for-each>
+						</div>
+					</xsl:when>
+					<xsl:otherwise>
+						<header class="sitemap-header">
+							<h1>XML Sitemap</h1>
+							<p class="sitemap-count">
+								<xsl:value-of select="count(s:urlset/s:url)"/>
+								<xsl:text> URLs</xsl:text>
+							</p>
+						</header>
+						<p class="intro">
+							This sitemap was generated by CYBER MAPS to help with search engine indexing.
+						</p>
+						<div class="sitemap-table">
+							<div class="sitemap-table-header sitemap-table-header--urlset">
+								<div>Location</div>
+								<div>Date</div>
+								<div>Priority</div>
+								<div style="text-align:right;">Media</div>
+							</div>
+							<xsl:for-each select="s:urlset/s:url">
+								<div class="sitemap-row sitemap-row--urlset">
+									<div class="loc">
+										<a href="{s:loc}"><xsl:value-of select="s:loc"/></a>
+										<xsl:if test="news:news/news:title">
+											<span class="news-title"><xsl:value-of select="news:news/news:title"/></span>
+										</xsl:if>
+									</div>
+										<div class="date" data-label="Date">
+										<xsl:call-template name="formatDate">
+											<xsl:with-param name="value" select="string(s:lastmod)"/>
+										</xsl:call-template>
+									</div>
+										<div class="priority" data-label="Priority">
+										<xsl:call-template name="formatPriority">
+											<xsl:with-param name="value" select="string(s:priority)"/>
+										</xsl:call-template>
+									</div>
+										<div class="media" data-label="Media">
+										<xsl:call-template name="mediaCount">
+											<xsl:with-param name="url" select="."/>
+										</xsl:call-template>
+									</div>
+								</div>
+							</xsl:for-each>
+						</div>
+					</xsl:otherwise>
+				</xsl:choose>
+			</div>
+		</body>
+	</html>
+</xsl:template>
+</xsl:stylesheet>

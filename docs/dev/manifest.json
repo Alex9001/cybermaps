@@ -1,0 +1,3028 @@
+{
+    "plugin": "CYBERMAPS: XML Sitemaps & llms.txt",
+    "version": "7.4.0",
+    "php_min": "8.2",
+    "wp_min": "7.1",
+    "generated_at": "2026-09-10T05:24:46+00:00",
+    "discovery_endpoints": [
+        {
+            "id": "manifest",
+            "path": "/ai.json",
+            "canonical": true,
+            "parameterized": false,
+            "type": "application/json",
+            "label": "AI Discovery Manifest",
+            "desc": "Primary machine-readable discovery manifest.",
+            "spec": "Cybermaps AI Discovery Manifest 1.0",
+            "delivery": "fixed-path",
+            "maturity": "vendor-extension",
+            "adoption": "reference-only",
+            "group": "essential",
+            "enabled_setting": "",
+            "advertised": true,
+            "throttle_tier": "cheap",
+            "static_bucket": "well_known"
+        },
+        {
+            "id": "adp_discovery",
+            "path": "/ai-discovery.json",
+            "canonical": true,
+            "parameterized": false,
+            "type": "application/json",
+            "label": "ADP Discovery Manifest",
+            "desc": "AI Discovery Protocol 3.0 Level 3 manifest.",
+            "spec": "AI Discovery Protocol 3.0 Level 3",
+            "delivery": "fixed-path",
+            "maturity": "community-convention",
+            "adoption": "reference-only",
+            "group": "essential",
+            "enabled_setting": "",
+            "advertised": true,
+            "throttle_tier": "cheap",
+            "static_bucket": ""
+        },
+        {
+            "id": "discovery_index",
+            "path": "/ai-discovery",
+            "canonical": true,
+            "parameterized": false,
+            "type": "application/json",
+            "label": "Discovery Index",
+            "desc": "Index of Cybermaps discovery publications.",
+            "spec": "Cybermaps Discovery Index",
+            "delivery": "fixed-path",
+            "maturity": "vendor-extension",
+            "adoption": "reference-only",
+            "group": "essential",
+            "enabled_setting": "",
+            "advertised": false,
+            "throttle_tier": "cheap",
+            "static_bucket": "well_known"
+        },
+        {
+            "id": "llms",
+            "path": "/llms.txt",
+            "canonical": true,
+            "parameterized": false,
+            "type": "text/markdown",
+            "label": "LLMS Summary",
+            "desc": "Concise site summary for language models.",
+            "spec": "llms.txt proposal",
+            "delivery": "fixed-path",
+            "maturity": "community-convention",
+            "adoption": "independent-producers",
+            "group": "essential",
+            "enabled_setting": "",
+            "advertised": true,
+            "throttle_tier": "medium",
+            "static_bucket": "all"
+        },
+        {
+            "id": "llms_full",
+            "path": "/llms-full.txt",
+            "canonical": true,
+            "parameterized": false,
+            "type": "text/markdown",
+            "label": "LLMS Full",
+            "desc": "Opt-in complete literal publication of eligible stored content.",
+            "spec": "Cybermaps Literal Full Corpus 1.0",
+            "delivery": "fixed-path",
+            "maturity": "vendor-extension",
+            "adoption": "reference-only",
+            "group": "essential",
+            "enabled_setting": "enable_llms_full",
+            "advertised": true,
+            "throttle_tier": "expensive",
+            "static_bucket": "all"
+        },
+        {
+            "id": "llms_tldr",
+            "path": "/llms-tldr.txt",
+            "canonical": true,
+            "parameterized": false,
+            "type": "text/plain",
+            "label": "Budgeted Site Briefing",
+            "desc": "Experimental literal briefing with deterministic budget accounting.",
+            "spec": "Cybermaps Budgeted Site Briefing 0.2-draft",
+            "delivery": "fixed-path",
+            "maturity": "experimental-proposal",
+            "adoption": "reference-only",
+            "group": "experimental",
+            "enabled_setting": "enable_llms_tldr",
+            "advertised": true,
+            "throttle_tier": "expensive",
+            "static_bucket": "all"
+        },
+        {
+            "id": "knowledge_graph",
+            "path": "/knowledge-graph.json",
+            "canonical": true,
+            "parameterized": false,
+            "type": "application/ld+json",
+            "label": "Knowledge Graph",
+            "desc": "Schema.org identity and relationship graph.",
+            "spec": "Schema.org",
+            "delivery": "fixed-path",
+            "maturity": "vendor-extension",
+            "adoption": "reference-only",
+            "group": "essential",
+            "enabled_setting": "",
+            "advertised": true,
+            "throttle_tier": "expensive",
+            "static_bucket": "all"
+        },
+        {
+            "id": "feed",
+            "path": "/feed.json",
+            "canonical": true,
+            "parameterized": false,
+            "type": "application/feed+json",
+            "label": "AI Activity Feed",
+            "desc": "JSON Feed publication of recent content.",
+            "spec": "JSON Feed 1.1",
+            "delivery": "fixed-path",
+            "maturity": "community-convention",
+            "adoption": "known-consumer",
+            "group": "essential",
+            "enabled_setting": "",
+            "advertised": true,
+            "throttle_tier": "medium",
+            "static_bucket": ""
+        },
+        {
+            "id": "updates",
+            "path": "/updates.json",
+            "canonical": true,
+            "parameterized": false,
+            "type": "application/json",
+            "label": "Recent Updates",
+            "desc": "Bounded seven-day ADP change stream for current public content.",
+            "spec": "AI Discovery Protocol 3.0 Updates",
+            "delivery": "fixed-path",
+            "maturity": "community-convention",
+            "adoption": "reference-only",
+            "group": "essential",
+            "enabled_setting": "",
+            "advertised": true,
+            "throttle_tier": "medium",
+            "static_bucket": "all"
+        },
+        {
+            "id": "adp_news_llms",
+            "path": "/news/llms.txt",
+            "canonical": true,
+            "parameterized": false,
+            "type": "text/markdown",
+            "label": "ADP News Context",
+            "desc": "Bounded Markdown context for recent eligible news content.",
+            "spec": "AI Discovery Protocol 3.0 News Namespace",
+            "delivery": "fixed-path",
+            "maturity": "community-convention",
+            "adoption": "reference-only",
+            "group": "essential",
+            "enabled_setting": "",
+            "advertised": true,
+            "throttle_tier": "medium",
+            "static_bucket": "all"
+        },
+        {
+            "id": "adp_news_speakable",
+            "path": "/news/speakable.json",
+            "canonical": true,
+            "parameterized": false,
+            "type": "application/ld+json",
+            "label": "ADP Speakable News",
+            "desc": "Schema.org speakable summaries for recent eligible content.",
+            "spec": "AI Discovery Protocol 3.0 Speakable News",
+            "delivery": "fixed-path",
+            "maturity": "community-convention",
+            "adoption": "reference-only",
+            "group": "essential",
+            "enabled_setting": "",
+            "advertised": true,
+            "throttle_tier": "medium",
+            "static_bucket": "all"
+        },
+        {
+            "id": "adp_news_changelog",
+            "path": "/news/changelog.json",
+            "canonical": true,
+            "parameterized": false,
+            "type": "application/json",
+            "label": "ADP News Changelog",
+            "desc": "Version metadata for the Level 3 news publication surface.",
+            "spec": "AI Discovery Protocol 3.0 News Changelog",
+            "delivery": "fixed-path",
+            "maturity": "community-convention",
+            "adoption": "reference-only",
+            "group": "essential",
+            "enabled_setting": "",
+            "advertised": true,
+            "throttle_tier": "cheap",
+            "static_bucket": "all"
+        },
+        {
+            "id": "adp_news_archive",
+            "path": "/news/archive.jsonl",
+            "canonical": true,
+            "parameterized": false,
+            "type": "application/x-ndjson",
+            "label": "ADP News Archive",
+            "desc": "Bounded newline-delimited archive of eligible content.",
+            "spec": "AI Discovery Protocol 3.0 News Archive",
+            "delivery": "fixed-path",
+            "maturity": "community-convention",
+            "adoption": "reference-only",
+            "group": "essential",
+            "enabled_setting": "",
+            "advertised": true,
+            "throttle_tier": "expensive",
+            "static_bucket": "all"
+        },
+        {
+            "id": "ai_sitemap",
+            "path": "/ai-sitemap.xml",
+            "canonical": true,
+            "parameterized": false,
+            "type": "application/xml",
+            "label": "AI Sitemap",
+            "desc": "AI-oriented XML content inventory.",
+            "spec": "AI XML Sitemap",
+            "delivery": "fixed-path",
+            "maturity": "vendor-extension",
+            "adoption": "reference-only",
+            "group": "essential",
+            "enabled_setting": "",
+            "advertised": true,
+            "throttle_tier": "expensive",
+            "static_bucket": "all"
+        },
+        {
+            "id": "usage_policy",
+            "path": "/ai-usage.json",
+            "canonical": true,
+            "parameterized": false,
+            "type": "application/json",
+            "label": "AI Usage Policy",
+            "desc": "Machine-readable permissions for AI uses.",
+            "spec": "Usage Policy 1.0",
+            "delivery": "fixed-path",
+            "maturity": "vendor-extension",
+            "adoption": "reference-only",
+            "group": "essential",
+            "enabled_setting": "",
+            "advertised": true,
+            "throttle_tier": "cheap",
+            "static_bucket": "well_known"
+        },
+        {
+            "id": "actions",
+            "path": "/ai-actions.json",
+            "canonical": true,
+            "parameterized": false,
+            "type": "application/ld+json",
+            "label": "AI Actions",
+            "desc": "Machine-readable action and capability inventory.",
+            "spec": "Action Sitemap",
+            "delivery": "fixed-path",
+            "maturity": "vendor-extension",
+            "adoption": "reference-only",
+            "group": "essential",
+            "enabled_setting": "",
+            "advertised": true,
+            "throttle_tier": "cheap",
+            "static_bucket": "well_known"
+        },
+        {
+            "id": "skill",
+            "path": "/.well-known/agent-skills/cybermaps-site-guide/SKILL.md",
+            "canonical": true,
+            "parameterized": false,
+            "type": "text/markdown",
+            "label": "Agent Skill Site Guide",
+            "desc": "Agent Skills-compatible guide to the site's public read-only resources.",
+            "spec": "Agent Skills SKILL.md",
+            "delivery": "fixed-path",
+            "maturity": "community-convention",
+            "adoption": "known-consumer",
+            "group": "essential",
+            "enabled_setting": "",
+            "advertised": true,
+            "throttle_tier": "cheap",
+            "static_bucket": "well_known"
+        },
+        {
+            "id": "skill",
+            "path": "/skill.md",
+            "canonical": false,
+            "parameterized": false,
+            "type": "text/markdown",
+            "label": "Agent Skill Site Guide (alternate)",
+            "desc": "Agent Skills-compatible guide to the site's public read-only resources.",
+            "spec": "Agent Skills SKILL.md",
+            "delivery": "fixed-path",
+            "maturity": "community-convention",
+            "adoption": "known-consumer",
+            "group": "essential",
+            "enabled_setting": "",
+            "advertised": true,
+            "throttle_tier": "cheap",
+            "static_bucket": ""
+        },
+        {
+            "id": "agent_skills",
+            "path": "/.well-known/agent-skills/index.json",
+            "canonical": true,
+            "parameterized": false,
+            "type": "application/json",
+            "label": "Agent Skills Index",
+            "desc": "Draft discovery index for the canonical Cybermaps site-guide skill.",
+            "spec": "Agent Skills Discovery 0.2.0 draft",
+            "delivery": "fixed-path",
+            "maturity": "formal-draft",
+            "adoption": "reference-only",
+            "group": "essential",
+            "enabled_setting": "",
+            "advertised": true,
+            "throttle_tier": "cheap",
+            "static_bucket": "well_known"
+        },
+        {
+            "id": "api_catalog",
+            "path": "/.well-known/api-catalog",
+            "canonical": true,
+            "parameterized": false,
+            "type": "application/linkset+json",
+            "label": "API Catalog",
+            "desc": "Dynamic Linkset catalog using the RFC 9727 media-type profile and api-catalog relation.",
+            "spec": "RFC 9727 API Catalog using RFC 9264 Linkset",
+            "delivery": "fixed-path",
+            "maturity": "formal-standard",
+            "adoption": "independent-producers",
+            "group": "essential",
+            "enabled_setting": "",
+            "advertised": true,
+            "throttle_tier": "cheap",
+            "static_bucket": "well_known"
+        },
+        {
+            "id": "api_catalog",
+            "path": "/api-catalog",
+            "canonical": false,
+            "parameterized": false,
+            "type": "application/linkset+json",
+            "label": "API Catalog (alternate)",
+            "desc": "Dynamic Linkset catalog using the RFC 9727 media-type profile and api-catalog relation.",
+            "spec": "RFC 9727 API Catalog using RFC 9264 Linkset",
+            "delivery": "fixed-path",
+            "maturity": "formal-standard",
+            "adoption": "independent-producers",
+            "group": "essential",
+            "enabled_setting": "",
+            "advertised": true,
+            "throttle_tier": "cheap",
+            "static_bucket": ""
+        },
+        {
+            "id": "ai_catalog",
+            "path": "/.well-known/ai-catalog.json",
+            "canonical": true,
+            "parameterized": false,
+            "type": "application/json",
+            "label": "Agentic Resource Catalog",
+            "desc": "Draft ARD catalog of active Cybermaps discovery resources.",
+            "spec": "Agentic Resource Discovery 1.0 draft",
+            "delivery": "fixed-path",
+            "maturity": "formal-draft",
+            "adoption": "reference-only",
+            "group": "essential",
+            "enabled_setting": "enable_discovery_hub",
+            "advertised": true,
+            "throttle_tier": "cheap",
+            "static_bucket": "well_known"
+        },
+        {
+            "id": "ai_catalog",
+            "path": "/ai-catalog.json",
+            "canonical": false,
+            "parameterized": false,
+            "type": "application/json",
+            "label": "Agentic Resource Catalog (alternate)",
+            "desc": "Draft ARD catalog of active Cybermaps discovery resources.",
+            "spec": "Agentic Resource Discovery 1.0 draft",
+            "delivery": "fixed-path",
+            "maturity": "formal-draft",
+            "adoption": "reference-only",
+            "group": "essential",
+            "enabled_setting": "enable_discovery_hub",
+            "advertised": true,
+            "throttle_tier": "cheap",
+            "static_bucket": ""
+        },
+        {
+            "id": "auth_md",
+            "path": "/auth.md",
+            "canonical": true,
+            "parameterized": false,
+            "type": "text/markdown",
+            "label": "Agent Registration Guide",
+            "desc": "Opt-in Auth.md instructions for user-claimed OAuth device authorization.",
+            "spec": "Auth.md emerging protocol",
+            "delivery": "fixed-path",
+            "maturity": "community-convention",
+            "adoption": "reference-only",
+            "group": "essential",
+            "enabled_setting": "",
+            "advertised": true,
+            "throttle_tier": "cheap",
+            "static_bucket": ""
+        },
+        {
+            "id": "mcp_server_card",
+            "path": "/.well-known/mcp/server-card.json",
+            "canonical": true,
+            "parameterized": false,
+            "type": "application/mcp-server-card+json",
+            "label": "MCP Server Card Compatibility URL",
+            "desc": "Experimental well-known compatibility route for the current MCP Server Card draft.",
+            "spec": "MCP ext-server-card v1 draft",
+            "delivery": "fixed-path",
+            "maturity": "experimental-proposal",
+            "adoption": "reference-only",
+            "group": "experimental",
+            "enabled_setting": "",
+            "advertised": false,
+            "throttle_tier": "cheap",
+            "static_bucket": "well_known"
+        },
+        {
+            "id": "oauth_authorization_server",
+            "path": "/.well-known/oauth-authorization-server",
+            "canonical": true,
+            "parameterized": false,
+            "type": "application/json",
+            "label": "OAuth Authorization Server Metadata",
+            "desc": "RFC 8414 metadata describing how an agent obtains and refreshes access tokens.",
+            "spec": "RFC 8414 OAuth 2.0 Authorization Server Metadata",
+            "delivery": "fixed-path",
+            "maturity": "formal-standard",
+            "adoption": "independent-producers",
+            "group": "essential",
+            "enabled_setting": "",
+            "advertised": true,
+            "throttle_tier": "cheap",
+            "static_bucket": "well_known"
+        },
+        {
+            "id": "oauth_protected_resource",
+            "path": "/.well-known/oauth-protected-resource",
+            "canonical": true,
+            "parameterized": false,
+            "type": "application/json",
+            "label": "OAuth Protected Resource Metadata",
+            "desc": "RFC 9728 metadata identifying the MCP resource, issuers, and supported scopes.",
+            "spec": "RFC 9728 OAuth 2.0 Protected Resource Metadata",
+            "delivery": "fixed-path",
+            "maturity": "formal-standard",
+            "adoption": "independent-producers",
+            "group": "essential",
+            "enabled_setting": "",
+            "advertised": true,
+            "throttle_tier": "cheap",
+            "static_bucket": "well_known"
+        },
+        {
+            "id": "openapi",
+            "path": "/cybermaps-openapi.json",
+            "canonical": true,
+            "parameterized": false,
+            "type": "application/vnd.oai.openapi+json",
+            "label": "OpenAPI Description",
+            "desc": "Read-only public Cybermaps REST API contract.",
+            "spec": "OpenAPI 3.2.0 (3.1.2 compatibility negotiation)",
+            "delivery": "fixed-path",
+            "maturity": "community-convention",
+            "adoption": "known-consumer",
+            "group": "essential",
+            "enabled_setting": "",
+            "advertised": false,
+            "throttle_tier": "cheap",
+            "static_bucket": ""
+        },
+        {
+            "id": "rest_root",
+            "path": "/wp-json/cybermaps/v1/discovery",
+            "canonical": true,
+            "parameterized": false,
+            "type": "application/json",
+            "label": "REST Discovery Index",
+            "desc": "REST API index of primary Cybermaps publications.",
+            "spec": "WordPress REST API",
+            "delivery": "rest-api",
+            "maturity": "vendor-extension",
+            "adoption": "reference-only",
+            "group": "essential",
+            "enabled_setting": "",
+            "advertised": true,
+            "throttle_tier": "cheap",
+            "static_bucket": ""
+        },
+        {
+            "id": "rest_llms_tldr",
+            "path": "/wp-json/cybermaps/v1/llms-tldr",
+            "canonical": true,
+            "parameterized": false,
+            "type": "application/json",
+            "label": "Budgeted Site Briefing REST API",
+            "desc": "REST representation of the experimental budgeted site briefing.",
+            "spec": "Cybermaps Budgeted Site Briefing 0.2-draft",
+            "delivery": "rest-api",
+            "maturity": "experimental-proposal",
+            "adoption": "reference-only",
+            "group": "experimental",
+            "enabled_setting": "enable_llms_tldr",
+            "advertised": false,
+            "throttle_tier": "expensive",
+            "static_bucket": ""
+        },
+        {
+            "id": "rest_search",
+            "path": "/wp-json/cybermaps/v1/search",
+            "canonical": true,
+            "parameterized": false,
+            "type": "application/json",
+            "label": "REST Search",
+            "desc": "Bounded public search over the configured, indexable AI publication inventory.",
+            "spec": "WordPress REST API",
+            "delivery": "rest-api",
+            "maturity": "vendor-extension",
+            "adoption": "reference-only",
+            "group": "essential",
+            "enabled_setting": "",
+            "advertised": false,
+            "throttle_tier": "medium",
+            "static_bucket": ""
+        },
+        {
+            "id": "localized_llms",
+            "path": "/{language}/llms.txt",
+            "canonical": true,
+            "parameterized": true,
+            "type": "text/markdown",
+            "label": "Localized LLMS Summary",
+            "desc": "Language-specific llms.txt publication.",
+            "spec": "llms.txt",
+            "delivery": "parameterized-path",
+            "maturity": "community-convention",
+            "adoption": "independent-producers",
+            "group": "essential",
+            "enabled_setting": "enable_multilingual_hub",
+            "advertised": false,
+            "throttle_tier": "medium",
+            "static_bucket": "all"
+        },
+        {
+            "id": "localized_llms_full",
+            "path": "/{language}/llms-full.txt",
+            "canonical": true,
+            "parameterized": true,
+            "type": "text/markdown",
+            "label": "Localized LLMS Full",
+            "desc": "Language-specific complete literal publication of eligible stored content.",
+            "spec": "Cybermaps Literal Full Corpus 1.0",
+            "delivery": "parameterized-path",
+            "maturity": "vendor-extension",
+            "adoption": "reference-only",
+            "group": "essential",
+            "enabled_setting": "enable_llms_full",
+            "advertised": false,
+            "throttle_tier": "medium",
+            "static_bucket": "all"
+        },
+        {
+            "id": "localized_llms_tldr",
+            "path": "/{language}/llms-tldr.txt",
+            "canonical": true,
+            "parameterized": true,
+            "type": "text/plain",
+            "label": "Localized Budgeted Site Briefing",
+            "desc": "Language-specific experimental literal briefing.",
+            "spec": "Cybermaps Budgeted Site Briefing 0.2-draft",
+            "delivery": "parameterized-path",
+            "maturity": "experimental-proposal",
+            "adoption": "reference-only",
+            "group": "experimental",
+            "enabled_setting": "enable_llms_tldr",
+            "advertised": false,
+            "throttle_tier": "expensive",
+            "static_bucket": "all"
+        },
+        {
+            "id": "rag_chunk",
+            "path": "/discovery/chunks/{post_id}.json",
+            "canonical": true,
+            "parameterized": true,
+            "type": "application/json",
+            "label": "RAG Chunk",
+            "desc": "Per-resource chunk publication for eligible stored content.",
+            "spec": "Cybermaps RAG chunk",
+            "delivery": "parameterized-path",
+            "maturity": "vendor-extension",
+            "adoption": "reference-only",
+            "group": "essential",
+            "enabled_setting": "enable_rag_chunks",
+            "advertised": true,
+            "throttle_tier": "expensive",
+            "static_bucket": "all"
+        },
+        {
+            "id": "markdown_alternate",
+            "path": "/{permalink}/index.md",
+            "canonical": true,
+            "parameterized": true,
+            "type": "text/markdown",
+            "label": "Per-resource Markdown Alternate",
+            "desc": "Literal Markdown representation of an eligible singular WordPress resource.",
+            "spec": "llms.txt page-alternate proposal",
+            "delivery": "parameterized-path",
+            "maturity": "community-convention",
+            "adoption": "independent-producers",
+            "group": "essential",
+            "enabled_setting": "",
+            "advertised": false,
+            "throttle_tier": "medium",
+            "static_bucket": ""
+        }
+    ],
+    "discovery_endpoint_count": 36,
+    "sitemap_features": [
+        "XML sitemaps with configurable base URL slug",
+        "Automatic 2,000 URL children with collision-safe post-type and taxonomy route namespaces",
+        "Post types, taxonomies, authors, archives, and Google News sitemaps",
+        "RSS 2.0 sitemap with configurable post types and item limit",
+        "Image and video sitemap extensions with configurable media discovery intensity",
+        "Optional transient caching and ETag-based 304 Not Modified responses",
+        "XSL stylesheet for a human-readable browser preview",
+        "Content Discovery Strategy with practical profile baselines, independent Publish status, Informational/Commercial discovery intent, publication weight, and manual per-resource overrides",
+        "Per-post changefreq override (always, hourly, daily, weekly, monthly, yearly, never)",
+        "Per-post exclude from sitemap toggle (Gutenberg sidebar)",
+        "Shared publication eligibility honoring WordPress visibility, Genesis/Mai, and supported Yoast, Rank Math, and AIOSEO signals",
+        "HTML sitemap via [cybermap] shortcode with interactive builder (list, columns, bare layouts)",
+        "Sitemap URL listing page with coverage statistics",
+        "External sitemap URL inclusion in sitemap index"
+    ],
+    "shortcode_attributes": [
+        {
+            "name": "only",
+            "default": ""
+        },
+        {
+            "name": "exclude",
+            "default": ""
+        },
+        {
+            "name": "limit",
+            "default": 50
+        },
+        {
+            "name": "depth",
+            "default": 0
+        },
+        {
+            "name": "sort",
+            "default": "asc"
+        },
+        {
+            "name": "nofollow",
+            "default": "false"
+        },
+        {
+            "name": "display_title",
+            "default": "true"
+        },
+        {
+            "name": "layout",
+            "default": "list"
+        }
+    ],
+    "shortcode_attribute_count": 8,
+    "rest_api_routes": [
+        {
+            "namespace": "cybermaps/v1",
+            "route": "/discovery",
+            "full": "/wp-json/cybermaps/v1/discovery"
+        },
+        {
+            "namespace": "cybermaps/v1",
+            "route": "/health",
+            "full": "/wp-json/cybermaps/v1/health"
+        },
+        {
+            "namespace": "cybermaps/v1",
+            "route": "/mcp",
+            "full": "/wp-json/cybermaps/v1/mcp"
+        },
+        {
+            "namespace": "cybermaps/v1",
+            "route": "/mcp/server-card",
+            "full": "/wp-json/cybermaps/v1/mcp/server-card"
+        },
+        {
+            "namespace": "cybermaps/v1",
+            "route": "/llms-tldr",
+            "full": "/wp-json/cybermaps/v1/llms-tldr"
+        },
+        {
+            "namespace": "cybermaps/v1",
+            "route": "/search",
+            "full": "/wp-json/cybermaps/v1/search"
+        },
+        {
+            "namespace": "cybermaps/v1",
+            "route": "/urls",
+            "full": "/wp-json/cybermaps/v1/urls"
+        },
+        {
+            "namespace": "cybermaps/v1",
+            "route": "/status",
+            "full": "/wp-json/cybermaps/v1/status"
+        },
+        {
+            "namespace": "cybermaps/v1",
+            "route": "/audit-latest",
+            "full": "/wp-json/cybermaps/v1/audit-latest"
+        },
+        {
+            "namespace": "cybermaps/v1",
+            "route": "/audit-run",
+            "full": "/wp-json/cybermaps/v1/audit-run"
+        },
+        {
+            "namespace": "cybermaps/v1",
+            "route": "/purge",
+            "full": "/wp-json/cybermaps/v1/purge"
+        }
+    ],
+    "rest_api_route_count": 11,
+    "wp_cli_commands": [
+        {
+            "name": "flush_rules",
+            "full": "wp cybermaps flush_rules"
+        },
+        {
+            "name": "clear_cache",
+            "full": "wp cybermaps clear_cache"
+        },
+        {
+            "name": "regenerate",
+            "full": "wp cybermaps regenerate"
+        },
+        {
+            "name": "status",
+            "full": "wp cybermaps status"
+        }
+    ],
+    "wp_cli_command_count": 4,
+    "static_files": [
+        "{base}.xml",
+        "{index_child}.xml",
+        "{news_base}.xml",
+        "{rss_base}.xml",
+        "{language}/llms.txt",
+        "{language}/llms-full.txt",
+        "{language}/llms-tldr.txt",
+        "discovery/chunks/{post_id}.json",
+        "ai.json",
+        "ai-discovery",
+        "llms.txt",
+        "llms-full.txt",
+        "llms-tldr.txt",
+        "knowledge-graph.json",
+        "updates.json",
+        "news/llms.txt",
+        "news/speakable.json",
+        "news/changelog.json",
+        "news/archive.jsonl",
+        "ai-sitemap.xml",
+        "ai-usage.json",
+        "ai-actions.json",
+        ".well-known/agent-skills/cybermaps-site-guide/SKILL.md",
+        ".well-known/agent-skills/index.json",
+        ".well-known/api-catalog",
+        ".well-known/ai-catalog.json",
+        ".well-known/mcp/server-card.json",
+        ".well-known/oauth-authorization-server",
+        ".well-known/oauth-protected-resource"
+    ],
+    "static_file_count": 29,
+    "static_engine": {
+        "default": "well_known",
+        "modes": [
+            {
+                "mode": "off",
+                "label": "Publishes no files; supported requests use WordPress when the server routes them to PHP."
+            },
+            {
+                "mode": "well_known",
+                "label": "Publishes the 11 registered core compatibility files; all other supported routes remain dynamic. (Default)"
+            },
+            {
+                "mode": "all",
+                "label": "Publishes the eligible sitemap, protocol-safe discovery, localized, and RAG inventory; protocol/MIME-sensitive routes and robots.txt remain dynamic."
+            }
+        ],
+        "target_counts": {
+            "off": 0,
+            "well_known": 11,
+            "all": 21
+        },
+        "multisite": "Dynamic delivery only; physical root files are disabled because sites share a web root."
+    },
+    "settings": [
+        "agency_logo",
+        "agency_name",
+        "agency_url",
+        "agent_registration_mode",
+        "ai_action_mappings",
+        "ai_business_description",
+        "ai_capabilities",
+        "ai_feed_full_content",
+        "ai_feed_include_authors",
+        "ai_feed_limit",
+        "ai_kg_expose_admin",
+        "ai_kg_link_org",
+        "ai_licensing_email",
+        "ai_manifest_endpoints",
+        "ai_sitemap_custom_links",
+        "ai_sitemap_exclude_terms",
+        "ai_sitemap_limit",
+        "ai_sitemap_types",
+        "ai_topics",
+        "ai_usage_commercial",
+        "ai_usage_rag",
+        "ai_usage_training",
+        "anonymize_analytics_ips",
+        "api_secret",
+        "audit_page_max_age_days",
+        "audit_page_min_words",
+        "audit_page_require_media",
+        "audit_post_max_age_days",
+        "audit_post_min_words",
+        "audit_post_require_media",
+        "cdn_base_url",
+        "cdn_enabled",
+        "delete_data_on_uninstall",
+        "enable_analytics",
+        "enable_caching",
+        "enable_content_hints",
+        "enable_discovery_hub",
+        "enable_google_news",
+        "enable_header_discovery",
+        "enable_indexnow",
+        "enable_llms_full",
+        "enable_llms_tldr",
+        "enable_markdown_negotiation",
+        "enable_multilingual_hub",
+        "enable_multimodal_discovery",
+        "enable_rag_chunks",
+        "enable_rss_sitemap",
+        "enable_shortcode",
+        "enable_translation_integrations",
+        "enable_video_schema",
+        "enable_webmcp",
+        "enable_websub",
+        "exclude_categories",
+        "exclude_post_ids",
+        "external_pages",
+        "external_sitemaps",
+        "frontend_base_url",
+        "include_archives",
+        "include_authors",
+        "include_empty_terms",
+        "include_homepage",
+        "inject_robots",
+        "llms_content_license",
+        "llms_custom_instructions",
+        "llms_exclude_ids",
+        "llms_filter_taxonomies",
+        "llms_include_sitemap_link",
+        "llms_included_types",
+        "llms_link_limit",
+        "llms_mission_statement",
+        "llms_pinned_ids",
+        "llms_title_override",
+        "llms_tldr_token_budget",
+        "log_retention_days",
+        "mcp_mode",
+        "media_discovery_intensity",
+        "news_publication_name",
+        "news_sitemap_url_base",
+        "rag_chunk_overlap",
+        "rag_chunk_size",
+        "redirect_default_sitemap",
+        "redirect_news_sitemap",
+        "redirect_wp_sitemap",
+        "report_theme",
+        "rss_sitemap_limit",
+        "rss_sitemap_types",
+        "rss_sitemap_url_base",
+        "site_guide_instructions",
+        "site_language",
+        "site_name_override",
+        "sitemap_url_base",
+        "static_engine_mode",
+        "trusted_proxy_cidrs",
+        "trusted_proxy_header",
+        "update_comment_page",
+        "update_comment_post",
+        "websub_hubs"
+    ],
+    "settings_count": 97,
+    "configuration_options": [
+        {
+            "option": "cybermaps_settings",
+            "storage_type": "array",
+            "sanitizer": "Cybermaps\\Admin\\Settings\\Sanitizers\\SettingsSanitizer::sanitize",
+            "top_level_fields": [
+                "agency_logo",
+                "agency_name",
+                "agency_url",
+                "agent_registration_mode",
+                "ai_action_mappings",
+                "ai_business_description",
+                "ai_capabilities",
+                "ai_feed_full_content",
+                "ai_feed_include_authors",
+                "ai_feed_limit",
+                "ai_kg_expose_admin",
+                "ai_kg_link_org",
+                "ai_licensing_email",
+                "ai_manifest_endpoints",
+                "ai_sitemap_custom_links",
+                "ai_sitemap_exclude_terms",
+                "ai_sitemap_limit",
+                "ai_sitemap_types",
+                "ai_topics",
+                "ai_usage_commercial",
+                "ai_usage_rag",
+                "ai_usage_training",
+                "anonymize_analytics_ips",
+                "api_secret",
+                "audit_page_max_age_days",
+                "audit_page_min_words",
+                "audit_page_require_media",
+                "audit_post_max_age_days",
+                "audit_post_min_words",
+                "audit_post_require_media",
+                "cdn_base_url",
+                "cdn_enabled",
+                "delete_data_on_uninstall",
+                "enable_analytics",
+                "enable_caching",
+                "enable_content_hints",
+                "enable_discovery_hub",
+                "enable_google_news",
+                "enable_header_discovery",
+                "enable_indexnow",
+                "enable_llms_full",
+                "enable_llms_tldr",
+                "enable_markdown_negotiation",
+                "enable_multilingual_hub",
+                "enable_multimodal_discovery",
+                "enable_rag_chunks",
+                "enable_rss_sitemap",
+                "enable_shortcode",
+                "enable_translation_integrations",
+                "enable_video_schema",
+                "enable_webmcp",
+                "enable_websub",
+                "exclude_categories",
+                "exclude_post_ids",
+                "external_pages",
+                "external_sitemaps",
+                "frontend_base_url",
+                "include_archives",
+                "include_authors",
+                "include_empty_terms",
+                "include_homepage",
+                "inject_robots",
+                "llms_content_license",
+                "llms_custom_instructions",
+                "llms_exclude_ids",
+                "llms_filter_taxonomies",
+                "llms_include_sitemap_link",
+                "llms_included_types",
+                "llms_link_limit",
+                "llms_mission_statement",
+                "llms_pinned_ids",
+                "llms_title_override",
+                "llms_tldr_token_budget",
+                "log_retention_days",
+                "mcp_mode",
+                "media_discovery_intensity",
+                "news_publication_name",
+                "news_sitemap_url_base",
+                "rag_chunk_overlap",
+                "rag_chunk_size",
+                "redirect_default_sitemap",
+                "redirect_news_sitemap",
+                "redirect_wp_sitemap",
+                "report_theme",
+                "rss_sitemap_limit",
+                "rss_sitemap_types",
+                "rss_sitemap_url_base",
+                "site_guide_instructions",
+                "site_language",
+                "site_name_override",
+                "sitemap_url_base",
+                "static_engine_mode",
+                "trusted_proxy_cidrs",
+                "trusted_proxy_header",
+                "update_comment_page",
+                "update_comment_post",
+                "websub_hubs"
+            ],
+            "owning_workspace": "General settings across XML Sitemaps, HTML Sitemap, AI Publishing, Reports, and Advanced"
+        },
+        {
+            "option": "cybermaps_discovery_center",
+            "storage_type": "json_string",
+            "sanitizer": "Cybermaps\\Admin\\Settings\\Sanitizers\\DiscoveryCenterSanitizer::sanitize",
+            "top_level_fields": [
+                "archetype",
+                "overrides",
+                "type_intents",
+                "disabled"
+            ],
+            "owning_workspace": "XML Sitemaps — Content Discovery Strategy"
+        },
+        {
+            "option": "cybermaps_robots_manager",
+            "storage_type": "array",
+            "sanitizer": "Cybermaps\\Admin\\Settings\\Sanitizers\\RobotsManagerSanitizer::sanitize",
+            "top_level_fields": [
+                "takeover_enabled",
+                "overrides",
+                "manual_directives",
+                "content_signals"
+            ],
+            "owning_workspace": "AI Publishing — Crawler Policy"
+        },
+        {
+            "option": "cybermaps_identity_data",
+            "storage_type": "array",
+            "sanitizer": "Cybermaps\\Admin\\IdentityHub::sanitize_identity_data",
+            "top_level_fields": [
+                "type",
+                "precise_type",
+                "name",
+                "description",
+                "image_id",
+                "address_country",
+                "address",
+                "city",
+                "address_region",
+                "postal_code",
+                "phone",
+                "email",
+                "latitude",
+                "longitude",
+                "hours",
+                "catalogs",
+                "social_profiles",
+                "contact_points"
+            ],
+            "owning_workspace": "Schema — Site Identity"
+        }
+    ],
+    "configuration_option_count": 4,
+    "standards": [
+        {
+            "title": "OpenAPI Specification",
+            "authority": "OpenAPI Initiative",
+            "spec_uri": "https://spec.openapis.org/oas/v3.2.0.html",
+            "version": "3.2.0",
+            "maturity": "canonical",
+            "support": "implemented",
+            "reviewed_at": "2026-08-30",
+            "conformance": {
+                "canonical_media_type": "application/vnd.oai.openapi+json;version=3.2",
+                "json_schema_dialect": "https://spec.openapis.org/oas/3.2/dialect/base"
+            },
+            "id": "openapi-3.2.0"
+        },
+        {
+            "title": "OpenAPI Specification",
+            "authority": "OpenAPI Initiative",
+            "spec_uri": "https://spec.openapis.org/oas/v3.1.2.html",
+            "version": "3.1.2",
+            "maturity": "compatibility",
+            "support": "implemented",
+            "reviewed_at": "2026-08-30",
+            "conformance": {
+                "negotiated_by": "Accept or ?version=3.1.2"
+            },
+            "id": "openapi-3.1.2"
+        },
+        {
+            "title": "llms.txt",
+            "authority": "llmstxt.org",
+            "spec_uri": "https://llmstxt.org/changes.html",
+            "version": "2",
+            "maturity": "proposal",
+            "support": "implemented",
+            "reviewed_at": "2026-08-30",
+            "conformance": [],
+            "id": "llms-txt-v2"
+        },
+        {
+            "title": "Markdown for Agents",
+            "authority": "Cloudflare",
+            "spec_uri": "https://developers.cloudflare.com/fundamentals/reference/markdown-for-agents/",
+            "version": "2026-07-13",
+            "maturity": "vendor-convention",
+            "support": "implemented",
+            "reviewed_at": "2026-08-30",
+            "conformance": {
+                "negotiated_by": "Accept: text/markdown",
+                "renderer": "bounded stored WordPress content; not rendered-HTML conversion"
+            },
+            "id": "markdown-for-agents-2026"
+        },
+        {
+            "title": "Agent Skills and Discovery",
+            "authority": "agentskills.io / Cloudflare",
+            "spec_uri": "https://agentskills.io/specification",
+            "version": "0.2.0",
+            "maturity": "draft",
+            "support": "implemented",
+            "reviewed_at": "2026-08-30",
+            "conformance": {
+                "discovery_uri": "https://github.com/cloudflare/agent-skills-discovery-rfc"
+            },
+            "id": "agent-skills-0.2.0"
+        },
+        {
+            "title": "AI Discovery Protocol",
+            "authority": "BuddySpuds",
+            "spec_uri": "https://github.com/BuddySpuds/AI-Discovery-Protocol/blob/main/SPECIFICATION.md",
+            "version": "3.0",
+            "maturity": "proposal",
+            "support": "profiled",
+            "reviewed_at": "2026-08-30",
+            "conformance": {
+                "profile": "Cybermaps Level 3; supported resources are explicitly registry-backed; Level 4 is not claimed"
+            },
+            "id": "adp-3.0-cybermaps-level-3"
+        },
+        {
+            "title": "Model Context Protocol",
+            "authority": "MCP Steering Group",
+            "spec_uri": "https://modelcontextprotocol.io/specification/2026-07-28",
+            "version": "2026-07-28",
+            "maturity": "recommendation",
+            "support": "implemented",
+            "reviewed_at": "2026-08-30",
+            "conformance": {
+                "transport": "stateless Streamable HTTP POST"
+            },
+            "id": "mcp-2026-07-28"
+        },
+        {
+            "title": "AI Preferences Vocabulary",
+            "authority": "IETF AIPREF",
+            "spec_uri": "https://datatracker.ietf.org/doc/draft-ietf-aipref-vocab-07/",
+            "version": "vocab-07",
+            "maturity": "draft",
+            "support": "partial",
+            "reviewed_at": "2026-08-30",
+            "conformance": {
+                "publication": "opt-in dual publication with Content-Signal"
+            },
+            "id": "aipref-vocab-07"
+        },
+        {
+            "title": "AI Preferences HTTP and robots attachment",
+            "authority": "IETF AIPREF",
+            "spec_uri": "https://ietf-wg-aipref.github.io/drafts/draft-ietf-aipref-attach.html",
+            "version": "draft",
+            "maturity": "draft",
+            "support": "partial",
+            "reviewed_at": "2026-08-30",
+            "conformance": [],
+            "id": "aipref-attachment-draft"
+        },
+        {
+            "title": "WebSub",
+            "authority": "W3C",
+            "spec_uri": "https://www.w3.org/TR/websub/",
+            "version": "2026 Recommendation",
+            "maturity": "recommendation",
+            "support": "implemented",
+            "reviewed_at": "2026-08-30",
+            "conformance": {
+                "requirement": "one rel=self and at least one rel=hub link"
+            },
+            "id": "websub-2026"
+        },
+        {
+            "title": "JSON Feed",
+            "authority": "JSON Feed",
+            "spec_uri": "https://www.jsonfeed.org/version/1.1/",
+            "version": "1.1",
+            "maturity": "specification",
+            "support": "implemented",
+            "reviewed_at": "2026-08-30",
+            "conformance": [],
+            "id": "json-feed-1.1"
+        },
+        {
+            "title": "Robots Exclusion Protocol",
+            "authority": "IETF",
+            "spec_uri": "https://www.rfc-editor.org/rfc/rfc9309",
+            "version": "RFC 9309",
+            "maturity": "standard",
+            "support": "implemented",
+            "reviewed_at": "2026-08-30",
+            "conformance": [],
+            "id": "rfc-9309"
+        },
+        {
+            "title": "Problem Details for HTTP APIs",
+            "authority": "IETF",
+            "spec_uri": "https://www.rfc-editor.org/rfc/rfc9457",
+            "version": "RFC 9457",
+            "maturity": "standard",
+            "support": "implemented",
+            "reviewed_at": "2026-08-30",
+            "conformance": [],
+            "id": "rfc-9457"
+        },
+        {
+            "title": "HTTP Content-Digest",
+            "authority": "IETF",
+            "spec_uri": "https://www.rfc-editor.org/rfc/rfc9530",
+            "version": "RFC 9530",
+            "maturity": "standard",
+            "support": "implemented",
+            "reviewed_at": "2026-08-30",
+            "conformance": [],
+            "id": "rfc-9530"
+        },
+        {
+            "title": "API Catalog",
+            "authority": "IETF",
+            "spec_uri": "https://www.rfc-editor.org/rfc/rfc9727",
+            "version": "RFC 9727",
+            "maturity": "standard",
+            "support": "implemented",
+            "reviewed_at": "2026-08-30",
+            "conformance": [],
+            "id": "rfc-9727"
+        },
+        {
+            "title": "IndexNow",
+            "authority": "IndexNow",
+            "spec_uri": "https://www.indexnow.org/documentation",
+            "version": "current",
+            "maturity": "protocol",
+            "support": "implemented",
+            "reviewed_at": "2026-08-30",
+            "conformance": {
+                "batch_limit": 10000
+            },
+            "id": "indexnow"
+        }
+    ],
+    "standards_count": 16,
+    "ai_configuration": {
+        "format": "cybermaps-ai-configuration-changes",
+        "format_version": 2,
+        "section_count": 8,
+        "field_count": 121,
+        "forbidden_fields": [
+            "api_secret",
+            "delete_data_on_uninstall"
+        ],
+        "catalog_hash": "ef971106b3b96afe8bcdcacafda912e7bdcda84ad01fd19e84bcb42bedc22a1a",
+        "schema_hash": "476b9602de63902a2d144e4d1a16c613509f4e7daa99837345e6b0b0d4d3e19d",
+        "guide_path": "docs/ai-configuration.md",
+        "guide_url": "https://cybermaps.dev/docs/ai-configuration/",
+        "schema_url": "https://cybermaps.dev/specs/ai-configuration/7.4.0/schema.json",
+        "catalog_url": "https://cybermaps.dev/specs/ai-configuration/7.4.0/catalog.json",
+        "compatibility": {
+            "format_version": "exact",
+            "plugin_version": "warning_on_mismatch",
+            "runtime_authority": "installed_plugin_registry_and_sanitizers"
+        },
+        "hash_scope": "sha256_of_canonical_registry_json",
+        "artifacts": [
+            "docs/dev/ai-configuration/catalog.json",
+            "docs/dev/ai-configuration/schema.json"
+        ]
+    },
+    "source_classes": [
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "AIConfigurationRegistry",
+            "fqcn": "Cybermaps\\Admin\\AIConfigurationRegistry",
+            "file": "src/Admin/AIConfigurationRegistry.php",
+            "summary": "Canonical, non-secret configuration contract for AI-assisted editing."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "AIDiscoveryStatus",
+            "fqcn": "Cybermaps\\Admin\\AIDiscoveryStatus",
+            "file": "src/Admin/AIDiscoveryStatus.php",
+            "summary": "AI Discovery Status Page."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "AccessibleTooltip",
+            "fqcn": "Cybermaps\\Admin\\AccessibleTooltip",
+            "file": "src/Admin/AccessibleTooltip.php",
+            "summary": "Renders accessible informational toggletips across supported WordPress versions."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "CloudflareOAuthClient",
+            "fqcn": "Cybermaps\\Admin\\CloudflareOAuthClient",
+            "file": "src/Admin/CloudflareOAuthClient.php",
+            "summary": "Performs PKCE authorization support without persisting OAuth credentials."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "CloudflareOAuthTransactionStore",
+            "fqcn": "Cybermaps\\Admin\\CloudflareOAuthTransactionStore",
+            "file": "src/Admin/CloudflareOAuthTransactionStore.php",
+            "summary": "Keeps PKCE material bounded to one short-lived administrator transaction."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "CloudflareRuleManager",
+            "fqcn": "Cybermaps\\Admin\\CloudflareRuleManager",
+            "file": "src/Admin/CloudflareRuleManager.php",
+            "summary": "Owns only rules carrying Cybermaps' stable reference identifiers."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "CloudflareRulesClient",
+            "fqcn": "Cybermaps\\Admin\\CloudflareRulesClient",
+            "file": "src/Admin/CloudflareRulesClient.php",
+            "summary": "Uses an ephemeral bearer credential without persisting it."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "CompetingSeoPlugin",
+            "fqcn": "Cybermaps\\Admin\\CompetingSeoPlugin",
+            "file": "src/Admin/CompetingSeoPlugin.php",
+            "summary": "Detects common SEO plugins that may publish competing XML sitemaps."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "ConfigurationReviewGuard",
+            "fqcn": "Cybermaps\\Admin\\ConfigurationReviewGuard",
+            "file": "src/Admin/ConfigurationReviewGuard.php",
+            "summary": "Shared acknowledgement rule for reviewed configuration transactions."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "ContentAuditManager",
+            "fqcn": "Cybermaps\\Admin\\ContentAuditManager",
+            "file": "src/Admin/ContentAuditManager.php",
+            "summary": "Owns nonce-protected report runs and exports."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "CrawlerAnalyticsRecorder",
+            "fqcn": "Cybermaps\\Admin\\CrawlerAnalyticsRecorder",
+            "file": "src/Admin/CrawlerAnalyticsRecorder.php",
+            "summary": "Records PHP-observed endpoints and crawler-identity evidence."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "CrawlerAnalyticsRepository",
+            "fqcn": "Cybermaps\\Admin\\CrawlerAnalyticsRepository",
+            "file": "src/Admin/CrawlerAnalyticsRepository.php",
+            "summary": "Read model for PHP-observed crawler analytics."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "CrawlerRequestClassifier",
+            "fqcn": "Cybermaps\\Admin\\CrawlerRequestClassifier",
+            "file": "src/Admin/CrawlerRequestClassifier.php",
+            "summary": "Classifies PHP-observed requests for crawler analytics."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "DashboardRenderer",
+            "fqcn": "Cybermaps\\Admin\\DashboardRenderer",
+            "file": "src/Admin/DashboardRenderer.php",
+            "summary": "Renders factual Core capability state without synthetic quality scores."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "DeploymentGuidance",
+            "fqcn": "Cybermaps\\Admin\\DeploymentGuidance",
+            "file": "src/Admin/DeploymentGuidance.php",
+            "summary": "Renders copy-ready rules without mutating server or edge configuration."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "DiscoveryAnalytics",
+            "fqcn": "Cybermaps\\Admin\\DiscoveryAnalytics",
+            "file": "src/Admin/DiscoveryAnalytics.php",
+            "summary": "Unified Discovery Analytics and PHP-observed request log."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "DiscoveryAuditor",
+            "fqcn": "Cybermaps\\Admin\\DiscoveryAuditor",
+            "file": "src/Admin/DiscoveryAuditor.php",
+            "summary": "Suggest a starting discovery profile from the site's published structure."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "DiscoveryScope",
+            "fqcn": "Cybermaps\\Admin\\DiscoveryScope",
+            "file": "src/Admin/DiscoveryScope.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "DiscoveryStatus",
+            "fqcn": "Cybermaps\\Admin\\DiscoveryStatus",
+            "file": "src/Admin/DiscoveryStatus.php",
+            "summary": "Public discovery publication health checks."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "EdgeOptimizationController",
+            "fqcn": "Cybermaps\\Admin\\EdgeOptimizationController",
+            "file": "src/Admin/EdgeOptimizationController.php",
+            "summary": "Coordinates diagnostics, ephemeral Cloudflare OAuth, and fallback token actions."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "IdentityHub",
+            "fqcn": "Cybermaps\\Admin\\IdentityHub",
+            "file": "src/Admin/IdentityHub.php",
+            "summary": "Identity Hub for Managing Business Metadata"
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "InternationalPanel",
+            "fqcn": "Cybermaps\\Admin\\InternationalPanel",
+            "file": "src/Admin/InternationalPanel.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "LocalDeliveryController",
+            "fqcn": "Cybermaps\\Admin\\LocalDeliveryController",
+            "file": "src/Admin/LocalDeliveryController.php",
+            "summary": "Keeps filesystem success distinct from externally observed HTTP delivery."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "Logs",
+            "fqcn": "Cybermaps\\Admin\\Logs",
+            "file": "src/Admin/Logs.php",
+            "summary": "Logs management for Cybermaps."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "MarkdownNegotiationStatus",
+            "fqcn": "Cybermaps\\Admin\\MarkdownNegotiationStatus",
+            "file": "src/Admin/MarkdownNegotiationStatus.php",
+            "summary": "Public two-variant probe for Markdown content negotiation."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "MaturityGuidance",
+            "fqcn": "Cybermaps\\Admin\\MaturityGuidance",
+            "file": "src/Admin/MaturityGuidance.php",
+            "summary": "Renders visible, linked maturity guidance for settings and status surfaces."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "MediaAuditor",
+            "fqcn": "Cybermaps\\Admin\\MediaAuditor",
+            "file": "src/Admin/MediaAuditor.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "MigrationHub",
+            "fqcn": "Cybermaps\\Admin\\MigrationHub",
+            "file": "src/Admin/MigrationHub.php",
+            "summary": "Handles complete current-format configuration backups and merge-only AI"
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "NetworkSettings",
+            "fqcn": "Cybermaps\\Admin\\NetworkSettings",
+            "file": "src/Admin/NetworkSettings.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "NetworkSetup",
+            "fqcn": "Cybermaps\\Admin\\NetworkSetup",
+            "file": "src/Admin/NetworkSetup.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "PageHeader",
+            "fqcn": "Cybermaps\\Admin\\PageHeader",
+            "file": "src/Admin/PageHeader.php",
+            "summary": "Shared standalone admin-page heading."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "RequestIdentityClassifier",
+            "fqcn": "Cybermaps\\Admin\\RequestIdentityClassifier",
+            "file": "src/Admin/RequestIdentityClassifier.php",
+            "summary": "Classify the evidence presented by one PHP-observed request."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "SVGMapper",
+            "fqcn": "Cybermaps\\Admin\\SVGMapper",
+            "file": "src/Admin/SVGMapper.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "Settings",
+            "fqcn": "Cybermaps\\Admin\\Settings",
+            "file": "src/Admin/Settings.php",
+            "summary": "Thin facade for Cybermaps admin settings — hooks, registration, and page render."
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\Settings\\Fields",
+            "class": "FieldRenderer",
+            "fqcn": "Cybermaps\\Admin\\Settings\\Fields\\FieldRenderer",
+            "file": "src/Admin/Settings/Fields/FieldRenderer.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\Settings\\Sanitizers",
+            "class": "DiscoveryCenterSanitizer",
+            "fqcn": "Cybermaps\\Admin\\Settings\\Sanitizers\\DiscoveryCenterSanitizer",
+            "file": "src/Admin/Settings/Sanitizers/DiscoveryCenterSanitizer.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\Settings\\Sanitizers",
+            "class": "RobotsManagerSanitizer",
+            "fqcn": "Cybermaps\\Admin\\Settings\\Sanitizers\\RobotsManagerSanitizer",
+            "file": "src/Admin/Settings/Sanitizers/RobotsManagerSanitizer.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\Settings\\Sanitizers",
+            "class": "SettingsAdvancedNormalizer",
+            "fqcn": "Cybermaps\\Admin\\Settings\\Sanitizers\\SettingsAdvancedNormalizer",
+            "file": "src/Admin/Settings/Sanitizers/SettingsAdvancedNormalizer.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\Settings\\Sanitizers",
+            "class": "SettingsAnalyticsNormalizer",
+            "fqcn": "Cybermaps\\Admin\\Settings\\Sanitizers\\SettingsAnalyticsNormalizer",
+            "file": "src/Admin/Settings/Sanitizers/SettingsAnalyticsNormalizer.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\Settings\\Sanitizers",
+            "class": "SettingsDiscoveryNormalizer",
+            "fqcn": "Cybermaps\\Admin\\Settings\\Sanitizers\\SettingsDiscoveryNormalizer",
+            "file": "src/Admin/Settings/Sanitizers/SettingsDiscoveryNormalizer.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\Settings\\Sanitizers",
+            "class": "SettingsSanitizer",
+            "fqcn": "Cybermaps\\Admin\\Settings\\Sanitizers\\SettingsSanitizer",
+            "file": "src/Admin/Settings/Sanitizers/SettingsSanitizer.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\Settings\\Sanitizers",
+            "class": "SettingsSitemapNormalizer",
+            "fqcn": "Cybermaps\\Admin\\Settings\\Sanitizers\\SettingsSitemapNormalizer",
+            "file": "src/Admin/Settings/Sanitizers/SettingsSitemapNormalizer.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\Settings",
+            "class": "SettingsAjax",
+            "fqcn": "Cybermaps\\Admin\\Settings\\SettingsAjax",
+            "file": "src/Admin/Settings/SettingsAjax.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\Settings",
+            "class": "SettingsAssets",
+            "fqcn": "Cybermaps\\Admin\\Settings\\SettingsAssets",
+            "file": "src/Admin/Settings/SettingsAssets.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\Settings",
+            "class": "SettingsRegistrar",
+            "fqcn": "Cybermaps\\Admin\\Settings\\SettingsRegistrar",
+            "file": "src/Admin/Settings/SettingsRegistrar.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\Settings\\Tabs",
+            "class": "Advanced",
+            "fqcn": "Cybermaps\\Admin\\Settings\\Tabs\\Advanced",
+            "file": "src/Admin/Settings/Tabs/Advanced.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\Settings\\Tabs\\Advanced",
+            "class": "AdvancedFields",
+            "fqcn": "Cybermaps\\Admin\\Settings\\Tabs\\Advanced\\AdvancedFields",
+            "file": "src/Admin/Settings/Tabs/Advanced/AdvancedFields.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\Settings\\Tabs",
+            "class": "ContentReview",
+            "fqcn": "Cybermaps\\Admin\\Settings\\Tabs\\ContentReview",
+            "file": "src/Admin/Settings/Tabs/ContentReview.php",
+            "summary": "Evidence-first reports, exports, and client presentation controls."
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\Settings\\Tabs",
+            "class": "Dashboard",
+            "fqcn": "Cybermaps\\Admin\\Settings\\Tabs\\Dashboard",
+            "file": "src/Admin/Settings/Tabs/Dashboard.php",
+            "summary": "Overview tab — factual capability state and architecture."
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\Settings\\Tabs",
+            "class": "Discovery",
+            "fqcn": "Cybermaps\\Admin\\Settings\\Tabs\\Discovery",
+            "file": "src/Admin/Settings/Tabs/Discovery.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\Settings\\Tabs\\Discovery",
+            "class": "DiscoveryFields",
+            "fqcn": "Cybermaps\\Admin\\Settings\\Tabs\\Discovery\\DiscoveryFields",
+            "file": "src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\Settings\\Tabs",
+            "class": "Identity",
+            "fqcn": "Cybermaps\\Admin\\Settings\\Tabs\\Identity",
+            "file": "src/Admin/Settings/Tabs/Identity.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\Settings\\Tabs\\Identity",
+            "class": "IdentityFields",
+            "fqcn": "Cybermaps\\Admin\\Settings\\Tabs\\Identity\\IdentityFields",
+            "file": "src/Admin/Settings/Tabs/Identity/IdentityFields.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\Settings\\Tabs",
+            "class": "Robots",
+            "fqcn": "Cybermaps\\Admin\\Settings\\Tabs\\Robots",
+            "file": "src/Admin/Settings/Tabs/Robots.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\Settings\\Tabs\\Robots",
+            "class": "RobotsFields",
+            "fqcn": "Cybermaps\\Admin\\Settings\\Tabs\\Robots\\RobotsFields",
+            "file": "src/Admin/Settings/Tabs/Robots/RobotsFields.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\Settings\\Tabs",
+            "class": "Shortcode",
+            "fqcn": "Cybermaps\\Admin\\Settings\\Tabs\\Shortcode",
+            "file": "src/Admin/Settings/Tabs/Shortcode.php",
+            "summary": "HTML Sitemap tab — shortcode builder and preview."
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\Settings\\Tabs",
+            "class": "Sitemaps",
+            "fqcn": "Cybermaps\\Admin\\Settings\\Tabs\\Sitemaps",
+            "file": "src/Admin/Settings/Tabs/Sitemaps.php",
+            "summary": "XML Sitemaps tab — publication strategy, XML formats, exclusions, and redirects."
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\Settings\\Tabs\\Sitemaps",
+            "class": "SitemapsSections",
+            "fqcn": "Cybermaps\\Admin\\Settings\\Tabs\\Sitemaps\\SitemapsSections",
+            "file": "src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "SettingsPage",
+            "fqcn": "Cybermaps\\Admin\\SettingsPage",
+            "file": "src/Admin/SettingsPage.php",
+            "summary": "Thin router for the Settings page. Maintains a registry of tab classes"
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\SetupWizard",
+            "class": "SetupWizardContext",
+            "fqcn": "Cybermaps\\Admin\\SetupWizard\\SetupWizardContext",
+            "file": "src/Admin/SetupWizard/SetupWizardContext.php",
+            "summary": "Bounded, read-only facts used by Guided Setup recommendations."
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\SetupWizard",
+            "class": "SetupWizardController",
+            "fqcn": "Cybermaps\\Admin\\SetupWizard\\SetupWizardController",
+            "file": "src/Admin/SetupWizard/SetupWizardController.php",
+            "summary": "Protected admin endpoints for Guided Setup."
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\SetupWizard",
+            "class": "SetupWizardPage",
+            "fqcn": "Cybermaps\\Admin\\SetupWizard\\SetupWizardPage",
+            "file": "src/Admin/SetupWizard/SetupWizardPage.php",
+            "summary": "Dedicated, optional workspace for the Guided Setup client."
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\SetupWizard",
+            "class": "SetupWizardPlanFactory",
+            "fqcn": "Cybermaps\\Admin\\SetupWizard\\SetupWizardPlanFactory",
+            "file": "src/Admin/SetupWizard/SetupWizardPlanFactory.php",
+            "summary": "Converts reviewed Guided Setup answers into the canonical configuration"
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\SetupWizard",
+            "class": "SetupWizardRegistry",
+            "fqcn": "Cybermaps\\Admin\\SetupWizard\\SetupWizardRegistry",
+            "file": "src/Admin/SetupWizard/SetupWizardRegistry.php",
+            "summary": "Declarative contract for the optional Guided Setup workspace."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "ShortcodeBuilder",
+            "fqcn": "Cybermaps\\Admin\\ShortcodeBuilder",
+            "file": "src/Admin/ShortcodeBuilder.php",
+            "summary": "HTML Sitemap Shortcode Builder."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "SitemapStatus",
+            "fqcn": "Cybermaps\\Admin\\SitemapStatus",
+            "file": "src/Admin/SitemapStatus.php",
+            "summary": "Sitemap URL Listing Page."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "SystemStatus",
+            "fqcn": "Cybermaps\\Admin\\SystemStatus",
+            "file": "src/Admin/SystemStatus.php",
+            "summary": "Displays the detected stack and Cybermaps optimization utilization."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "SystemStatusCollector",
+            "fqcn": "Cybermaps\\Admin\\SystemStatusCollector",
+            "file": "src/Admin/SystemStatusCollector.php",
+            "summary": "Collects bounded, non-secret evidence for the System Status UI."
+        },
+        {
+            "namespace": "Cybermaps\\Audit",
+            "class": "AuditExporter",
+            "fqcn": "Cybermaps\\Audit\\AuditExporter",
+            "file": "src/Audit/AuditExporter.php",
+            "summary": "Serializes one saved audit snapshot without re-reading live content."
+        },
+        {
+            "namespace": "Cybermaps\\Audit",
+            "class": "AuditPolicy",
+            "fqcn": "Cybermaps\\Audit\\AuditPolicy",
+            "file": "src/Audit/AuditPolicy.php",
+            "summary": "Explicit per-content-type rules captured with every audit run."
+        },
+        {
+            "namespace": "Cybermaps\\Audit",
+            "class": "AuditReadAPI",
+            "fqcn": "Cybermaps\\Audit\\AuditReadAPI",
+            "file": "src/Audit/AuditReadAPI.php",
+            "summary": "Read-only audit surface for REST consumers and future companion plugins."
+        },
+        {
+            "namespace": "Cybermaps\\Audit",
+            "class": "AuditRunRepository",
+            "fqcn": "Cybermaps\\Audit\\AuditRunRepository",
+            "file": "src/Audit/AuditRunRepository.php",
+            "summary": "Persists completed audit snapshots in three normalized tables."
+        },
+        {
+            "namespace": "Cybermaps\\Audit",
+            "class": "ContentAuditEvaluator",
+            "fqcn": "Cybermaps\\Audit\\ContentAuditEvaluator",
+            "file": "src/Audit/ContentAuditEvaluator.php",
+            "summary": "Converts one stored post into measurements and reproducible findings."
+        },
+        {
+            "namespace": "Cybermaps\\Audit",
+            "class": "ContentAuditService",
+            "fqcn": "Cybermaps\\Audit\\ContentAuditService",
+            "file": "src/Audit/ContentAuditService.php",
+            "summary": "Creates saved audit runs and compares their exact finding identities."
+        },
+        {
+            "namespace": "Cybermaps\\Audit",
+            "class": "DiscoveryReportExporter",
+            "fqcn": "Cybermaps\\Audit\\DiscoveryReportExporter",
+            "file": "src/Audit/DiscoveryReportExporter.php",
+            "summary": "Serializes a current, explicitly time-stamped discovery validation report."
+        },
+        {
+            "namespace": "Cybermaps\\Audit",
+            "class": "PublishedPostSource",
+            "fqcn": "Cybermaps\\Audit\\PublishedPostSource",
+            "file": "src/Audit/PublishedPostSource.php",
+            "summary": "Reads a bounded snapshot of published content without OFFSET pagination."
+        },
+        {
+            "namespace": "Cybermaps\\Audit",
+            "class": "ReportPresentation",
+            "fqcn": "Cybermaps\\Audit\\ReportPresentation",
+            "file": "src/Audit/ReportPresentation.php",
+            "summary": "Shared branding and visual themes for client-facing reports."
+        },
+        {
+            "namespace": "Cybermaps",
+            "class": "Autoloader",
+            "fqcn": "Cybermaps\\Autoloader",
+            "file": "src/Autoloader.php",
+            "summary": "Minimal PSR-4 loader used by the standalone WordPress.org artifact."
+        },
+        {
+            "namespace": "Cybermaps\\CLI",
+            "class": "Command",
+            "fqcn": "Cybermaps\\CLI\\Command",
+            "file": "src/CLI/Command.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Content",
+            "class": "VisibleTextExtractor",
+            "fqcn": "Cybermaps\\Content\\VisibleTextExtractor",
+            "file": "src/Content/VisibleTextExtractor.php",
+            "summary": "Extracts literal, human-visible text without executing shortcodes or blocks."
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "AbilityKernel",
+            "fqcn": "Cybermaps\\Core\\AbilityKernel",
+            "file": "src/Core/AbilityKernel.php",
+            "summary": "Registers Cybermaps abilities and projects public WordPress abilities to clients."
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "AtomicMinuteCounter",
+            "fqcn": "Cybermaps\\Core\\AtomicMinuteCounter",
+            "file": "src/Core/AtomicMinuteCounter.php",
+            "summary": "Shared atomic per-minute counter with production-safe backends."
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "AtomicOneTimeStateStore",
+            "fqcn": "Cybermaps\\Core\\AtomicOneTimeStateStore",
+            "file": "src/Core/AtomicOneTimeStateStore.php",
+            "summary": "DB-authoritative, single-consume state records stored in non-autoloaded options."
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "AtomicOptionSequence",
+            "fqcn": "Cybermaps\\Core\\AtomicOptionSequence",
+            "file": "src/Core/AtomicOptionSequence.php",
+            "summary": "Monotonic, production-atomic sequence stored in a non-autoloaded option."
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "BotMetadata",
+            "fqcn": "Cybermaps\\Core\\BotMetadata",
+            "file": "src/Core/BotMetadata.php",
+            "summary": "Bot metadata DTO."
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "CacheManager",
+            "fqcn": "Cybermaps\\Core\\CacheManager",
+            "file": "src/Core/CacheManager.php",
+            "summary": "Backend-neutral cache for derived Cybermaps values."
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "ClientIPResolver",
+            "fqcn": "Cybermaps\\Core\\ClientIPResolver",
+            "file": "src/Core/ClientIPResolver.php",
+            "summary": "Resolve a request's client address without trusting arbitrary proxy headers."
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "ConfigurationStore",
+            "fqcn": "Cybermaps\\Core\\ConfigurationStore",
+            "file": "src/Core/ConfigurationStore.php",
+            "summary": "Shape-safe readers for Cybermaps' four runtime configuration roots."
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "Container",
+            "fqcn": "Cybermaps\\Core\\Container",
+            "file": "src/Core/Container.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "CrawlerMatch",
+            "fqcn": "Cybermaps\\Core\\CrawlerMatch",
+            "file": "src/Core/CrawlerMatch.php",
+            "summary": "A crawler identity claimed by a matching User-Agent product token."
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "CrawlerRegistry",
+            "fqcn": "Cybermaps\\Core\\CrawlerRegistry",
+            "file": "src/Core/CrawlerRegistry.php",
+            "summary": "Central registry for supported crawlers and bots."
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "DatabaseSessionLock",
+            "fqcn": "Cybermaps\\Core\\DatabaseSessionLock",
+            "file": "src/Core/DatabaseSessionLock.php",
+            "summary": "Connection-bound database fence for operations that also use option leases."
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "DiagnosticLogger",
+            "fqcn": "Cybermaps\\Core\\DiagnosticLogger",
+            "file": "src/Core/DiagnosticLogger.php",
+            "summary": "Stores short-lived, redacted Cybermaps diagnostic events."
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "EndpointRegistry",
+            "fqcn": "Cybermaps\\Core\\EndpointRegistry",
+            "file": "src/Core/EndpointRegistry.php",
+            "summary": "Records canonical, publicly consumable endpoint metadata."
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "ExtensionAPI",
+            "fqcn": "Cybermaps\\Core\\ExtensionAPI",
+            "file": "src/Core/ExtensionAPI.php",
+            "summary": "Exposes versioned endpoint, eligibility, and read-only audit contracts."
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "IdentityEntityBuilder",
+            "fqcn": "Cybermaps\\Core\\IdentityEntityBuilder",
+            "file": "src/Core/IdentityEntityBuilder.php",
+            "summary": "Builds the shared Schema.org entity used on-page and in the knowledge graph."
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "Lifecycle",
+            "fqcn": "Cybermaps\\Core\\Lifecycle",
+            "file": "src/Core/Lifecycle.php",
+            "summary": "Owns activation, deactivation, and multisite provisioning."
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "NativeRoutingRegistrar",
+            "fqcn": "Cybermaps\\Core\\NativeRoutingRegistrar",
+            "file": "src/Core/NativeRoutingRegistrar.php",
+            "summary": "Registers exact global rules before filesystem short-circuits can intercept them."
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "OptionLeaseLock",
+            "fqcn": "Cybermaps\\Core\\OptionLeaseLock",
+            "file": "src/Core/OptionLeaseLock.php",
+            "summary": "Compare-and-swap option lease for bounded background work."
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "Plugin",
+            "fqcn": "Cybermaps\\Core\\Plugin",
+            "file": "src/Core/Plugin.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "PositiveIdList",
+            "fqcn": "Cybermaps\\Core\\PositiveIdList",
+            "file": "src/Core/PositiveIdList.php",
+            "summary": "Canonical parser for bounded, comma-delimited positive WordPress IDs."
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "PublicationPostTypes",
+            "fqcn": "Cybermaps\\Core\\PublicationPostTypes",
+            "file": "src/Core/PublicationPostTypes.php",
+            "summary": "Canonical inventory of public post types that represent publishable pages."
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "ReadOnlyRequest",
+            "fqcn": "Cybermaps\\Core\\ReadOnlyRequest",
+            "file": "src/Core/ReadOnlyRequest.php",
+            "summary": "Shared HTTP method policy for public read-only publications."
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "RestAPI",
+            "fqcn": "Cybermaps\\Core\\RestAPI",
+            "file": "src/Core/RestAPI.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "RuntimeCounterStore",
+            "fqcn": "Cybermaps\\Core\\RuntimeCounterStore",
+            "file": "src/Core/RuntimeCounterStore.php",
+            "summary": "Optional compact database backend for short-lived atomic counters."
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "SchemaRegistry",
+            "fqcn": "Cybermaps\\Core\\SchemaRegistry",
+            "file": "src/Core/SchemaRegistry.php",
+            "summary": "Registry for Schema.org types used in Identity Hub."
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "StandardsRegistry",
+            "fqcn": "Cybermaps\\Core\\StandardsRegistry",
+            "file": "src/Core/StandardsRegistry.php",
+            "summary": "Immutable, local registry of external standards used by Cybermaps."
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "TermExclusionList",
+            "fqcn": "Cybermaps\\Core\\TermExclusionList",
+            "file": "src/Core/TermExclusionList.php",
+            "summary": "Canonical parser for bounded term exclusion IDs and slugs."
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "TranslationHelper",
+            "fqcn": "Cybermaps\\Core\\TranslationHelper",
+            "file": "src/Core/TranslationHelper.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "TranslationRegistry",
+            "fqcn": "Cybermaps\\Core\\TranslationRegistry",
+            "file": "src/Core/TranslationRegistry.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "URLManager",
+            "fqcn": "Cybermaps\\Core\\URLManager",
+            "file": "src/Core/URLManager.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "Uninstaller",
+            "fqcn": "Cybermaps\\Core\\Uninstaller",
+            "file": "src/Core/Uninstaller.php",
+            "summary": "Deletes data owned by Core when the site's uninstall opt-in is enabled."
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "Upgrade",
+            "fqcn": "Cybermaps\\Core\\Upgrade",
+            "file": "src/Core/Upgrade.php",
+            "summary": "Performs bounded one-time data migrations for the current Core foundation."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "ADP",
+            "fqcn": "Cybermaps\\Discovery\\ADP",
+            "file": "src/Discovery/ADP.php",
+            "summary": "Cybermaps AI Discovery Manifest implementation."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "ADPDiscovery",
+            "fqcn": "Cybermaps\\Discovery\\ADPDiscovery",
+            "file": "src/Discovery/ADPDiscovery.php",
+            "summary": "Publishes the AI Discovery Protocol 3.0 Level 3 manifest."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "ADPNews",
+            "fqcn": "Cybermaps\\Discovery\\ADPNews",
+            "file": "src/Discovery/ADPNews.php",
+            "summary": "Publishes the bounded ADP 3.0 Level 3 news namespace."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "AICatalog",
+            "fqcn": "Cybermaps\\Discovery\\AICatalog",
+            "file": "src/Discovery/AICatalog.php",
+            "summary": "Publishes active Cybermaps capabilities using the ARD 1.0 catalog shape."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "AIContentSelector",
+            "fqcn": "Cybermaps\\Discovery\\AIContentSelector",
+            "file": "src/Discovery/AIContentSelector.php",
+            "summary": "Canonical content-selection policy for AI sitemap and RAG publications."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "AIManifest",
+            "fqcn": "Cybermaps\\Discovery\\AIManifest",
+            "file": "src/Discovery/AIManifest.php",
+            "summary": "Canonical Cybermaps AI Discovery Manifest handler."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "AIMetadata",
+            "fqcn": "Cybermaps\\Discovery\\AIMetadata",
+            "file": "src/Discovery/AIMetadata.php",
+            "summary": "Builds transparent stored-content metadata without model inference."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "AISitemap",
+            "fqcn": "Cybermaps\\Discovery\\AISitemap",
+            "file": "src/Discovery/AISitemap.php",
+            "summary": "AI-Sitemap Handler"
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "APICatalog",
+            "fqcn": "Cybermaps\\Discovery\\APICatalog",
+            "file": "src/Discovery/APICatalog.php",
+            "summary": "API Catalog Discovery Service"
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "AcceptNegotiator",
+            "fqcn": "Cybermaps\\Discovery\\AcceptNegotiator",
+            "file": "src/Discovery/AcceptNegotiator.php",
+            "summary": "Bounded RFC 9110 media-range negotiation for Markdown representations."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "Actions",
+            "fqcn": "Cybermaps\\Discovery\\Actions",
+            "file": "src/Discovery/Actions.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "AgentSkills",
+            "fqcn": "Cybermaps\\Discovery\\AgentSkills",
+            "file": "src/Discovery/AgentSkills.php",
+            "summary": "Publishes the Agent Skills discovery index draft."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "Capabilities",
+            "fqcn": "Cybermaps\\Discovery\\Capabilities",
+            "file": "src/Discovery/Capabilities.php",
+            "summary": "Publishes an Agent Skills-compatible read-only guide for the current site."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "Chunker",
+            "fqcn": "Cybermaps\\Discovery\\Chunker",
+            "file": "src/Discovery/Chunker.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "DiscoveryIndex",
+            "fqcn": "Cybermaps\\Discovery\\DiscoveryIndex",
+            "file": "src/Discovery/DiscoveryIndex.php",
+            "summary": "Discovery Index — /ai-discovery"
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "DiscoveryPublicationGenerator",
+            "fqcn": "Cybermaps\\Discovery\\DiscoveryPublicationGenerator",
+            "file": "src/Discovery/DiscoveryPublicationGenerator.php",
+            "summary": "Serializes fixed discovery publications by their EndpointRegistry ID."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "Feed",
+            "fqcn": "Cybermaps\\Discovery\\Feed",
+            "file": "src/Discovery/Feed.php",
+            "summary": "AI Feed Handler"
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "HeaderDiscovery",
+            "fqcn": "Cybermaps\\Discovery\\HeaderDiscovery",
+            "file": "src/Discovery/HeaderDiscovery.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "IndexNow",
+            "fqcn": "Cybermaps\\Discovery\\IndexNow",
+            "file": "src/Discovery/IndexNow.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "IndexNowQueue",
+            "fqcn": "Cybermaps\\Discovery\\IndexNowQueue",
+            "file": "src/Discovery/IndexNowQueue.php",
+            "summary": "Stores normalized IndexNow URLs until a delivery worker consumes them."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "IndexNowQueueRepository",
+            "fqcn": "Cybermaps\\Discovery\\IndexNowQueueRepository",
+            "file": "src/Discovery/IndexNowQueueRepository.php",
+            "summary": "Database-authoritative queue operations for IndexNow delivery."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "IndexNowQueueSchema",
+            "fqcn": "Cybermaps\\Discovery\\IndexNowQueueSchema",
+            "file": "src/Discovery/IndexNowQueueSchema.php",
+            "summary": "Owns the site-local durable IndexNow queue table."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "Integrity",
+            "fqcn": "Cybermaps\\Discovery\\Integrity",
+            "file": "src/Discovery/Integrity.php",
+            "summary": "Shared HTTP integrity and conditional-request helper."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "IntentEngine",
+            "fqcn": "Cybermaps\\Discovery\\IntentEngine",
+            "file": "src/Discovery/IntentEngine.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "KnowledgeGraph",
+            "fqcn": "Cybermaps\\Discovery\\KnowledgeGraph",
+            "file": "src/Discovery/KnowledgeGraph.php",
+            "summary": "Knowledge Graph Handler"
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "LLMS",
+            "fqcn": "Cybermaps\\Discovery\\LLMS",
+            "file": "src/Discovery/LLMS.php",
+            "summary": "Serves the community llms.txt convention and the opt-in literal full corpus."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "LLMSTLDR",
+            "fqcn": "Cybermaps\\Discovery\\LLMSTLDR",
+            "file": "src/Discovery/LLMSTLDR.php",
+            "summary": "Serves Cybermaps' opt-in experimental budgeted site briefing."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery\\LLMSTLDR",
+            "class": "LLMSTLDRGenerator",
+            "fqcn": "Cybermaps\\Discovery\\LLMSTLDR\\LLMSTLDRGenerator",
+            "file": "src/Discovery/LLMSTLDR/LLMSTLDRGenerator.php",
+            "summary": "Builds Cybermaps' experimental, literal budgeted site briefing."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery\\LLMSTLDR",
+            "class": "TokenBudget",
+            "fqcn": "Cybermaps\\Discovery\\LLMSTLDR\\TokenBudget",
+            "file": "src/Discovery/LLMSTLDR/TokenBudget.php",
+            "summary": "Rough token estimation for TL;DR output budgeting."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "MCPServerCard",
+            "fqcn": "Cybermaps\\Discovery\\MCPServerCard",
+            "file": "src/Discovery/MCPServerCard.php",
+            "summary": "Implements only the current v1 ext-server-card draft surface."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "ManagedHtaccess",
+            "fqcn": "Cybermaps\\Discovery\\ManagedHtaccess",
+            "file": "src/Discovery/ManagedHtaccess.php",
+            "summary": "Owns one root-level block, never the WordPress or cache-plugin blocks."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "Manager",
+            "fqcn": "Cybermaps\\Discovery\\Manager",
+            "file": "src/Discovery/Manager.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "MarkdownAlternate",
+            "fqcn": "Cybermaps\\Discovery\\MarkdownAlternate",
+            "file": "src/Discovery/MarkdownAlternate.php",
+            "summary": "Serves literal Markdown alternates for eligible singular WordPress content."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "MarkdownCollection",
+            "fqcn": "Cybermaps\\Discovery\\MarkdownCollection",
+            "file": "src/Discovery/MarkdownCollection.php",
+            "summary": "Builds bounded Markdown summaries for public WordPress collection views."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "MarkdownNegotiation",
+            "fqcn": "Cybermaps\\Discovery\\MarkdownNegotiation",
+            "file": "src/Discovery/MarkdownNegotiation.php",
+            "summary": "Serves Markdown at canonical public URLs through HTTP content negotiation."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "MarkdownResponder",
+            "fqcn": "Cybermaps\\Discovery\\MarkdownResponder",
+            "file": "src/Discovery/MarkdownResponder.php",
+            "summary": "Sends bounded Markdown representations with one consistent HTTP contract."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "NotFoundSuggestions",
+            "fqcn": "Cybermaps\\Discovery\\NotFoundSuggestions",
+            "file": "src/Discovery/NotFoundSuggestions.php",
+            "summary": "Adds literal WordPress search suggestions to a problem-details 404."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "OpenAPI",
+            "fqcn": "Cybermaps\\Discovery\\OpenAPI",
+            "file": "src/Discovery/OpenAPI.php",
+            "summary": "Describes only Cybermaps' public, read-only REST operations."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "PublicHealth",
+            "fqcn": "Cybermaps\\Discovery\\PublicHealth",
+            "file": "src/Discovery/PublicHealth.php",
+            "summary": "Exposes only a coarse service state and already-public release metadata."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "PublicationCachePolicy",
+            "fqcn": "Cybermaps\\Discovery\\PublicationCachePolicy",
+            "file": "src/Discovery/PublicationCachePolicy.php",
+            "summary": "Builds the portable cache, integrity, CORS, and edge-tag contract."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "PublicationConstraints",
+            "fqcn": "Cybermaps\\Discovery\\PublicationConstraints",
+            "file": "src/Discovery/PublicationConstraints.php",
+            "summary": "Shared resource bounds for administrator input and public AI publications."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "PublicationHandlerResolver",
+            "fqcn": "Cybermaps\\Discovery\\PublicationHandlerResolver",
+            "file": "src/Discovery/PublicationHandlerResolver.php",
+            "summary": "Resolves registry-backed publication handlers for the router."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "PublicationInventory",
+            "fqcn": "Cybermaps\\Discovery\\PublicationInventory",
+            "file": "src/Discovery/PublicationInventory.php",
+            "summary": "Complete, deterministic inventory shared by literal AI text publications."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "PublicationNotifier",
+            "fqcn": "Cybermaps\\Discovery\\PublicationNotifier",
+            "file": "src/Discovery/PublicationNotifier.php",
+            "summary": "Sends publication notifications only after WordPress finishes the request's"
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "PublicationRequestGuard",
+            "fqcn": "Cybermaps\\Discovery\\PublicationRequestGuard",
+            "file": "src/Discovery/PublicationRequestGuard.php",
+            "summary": "Shared method and CORS preflight handling for active discovery publications."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "PublicationRouter",
+            "fqcn": "Cybermaps\\Discovery\\PublicationRouter",
+            "file": "src/Discovery/PublicationRouter.php",
+            "summary": "Routes fixed discovery paths from EndpointRegistry to their dynamic handler."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "PublicationSizeLimitException",
+            "fqcn": "Cybermaps\\Discovery\\PublicationSizeLimitException",
+            "file": "src/Discovery/PublicationSizeLimitException.php",
+            "summary": "Signals that a complete publication cannot be assembled within Core's hard"
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "PublisherGuidance",
+            "fqcn": "Cybermaps\\Discovery\\PublisherGuidance",
+            "file": "src/Discovery/PublisherGuidance.php",
+            "summary": "Reads the publisher-authored guidance shared by discovery publications."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "RAGChunk",
+            "fqcn": "Cybermaps\\Discovery\\RAGChunk",
+            "file": "src/Discovery/RAGChunk.php",
+            "summary": "Dynamic fallback for advertised RAG chunk publications."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "Robots",
+            "fqcn": "Cybermaps\\Discovery\\Robots",
+            "file": "src/Discovery/Robots.php",
+            "summary": "Robots.txt Service"
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "Search",
+            "fqcn": "Cybermaps\\Discovery\\Search",
+            "file": "src/Discovery/Search.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "StaticBridge",
+            "fqcn": "Cybermaps\\Discovery\\StaticBridge",
+            "file": "src/Discovery/StaticBridge.php",
+            "summary": "Service for bridging static file discovery."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "StaticHeaderManifest",
+            "fqcn": "Cybermaps\\Discovery\\StaticHeaderManifest",
+            "file": "src/Discovery/StaticHeaderManifest.php",
+            "summary": "Describes headers a deployment must attach when it serves a Cybermaps static"
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "StaticOwnershipStore",
+            "fqcn": "Cybermaps\\Discovery\\StaticOwnershipStore",
+            "file": "src/Discovery/StaticOwnershipStore.php",
+            "summary": "Sharded ownership inventory for generated static files."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "StaticSyncRunner",
+            "fqcn": "Cybermaps\\Discovery\\StaticSyncRunner",
+            "file": "src/Discovery/StaticSyncRunner.php",
+            "summary": "Phase-and-cursor static synchronization runner (schema 4)."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "StaticWriteIntentStore",
+            "fqcn": "Cybermaps\\Discovery\\StaticWriteIntentStore",
+            "file": "src/Discovery/StaticWriteIntentStore.php",
+            "summary": "Durable single-writer journal for the file-move/ownership-checkpoint gap."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "Throttler",
+            "fqcn": "Cybermaps\\Discovery\\Throttler",
+            "file": "src/Discovery/Throttler.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "Updates",
+            "fqcn": "Cybermaps\\Discovery\\Updates",
+            "file": "src/Discovery/Updates.php",
+            "summary": "Publishes the bounded ADP 3.0 recent-update stream."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "UsagePolicy",
+            "fqcn": "Cybermaps\\Discovery\\UsagePolicy",
+            "file": "src/Discovery/UsagePolicy.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "WebSub",
+            "fqcn": "Cybermaps\\Discovery\\WebSub",
+            "file": "src/Discovery/WebSub.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "WellKnownRoutingBridge",
+            "fqcn": "Cybermaps\\Discovery\\WellKnownRoutingBridge",
+            "file": "src/Discovery/WellKnownRoutingBridge.php",
+            "summary": "Verifies native routing and removes only the obsolete bridge block Cybermaps owns."
+        },
+        {
+            "namespace": "Cybermaps\\Integration\\EdgeCache",
+            "class": "Coordinator",
+            "fqcn": "Cybermaps\\Integration\\EdgeCache\\Coordinator",
+            "file": "src/Integration/EdgeCache/Coordinator.php",
+            "summary": "Coordinates portable invalidation events and opt-in adapter delivery."
+        },
+        {
+            "namespace": "Cybermaps\\Integration\\EdgeCache",
+            "class": "LiteSpeedAdapter",
+            "fqcn": "Cybermaps\\Integration\\EdgeCache\\LiteSpeedAdapter",
+            "file": "src/Integration/EdgeCache/LiteSpeedAdapter.php",
+            "summary": "Uses only LiteSpeed's documented tag and purge integration points."
+        },
+        {
+            "namespace": "Cybermaps\\Integration\\EdgeCache",
+            "class": "VarnishAdapter",
+            "fqcn": "Cybermaps\\Integration\\EdgeCache\\VarnishAdapter",
+            "file": "src/Integration/EdgeCache/VarnishAdapter.php",
+            "summary": "Sends exact-path PURGE requests only after a site owner explicitly opts in."
+        },
+        {
+            "namespace": "Cybermaps\\Integration",
+            "class": "RestResponseGuard",
+            "fqcn": "Cybermaps\\Integration\\RestResponseGuard",
+            "file": "src/Integration/RestResponseGuard.php",
+            "summary": "Keeps Cybermaps machine responses away from HTML optimizers and prevents"
+        },
+        {
+            "namespace": "Cybermaps\\Integration",
+            "class": "TranslationManager",
+            "fqcn": "Cybermaps\\Integration\\TranslationManager",
+            "file": "src/Integration/TranslationManager.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Integration",
+            "class": "WebMCP",
+            "fqcn": "Cybermaps\\Integration\\WebMCP",
+            "file": "src/Integration/WebMCP.php",
+            "summary": "Enqueues a read-only browser bridge when explicitly enabled."
+        },
+        {
+            "namespace": "Cybermaps\\MCP",
+            "class": "CallbackCallerContextResolver",
+            "fqcn": "Cybermaps\\MCP\\CallbackCallerContextResolver",
+            "file": "src/MCP/CallbackCallerContextResolver.php",
+            "summary": "Callable adapter for the owning OAuth service."
+        },
+        {
+            "namespace": "Cybermaps\\MCP",
+            "class": "CallbackResourceReader",
+            "fqcn": "Cybermaps\\MCP\\CallbackResourceReader",
+            "file": "src/MCP/CallbackResourceReader.php",
+            "summary": "Callable adapter for registry-backed publication generators."
+        },
+        {
+            "namespace": "Cybermaps\\MCP",
+            "class": "CallbackTaskService",
+            "fqcn": "Cybermaps\\MCP\\CallbackTaskService",
+            "file": "src/MCP/CallbackTaskService.php",
+            "summary": "Callable task adapter owned by the existing audit/static services."
+        },
+        {
+            "namespace": "Cybermaps\\MCP",
+            "class": "CallerContext",
+            "fqcn": "Cybermaps\\MCP\\CallerContext",
+            "file": "src/MCP/CallerContext.php",
+            "summary": "Authenticated identity and authorization facts for one MCP request."
+        },
+        {
+            "namespace": "Cybermaps\\MCP",
+            "class": "InMemoryConfirmationStateStore",
+            "fqcn": "Cybermaps\\MCP\\InMemoryConfirmationStateStore",
+            "file": "src/MCP/InMemoryConfirmationStateStore.php",
+            "summary": "Request-process store intended for tests and non-persistent adapters."
+        },
+        {
+            "namespace": "Cybermaps\\MCP\\OAuth",
+            "class": "AgentRegistrationMode",
+            "fqcn": "Cybermaps\\MCP\\OAuth\\AgentRegistrationMode",
+            "file": "src/MCP/OAuth/AgentRegistrationMode.php",
+            "summary": "Fail-closed resolver for the optional user-claimed OAuth registration mode."
+        },
+        {
+            "namespace": "Cybermaps\\MCP\\OAuth",
+            "class": "AuthMd",
+            "fqcn": "Cybermaps\\MCP\\OAuth\\AuthMd",
+            "file": "src/MCP/OAuth/AuthMd.php",
+            "summary": "Generates the mode-gated public OAuth agent-registration description."
+        },
+        {
+            "namespace": "Cybermaps\\MCP\\OAuth",
+            "class": "ClientRegistrationValidator",
+            "fqcn": "Cybermaps\\MCP\\OAuth\\ClientRegistrationValidator",
+            "file": "src/MCP/OAuth/ClientRegistrationValidator.php",
+            "summary": "Validates administrator-created public clients and their metadata documents."
+        },
+        {
+            "namespace": "Cybermaps\\MCP\\OAuth",
+            "class": "DeviceAuthorizationPage",
+            "fqcn": "Cybermaps\\MCP\\OAuth\\DeviceAuthorizationPage",
+            "file": "src/MCP/OAuth/DeviceAuthorizationPage.php",
+            "summary": "Logged-in WordPress approval page for RFC 8628 user codes."
+        },
+        {
+            "namespace": "Cybermaps\\MCP\\OAuth",
+            "class": "OAuthException",
+            "fqcn": "Cybermaps\\MCP\\OAuth\\OAuthException",
+            "file": "src/MCP/OAuth/OAuthException.php",
+            "summary": "A protocol-safe OAuth failure."
+        },
+        {
+            "namespace": "Cybermaps\\MCP\\OAuth",
+            "class": "OAuthMetadataPublication",
+            "fqcn": "Cybermaps\\MCP\\OAuth\\OAuthMetadataPublication",
+            "file": "src/MCP/OAuth/OAuthMetadataPublication.php",
+            "summary": "Canonical OAuth discovery bodies shared by HTTP and static publication."
+        },
+        {
+            "namespace": "Cybermaps\\MCP\\OAuth",
+            "class": "OAuthRouteController",
+            "fqcn": "Cybermaps\\MCP\\OAuth\\OAuthRouteController",
+            "file": "src/MCP/OAuth/OAuthRouteController.php",
+            "summary": "REST routes and browser-consent contract for the isolated OAuth server."
+        },
+        {
+            "namespace": "Cybermaps\\MCP\\OAuth",
+            "class": "OAuthService",
+            "fqcn": "Cybermaps\\MCP\\OAuth\\OAuthService",
+            "file": "src/MCP/OAuth/OAuthService.php",
+            "summary": "OAuth 2.1 authorization-code, PKCE, opaque-token, and metadata service."
+        },
+        {
+            "namespace": "Cybermaps\\MCP\\OAuth",
+            "class": "OAuthServiceFactory",
+            "fqcn": "Cybermaps\\MCP\\OAuth\\OAuthServiceFactory",
+            "file": "src/MCP/OAuth/OAuthServiceFactory.php",
+            "summary": "Constructs the one Core OAuth service used by routes and publications."
+        },
+        {
+            "namespace": "Cybermaps\\MCP\\OAuth",
+            "class": "WordPressUserAuthorizer",
+            "fqcn": "Cybermaps\\MCP\\OAuth\\WordPressUserAuthorizer",
+            "file": "src/MCP/OAuth/WordPressUserAuthorizer.php",
+            "summary": "Rechecks the WordPress capability required by each OAuth scope."
+        },
+        {
+            "namespace": "Cybermaps\\MCP\\OAuth",
+            "class": "WpdbOAuthRepository",
+            "fqcn": "Cybermaps\\MCP\\OAuth\\WpdbOAuthRepository",
+            "file": "src/MCP/OAuth/WpdbOAuthRepository.php",
+            "summary": "WordPress database implementation for OAuth client, grant, code, and token records."
+        },
+        {
+            "namespace": "Cybermaps\\MCP",
+            "class": "OneTimeConfirmationService",
+            "fqcn": "Cybermaps\\MCP\\OneTimeConfirmationService",
+            "file": "src/MCP/OneTimeConfirmationService.php",
+            "summary": "HMAC-signed, caller-bound, five-minute single-use confirmation service."
+        },
+        {
+            "namespace": "Cybermaps\\MCP",
+            "class": "Protocol",
+            "fqcn": "Cybermaps\\MCP\\Protocol",
+            "file": "src/MCP/Protocol.php",
+            "summary": "MCP protocol constants supported by Cybermaps."
+        },
+        {
+            "namespace": "Cybermaps\\MCP",
+            "class": "ProtocolException",
+            "fqcn": "Cybermaps\\MCP\\ProtocolException",
+            "file": "src/MCP/ProtocolException.php",
+            "summary": "JSON-RPC dispatch exception with a stable protocol error code."
+        },
+        {
+            "namespace": "Cybermaps\\MCP",
+            "class": "ResourceRegistry",
+            "fqcn": "Cybermaps\\MCP\\ResourceRegistry",
+            "file": "src/MCP/ResourceRegistry.php",
+            "summary": "Exact resource allowlist derived from public path publications."
+        },
+        {
+            "namespace": "Cybermaps\\MCP",
+            "class": "Runtime",
+            "fqcn": "Cybermaps\\MCP\\Runtime",
+            "file": "src/MCP/Runtime.php",
+            "summary": "Composition root for the optional MCP runtime."
+        },
+        {
+            "namespace": "Cybermaps\\MCP",
+            "class": "SchemaValidator",
+            "fqcn": "Cybermaps\\MCP\\SchemaValidator",
+            "file": "src/MCP/SchemaValidator.php",
+            "summary": "Small, fail-closed validator for the bounded schemas declared by Core tools."
+        },
+        {
+            "namespace": "Cybermaps\\MCP",
+            "class": "Server",
+            "fqcn": "Cybermaps\\MCP\\Server",
+            "file": "src/MCP/Server.php",
+            "summary": "Stateless MCP JSON-RPC dispatcher."
+        },
+        {
+            "namespace": "Cybermaps\\MCP",
+            "class": "TaskRepository",
+            "fqcn": "Cybermaps\\MCP\\TaskRepository",
+            "file": "src/MCP/TaskRepository.php",
+            "summary": "Bounded, site-local persistence for asynchronous MCP operation handles."
+        },
+        {
+            "namespace": "Cybermaps\\MCP",
+            "class": "ToolRegistry",
+            "fqcn": "Cybermaps\\MCP\\ToolRegistry",
+            "file": "src/MCP/ToolRegistry.php",
+            "summary": "Deterministic registry and dispatcher for the five allowlisted Core tools."
+        },
+        {
+            "namespace": "Cybermaps\\MCP",
+            "class": "Transport",
+            "fqcn": "Cybermaps\\MCP\\Transport",
+            "file": "src/MCP/Transport.php",
+            "summary": "Stateless one-request-per-POST Streamable HTTP transport."
+        },
+        {
+            "namespace": "Cybermaps\\MCP",
+            "class": "WordPressConfirmationStateStore",
+            "fqcn": "Cybermaps\\MCP\\WordPressConfirmationStateStore",
+            "file": "src/MCP/WordPressConfirmationStateStore.php",
+            "summary": "Atomic WordPress-backed confirmation state for normal WordPress requests."
+        },
+        {
+            "namespace": "Cybermaps\\MCP",
+            "class": "WordPressIntegration",
+            "fqcn": "Cybermaps\\MCP\\WordPressIntegration",
+            "file": "src/MCP/WordPressIntegration.php",
+            "summary": "WordPress composition root for Cybermaps' optional MCP surface."
+        },
+        {
+            "namespace": "Cybermaps\\MCP",
+            "class": "WordPressTaskService",
+            "fqcn": "Cybermaps\\MCP\\WordPressTaskService",
+            "file": "src/MCP/WordPressTaskService.php",
+            "summary": "Bounded WordPress-backed executors for MCP asynchronous operations."
+        },
+        {
+            "namespace": "Cybermaps\\SEO",
+            "class": "GenesisMaiAdapter",
+            "fqcn": "Cybermaps\\SEO\\GenesisMaiAdapter",
+            "file": "src/SEO/GenesisMaiAdapter.php",
+            "summary": "Reads the SEO settings emitted by Genesis and used by Mai themes."
+        },
+        {
+            "namespace": "Cybermaps\\SEO",
+            "class": "IndexabilityDecision",
+            "fqcn": "Cybermaps\\SEO\\IndexabilityDecision",
+            "file": "src/SEO/IndexabilityDecision.php",
+            "summary": "Immutable effective indexability result."
+        },
+        {
+            "namespace": "Cybermaps\\SEO",
+            "class": "IndexabilityInvalidator",
+            "fqcn": "Cybermaps\\SEO\\IndexabilityInvalidator",
+            "file": "src/SEO/IndexabilityInvalidator.php",
+            "summary": "Reconciles publications when an upstream SEO decision changes."
+        },
+        {
+            "namespace": "Cybermaps\\SEO",
+            "class": "IndexabilityResolver",
+            "fqcn": "Cybermaps\\SEO\\IndexabilityResolver",
+            "file": "src/SEO/IndexabilityResolver.php",
+            "summary": "Produces one effective indexability decision for every publication surface."
+        },
+        {
+            "namespace": "Cybermaps\\SEO",
+            "class": "PluginSeoAdapter",
+            "fqcn": "Cybermaps\\SEO\\PluginSeoAdapter",
+            "file": "src/SEO/PluginSeoAdapter.php",
+            "summary": "Normalizes active Yoast, Rank Math, and AIOSEO singular directives."
+        },
+        {
+            "namespace": "Cybermaps\\SEO",
+            "class": "PublicationEligibility",
+            "fqcn": "Cybermaps\\SEO\\PublicationEligibility",
+            "file": "src/SEO/PublicationEligibility.php",
+            "summary": "Applies Cybermaps channel scope after provider-level indexability."
+        },
+        {
+            "namespace": "Cybermaps\\SEO",
+            "class": "SeoContext",
+            "fqcn": "Cybermaps\\SEO\\SeoContext",
+            "file": "src/SEO/SeoContext.php",
+            "summary": "Immutable description of a public WordPress resource."
+        },
+        {
+            "namespace": "Cybermaps\\SEO",
+            "class": "SeoSignals",
+            "fqcn": "Cybermaps\\SEO\\SeoSignals",
+            "file": "src/SEO/SeoSignals.php",
+            "summary": "SEO directives reported by one compatibility adapter."
+        },
+        {
+            "namespace": "Cybermaps\\Sitemap",
+            "class": "ArchiveProvider",
+            "fqcn": "Cybermaps\\Sitemap\\ArchiveProvider",
+            "file": "src/Sitemap/ArchiveProvider.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Sitemap",
+            "class": "AuthorProvider",
+            "fqcn": "Cybermaps\\Sitemap\\AuthorProvider",
+            "file": "src/Sitemap/AuthorProvider.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Sitemap",
+            "class": "BaseProvider",
+            "fqcn": "Cybermaps\\Sitemap\\BaseProvider",
+            "file": "src/Sitemap/BaseProvider.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Sitemap",
+            "class": "EligibleContentRepository",
+            "fqcn": "Cybermaps\\Sitemap\\EligibleContentRepository",
+            "file": "src/Sitemap/EligibleContentRepository.php",
+            "summary": "Bounded, request-local access to sitemap candidates."
+        },
+        {
+            "namespace": "Cybermaps\\Sitemap",
+            "class": "ExternalSitemapValidator",
+            "fqcn": "Cybermaps\\Sitemap\\ExternalSitemapValidator",
+            "file": "src/Sitemap/ExternalSitemapValidator.php",
+            "summary": "Validates external sitemap URLs before index inclusion or option storage."
+        },
+        {
+            "namespace": "Cybermaps\\Sitemap",
+            "class": "MediaScanner",
+            "fqcn": "Cybermaps\\Sitemap\\MediaScanner",
+            "file": "src/Sitemap/MediaScanner.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Sitemap",
+            "class": "MiscProvider",
+            "fqcn": "Cybermaps\\Sitemap\\MiscProvider",
+            "file": "src/Sitemap/MiscProvider.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Sitemap",
+            "class": "NewsProvider",
+            "fqcn": "Cybermaps\\Sitemap\\NewsProvider",
+            "file": "src/Sitemap/NewsProvider.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Sitemap",
+            "class": "Orchestrator",
+            "fqcn": "Cybermaps\\Sitemap\\Orchestrator",
+            "file": "src/Sitemap/Orchestrator.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Sitemap",
+            "class": "PageOccupancyBuilder",
+            "fqcn": "Cybermaps\\Sitemap\\PageOccupancyBuilder",
+            "file": "src/Sitemap/PageOccupancyBuilder.php",
+            "summary": "Background builder for generation-scoped sitemap page occupancy."
+        },
+        {
+            "namespace": "Cybermaps\\Sitemap",
+            "class": "PageOccupancyManifest",
+            "fqcn": "Cybermaps\\Sitemap\\PageOccupancyManifest",
+            "file": "src/Sitemap/PageOccupancyManifest.php",
+            "summary": "Generation-scoped sitemap page occupancy manifest."
+        },
+        {
+            "namespace": "Cybermaps\\Sitemap",
+            "class": "PostTypeProvider",
+            "fqcn": "Cybermaps\\Sitemap\\PostTypeProvider",
+            "file": "src/Sitemap/PostTypeProvider.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Sitemap",
+            "class": "PriorityEngine",
+            "fqcn": "Cybermaps\\Sitemap\\PriorityEngine",
+            "file": "src/Sitemap/PriorityEngine.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Sitemap",
+            "class": "ProviderIdentity",
+            "fqcn": "Cybermaps\\Sitemap\\ProviderIdentity",
+            "file": "src/Sitemap/ProviderIdentity.php",
+            "summary": "Keeps WordPress object slugs separate from Cybermaps' system providers."
+        },
+        {
+            "namespace": "Cybermaps\\Sitemap",
+            "class": "PublicationRouteSlugs",
+            "fqcn": "Cybermaps\\Sitemap\\PublicationRouteSlugs",
+            "file": "src/Sitemap/PublicationRouteSlugs.php",
+            "summary": "Resolve the three configurable sitemap publication slugs as one route set."
+        },
+        {
+            "namespace": "Cybermaps\\Sitemap",
+            "class": "PublicationTaxonomies",
+            "fqcn": "Cybermaps\\Sitemap\\PublicationTaxonomies",
+            "file": "src/Sitemap/PublicationTaxonomies.php",
+            "summary": "Shared taxonomy relevance policy for sitemap occupancy invalidation."
+        },
+        {
+            "namespace": "Cybermaps\\Sitemap",
+            "class": "RSSProvider",
+            "fqcn": "Cybermaps\\Sitemap\\RSSProvider",
+            "file": "src/Sitemap/RSSProvider.php",
+            "summary": "RSS 2.0 Sitemap Provider."
+        },
+        {
+            "namespace": "Cybermaps\\Sitemap\\Renderer",
+            "class": "BaseRenderer",
+            "fqcn": "Cybermaps\\Sitemap\\Renderer\\BaseRenderer",
+            "file": "src/Sitemap/Renderer/BaseRenderer.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Sitemap\\Renderer",
+            "class": "IndexRenderer",
+            "fqcn": "Cybermaps\\Sitemap\\Renderer\\IndexRenderer",
+            "file": "src/Sitemap/Renderer/IndexRenderer.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Sitemap\\Renderer",
+            "class": "NetworkRenderer",
+            "fqcn": "Cybermaps\\Sitemap\\Renderer\\NetworkRenderer",
+            "file": "src/Sitemap/Renderer/NetworkRenderer.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Sitemap\\Renderer",
+            "class": "SitemapRenderer",
+            "fqcn": "Cybermaps\\Sitemap\\Renderer\\SitemapRenderer",
+            "file": "src/Sitemap/Renderer/SitemapRenderer.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Sitemap",
+            "class": "Schema",
+            "fqcn": "Cybermaps\\Sitemap\\Schema",
+            "file": "src/Sitemap/Schema.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Sitemap",
+            "class": "ShortcodeHandler",
+            "fqcn": "Cybermaps\\Sitemap\\ShortcodeHandler",
+            "file": "src/Sitemap/ShortcodeHandler.php",
+            "summary": "Shortcode Handler for [cybermap]."
+        },
+        {
+            "namespace": "Cybermaps\\Sitemap",
+            "class": "SitemapRouteMatcher",
+            "fqcn": "Cybermaps\\Sitemap\\SitemapRouteMatcher",
+            "file": "src/Sitemap/SitemapRouteMatcher.php",
+            "summary": "Shares the exact public sitemap filename grammar with analytics and request"
+        },
+        {
+            "namespace": "Cybermaps\\Sitemap",
+            "class": "TaxonomyProvider",
+            "fqcn": "Cybermaps\\Sitemap\\TaxonomyProvider",
+            "file": "src/Sitemap/TaxonomyProvider.php",
+            "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Sitemap",
+            "class": "XmlWriter",
+            "fqcn": "Cybermaps\\Sitemap\\XmlWriter",
+            "file": "src/Sitemap/XmlWriter.php",
+            "summary": "Small sitemap XML writer with a native XMLWriter fast path."
+        }
+    ],
+    "class_count": 243
+}

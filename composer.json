@@ -1,0 +1,65 @@
+{
+    "name": "cyberbrand/cybermaps",
+    "description": "A focused WordPress sitemap engine with llms.txt, literal Markdown page alternates, and AI-readable discovery publications.",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "php": ">=8.2"
+    },
+    "require-dev": {
+        "phpcompatibility/phpcompatibility-wp": "^2.1.8",
+        "phpunit/phpunit": "^10.5",
+        "wp-coding-standards/wpcs": "^3.4.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Cybermaps\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Cybermaps\\Tests\\": "tests/"
+        },
+        "exclude-from-classmap": [
+            "/tests/bootstrap.php",
+            "/tests/mocks/",
+            "/tests/fixtures/"
+        ]
+    },
+    "scripts": {
+        "test": "phpunit",
+        "lint:phpcompat": "phpcs --standard=phpcs-compat.xml.dist",
+        "lint:phpcs": "phpcs --standard=phpcs.xml.dist",
+        "lint:complexity": "phpcs --standard=phpcs.xml.dist --sniffs=Generic.Metrics.CyclomaticComplexity",
+        "lint:phpcbf": "phpcbf --standard=phpcs.xml.dist",
+        "i18n:generate": "bash bin/generate-pot.sh",
+        "i18n:check": "bash bin/generate-pot.sh --check",
+        "manifest:check": "php bin/check-manifest.php",
+        "ai-config:check": "php bin/check-ai-configuration.php",
+        "release:check": [
+            "@lint:phpcompat",
+            "@lint:phpcs",
+            "@i18n:check",
+            "@manifest:check",
+            "@ai-config:check"
+        ],
+        "release:build": "bash clean.sh",
+        "release:validate": [
+            "@release:check",
+            "bash bin/validate-release.sh"
+        ],
+        "tooling:lint": "bash -n clean.sh && bash -n bin/validate-release.sh && bash -n bin/generate-pot.sh && bash -n bin/release-github.sh && php -l bin/check-manifest.php && php -l bin/check-ai-configuration.php",
+        "release:github": "bash bin/release-github.sh",
+        "test:release-github": "python3 tests/tooling/test_release_github.py"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        },
+        "optimize-autoloader": true,
+        "platform": {
+            "php": "8.2.0"
+        },
+        "sort-packages": true
+    }
+}

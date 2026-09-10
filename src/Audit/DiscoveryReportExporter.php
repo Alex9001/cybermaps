@@ -1,0 +1,206 @@
+<?php
+declare(strict_types=1);
+
+namespace Cybermaps\Audit;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * Serializes a current, explicitly time-stamped discovery validation report.
+ */
+final class DiscoveryReportExporter {
+	/**
+	 * @param array<string,mixed> $status Current DiscoveryStatus result.
+	 */
+	public function json( array $status ): string {
+		$output = wp_json_encode( $this->normalize( $status ), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+		return is_string( $output ) ? $output . "\n" : "{}\n";
+	}
+
+	/**
+	 * @param array<string,mixed> $status Current DiscoveryStatus result.
+	 */
+	public function html( array $status ): string {
+		$identity  = ReportPresentation::identity();
+		$endpoints = (array) ( $status['endpoints'] ?? array() );
+		$rows      = $this->endpoint_rows( $endpoints );
+
+		$title          = __( 'AI Discovery Publication Report', 'cybermaps' );
+		$subtitle       = __( 'Current publication intent and public HTTP validation', 'cybermaps' );
+		$disabled_count = $this->disabled_count( $endpoints );
+		$summary        = array(
+			array( __( 'Publications', 'cybermaps' ), count( $endpoints ) ),
+			array( __( 'Validated', 'cybermaps' ), (int) ( $status['active_count'] ?? 0 ) ),
+			array(
+				__( 'Needs attention', 'cybermaps' ),
+				(int) ( $status['error_count'] ?? 0 ) + (int) ( $status['unverified_count'] ?? 0 ),
+			),
+			array( __( 'Disabled', 'cybermaps' ), $disabled_count ),
+		);
+
+		return $this->document(
+			$title,
+			$subtitle,
+			$identity,
+			$summary,
+			'<section><div class="section-heading"><p>' . esc_html__( 'Publication inventory', 'cybermaps' ) . '</p><h2>' . esc_html__( 'Discovery endpoints', 'cybermaps' ) . '</h2></div>'
+			. '<p class="notice">' . esc_html__( 'This report records a point-in-time HTTP validation. Static files, CDNs, server rules, and later configuration changes can alter public delivery after generation.', 'cybermaps' ) . '</p>'
+			. '<div class="table-wrap"><table><thead><tr><th>' . esc_html__( 'Publication', 'cybermaps' ) . '</th><th>'
+			. esc_html__( 'Purpose', 'cybermaps' ) . '</th><th>' . esc_html__( 'Expected type', 'cybermaps' ) . '</th><th>'
+			. esc_html__( 'Intended', 'cybermaps' ) . '</th><th>' . esc_html__( 'HTTP validation', 'cybermaps' ) . '</th></tr></thead><tbody>'
+			. $rows . '</tbody></table></div></section>'
+		);
+	}
+
+	/** @param array<int,mixed> $endpoints */
+	private function endpoint_rows( array $endpoints ): string {
+		$rows = '';
+		foreach ( $endpoints as $endpoint ) {
+			$state = sanitize_key( (string) ( $endpoint['status'] ?? 'unverified' ) );
+			$rows .= '<tr><td><strong>' . esc_html( (string) ( $endpoint['label'] ?? '' ) ) . '</strong><br><code>'
+				. esc_html( (string) ( $endpoint['path'] ?? '' ) ) . '</code></td>';
+			$rows .= '<td>' . esc_html( (string) ( $endpoint['description'] ?? '' ) ) . '</td>';
+			$rows .= '<td><code>' . esc_html( (string) ( $endpoint['type'] ?? '' ) ) . '</code></td>';
+			$rows .= '<td>' . esc_html( self::state_label( (string) ( $endpoint['intended_delivery'] ?? 'dynamic' ) ) ) . '</td>';
+			$rows .= '<td><span class="status status-' . esc_attr( $state ) . '">' . esc_html( self::state_label( $state ) ) . '</span>';
+			if ( ! empty( $endpoint['message'] ) ) {
+				$rows .= '<small>' . esc_html( (string) $endpoint['message'] ) . '</small>';
+			}
+			$rows .= '</td></tr>';
+		}
+		return '' !== $rows ? $rows : '<tr><td colspan="5">' . esc_html__( 'No discovery publications were registered when this report was generated.', 'cybermaps' ) . '</td></tr>';
+	}
+
+	/** @param array<int,mixed> $endpoints */
+	private function disabled_count( array $endpoints ): int {
+		$count = 0;
+		foreach ( $endpoints as $endpoint ) {
+			if ( 'disabled' === (string) ( $endpoint['status'] ?? '' ) ) {
+				++$count;
+			}
+		}
+		return $count;
+	}
+
+	/**
+	 * @param array<string,string|bool>          $identity Report identity.
+	 * @param array<int,array{0:string,1:int}>   $summary Summary metrics.
+	 */
+	private function document( string $title, string $subtitle, array $identity, array $summary, string $body ): string {
+		$metrics = '';
+		foreach ( $summary as $metric ) {
+			$metrics .= '<div class="metric"><span>' . esc_html( $metric[0] ) . '</span><strong>' . (int) $metric[1] . '</strong></div>';
+		}
+		$logo        = '' !== (string) $identity['agency_logo']
+			? '<img src="' . esc_url( (string) $identity['agency_logo'] ) . '" alt="">'
+			: '';
+		$prepared_by = '' !== (string) $identity['agency_name']
+			? '<span>' . esc_html__( 'Prepared by', 'cybermaps' ) . ' '
+				. ( '' !== (string) $identity['agency_url']
+					? '<a href="' . esc_url( (string) $identity['agency_url'] ) . '">' . esc_html( (string) $identity['agency_name'] ) . '</a>'
+					: esc_html( (string) $identity['agency_name'] ) )
+				. '</span>'
+			: '';
+		$credit      = '<a href="https://cybermaps.dev" target="_blank" rel="noopener noreferrer">'
+			. esc_html__( 'Generated by CYBER MAPS', 'cybermaps' )
+			. '</a>';
+
+		return '<!doctype html><html lang="' . esc_attr( ReportPresentation::language() ) . '"><head><meta charset="utf-8">'
+			. '<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>'
+			. esc_html( $title ) . '</title><style>' . ReportPresentation::theme_css() . $this->styles() . '</style></head><body><main class="report">'
+			. '<header><div class="brand">' . $logo . '<div><p>' . esc_html( (string) $identity['site_name'] ) . '</p><h1>' . esc_html( $title )
+			. '</h1><span>' . esc_html( $subtitle ) . '</span></div></div><div class="meta"><span>' . esc_html( gmdate( 'F j, Y \a\t H:i \U\T\C' ) )
+			. '</span><span>' . esc_html( (string) $identity['site_url'] ) . '</span>' . $prepared_by . '</div></header><div class="report-body">'
+			. '<div class="metrics">' . $metrics . '</div>' . $body . '</div><footer>' . $credit . '</footer></main></body></html>';
+	}
+
+	private function styles(): string {
+		return 'body{margin:0;padding:44px 20px;background:var(--cmr-bg);color:var(--cmr-text);font:14px/1.55 system-ui,-apple-system,sans-serif}'
+			. '.report{max-width:1100px;margin:auto;overflow:hidden;background:var(--cmr-surface);border:1px solid var(--cmr-border);border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.12)}'
+			. 'header{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(240px,.7fr);background:var(--cmr-primary);color:#fff}.brand{display:flex;gap:18px;align-items:center;padding:40px}'
+			. '.brand img{max-width:170px;max-height:60px}.brand p,.section-heading p{margin:0 0 7px;color:var(--cmr-accent);font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}'
+			. 'h1{margin:0;font-size:30px;line-height:1.16}.brand span{display:block;margin-top:8px;color:#cbd5e1}.meta{display:flex;flex-direction:column;justify-content:center;gap:9px;padding:40px;background:var(--cmr-primary-2);color:#cbd5e1;font-size:12px}.meta a{color:inherit}'
+			. '.report-body{padding:36px 40px}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:34px}.metric{padding:17px;background:var(--cmr-accent-soft);border-top:3px solid var(--cmr-accent);border-radius:6px}'
+			. '.metric span{display:block;color:var(--cmr-muted);font-size:10px;font-weight:800;text-transform:uppercase}.metric strong{display:block;margin-top:6px;color:var(--cmr-text);font-size:27px}'
+			. '.section-heading h2{margin:0 0 15px;font-size:21px}.notice{padding:14px 16px;background:var(--cmr-accent-soft);border-left:3px solid var(--cmr-accent)}'
+			. 'table{width:100%;border-collapse:collapse}th,td{padding:12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--cmr-border)}th{color:var(--cmr-muted);background:var(--cmr-accent-soft);font-size:10px;text-transform:uppercase}'
+			. 'code{color:var(--cmr-text);overflow-wrap:anywhere}.status{display:inline-block;padding:2px 7px;border-radius:999px;font-size:11px;font-weight:700}.status-healthy{color:var(--cmr-success)}.status-error{color:var(--cmr-danger)}.status-disabled{color:var(--cmr-muted)}'
+			. '.status-unverified{color:var(--cmr-warning)}td small{display:block;margin-top:5px;color:var(--cmr-muted)}footer{display:flex;justify-content:center;min-height:18px;padding:18px;background:var(--cmr-accent-soft);color:var(--cmr-muted);font-size:11px}footer a{color:inherit;font-weight:700;text-decoration:none}footer a:hover{text-decoration:underline}'
+			. '@media(max-width:760px){body{padding:0}.report{border:0;border-radius:0}header{grid-template-columns:1fr}.brand,.meta,.report-body{padding:25px}.metrics{grid-template-columns:repeat(2,1fr)}.table-wrap{overflow-x:auto}}'
+			. '@media print{body{padding:0;background:#fff}.report{border:0;border-radius:0;box-shadow:none}header,.metric,th,.notice{print-color-adjust:exact;-webkit-print-color-adjust:exact}}';
+	}
+
+	private static function state_label( string $state ): string {
+		$labels = array(
+			'dynamic'    => __( 'Dynamic', 'cybermaps' ),
+			'static'     => __( 'Static', 'cybermaps' ),
+			'healthy'    => __( 'Healthy', 'cybermaps' ),
+			'error'      => __( 'Error', 'cybermaps' ),
+			'unverified' => __( 'Unverified', 'cybermaps' ),
+			'disabled'   => __( 'Disabled', 'cybermaps' ),
+		);
+
+		return $labels[ $state ] ?? ucfirst( $state );
+	}
+
+	/**
+	 * Exclude local paths and internal reconciliation payloads from a
+	 * client-facing JSON deliverable.
+	 *
+	 * @param array<string,mixed> $status Current DiscoveryStatus result.
+	 * @return array<string,mixed>
+	 */
+	private function normalize( array $status ): array {
+		$endpoints      = array();
+		$disabled_count = 0;
+		foreach ( (array) ( $status['endpoints'] ?? array() ) as $endpoint ) {
+			if ( 'disabled' === (string) ( $endpoint['status'] ?? '' ) ) {
+				++$disabled_count;
+			}
+			$endpoints[] = $this->normalized_endpoint( $endpoint );
+		}
+
+		return array(
+			'generated_gmt'    => gmdate( 'Y-m-d H:i:s' ),
+			'overall_status'   => (string) ( $status['overall_status'] ?? 'unverified' ),
+			'publication_mode' => (string) ( $status['static_mode'] ?? 'off' ),
+			'validated_count'  => (int) ( $status['active_count'] ?? 0 ),
+			'error_count'      => (int) ( $status['error_count'] ?? 0 ),
+			'unverified_count' => (int) ( $status['unverified_count'] ?? 0 ),
+			'disabled_count'   => $disabled_count,
+			'endpoints'        => $endpoints,
+		);
+	}
+
+	/** @param array<string,mixed> $endpoint @return array<string,mixed> */
+	private function normalized_endpoint( array $endpoint ): array {
+		return array(
+			'endpoint_id'        => $this->string_field( $endpoint, 'endpoint_id' ),
+			'label'              => $this->string_field( $endpoint, 'label' ),
+			'path'               => $this->string_field( $endpoint, 'path' ),
+			'url'                => $this->string_field( $endpoint, 'url' ),
+			'description'        => $this->string_field( $endpoint, 'description' ),
+			'expected_type'      => $this->string_field( $endpoint, 'type' ),
+			'status'             => $this->string_field( $endpoint, 'status', 'unverified' ),
+			'message'            => $this->string_field( $endpoint, 'message' ),
+			'intended_delivery'  => $this->string_field( $endpoint, 'intended_delivery', 'dynamic' ),
+			'observed_delivery'  => $this->string_field( $endpoint, 'delivery', 'unverified' ),
+			'http_code'          => (int) ( $endpoint['code'] ?? 0 ),
+			'observed_type'      => $this->string_field( $endpoint, 'content_type' ),
+			'content_type_valid' => $this->bool_field( $endpoint, 'content_type_valid' ),
+			'body_valid'         => $this->bool_field( $endpoint, 'body_valid' ),
+		);
+	}
+
+	/** @param array<string,mixed> $endpoint */
+	private function string_field( array $endpoint, string $key, string $fallback = '' ): string {
+		return (string) ( $endpoint[ $key ] ?? $fallback );
+	}
+
+	/** @param array<string,mixed> $endpoint */
+	private function bool_field( array $endpoint, string $key ): ?bool {
+		return is_bool( $endpoint[ $key ] ?? null ) ? $endpoint[ $key ] : null;
+	}
+}

@@ -1,0 +1,13 @@
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.zip binary
+*.mo binary
+
+/.github export-ignore
+/.wordpress-org export-ignore
+/freemius export-ignore
+/clean export-ignore

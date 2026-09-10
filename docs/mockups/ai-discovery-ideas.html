@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Discovery Hub Redesign</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0f172a;
+            --primary-light: #1e293b;
+            --accent: #2271b1;
+            --bg: #f4f7f9;
+            --card: #ffffff;
+            --text: #334155;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding: 40px; margin: 0; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { color: var(--primary); margin-top: 0; }
+        .idea-section { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 30px; margin-bottom: 40px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .idea-title { font-size: 20px; font-weight: 800; color: var(--primary); margin: 0 0 15px 0; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        
+        /* Node Mapping Mockup */
+        .node-map { position: relative; height: 300px; background: var(--primary); border-radius: 8px; overflow: hidden; padding: 20px; color: #fff; }
+        .node { position: absolute; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 10px 15px; border-radius: 6px; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .node-center { top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--accent); border-color: #60a5fa; font-size: 14px; z-index: 10; }
+        .node-top { top: 15%; left: 20%; }
+        .node-bottom { bottom: 15%; right: 20%; }
+        .node-left { top: 40%; left: 10%; }
+        .node-right { top: 30%; right: 10%; }
+        
+        /* Line drawing mocks */
+        .svg-lines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        .svg-lines path { stroke: rgba(255,255,255,0.2); stroke-width: 2; fill: none; stroke-dasharray: 4 4; }
+
+        /* Card styles */
+        .setting-card { border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+        .setting-header { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; font-weight: 700; color: var(--primary); }
+        .setting-icon { width: 32px; height: 32px; background: #eef2ff; color: #4338ca; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Discovery UI Redesign</h1>
+        
+        <div class="idea-section">
+            <h2 class="idea-title">Concept A: The "Semantic Node Map" (Visual Hero)</h2>
+            <p style="margin-bottom: 25px;">Instead of a plain list of toggles at the top of the AI tab, we use `SVGMapper` or `ChartGenerator` to render an interactive or dynamic visual representation of the Discovery Endpoints.</p>
+            
+            <div class="grid-2">
+                <div class="node-map">
+                    <svg class="svg-lines">
+                        <path d="M 50% 50% L 20% 15%" />
+                        <path d="M 50% 50% L 80% 85%" />
+                        <path d="M 50% 50% L 10% 40%" />
+                        <path d="M 50% 50% L 90% 30%" />
+                    </svg>
+                    <div class="node node-center">🌐 Website Core</div>
+                    <div class="node node-top">📄 llms.txt</div>
+                    <div class="node node-bottom">🤖 AI Sitemap</div>
+                    <div class="node node-left">🔗 Knowledge Graph</div>
+                    <div class="node node-right">⚡ Action Catalog</div>
+                </div>
+                <div>
+                    <h3 style="margin-top:0;">What this achieves:</h3>
+                    <ul>
+                        <li>Immediately sells the "technological moat" concept.</li>
+                        <li>We can make the nodes light up green/red based on whether the user has the feature toggled on below.</li>
+                        <li>Uses the existing mathematical SVG generation we built for the reports.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="idea-section">
+            <h2 class="idea-title">Concept B: "Premium Protocol Cards" (Replacing old fieldsets)</h2>
+            <p style="margin-bottom: 25px;">Currently, `render_ai_sitemap_controls` and others use plain WordPress inputs. We convert these into standalone visual cards that look like high-end API configuration portals.</p>
+            
+            <div class="grid-2">
+                <div class="setting-card">
+                    <div class="setting-header">
+                        <div class="setting-icon">T</div>
+                        <span>Knowledge TL;DR Factory</span>
+                    </div>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Automatically generates high-density excerpts for llms-tldr.txt, focusing on core entities and takeaways.</p>
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span style="font-size: 13px; font-weight: 600;">Status:</span>
+                        <div style="background: var(--success); color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700;">ACTIVE</div>
+                    </div>
+                </div>
+                
+                <div class="setting-card">
+                    <div class="setting-header">
+                        <div class="setting-icon">R</div>
+                        <span>RAG Vector Chunks</span>
+                    </div>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Generates machine-ready JSON chunks for every post to eliminate context window friction.</p>
+                    <div style="background: #f8fafc; padding: 15px; border-radius: 6px; border: 1px solid var(--border);">
+                        <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px;">
+                            <span>Chunk Size</span> <strong>800 chars</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                            <span>Overlap</span> <strong>100 chars</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

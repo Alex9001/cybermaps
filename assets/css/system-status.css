@@ -1,0 +1,134 @@
+.cm-status-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: center;
+}
+
+.cm-status-feedback {
+	min-height: 20px;
+	font-weight: 600;
+}
+
+.cm-status-feedback.is-error {
+	color: #b42318;
+}
+
+.cm-status-table-wrap {
+	overflow-x: auto;
+}
+
+.cm-status-table th:first-child {
+	width: 18%;
+}
+
+.cm-status-pill {
+	display: inline-block;
+	margin-bottom: 4px;
+	padding: 2px 8px;
+	border: 1px solid #c3c4c7;
+	border-radius: 999px;
+	font-size: 12px;
+	font-weight: 700;
+}
+
+.cm-status-active {
+	border-color: #4f8a5b;
+	background: #edf7ef;
+	color: #285c32;
+}
+
+.cm-status-available,
+.cm-status-attention {
+	border-color: #dba617;
+	background: #fff8df;
+	color: #674e00;
+}
+
+.cm-status-unavailable {
+	border-color: #d63638;
+	background: #fcf0f1;
+	color: #8a2424;
+}
+
+.cm-edge-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 12px;
+	margin: 12px 0;
+}
+
+.cm-edge-stat {
+	padding: 12px;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+	background: #fff;
+}
+
+.cm-edge-stat strong {
+	display: block;
+	font-size: 20px;
+}
+
+.cm-cloudflare-token {
+	width: min(100%, 560px);
+}
+
+@media (max-width: 782px) {
+	.cm-status-table th:first-child {
+		width: auto;
+	}
+}
+.cybermaps-debug-card {
+	border-left: 4px solid #2271b1;
+}
+
+.cybermaps-debug-controls,
+.cybermaps-debug-actions {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin: 12px 0;
+}
+
+.cybermaps-debug-toggle {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-right: 10px;
+}
+
+.cybermaps-debug-events {
+	margin-top: 16px;
+}
+
+.cybermaps-debug-events summary {
+	cursor: pointer;
+	font-weight: 600;
+}
+
+.cybermaps-debug-log-list {
+	margin: 12px 0 0 20px;
+}
+
+.cybermaps-debug-log-list li {
+	margin-bottom: 12px;
+	overflow-wrap: anywhere;
+}
+
+.cybermaps-debug-log-list pre {
+	max-width: 100%;
+	margin: 5px 0 0;
+	padding: 8px;
+	overflow: auto;
+	background: #f6f7f7;
+}
+
+@media (max-width: 782px) {
+	.cybermaps-debug-controls,
+	.cybermaps-debug-actions {
+		align-items: stretch;
+		flex-direction: column;
+	}
+}

@@ -1,0 +1,122 @@
+name: Open beta bug report
+description: Help improve Cybermaps with reproduction steps and the plugin's diagnostic support bundle.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for testing the Cybermaps open beta! Report one problem per issue.
+        Give the title a specific symptom, for example: "News sitemap returns 404 after enabling static publication."
+        [Search existing issues](https://github.com/Alex9001/cybermaps/issues?q=is%3Aissue) first; add your evidence to an existing report if it matches.
+
+        **Include diagnostics from the plugin:**
+        1. In WordPress, open **Cybermaps → Debugging**.
+        2. If you can reproduce the issue safely, turn on **Enable diagnostic logging**, select **1 hour**, and repeat the steps that trigger it.
+        3. Click **Copy GitHub support bundle** and paste the result into the diagnostic field below. If copying fails, use **Download support bundle**, open the JSON file, and copy its contents.
+        4. Review the bundle and any screenshots before sharing. You can turn diagnostic logging off after collecting the bundle; it also expires automatically.
+
+        If Cybermaps or WordPress cannot open, submit the report anyway: explain why diagnostics are unavailable and provide the versions and exact error you can access.
+        These issues are public. Do not include configuration backups, passwords, API/IndexNow keys, cookies, raw IP addresses, private URLs, or customer data.
+        Report suspected security vulnerabilities [privately](https://github.com/Alex9001/cybermaps/security/advisories/new).
+  - type: input
+    id: cybermaps_version
+    attributes:
+      label: Cybermaps version or beta build
+      description: Use the exact version from Plugins or the support bundle. Include the commit or ZIP build identifier if known.
+      placeholder: "7.4.0; installed from the beta release ZIP"
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where does the problem occur?
+      options:
+        - Installation, activation, or upgrade
+        - Settings or admin interface
+        - XML, News, RSS, media, or HTML sitemaps
+        - llms.txt, full text, or Markdown
+        - AI discovery publications or agent tools
+        - Static files, server routing, cache, or CDN
+        - Identity, schema, or crawler policy
+        - Analytics, diagnostics, or reports
+        - Multisite, multilingual, or headless integration
+        - Other or not sure
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Include the starting settings, exact action or endpoint path, and where the problem appears. For an intermittent problem, describe the closest sequence you know.
+      placeholder: |
+        1. Start with ...
+        2. In Cybermaps → ..., enable ... and save.
+        3. Open /example-path or click ...
+        4. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+      placeholder: Describe the result you expected from those steps.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What actually happened?
+      description: Include the exact error text, affected endpoint path or admin screen, and HTTP status if available. Explain what work this blocks.
+    validations:
+      required: true
+  - type: dropdown
+    id: frequency
+    attributes:
+      label: How often does it happen?
+      options:
+        - Every time
+        - Sometimes
+        - Happened once
+        - Not sure yet
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostic_bundle
+    attributes:
+      label: Cybermaps diagnostic support bundle
+      description: Paste the output of Cybermaps → Debugging → Copy GitHub support bundle here. If unavailable, explain why and provide your WordPress/PHP versions, server, and single-site or multisite setup instead. Review all content before posting.
+      placeholder: Paste the support bundle JSON here, or explain why you could not collect it.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Relevant environment and recent changes
+      description: Add details that help reproduce this issue and are not already in the bundle. An exhaustive plugin list is not necessary.
+      placeholder: |
+        - SEO, cache/CDN, translation, or other relevant plugins and versions:
+        - Theme, browser/device (for interface issues), or hosting details:
+        - Static File Engine mode and relevant Cybermaps settings:
+        - Last version that worked, recent updates, or new settings:
+        - Any workaround or troubleshooting results:
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Screenshots or additional evidence
+      description: Attach cropped screenshots or paste relevant sanitized error lines. For delivery issues, include the affected path, HTTP status, Content-Type, and the relevant Sitemap Status or AI Discovery Status finding. Include time and timezone for intermittent errors. Do not upload full access logs or site backups.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and am reporting one problem.
+          required: true
+        - label: I included the Cybermaps support bundle, or explained why it is unavailable.
+          required: true
+        - label: I reviewed my report and removed secrets and personal data.
+          required: true
+        - label: This is not a security vulnerability report.
+          required: true

@@ -1,0 +1,169 @@
+/**
+ * Cybermaps admin styles for right-to-left WordPress locales.
+ *
+ * WordPress loads this after admin-command-center.css. Keep this file limited
+ * to directional overrides for selectors that exist in the shipped interface.
+ */
+
+.cybermaps-sidebar .button-link-item,
+.cybermaps-react-shell .components-tab-panel__tabs-item,
+.cybermaps-tab-content .form-table > tbody > tr > th,
+.cm-kpi-card {
+    text-align: right;
+}
+
+.cm-kpi-card {
+    border-right: 4px solid var(--cm-accent);
+    border-left: 1px solid var(--cm-border);
+}
+
+.cm-matrix-col-label {
+    align-items: flex-start;
+}
+
+.cm-matrix-col-intent {
+    text-align: right;
+}
+
+.cm-matrix-slider,
+.cm-matrix-slider-val {
+    direction: ltr;
+}
+
+tr.cybermaps-matrix-category td:first-child {
+    border-right: 4px solid var(--cm-accent) !important;
+    border-left: 1px solid #e2e8f0 !important;
+    text-align: right;
+}
+
+.cybermaps-category-disclosure .dashicons-arrow-right-alt2 {
+    transform: scaleX(-1);
+}
+
+.cybermaps-category-disclosure[aria-expanded="true"] .dashicons-arrow-right-alt2 {
+    transform: rotate(90deg);
+}
+
+.cm-toggle-switch::after {
+    right: 2px;
+    left: auto;
+}
+
+.cm-toggle-input:checked + .cm-toggle-switch::after {
+    transform: translateX(-16px);
+}
+
+.cm-toggle-wrapper.small .cm-toggle-switch::after {
+    right: 2px;
+    left: auto;
+}
+
+.cm-toggle-wrapper.small .cm-toggle-input:checked + .cm-toggle-switch::after {
+    transform: translateX(-16px);
+}
+
+.notice.is-dismissible {
+    padding-right: 12px;
+    padding-left: 38px;
+}
+
+.notice-dismiss {
+    right: auto;
+    left: 1px;
+}
+
+.cm-exchange-col:first-child {
+    border-right: 0;
+    border-left: 1px solid var(--cm-border);
+}
+
+.cm-report-section-heading > p {
+    text-align: left;
+}
+
+.cm-activity-feed {
+    padding-right: 20px;
+    padding-left: 0;
+}
+
+.cm-activity-feed::before {
+    right: 26px;
+    left: auto;
+}
+
+.cm-feed-item {
+    padding-right: 30px;
+    padding-left: 0;
+}
+
+.cm-feed-marker {
+    right: 1px;
+    left: auto;
+}
+
+.cm-status-notice-banner {
+    border-right: 5px solid var(--primary);
+    border-left: 1px solid #e2e8f0;
+}
+
+.cm-arch-item-label {
+    margin-right: auto;
+    margin-left: 0;
+}
+
+.cm-section-desc {
+    border-right: 3px solid #0ea5e9;
+    border-left: 1px solid #bae6fd;
+}
+
+.cm-field-hint {
+    margin-right: 6px;
+    margin-left: 0;
+}
+
+.cm-scope-badge {
+    margin-right: 8px;
+    margin-left: 0;
+}
+
+.cm-desc-example {
+    border-right: 3px solid #94a3b8;
+    border-left: 0;
+    border-radius: 4px 0 0 4px;
+}
+
+.cm-coverage-note {
+    border-right: 4px solid #2271b1;
+    border-left: 1px solid #dbe5ef;
+}
+
+.cm-filter-group > span {
+    margin-right: 0;
+    margin-left: 4px;
+}
+
+.cm-analytics-settings-form > .description {
+    margin-right: 48px;
+    margin-left: 0;
+}
+
+.cm-analytics-danger-zone {
+    border-right: 4px solid #d63638;
+    border-left: 1px solid var(--cm-border);
+}
+
+@media (max-width: 960px) {
+    .cm-exchange-col:first-child {
+        border-left: 0;
+    }
+}
+
+@media screen and (max-width: 782px) {
+    .cm-report-section-heading > p {
+        text-align: right;
+    }
+
+    .cm-analytics-settings-form > .description {
+        margin-right: 0;
+    }
+}

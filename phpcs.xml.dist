@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<ruleset name="Cybermaps">
+	<description>WordPress coding standards for the shipped Cybermaps PHP runtime.</description>
+
+	<arg name="basepath" value="."/>
+	<arg name="colors"/>
+	<arg name="extensions" value="php"/>
+	<arg name="parallel" value="8"/>
+	<arg value="ps"/>
+
+	<file>cybermaps.php</file>
+	<file>uninstall.php</file>
+	<file>src</file>
+
+	<exclude-pattern>*/clean/*</exclude-pattern>
+	<exclude-pattern>*/freemius/*</exclude-pattern>
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+
+	<config name="minimum_wp_version" value="7.0"/>
+
+	<rule ref="WordPress-Extra">
+		<!-- Cybermaps uses a namespace-to-path PSR-4 contract for production classes. -->
+		<exclude name="WordPress.Files.FileName"/>
+	</rule>
+
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="cybermaps"/>
+			</property>
+		</properties>
+	</rule>
+
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="cybermaps"/>
+				<element value="CYBERMAPS"/>
+				<element value="Cybermaps"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!-- Every shipped function, method, and closure must remain independently understandable. -->
+	<rule ref="Generic.Metrics.CyclomaticComplexity">
+		<properties>
+			<property name="complexity" value="10"/>
+			<property name="absoluteComplexity" value="10"/>
+		</properties>
+	</rule>
+
+	<!-- Documentation is enforced on the deliberately public extension contract. -->
+	<rule ref="WordPress-Docs">
+		<include-pattern>src/Core/ExtensionAPI.php</include-pattern>
+	</rule>
+</ruleset>
