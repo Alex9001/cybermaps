@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://cybermaps.dev/"><img src=".wordpress-org/banner-1544x500.png" width="100%" alt="Cybermaps — publish, verify, and improve WordPress XML sitemaps, llms.txt, Markdown, and JSON discovery"></a>
+  <img src=".wordpress-org/banner-1544x500.png" width="1544" alt="Cybermaps — publish, verify, and improve WordPress XML sitemaps, llms.txt, Markdown, and JSON discovery">
 </p>
 
 <p align="center">
