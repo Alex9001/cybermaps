@@ -14,14 +14,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  * caches, transients, and optional APCu are replaceable acceleration layers.
  */
 final class CacheManager {
-	private const INVENTORY_OPTION       = 'cybermaps_core_transient_inventory';
-	private const GENERATION_PREFIX      = 'cybermaps_cache_generation_';
-	private const CACHE_SCHEMA           = 2;
-	private const MAX_INVENTORY_SIZE     = 2000;
-	private const PART_BYTES             = 262144;
-	private const SEGMENT_THRESHOLD      = 524288;
-	private const DEFAULT_LEASE_SECONDS  = 30;
-	private const DEFAULT_WAIT_MICROTIME = 150000;
+	private const INVENTORY_OPTION      = 'cybermaps_core_transient_inventory';
+	private const GENERATION_PREFIX     = 'cybermaps_cache_generation_';
+	private const CACHE_SCHEMA          = 2;
+	private const MAX_INVENTORY_SIZE    = 2000;
+	private const PART_BYTES            = 262144;
+	private const SEGMENT_THRESHOLD     = 524288;
+	private const DEFAULT_LEASE_SECONDS = 60;
 
 	/** @var string[] */
 	private const FAMILIES = array(
@@ -228,43 +227,38 @@ final class CacheManager {
 		string $family,
 		callable $producer,
 		?callable $cacheable = null,
-		int $lease_seconds = self::DEFAULT_LEASE_SECONDS
+		int $lease_seconds = self::DEFAULT_LEASE_SECONDS,
+		bool $skip_cache = false
 	) {
-		$cached = self::get( $key, $family, $found );
-		if ( $found ) {
-			return $cached;
-		}
-
-		$family     = self::normalize_family( $family );
-		$generation = self::get_generation( $family );
-		$lease_key  = self::backend_key( $key . ':fill', $family, $generation );
-		$lease      = null;
-		$acquired   = self::acquire_lease(
-			$lease_key,
-			$family,
-			max( 1, $lease_seconds ),
-			$lease
-		);
-		if ( ! $acquired ) {
-			\usleep( self::DEFAULT_WAIT_MICROTIME );
+		$family = self::normalize_family( $family );
+		if ( ! $skip_cache ) {
 			$cached = self::get( $key, $family, $found );
 			if ( $found ) {
 				return $cached;
 			}
 		}
 
-		try {
-			$value = $producer();
-			if ( null === $cacheable || $cacheable( $value ) ) {
-				self::set_if_current( $key, $value, $expiration, $family, $generation );
+		$name = 'cybermaps_cache_fill_' . substr( hash( 'sha256', self::site_id() . '|' . $family . '|' . $key ), 0, 40 );
+		return CacheFill::run(
+			$name,
+			$lease_seconds,
+			static function () use ( $key, $expiration, $family, $producer, $cacheable, $skip_cache ) {
+				// Another owner may have filled the cache before we acquired the lock.
+				if ( ! $skip_cache ) {
+					$cached = self::get( $key, $family, $found );
+					if ( $found ) {
+						return $cached;
+					}
+				}
+				$generation = self::get_generation( $family, true );
+				$value      = $producer();
+				CacheFill::heartbeat( true );
+				if ( ! $skip_cache && ( null === $cacheable || $cacheable( $value ) ) ) {
+					self::set_if_current( $key, $value, $expiration, $family, $generation );
+				}
+				return $value;
 			}
-		} finally {
-			if ( $acquired && \is_array( $lease ) ) {
-				self::release_fill_lease( $lease );
-			}
-		}
-
-		return $value;
+		);
 	}
 
 	/**
@@ -544,49 +538,6 @@ final class CacheManager {
 			);
 		}
 		return $acquired;
-	}
-
-	/**
-	 * Release a database fill lease only while its exact token still owns it.
-	 *
-	 * @param array<string,mixed> $lease Lease metadata.
-	 */
-	private static function release_fill_lease( array $lease ): void {
-		if ( 'option' !== (string) ( $lease['backend'] ?? '' ) ) {
-			return;
-		}
-		$option = (string) ( $lease['option'] ?? '' );
-		$token  = (string) ( $lease['token'] ?? '' );
-		$value  = $lease['value'] ?? null;
-		if ( '' === $option || '' === $token || ! \is_array( $value ) ) {
-			return;
-		}
-
-		if ( self::release_database_fill_lease( $option, $value ) ) {
-			return;
-		}
-		self::release_option_fill_lease( $option, $token );
-	}
-
-	private static function release_database_fill_lease( string $option, array $value ): bool {
-		global $wpdb;
-		if ( ! ( \class_exists( '\\wpdb', false ) && $wpdb instanceof \wpdb && ! empty( $wpdb->options ) ) ) {
-			return false;
-		}
-		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE option_name = %s AND option_value = %s', $wpdb->options, $option, \maybe_serialize( $value ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Token-matched deletion prevents an expired producer from deleting its successor's lease.
-		if ( \function_exists( 'wp_cache_delete' ) ) {
-			\wp_cache_delete( $option, 'options' );
-			\wp_cache_delete( 'notoptions', 'options' );
-			\wp_cache_delete( 'alloptions', 'options' );
-		}
-		return true;
-	}
-
-	private static function release_option_fill_lease( string $option, string $token ): void {
-		$current = \get_option( $option, null );
-		if ( \is_array( $current ) && \is_scalar( $current['token'] ?? null ) && \hash_equals( $token, (string) $current['token'] ) ) {
-			\delete_option( $option );
-		}
 	}
 
 	private static function delete_parts( string $key, string $family, int $count ): void {

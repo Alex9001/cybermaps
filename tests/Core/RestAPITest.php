@@ -37,6 +37,29 @@ class RestAPITest extends \WP_UnitTestCase {
 		parent::tearDown();
 	}
 
+	public function test_unavailable_briefing_is_retryable_and_never_gets_public_cache_validators(): void {
+		\cybermaps_mock_reset_cache_runtime();
+		\Cybermaps\Core\CacheManager::clear_family( 'discovery' );
+		$GLOBALS['cybermaps_mock_post_types'] = array( 'post' );
+		$GLOBALS['cybermaps_mock_post_type_objects'] = array( 'post' => (object) array( 'public' => true ) );
+		$GLOBALS['cybermaps_mock_get_posts_callback'] = static function (): never {
+			throw new \Cybermaps\Core\BuildUnavailableException( 'A build already owns this publication.' );
+		};
+		try {
+			$api = new RestAPI();
+			$response = $api->get_llms_tldr();
+			$request = new class { public function get_route(): string { return '/cybermaps/v1/llms-tldr'; } };
+			$response = $api->add_public_cache_validators( $response, null, $request );
+			self::assertSame( 503, $response->get_status() );
+			self::assertSame( 'cybermaps_publication_unavailable', $response->get_data()['code'] );
+			self::assertSame( '5', (string) $response->get_headers()['Retry-After'] );
+			self::assertStringContainsString( 'no-store', $response->get_headers()['Cache-Control'] );
+			self::assertArrayNotHasKey( 'ETag', $response->get_headers() );
+		} finally {
+			unset( $GLOBALS['cybermaps_mock_get_posts_callback'] );
+		}
+	}
+
 	public function test_public_discovery_response_gets_cache_validators(): void {
 		$request = new class() {
 			public function get_route(): string {

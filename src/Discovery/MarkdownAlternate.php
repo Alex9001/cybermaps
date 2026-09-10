@@ -104,7 +104,7 @@ final class MarkdownAlternate {
 			return '';
 		}
 
-		$canonical = URLManager::rewrite_url( (string) \get_permalink( $post_id ) );
+		$canonical = URLManager::rewrite_url( (string) \get_permalink( $post ) );
 		if ( '' === $canonical ) {
 			return '';
 		}

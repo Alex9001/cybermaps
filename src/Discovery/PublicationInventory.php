@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Cybermaps\Discovery;
 
 use Cybermaps\SEO\PublicationEligibility;
+use Cybermaps\Core\BuildUnavailableException;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -33,7 +34,7 @@ final class PublicationInventory {
 	 * Iterate through the complete eligible inventory without retaining every
 	 * post object in one PHP array.
 	 *
-	 * Posts are fetched in small, non-caching batches. Iterating one configured
+	 * Posts are fetched in small batches without populating the post-object cache. Iterating one configured
 	 * type at a time preserves the documented type priority followed by
 	 * modified-descending, ID-ascending order without a whole-corpus sort or an
 	 * N+1 query for every post.
@@ -41,7 +42,8 @@ final class PublicationInventory {
 	 * @param int[] $skip_ids Eligible IDs the caller already emitted.
 	 * @return \Generator<int, object>
 	 */
-	public function iterate_posts( array $skip_ids = array() ): \Generator {
+	public function iterate_posts( array $skip_ids = array(), ?PublicationScanBudget $budget = null ): \Generator {
+		$budget   ??= new PublicationScanBudget();
 		$post_types = $this->post_types();
 		if ( empty( $post_types ) ) {
 			return;
@@ -56,7 +58,10 @@ final class PublicationInventory {
 			true
 		);
 		foreach ( $post_types as $post_type ) {
-			yield from $this->iterate_post_type( $post_type, $skip );
+			yield from $this->iterate_post_type( $post_type, $skip, $budget );
+			if ( $budget->truncated() ) {
+				return;
+			}
 		}
 	}
 
@@ -64,7 +69,8 @@ final class PublicationInventory {
 	 * @param array<int,bool> $skip IDs already emitted.
 	 * @return \Generator<int,object>
 	 */
-	private function iterate_post_type( string $post_type, array $skip ): \Generator {
+	private function iterate_post_type( string $post_type, array $skip, PublicationScanBudget $budget ): \Generator {
+		$budget->checkpoint();
 		$snapshot_id    = $this->snapshot_max_id( $post_type );
 		$after_modified = '';
 		$after_id       = 0;
@@ -72,39 +78,38 @@ final class PublicationInventory {
 			return;
 		}
 		do {
-			$previous_modified = $after_modified;
-			$previous_id       = $after_id;
-			$candidates        = $this->get_keyset_posts(
-				$this->batch_args( $post_type, $snapshot_id, $after_modified, $after_id )
-			);
-			if ( ! is_array( $candidates ) ) {
-				break;
-			}
-			$candidate_count = count( $candidates );
-			$this->prime_candidates( $candidates, $post_type );
+			$budget->checkpoint();
+			$batch_size             = min( self::QUERY_BATCH_SIZE, 1 + min( self::QUERY_BATCH_SIZE, $budget->remaining() ) );
+			$args                   = $this->batch_args( $post_type, $snapshot_id, $after_modified, $after_id );
+			$args['posts_per_page'] = $batch_size;
+			$candidates             = $this->get_inventory_posts( $args );
+			$budget->checkpoint();
+			$this->prime_candidates( array_slice( $candidates, 0, $budget->remaining() ), $post_type );
 			foreach ( $candidates as $candidate ) {
-				$state = $this->candidate_state( $candidate, $skip );
-				if ( $state['eligible'] ) {
+				$state = $this->candidate_state( $candidate );
+				$this->require_cursor_progress( $after_modified, $after_id, $state['modified'], $state['id'] );
+				$after_modified = $state['modified'];
+				$after_id       = $state['id'];
+				if ( isset( $skip[ $after_id ] ) ) {
+					continue;
+				}
+				if ( ! $budget->claim() ) {
+					return;
+				}
+				if ( $this->eligibility->post( $state['post'], PublicationEligibility::AI )->indexable ) {
 					yield $state['post'];
 				}
-				if ( null !== $state['modified'] ) {
-					$after_modified = $state['modified'];
-					$after_id       = $state['id'];
-				}
 			}
-			$this->require_cursor_progress( $candidate_count, $previous_modified, $previous_id, $after_modified, $after_id );
-			$this->flush_runtime_cache();
+			$budget->checkpoint();
 			$this->heartbeat_static_operation();
-		} while ( self::QUERY_BATCH_SIZE === $candidate_count );
+			$candidate_count = count( $candidates );
+		} while ( $batch_size === $candidate_count );
 	}
 
-	/** Fail explicitly if another query filter prevents the next batch advancing. */
-	private function require_cursor_progress( int $count, string $previous, int $previous_id, string $current, int $current_id ): void {
-		if ( self::QUERY_BATCH_SIZE !== $count ) {
-			return;
-		}
-		if ( '' === $current || $current_id < 1 || ( '' !== $previous && ( $current > $previous || ( $current === $previous && $current_id <= $previous_id ) ) ) ) {
-			throw new \RuntimeException( esc_html__( 'Cybermaps stopped publication because content pagination did not advance. No complete publication was produced.', 'cybermaps' ) );
+	/** Reject repeated or reversed rows before SEO checks and emission. */
+	private function require_cursor_progress( string $previous, int $previous_id, ?string $current, int $current_id ): void {
+		if ( null === $current || '' === $current || $current_id < 1 || ( '' !== $previous && ( $current > $previous || ( $current === $previous && $current_id <= $previous_id ) ) ) ) {
+			throw new BuildUnavailableException( esc_html__( 'Cybermaps stopped publication because content pagination did not advance. No complete publication was produced.', 'cybermaps' ) );
 		}
 	}
 
@@ -133,7 +138,7 @@ final class PublicationInventory {
 	/**
 	 * @param array<int,mixed> $candidates Candidate posts or IDs.
 	 */
-	private function prime_candidates( array $candidates, string $post_type ): void {
+	private function prime_candidates( array $candidates, string|array $post_type ): void {
 		$ids = array();
 		foreach ( $candidates as $candidate ) {
 			$post_id = is_object( $candidate ) && isset( $candidate->ID )
@@ -153,23 +158,18 @@ final class PublicationInventory {
 	}
 
 	/**
-	 * @param array<int,bool> $skip IDs already emitted.
-	 * @return array{post:mixed,id:int,modified:?string,eligible:bool}
+	 * @return array{post:mixed,id:int,modified:?string}
 	 */
-	private function candidate_state( mixed $candidate, array $skip ): array {
+	private function candidate_state( mixed $candidate ): array {
 		$post     = is_object( $candidate ) ? $candidate : get_post( absint( $candidate ) );
 		$post_id  = is_object( $post ) && isset( $post->ID ) ? (int) $post->ID : 0;
 		$modified = is_object( $post )
 			? (string) ( $post->post_modified ?? $post->post_modified_gmt ?? $post->post_date_gmt ?? '' )
 			: null;
-		$eligible = $post_id > 0
-			&& ! isset( $skip[ $post_id ] )
-			&& $this->eligibility->post( $post, PublicationEligibility::AI )->indexable;
 		return array(
 			'post'     => $post,
 			'id'       => $post_id,
 			'modified' => $modified,
-			'eligible' => $eligible,
 		);
 	}
 
@@ -201,11 +201,13 @@ final class PublicationInventory {
 	 * @param array<string,mixed> $args Query arguments.
 	 * @return object[]
 	 */
-	private function get_keyset_posts( array $args ): array {
+	private function get_inventory_posts( array $args ): array {
 		// get_posts() suppresses posts_where by default, which would repeat page one.
-		$args['suppress_filters'] = false;
-		$filter                   = static function ( string $where, $query ): string {
-			if ( ! \is_object( $query ) || ! \method_exists( $query, 'get' ) ) {
+		$args['suppress_filters']          = false;
+		$marker                            = new \stdClass();
+		$args['cybermaps_inventory_query'] = $marker;
+		$filter                            = static function ( string $where, $query ) use ( $marker ): string {
+			if ( ! \is_object( $query ) || ! \method_exists( $query, 'get' ) || $marker !== $query->get( 'cybermaps_inventory_query' ) ) {
 				return $where;
 			}
 			$snapshot = (int) $query->get( 'cybermaps_snapshot_id' );
@@ -231,11 +233,17 @@ final class PublicationInventory {
 			return $where;
 		};
 
+		// WP_Query otherwise primes every post through the external cache even
+		// with cache_results=false. Fetch these small batches as complete rows.
+		$split_filter = static fn( bool $split, $query ): bool =>
+			is_object( $query ) && method_exists( $query, 'get' ) && $marker === $query->get( 'cybermaps_inventory_query' ) ? false : $split;
+		\add_filter( 'split_the_query', $split_filter, PHP_INT_MAX, 2 );
 		\add_filter( 'posts_where', $filter, 10, 2 );
 		try {
 			$candidates = get_posts( $args );
 		} finally {
 			\remove_filter( 'posts_where', $filter, 10 );
+			\remove_filter( 'split_the_query', $split_filter, PHP_INT_MAX );
 		}
 		return \is_array( $candidates ) ? \array_values( $candidates ) : array();
 	}
@@ -274,8 +282,9 @@ final class PublicationInventory {
 	 * @param int[] $ids Candidate post IDs.
 	 * @return \Generator<int, object>
 	 */
-	public function iterate_posts_by_ids( array $ids ): \Generator {
-		$ids = array_values(
+	public function iterate_posts_by_ids( array $ids, ?PublicationScanBudget $budget = null ): \Generator {
+		$budget ??= new PublicationScanBudget();
+		$ids      = array_values(
 			array_unique(
 				array_filter(
 					array_map( 'absint', $ids )
@@ -287,6 +296,7 @@ final class PublicationInventory {
 		}
 
 		foreach ( array_chunk( $ids, self::QUERY_BATCH_SIZE ) as $batch_ids ) {
+			$budget->checkpoint();
 			$args       = $this->get_query_args(
 				array(
 					'post__in'               => $batch_ids,
@@ -297,33 +307,27 @@ final class PublicationInventory {
 					'update_post_term_cache' => false,
 				)
 			);
-			$candidates = get_posts( $args );
-			if ( ! is_array( $candidates ) ) {
-				continue;
-			}
-
-			$eligible_by_id = array();
+			$candidates = $this->get_inventory_posts( $args );
+			$by_id      = array();
 			foreach ( $candidates as $candidate ) {
-				$post = is_object( $candidate )
-					? $candidate
-					: get_post( absint( $candidate ) );
-				if (
-					is_object( $post )
-					&& isset( $post->ID )
-					&& $this->eligibility->post( $post, PublicationEligibility::AI )->indexable
-				) {
-					$eligible_by_id[ (int) $post->ID ] = $post;
+				$state = $this->candidate_state( $candidate );
+				if ( $state['id'] > 0 ) {
+					$by_id[ $state['id'] ] = $state['post'];
 				}
 			}
-
-			foreach ( $batch_ids as $id ) {
-				if ( isset( $eligible_by_id[ $id ] ) ) {
-					yield $eligible_by_id[ $id ];
+			// Reorder before priming and evaluating, including when filters reorder rows.
+			$ordered = array_intersect_key( array_flip( $batch_ids ), $by_id );
+			$ordered = array_replace( $ordered, array_intersect_key( $by_id, $ordered ) );
+			$this->prime_candidates( array_slice( array_values( $ordered ), 0, $budget->remaining() ), $this->post_types() );
+			foreach ( $ordered as $post ) {
+				if ( ! $budget->claim() ) {
+					return;
+				}
+				if ( $this->eligibility->post( $post, PublicationEligibility::AI )->indexable ) {
+					yield $post;
 				}
 			}
-
-			unset( $candidates, $eligible_by_id );
-			$this->flush_runtime_cache();
+			$budget->checkpoint();
 			$this->heartbeat_static_operation();
 		}
 	}
@@ -391,24 +395,6 @@ final class PublicationInventory {
 		}
 
 		return $args;
-	}
-
-	/**
-	 * Release post/meta/term objects accumulated by a completed iterator slice.
-	 *
-	 * WordPress 7 provides a runtime-only flush. Object-cache drop-ins without
-	 * that capability are left untouched rather than flushing persistent data.
-	 */
-	private function flush_runtime_cache(): void {
-		if (
-			function_exists( 'wp_cache_flush_runtime' )
-			&& (
-				! function_exists( 'wp_cache_supports' )
-				|| wp_cache_supports( 'flush_runtime' )
-			)
-		) {
-			wp_cache_flush_runtime();
-		}
 	}
 
 	/**

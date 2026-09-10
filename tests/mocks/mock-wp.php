@@ -363,6 +363,7 @@ function mysql2date( $format, $date, $translate = true ) {
  * Mock get_permalink
  */
 function get_permalink( $id ) {
+	$id = is_object( $id ) ? (int) $id->ID : (int) $id;
 	if (
 		isset( $GLOBALS['cybermaps_mock_permalinks'] )
 		&& array_key_exists( (int) $id, $GLOBALS['cybermaps_mock_permalinks'] )
@@ -564,6 +565,9 @@ function wp_hash( $data, $scheme = 'auth', $algo = 'md5' ) {
  * Mock get_post
  */
 function get_post( $id ) {
+	if ( is_object( $id ) ) {
+		return $id;
+	}
 	global $cybermaps_mock_posts;
 	return isset( $cybermaps_mock_posts[ $id ] ) ? $cybermaps_mock_posts[ $id ] : null;
 }
@@ -917,6 +921,9 @@ function wp_dropdown_pages( $args = array() ) {
  * Mock get_post_meta
  */
 function get_post_meta( $id, $key, $single = false ) {
+	if ( isset( $GLOBALS['cybermaps_mock_post_meta_observer'] ) ) {
+		( $GLOBALS['cybermaps_mock_post_meta_observer'] )( $id, $key );
+	}
 	global $cybermaps_mock_post_meta;
 	if ( isset( $cybermaps_mock_post_meta[ $id ][ $key ] ) ) {
 		return $single ? $cybermaps_mock_post_meta[ $id ][ $key ] : array( $cybermaps_mock_post_meta[ $id ][ $key ] );
@@ -925,6 +932,9 @@ function get_post_meta( $id, $key, $single = false ) {
 }
 
 function update_postmeta_cache( $post_ids ) {
+	if ( isset( $GLOBALS['cybermaps_mock_prime_post_meta_observer'] ) ) {
+		( $GLOBALS['cybermaps_mock_prime_post_meta_observer'] )( $post_ids );
+	}
 	unset( $post_ids );
 }
 

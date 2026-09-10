@@ -136,6 +136,101 @@ final class PublicationInventoryTest extends \WP_UnitTestCase {
 		$this->assertSame( 30, $GLOBALS['cybermaps_mock_get_posts_args'][0]['posts_per_page'] );
 	}
 
+	protected function tearDown(): void {
+		unset( $GLOBALS['cybermaps_mock_post_meta_observer'], $GLOBALS['cybermaps_mock_prime_post_meta_observer'], $GLOBALS['cybermaps_mock_get_posts_callback'] );
+		parent::tearDown();
+	}
+
+	public function test_raw_candidate_budget_bounds_metadata_even_when_every_post_is_excluded(): void {
+		for ( $id = 1; $id <= 600; ++$id ) {
+			$GLOBALS['cybermaps_mock_posts'][ $id ] = $this->post( $id );
+			$GLOBALS['cybermaps_mock_post_meta'][ $id ]['_cybermaps_exclude_ai'] = '1';
+		}
+		$read_ids = array();
+		$primed = array();
+		$GLOBALS['cybermaps_mock_post_meta_observer'] = static function ( $id ) use ( &$read_ids ): void { $read_ids[ $id ] = true; };
+		$GLOBALS['cybermaps_mock_prime_post_meta_observer'] = static function ( $ids ) use ( &$primed ): void { $primed = array_merge( $primed, $ids ); };
+		$scan = new \Cybermaps\Discovery\PublicationScanBudget( 250 );
+		$inventory = new PublicationInventory( array( 'llms_included_types' => array( 'post' ) ) );
+		self::assertSame( array(), iterator_to_array( $inventory->iterate_posts( array(), $scan ), false ) );
+		self::assertSame( 250, $scan->scanned() );
+		self::assertTrue( $scan->truncated() );
+		self::assertSame( range( 1, 250 ), array_keys( $read_ids ) );
+		self::assertSame( range( 1, 250 ), $primed );
+		self::assertSame( array( 1, 100, 100, 51 ), array_column( $GLOBALS['cybermaps_mock_get_posts_args'], 'posts_per_page' ) );
+	}
+
+	public function test_pinned_and_regular_posts_share_one_budget_without_rechecking_pinned_ids(): void {
+		for ( $id = 1; $id <= 20; ++$id ) {
+			$GLOBALS['cybermaps_mock_posts'][ $id ] = $this->post( $id );
+		}
+		$GLOBALS['cybermaps_mock_post_meta'][20]['_cybermaps_exclude_ai'] = '1';
+		$scan = new \Cybermaps\Discovery\PublicationScanBudget( 5 );
+		$inventory = new PublicationInventory( array( 'llms_included_types' => array( 'post' ) ) );
+		$pinned = iterator_to_array( $inventory->iterate_posts_by_ids( array( 20, 1, 19 ), $scan ), false );
+		$rest = iterator_to_array( $inventory->iterate_posts( array( 20, 1, 19 ), $scan ), false );
+		self::assertSame( array( 1, 19, 2, 3 ), array_column( array_merge( $pinned, $rest ), 'ID' ) );
+		self::assertSame( 5, $scan->scanned() );
+		self::assertTrue( $scan->truncated() );
+	}
+
+	public function test_complete_inventory_crosses_batch_boundaries_with_equal_timestamps(): void {
+		for ( $id = 1; $id <= 225; ++$id ) {
+			$post = $this->post( $id );
+			$post->post_modified_gmt = '2026-09-01 00:00:00';
+			$GLOBALS['cybermaps_mock_posts'][ $id ] = $post;
+		}
+		$inventory = new PublicationInventory( array( 'llms_included_types' => array( 'post' ) ) );
+		self::assertSame( range( 1, 225 ), array_column( iterator_to_array( $inventory->iterate_posts(), false ), 'ID' ) );
+	}
+
+	public function test_repeated_batch_fails_before_emitting_a_duplicate(): void {
+		$posts = array_map( fn ( int $id ): object => $this->post( $id ), range( 1, 100 ) );
+		$GLOBALS['cybermaps_mock_get_posts_callback'] = static fn( $args ): array => 'ids' === ( $args['fields'] ?? '' ) ? array( 100 ) : $posts;
+		$inventory = new PublicationInventory( array( 'llms_included_types' => array( 'post' ) ) );
+		$emitted = array();
+		try {
+			foreach ( $inventory->iterate_posts() as $post ) { $emitted[] = $post->ID; }
+			self::fail( 'Repeated pagination must fail.' );
+		} catch ( \Cybermaps\Core\BuildUnavailableException $error ) {
+			self::assertStringContainsString( 'pagination', $error->getMessage() );
+		}
+		self::assertSame( range( 1, 100 ), $emitted );
+	}
+
+	public function test_split_query_filter_is_scoped_and_removed_even_when_query_fails(): void {
+		$matched_query = null;
+		$GLOBALS['cybermaps_mock_get_posts_callback'] = static function ( $args ) use ( &$matched_query ): array {
+			if ( 'ids' === ( $args['fields'] ?? '' ) ) { return array( 1 ); }
+			self::assertFalse( $args['suppress_filters'] );
+			$matched_query = new class( $args ) {
+				public function __construct( private array $args ) {}
+				public function get( $key ) { return $this->args[ $key ] ?? null; }
+			};
+			$other_query = new class { public function get( $key ) { return null; } };
+			self::assertFalse( self::apply_split_filters( $matched_query ) );
+			self::assertTrue( self::apply_split_filters( $other_query ) );
+			throw new \RuntimeException( 'Query failed' );
+		};
+		try {
+			iterator_to_array( ( new PublicationInventory( array( 'llms_included_types' => array( 'post' ) ) ) )->iterate_posts() );
+			self::fail( 'Expected the query failure.' );
+		} catch ( \RuntimeException $error ) {
+			self::assertSame( 'Query failed', $error->getMessage() );
+		}
+		self::assertTrue( self::apply_split_filters( $matched_query ) );
+	}
+
+	private static function apply_split_filters( object $query ): bool {
+		$value = true;
+		foreach ( $GLOBALS['wp_hooks'] ?? array() as $hook ) {
+			if ( 'filter' === $hook['type'] && 'split_the_query' === $hook['hook'] ) {
+				$value = ( $hook['callback'] )( $value, $query );
+			}
+		}
+		return $value;
+	}
+
 	private function post( int $id ): object {
 		return (object) array(
 			'ID'                => $id,

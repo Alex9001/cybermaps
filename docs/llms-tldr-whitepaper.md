@@ -116,7 +116,8 @@ enforceability.
 
 ## Caching and delivery
 
-The canonical dynamic response uses a one-hour WordPress transient. Content and
+Dynamic responses use a one-hour, generation-fenced WordPress cache with
+separate language keys. Content and
 relevant settings changes invalidate the discovery cache. With full static
 publication enabled, the same generated body can be materialized at
 `/llms-tldr.txt`; localized variants can also be materialized when translation
@@ -124,6 +125,13 @@ output is configured.
 
 Physical delivery bypasses PHP. It therefore cannot appear in PHP-observed
 crawler analytics and uses server-controlled response headers.
+
+Generation examines at most 250 candidates across pinned and ordinary passes,
+counting each candidate before SEO checks. `Candidate-Scan` reports examined
+candidates separately from eligible entries, and flags truncation only when
+another candidate remains beyond that limit. Builds share a durable ownership
+lock and a cooperative 20-second work deadline; an unfinished build is a
+retryable failure and never replaces a successful publication.
 
 ## Limitations
 

@@ -5,6 +5,7 @@ namespace Cybermaps\Discovery;
 
 use Cybermaps\Content\VisibleTextExtractor;
 use Cybermaps\Core\CacheManager;
+use Cybermaps\Core\BuildUnavailableException;
 use Cybermaps\Core\EndpointRegistry;
 use Cybermaps\Core\URLManager;
 use Cybermaps\Sitemap\Orchestrator;
@@ -58,12 +59,14 @@ class LLMS {
 
 		try {
 			try {
-				$output = $this->get_llms_content( $is_full, '' !== $lang, $lang );
+				$output = $this->get_llms_content( $is_full, false, $lang );
 			} finally {
 				if ( '' !== $lang ) {
 					\Cybermaps\Core\TranslationHelper::switch_to_language( $original_language );
 				}
 			}
+		} catch ( BuildUnavailableException $error ) {
+			PublicationRequestGuard::serve_unavailable( $error );
 		} catch ( PublicationSizeLimitException $error ) {
 			$this->serve_size_limit_error( $error );
 		}
@@ -86,10 +89,12 @@ class LLMS {
 		bool $skip_cache = false,
 		string $language = ''
 	): string {
-		// Canonical caches are not language-keyed. A localized caller must always
-		// build from its explicit translation context.
-		$skip_cache = $skip_cache || '' !== $language;
-		$producer   = function () use ( $is_full, $language ): string {
+		// Language variants share generation fences, but never cached bodies.
+		$key = $is_full ? self::FULL_CACHE_KEY : self::SUMMARY_CACHE_KEY;
+		if ( '' !== $language ) {
+			$key .= ':' . sanitize_key( $language );
+		}
+		$producer = function () use ( $is_full, $language ): string {
 			$settings  = \Cybermaps\Core\ConfigurationStore::settings();
 			$inventory = new PublicationInventory( $settings, null, $language );
 			$extractor = new VisibleTextExtractor();
@@ -98,12 +103,8 @@ class LLMS {
 				: $this->generate_summary( $settings, $inventory, $extractor );
 		};
 
-		if ( $is_full || $skip_cache ) {
-			return $producer();
-		}
-
 		return (string) CacheManager::remember(
-			self::SUMMARY_CACHE_KEY,
+			$key,
 			self::CACHE_TTL,
 			'discovery',
 			$producer,
@@ -111,7 +112,9 @@ class LLMS {
 				\is_string( $output )
 				&& '' !== $output
 				&& \strlen( $output ) <= self::OUTPUT_MAX_BYTES
-				&& $this->can_cache_without_large_database_value( $output )
+				&& $this->can_cache_without_large_database_value( $output ),
+			60,
+			$skip_cache || $is_full
 		);
 	}
 
@@ -174,7 +177,7 @@ class LLMS {
 		$this->append_complete( $output, '# ' . $this->markdown_text( $title ) . "\n\n", 'llms.txt' );
 		$this->append_summary_intro( $output, $mission, $guidance, $settings );
 		$counts = $this->append_summary_entries( $output, $settings, $inventory, $extractor );
-		$this->append_summary_footer( $output, $settings, $counts['eligible'], $counts['selected'] );
+		$this->append_summary_footer( $output, $settings, $counts['eligible'], $counts['selected'], $counts['truncated'] );
 		return rtrim( $output ) . "\n";
 	}
 
@@ -216,7 +219,7 @@ class LLMS {
 
 	/**
 	 * @param array<string,mixed> $settings Current settings.
-	 * @return array{eligible:int,selected:int}
+	 * @return array{eligible:int,selected:int,truncated:bool}
 	 */
 	private function append_summary_entries(
 		string &$output,
@@ -230,7 +233,8 @@ class LLMS {
 		$link_limit        = PublicationConstraints::llms_link_limit(
 			$settings['llms_link_limit'] ?? PublicationConstraints::LLMS_LINK_LIMIT_DEFAULT
 		);
-		foreach ( $inventory->iterate_posts() as $post ) {
+		$scan              = new PublicationScanBudget( PublicationConstraints::SUMMARY_CANDIDATE_SCAN_MAX );
+		foreach ( $inventory->iterate_posts( array(), $scan ) as $post ) {
 			++$eligible_count;
 			if ( $selected_count >= $link_limit ) {
 				break;
@@ -249,11 +253,10 @@ class LLMS {
 				$current_post_type = $post_type;
 			}
 
-			$post_id    = (int) $post->ID;
-			$post_title = $this->markdown_text( (string) get_the_title( $post_id ) );
+			$post_title = $this->markdown_text( (string) get_the_title( $post ) );
 			$url        = MarkdownAlternate::url_for_post( $post );
 			if ( '' === $url ) {
-				$url = URLManager::rewrite_url( (string) get_permalink( $post_id ) );
+				$url = URLManager::rewrite_url( (string) get_permalink( $post ) );
 			}
 			$summary = $extractor->summary( $post, 40 );
 			$entry   = '- [' . $post_title . '](' . $url . ')';
@@ -263,9 +266,11 @@ class LLMS {
 			$this->append_complete( $output, $entry . "\n", 'llms.txt' );
 			++$selected_count;
 		}
+		$scan->checkpoint();
 		return array(
-			'eligible' => $eligible_count,
-			'selected' => $selected_count,
+			'eligible'  => $eligible_count,
+			'selected'  => $selected_count,
+			'truncated' => $scan->truncated(),
 		);
 	}
 
@@ -283,14 +288,17 @@ class LLMS {
 		string &$output,
 		array $settings,
 		int $eligible_count,
-		int $selected_count
+		int $selected_count,
+		bool $truncated
 	): void {
 		if ( $selected_count > 0 ) {
 			$this->append_complete( $output, "\n", 'llms.txt' );
-		} else {
+		} elseif ( ! $truncated ) {
 			$this->append_complete( $output, "No eligible published content is available.\n\n", 'llms.txt' );
 		}
-		if ( $eligible_count > $selected_count ) {
+		if ( $truncated ) {
+			$this->append_complete( $output, 'Coverage: selected ' . $selected_count . " eligible resources within the candidate scan limit; additional content may be available.\n\n", 'llms.txt' );
+		} elseif ( $eligible_count > $selected_count ) {
 			$this->append_complete(
 				$output,
 				'Coverage: selected ' . $selected_count . " eligible resources; additional eligible resources are available.\n\n",
@@ -305,7 +313,7 @@ class LLMS {
 		}
 
 		$resources = array();
-		if ( ! empty( $settings['llms_include_sitemap_link'] ) || $eligible_count > $selected_count ) {
+		if ( ! empty( $settings['llms_include_sitemap_link'] ) || $eligible_count > $selected_count || $truncated ) {
 			$base        = Orchestrator::get_sitemap_base();
 			$resources[] = '- [XML sitemap](' . URLManager::get_home_url( '/' . $base . '.xml' ) . ')';
 		}
@@ -392,9 +400,8 @@ class LLMS {
 	}
 
 	private function append_full_post( string &$output, object $post, VisibleTextExtractor $extractor ): void {
-		$post_id   = (int) $post->ID;
-		$title     = $this->markdown_text( (string) get_the_title( $post_id ) );
-		$url       = URLManager::rewrite_url( (string) get_permalink( $post_id ) );
+		$title     = $this->markdown_text( (string) get_the_title( $post ) );
+		$url       = URLManager::rewrite_url( (string) get_permalink( $post ) );
 		$modified  = (string) ( $post->post_modified_gmt ?? $post->post_date_gmt ?? '' );
 		$metadata  = '## ' . $title . "\n\n";
 		$metadata .= '- URL: ' . $url . "\n";

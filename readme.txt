@@ -3,12 +3,12 @@ Contributors: oreshkin
 Tags: sitemap, llms-txt, technical-seo, content-audit, indexnow
 Requires at least: 7.1
 Tested up to: 7.1
-Stable tag: 7.4.1
+Stable tag: 7.4.2
 Requires PHP: 8.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Publish sitemaps and machine-readable WordPress maps for search engines and agents.
+Publish WordPress sitemaps and machine-readable maps.
 
 == Description ==
 
@@ -30,18 +30,16 @@ Cybermaps honors Genesis/Mai, Yoast, Rank Math, and All in One SEO signals.
   OAuth/Auth.md, and enabled capability catalogs
 * Draft MCP Server Card, ARD AI Catalog, and read-only WebMCP tools
 
-No AI account is required; full output is bounded to 32 MiB.
+No AI account required. Full output: up to 32 MiB.
 
 = Flexible, verified delivery =
 
 Static modes are `off`, default `well_known`, and `all`. Dynamic routes retain
 CORS/validators; static files use ownership hashes and bounded safe repair.
 
-WordPress caches support Redis/Memcached and isolated APCu.
-LSCWP hooks and opt-in exact-URL Varnish PURGE are supported.
+Supports Redis/Memcached, isolated APCu, LSCWP, and opt-in Varnish PURGE.
 
-Debugging provides redacted support bundles. Advanced manages caches, Cloudflare
-OAuth, and temporary tokens.
+Debugging exports redacted support bundles; Advanced manages caches and tokens.
 
 = Standards and controlled agent access =
 
@@ -54,9 +52,9 @@ requires logged-in review.
 == Installation ==
 
 1. Install and activate Cybermaps.
-2. Optionally launch **Guided Setup** from **Cybermaps → Overview**.
-3. Review **XML Sitemaps**, configure **Schema**, then enable **AI Publishing** and guidance.
-4. Validate status; optionally enable **Discovery Analytics** and **Reports**.
+2. Run **Guided Setup** from **Cybermaps → Overview**.
+3. Review sitemaps, schema, and AI publishing.
+4. Validate status; optionally enable analytics and reports.
 
 == Frequently Asked Questions ==
 
@@ -122,6 +120,9 @@ Persistent settings, tables, and post metadata remain after uninstall unless
 **Uninstall Cleanup** was enabled beforehand.
 
 == Changelog ==
+
+= 7.4.2 =
+* Bounded LLMS work, prevented overlapping rebuilds, reduced cache reads, and corrected scan coverage.
 
 = 7.4.1 =
 * Hardened request sanitization and SQL identifiers; documented Plugin Check false positives.
@@ -199,6 +200,9 @@ Persistent settings, tables, and post metadata remain after uninstall unless
 Earlier release history is included in `changelog.txt`.
 
 == Upgrade Notice ==
+
+= 7.4.2 =
+Prevents overlapping LLMS rebuilds and bounds scans of excluded posts.
 
 = 7.4.1 =
 Improves request handling and WordPress.org Plugin Check compatibility.

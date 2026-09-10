@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Cybermaps\Discovery;
 
 use Cybermaps\Core\CacheManager;
+use Cybermaps\Core\BuildUnavailableException;
 use Cybermaps\Discovery\LLMSTLDR\LLMSTLDRGenerator;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -45,11 +46,15 @@ class LLMSTLDR {
 		}
 
 		try {
-			$output = $this->get_content( '' !== $lang, $lang );
-		} finally {
-			if ( '' !== $lang ) {
-				\Cybermaps\Core\TranslationHelper::switch_to_language( $original_language );
+			try {
+				$output = $this->get_content( false, $lang );
+			} finally {
+				if ( '' !== $lang ) {
+					\Cybermaps\Core\TranslationHelper::switch_to_language( $original_language );
+				}
 			}
+		} catch ( BuildUnavailableException $error ) {
+			PublicationRequestGuard::serve_unavailable( $error );
 		}
 
 		Integrity::send_headers( $output );
@@ -89,9 +94,11 @@ class LLMSTLDR {
 	}
 
 	public function get_content( bool $skip_cache = false, string $language = '' ): string {
-		// The canonical briefing cache is not language-keyed.
-		$skip_cache = $skip_cache || '' !== $language;
-		$producer   = static function () use ( $language ): string {
+		$key = self::CACHE_KEY;
+		if ( '' !== $language ) {
+			$key .= ':' . sanitize_key( $language );
+		}
+		$producer = static function () use ( $language ): string {
 			$settings = \Cybermaps\Core\ConfigurationStore::settings();
 			$result   = ( new LLMSTLDRGenerator( new PublicationInventory( $settings, null, $language ) ) )->generate_publication(
 				$settings,
@@ -99,12 +106,9 @@ class LLMSTLDR {
 			);
 			return (string) $result['output'];
 		};
-		if ( $skip_cache ) {
-			return $producer();
-		}
 
 		return (string) CacheManager::remember(
-			self::CACHE_KEY,
+			$key,
 			self::CACHE_TTL,
 			'discovery',
 			$producer,
@@ -115,7 +119,9 @@ class LLMSTLDR {
 				&& (
 					\strlen( $output ) <= self::DATABASE_CACHE_MAX_BYTES
 					|| ( \function_exists( 'wp_using_ext_object_cache' ) && \wp_using_ext_object_cache() )
-				)
+				),
+			60,
+			$skip_cache
 		);
 	}
 }

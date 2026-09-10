@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: CYBERMAPS: XML Sitemaps & llms.txt 7.4.1\n"
+"Project-Id-Version: CYBERMAPS: XML Sitemaps & llms.txt 7.4.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/cybermaps\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-10T14:22:44+00:00\n"
+"POT-Creation-Date: 2026-09-10T17:08:32+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: cybermaps\n"
@@ -8528,6 +8528,14 @@ msgstr ""
 msgid "Cybermaps Ability"
 msgstr ""
 
+#: src/Core/CacheFill.php:29
+msgid "Cybermaps is already building this publication. Please retry shortly."
+msgstr ""
+
+#: src/Core/CacheFill.php:51
+msgid "Cybermaps stopped publication because its build lock was lost. Please retry shortly."
+msgstr ""
+
 #. translators: %s: internal service identifier.
 #: src/Core/Container.php:47
 #, php-format
@@ -9126,23 +9134,23 @@ msgstr ""
 msgid "The MCP Server Card is unavailable while MCP is disabled."
 msgstr ""
 
-#: src/Core/RestAPI.php:366
+#: src/Core/RestAPI.php:376
 msgid "The experimental budgeted site briefing is disabled."
 msgstr ""
 
-#: src/Core/RestAPI.php:616
+#: src/Core/RestAPI.php:626
 msgid "No completed content report run exists."
 msgstr ""
 
-#: src/Core/RestAPI.php:640
+#: src/Core/RestAPI.php:650
 msgid "The requested content report run was not found."
 msgstr ""
 
-#: src/Core/RestAPI.php:654
+#: src/Core/RestAPI.php:664
 msgid "The saved content report is too large for a synchronous JSON response. Use the bounded CSV export from Reports."
 msgstr ""
 
-#: src/Core/RestAPI.php:666
+#: src/Core/RestAPI.php:676
 msgid "The saved content report could not be loaded from the database."
 msgstr ""
 
@@ -9275,7 +9283,7 @@ msgstr ""
 msgid "Public %s taxonomy."
 msgstr ""
 
-#: src/Discovery/LLMS.php:473
+#: src/Discovery/LLMS.php:480
 msgid "LLMS publication exceeds the safe output limit."
 msgstr ""
 
@@ -9382,11 +9390,11 @@ msgstr ""
 msgid "Related eligible resources are listed in suggested_alternatives."
 msgstr ""
 
-#: src/Discovery/PublicationInventory.php:107
+#: src/Discovery/PublicationInventory.php:112
 msgid "Cybermaps stopped publication because content pagination did not advance. No complete publication was produced."
 msgstr ""
 
-#: src/Discovery/PublicationInventory.php:431
+#: src/Discovery/PublicationInventory.php:417
 msgid "Static publication stopped because this request no longer owned its operation lock."
 msgstr ""
 
@@ -9396,6 +9404,10 @@ msgstr ""
 
 #: src/Discovery/PublicationRouter.php:85
 msgid "This publication is temporarily unavailable."
+msgstr ""
+
+#: src/Discovery/PublicationScanBudget.php:51
+msgid "Cybermaps stopped publication at its generation time limit. No partial publication was produced."
 msgstr ""
 
 #. translators: 1: publication filename, 2: maximum encoded bytes.

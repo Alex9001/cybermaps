@@ -51,6 +51,22 @@ final class LLMSSummaryTest extends \WP_UnitTestCase {
 		parent::tearDown();
 	}
 
+	public function test_summary_bounds_excluded_rows_and_does_not_claim_the_site_has_no_content(): void {
+		$template = $GLOBALS['cybermaps_mock_posts'][1];
+		$GLOBALS['cybermaps_mock_posts'] = array();
+		for ( $id = 1; $id <= 1200; ++$id ) {
+			$post = clone $template;
+			$post->ID = $id;
+			$GLOBALS['cybermaps_mock_posts'][ $id ] = $post;
+			if ( $id <= 1000 ) { $GLOBALS['cybermaps_mock_post_meta'][ $id ]['_cybermaps_exclude_ai'] = '1'; }
+		}
+		$output = ( new LLMS() )->get_llms_content( false, true );
+		self::assertStringContainsString( 'selected 0 eligible resources within the candidate scan limit', $output );
+		self::assertStringContainsString( 'additional content may be available', $output );
+		self::assertStringContainsString( '[XML sitemap]', $output );
+		self::assertStringNotContainsString( 'No eligible published content is available', $output );
+	}
+
 	public function test_concise_map_is_bounded_discloses_coverage_and_links_markdown(): void {
 		$output = ( new LLMS() )->get_llms_content();
 

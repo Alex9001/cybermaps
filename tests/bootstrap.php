@@ -241,9 +241,10 @@ if ( ! class_exists( 'WP_REST_Response', false ) ) {
 	private $headers = array();
 	private $status;
 
-	public function __construct( $data, $status = 200 ) {
+	public function __construct( $data, $status = 200, $headers = array() ) {
 		$this->data = $data;
 		$this->status = (int) $status;
+		$this->headers = $headers;
 	}
 
 	public function get_data() {

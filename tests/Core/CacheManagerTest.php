@@ -225,12 +225,77 @@ final class CacheManagerTest extends \WP_UnitTestCase {
 		$this->assertSame( 'built', CacheManager::remember( 'leased', HOUR_IN_SECONDS, 'discovery', $producer ) );
 		$this->assertSame( 'built', CacheManager::remember( 'leased', HOUR_IN_SECONDS, 'discovery', $producer ) );
 		$this->assertSame( 1, $builds );
-		$this->assertNotEmpty(
+		$this->assertEmpty(
 			array_filter(
 				array_keys( $GLOBALS['cybermaps_mock_object_cache'] ),
 				static fn( string $key ): bool => str_starts_with( $key, 'cybermaps_discovery_locks:' )
 			)
 		);
+	}
+
+	public function test_competing_fill_never_runs_without_ownership_even_after_invalidation_and_cache_eviction(): void {
+		foreach ( array( false, true ) as $external ) {
+			$GLOBALS['cybermaps_mock_using_ext_object_cache'] = $external;
+			$key = 'competing-' . (int) $external;
+			$builds = 0;
+			$owner = new \Fiber( static function () use ( $key, &$builds ): string {
+				return CacheManager::remember( $key, 60, 'discovery', static function () use ( &$builds ): string {
+					++$builds;
+					\Fiber::suspend();
+					return 'complete';
+				} );
+			} );
+			$owner->start();
+			CacheManager::clear_family( 'discovery' );
+			$GLOBALS['cybermaps_mock_object_cache'] = array();
+			try {
+				CacheManager::remember( $key, 60, 'discovery', static function () use ( &$builds ): string { ++$builds; return 'duplicate'; } );
+				self::fail( 'A competing producer must defer.' );
+			} catch ( \Cybermaps\Core\BuildUnavailableException $error ) {
+				self::assertSame( 1, $builds );
+			}
+			$owner->resume();
+			self::assertSame( 'complete', $owner->getReturn() );
+			CacheManager::get( $key, 'discovery', $found );
+			self::assertFalse( $found, 'An invalidated build must not populate the new generation.' );
+			self::assertSame( 'next', CacheManager::remember( $key, 60, 'discovery', static fn(): string => 'next' ) );
+		}
+	}
+
+	public function test_failed_and_uncacheable_fills_release_their_owner_immediately(): void {
+		foreach ( array( false, true ) as $external ) {
+			$GLOBALS['cybermaps_mock_using_ext_object_cache'] = $external;
+			$key = 'failure-' . (int) $external;
+			try {
+				CacheManager::remember( $key, 60, 'discovery', static function (): never { throw new \RuntimeException( 'producer failed' ); } );
+				self::fail( 'Expected producer failure.' );
+			} catch ( \RuntimeException $error ) {
+				self::assertSame( 'producer failed', $error->getMessage() );
+			}
+			self::assertSame( 'uncached', CacheManager::remember( $key, 60, 'discovery', static fn(): string => 'uncached', static fn(): bool => false ) );
+			self::assertSame( 'retry', CacheManager::remember( $key, 60, 'discovery', static fn(): string => 'retry' ) );
+		}
+	}
+
+	public function test_lost_fill_owner_cannot_cache_or_release_a_successors_lease(): void {
+		$successor = array( 'token' => 'successor-token', 'time' => time() );
+		$option = '';
+		try {
+			CacheManager::remember( 'lost-owner', 60, 'discovery', static function () use ( &$option, $successor ): string {
+				foreach ( array_keys( $GLOBALS['cybermaps_mock_options'] ) as $key ) {
+					if ( str_starts_with( $key, 'cybermaps_cache_fill_' ) ) { $option = $key; }
+				}
+				update_option( $option, $successor );
+				return 'unsafe';
+			} );
+			self::fail( 'Lost ownership must fail.' );
+		} catch ( \Cybermaps\Core\BuildUnavailableException $error ) {
+			self::assertStringContainsString( 'lock was lost', $error->getMessage() );
+		}
+		CacheManager::get( 'lost-owner', 'discovery', $found );
+		self::assertFalse( $found );
+		self::assertSame( $successor, get_option( $option ) );
+		delete_option( $option );
 	}
 
 	public function test_apcu_l1_is_generation_scoped_and_never_authoritative(): void {

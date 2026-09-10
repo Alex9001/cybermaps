@@ -26,6 +26,7 @@ final class PublicationConstraints {
 	public const CUSTOM_LINKS_MAX               = 100;
 	public const ACTION_MAPPINGS_MAX            = 100;
 	public const BRIEFING_PINNED_IDS_MAX        = 100;
+	public const SUMMARY_CANDIDATE_SCAN_MAX     = 1000;
 	public const BRIEFING_CANDIDATE_SCAN_MAX    = 250;
 	public const BRIEFING_TOKEN_BUDGET_MIN      = 1000;
 	public const BRIEFING_TOKEN_BUDGET_MAX      = 200000;

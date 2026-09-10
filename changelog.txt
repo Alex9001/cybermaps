@@ -1,6 +1,15 @@
 Cybermaps release history
 =========================
 
+7.4.2
+-----
+
+* Counted raw candidates before SEO evaluation: briefings share a 250-candidate budget across pinned and ordinary posts; summaries examine at most 1,000 candidates and disclose incomplete coverage.
+* Fetched inventory batches as complete post rows, retained hydrated objects through URL/title and SEO helpers, primed pinned metadata, and stopped flushing unrelated runtime cache entries between batches.
+* Serialized cached, forced, full, and localized LLMS generation with durable ownership leases and MySQL session fences where supported; cache invalidation and eviction cannot authorize another owner.
+* Added a cooperative 20-second generation deadline, early pagination-progress checks, and uncached HTTP 503 responses with Retry-After when a build cannot complete. Failed builds never populate caches or replace static publications.
+* Corrected candidate-scan reporting when SEO exclusions exhaust the inventory, and isolated localized publication caches.
+
 7.4.1
 -----
 

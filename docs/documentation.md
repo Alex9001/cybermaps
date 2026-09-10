@@ -1,6 +1,6 @@
 # Cybermaps — Technical Documentation
 
-> Version 7.4.1 · PHP 8.2 · WordPress 7.1
+> Version 7.4.2 · PHP 8.2 · WordPress 7.1
 
 Cybermaps is a fast sitemap and AI-discovery plugin for WordPress.
 It combines XML, RSS, and HTML sitemap publishing with compact machine-readable
@@ -485,17 +485,19 @@ OpenAPI contract; administrative and secret-authenticated routes are omitted.
 
 `/llms.txt` lists eligible resources in stable publication order with links to
 their literal Markdown alternates and compact extracts. Its configurable limit
-is clamped to 20–500 links, with a default of 100. The output reports selected
-and total eligible counts; when eligible resources overflow the limit, it also
-links the complete XML sitemap. Configured title, mission, sitemap reference,
+is clamped to 20–500 links, with a default of 100. The output reports selected resources and observed coverage. Summary generation
+examines at most 1,000 candidates, counting rows before SEO checks. When the
+link or candidate limit leaves more content to explore, the output discloses
+that boundary and links the complete XML sitemap. Configured title, mission, sitemap reference,
 license, and publisher guidance are included when available.
 
 `/llms-full.txt` is disabled by default because it can become large. It includes
 the literal visible stored text for eligible resources without executing
 shortcodes or dynamic blocks. LLMS inventory is traversed in bounded,
-non-caching post batches rather than loaded as one corpus. Core applies a 32 MiB full-corpus
-encoded-response safety ceiling to both LLMS text publications and never
-silently truncates either one. If a complete body would cross the ceiling, the
+non-caching post batches rather than loaded as one corpus. Core applies a 32 MiB
+full-corpus encoded-response ceiling and a 4 MiB summary ceiling, with additional
+PHP memory headroom checks. It never emits a truncated entry or labels a partial
+full-corpus response as complete. If a complete body would cross the ceiling, the
 dynamic route returns an explicit `507 application/problem+json` response and a
 static reconciliation records `publication_too_large` without writing a
 partial file. The full body is never stored in a transient or retained in the
@@ -511,10 +513,34 @@ The optional budgeted briefing:
 - estimates tokens as `ceil(UTF-8 bytes / 4)`; and
 - reports eligible, selected, omitted, and partial counts.
 
-The briefing counts and traverses the same batched inventory without retaining
-the complete post collection. Generated briefings larger than 512 KiB are
+The briefing examines at most 250 candidates across its pinned and regular
+passes. This count includes SEO-excluded candidates. Its Candidate-Scan field
+reports actual examined rows and whether another candidate remained beyond
+the limit; excluded posts alone do not make a completed scan "truncated". Generated briefings larger than 512 KiB are
 cached only when WordPress uses an external object cache, avoiding oversized
 database transients.
+
+All LLMS builds fetch batches as complete WordPress post rows and retain those
+objects through SEO, title, and permalink helpers. This avoids WordPress's split
+query path and its per-post external-cache reads. Metadata is primed for both
+pinned and regular batches. Inventory traversal does not flush the site's entire
+runtime object cache between batches.
+
+Cold builds use durable, site- and publication-specific ownership locks, shared
+by dynamic, REST, localized, full, and forced/static generation. Lock identity
+survives cache invalidation and eviction; supported MySQL/MariaDB installations
+also use a connection-bound fence. Localized cache bodies are language-keyed.
+A competing request receives `503`, `Retry-After: 5`, and `Cache-Control: no-store`
+unless it can serve an existing valid cached body. Leases renew during work and
+release on success or failure; a stopped worker's lease can be recovered.
+
+Generation checks a cooperative 20-second deadline between queries, candidate
+checks, and rendered entries. Lost ownership, stalled pagination, or an exceeded
+deadline produces the same retryable failure, without caching a partial body or
+replacing a static file. PHP cannot interrupt a blocked database/cache driver at
+these checkpoints: persistent transport stalls still require checking that
+backend's connection and read timeouts. The complete full-corpus publication is
+not subject to a candidate count cap.
 
 **Custom AI Instructions** are stored once and published as publisher guidance
 in `/llms.txt`, enabled `/llms-full.txt`, `/skill.md`, the discovery manifest,

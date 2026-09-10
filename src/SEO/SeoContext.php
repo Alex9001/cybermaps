@@ -46,7 +46,7 @@ final class SeoContext {
 		$object = is_object( $post ) ? $post : get_post( $post );
 		$id     = is_object( $object ) && isset( $object->ID ) ? (int) $object->ID : (int) $post;
 		$type   = is_object( $object ) && isset( $object->post_type ) ? (string) $object->post_type : '';
-		$url    = $id > 0 ? (string) get_permalink( $id ) : '';
+		$url    = $id > 0 ? (string) get_permalink( $object ?? $id ) : '';
 
 		return new self( self::POST, $id, $type, $url, $object );
 	}

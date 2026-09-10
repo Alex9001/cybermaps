@@ -6,6 +6,7 @@ namespace Cybermaps\Discovery\LLMSTLDR;
 use Cybermaps\Content\VisibleTextExtractor;
 use Cybermaps\Core\URLManager;
 use Cybermaps\Discovery\PublicationInventory;
+use Cybermaps\Discovery\PublicationScanBudget;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -58,16 +59,13 @@ final class LLMSTLDRGenerator {
 		$pinned_ids     = $this->pinned_ids( $settings['llms_pinned_ids'] ?? '' );
 		$eligible_count = 0;
 		$selected_count = 0;
-		$scanned_count  = 0;
-		$scan_limit     = \Cybermaps\Discovery\PublicationConstraints::BRIEFING_CANDIDATE_SCAN_MAX;
-		$scan_metadata  = $this->render_scan_metadata( min( $eligible_upper, $scan_limit ), $eligible_upper, $eligible_upper > $scan_limit );
-		$body           = '';
 
-		foreach ( $this->ordered_posts( $pinned_ids ) as $post ) {
-			if ( $scanned_count >= $scan_limit ) {
-				break;
-			}
-			++$scanned_count;
+		$scan_limit    = \Cybermaps\Discovery\PublicationConstraints::BRIEFING_CANDIDATE_SCAN_MAX;
+		$scan_metadata = $this->render_scan_metadata( min( $eligible_upper, $scan_limit ), $eligible_upper, $eligible_upper > $scan_limit );
+		$body          = '';
+		$scan          = new PublicationScanBudget( $scan_limit );
+
+		foreach ( $this->ordered_posts( $pinned_ids, $scan ) as $post ) {
 			++$eligible_count;
 			$entry         = $this->render_entry( $post );
 			$next_selected = $selected_count + 1;
@@ -93,7 +91,7 @@ final class LLMSTLDRGenerator {
 			$body          .= $entry;
 		}
 
-		$header         = $this->render_header(
+		$header = $this->render_header(
 			$settings,
 			$site_name,
 			$budget,
@@ -101,7 +99,9 @@ final class LLMSTLDRGenerator {
 			$selected_count,
 			max( 0, $eligible_count - $selected_count )
 		);
-		$scan_truncated = $eligible_upper > $scanned_count;
+		$scan->checkpoint();
+		$scanned_count  = $scan->scanned();
+		$scan_truncated = $scan->truncated();
 
 		$header = $header . $this->render_scan_metadata( $scanned_count, $eligible_upper, $scan_truncated );
 		if ( '' === $body ) {
@@ -144,8 +144,8 @@ final class LLMSTLDRGenerator {
 	 * @param int[] $pinned_ids Priority post IDs.
 	 * @return \Generator<int, object>
 	 */
-	private function ordered_posts( array $pinned_ids ): \Generator {
-		foreach ( $this->inventory->iterate_posts_by_ids( $pinned_ids ) as $post ) {
+	private function ordered_posts( array $pinned_ids, PublicationScanBudget $scan ): \Generator {
+		foreach ( $this->inventory->iterate_posts_by_ids( $pinned_ids, $scan ) as $post ) {
 			$post_id = (int) ( $post->ID ?? 0 );
 			if ( $post_id < 1 ) {
 				continue;
@@ -153,9 +153,13 @@ final class LLMSTLDRGenerator {
 			yield $post;
 		}
 
+		if ( $scan->truncated() ) {
+			return;
+		}
+
 		// Skip the complete bounded priority list. Ineligible or missing IDs would
 		// not be emitted by the regular iterator anyway.
-		foreach ( $this->inventory->iterate_posts( $pinned_ids ) as $post ) {
+		foreach ( $this->inventory->iterate_posts( $pinned_ids, $scan ) as $post ) {
 			yield $post;
 		}
 	}
@@ -219,9 +223,8 @@ final class LLMSTLDRGenerator {
 	}
 
 	private function render_entry( object $post ): string {
-		$post_id  = (int) $post->ID;
-		$title    = $this->plain_line( (string) get_the_title( $post_id ) );
-		$url      = URLManager::rewrite_url( (string) get_permalink( $post_id ) );
+		$title    = $this->plain_line( (string) get_the_title( $post ) );
+		$url      = URLManager::rewrite_url( (string) get_permalink( $post ) );
 		$modified = (string) ( $post->post_modified_gmt ?? $post->post_date_gmt ?? '' );
 		$summary  = $this->extractor->summary( $post, 60 );
 

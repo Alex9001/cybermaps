@@ -187,6 +187,31 @@ final class LLMSTLDRTest extends TestCase {
 		$this->assertFalse( get_transient( LLMSTLDR::CACHE_KEY ) );
 	}
 
+	public function test_briefing_counts_excluded_candidates_and_reports_real_exhaustion(): void {
+		for ( $id = 1; $id <= 241; ++$id ) {
+			$this->install_post( $id, 'Resource ' . $id, 'Literal content.', '2026-01-01 00:00:00' );
+			if ( $id <= 12 ) { $GLOBALS['cybermaps_mock_post_meta'][ $id ]['_cybermaps_exclude_ai'] = '1'; }
+		}
+		$result = ( new LLMSTLDRGenerator() )->generate_publication( $GLOBALS['cybermaps_mock_options']['cybermaps_settings'], 'Test' );
+		self::assertSame( 241, $result['scanned_count'] );
+		self::assertSame( 229, $result['eligible_count'] );
+		self::assertFalse( $result['scan_truncated'] );
+		self::assertStringContainsString( 'scanned 241 of at most 241 candidates; truncated no', $result['output'] );
+	}
+
+	public function test_briefing_does_not_search_past_excluded_candidate_budget(): void {
+		for ( $id = 1; $id <= 600; ++$id ) {
+			$this->install_post( $id, 'Resource ' . $id, 'Literal content.', '2026-01-01 00:00:00' );
+			if ( $id <= 250 ) { $GLOBALS['cybermaps_mock_post_meta'][ $id ]['_cybermaps_exclude_ai'] = '1'; }
+		}
+		$result = ( new LLMSTLDRGenerator() )->generate_publication( $GLOBALS['cybermaps_mock_options']['cybermaps_settings'], 'Test' );
+		self::assertSame( 250, $result['scanned_count'] );
+		self::assertSame( 0, $result['eligible_count'] );
+		self::assertSame( 0, $result['selected_count'] );
+		self::assertTrue( $result['scan_truncated'] );
+		self::assertLessThanOrEqual( $result['token_budget'], $result['token_estimate'] );
+	}
+
 	public function test_localized_publications_never_reuse_canonical_cache_entries(): void {
 		$GLOBALS['cybermaps_mock_transients'][ LLMS::SUMMARY_CACHE_KEY ] = "# Cached canonical LLMS\n";
 		$GLOBALS['cybermaps_mock_transients'][ LLMSTLDR::CACHE_KEY ]     = "# Cached canonical briefing\n";

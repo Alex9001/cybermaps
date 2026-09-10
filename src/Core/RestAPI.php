@@ -340,11 +340,21 @@ class RestAPI {
 
 	public function get_llms_tldr() {
 		$tldr = new \Cybermaps\Discovery\LLMSTLDR();
-		return rest_ensure_response(
-			array(
-				'content' => $tldr->get_content(),
-			)
-		);
+		try {
+			return rest_ensure_response( array( 'content' => $tldr->get_content() ) );
+		} catch ( BuildUnavailableException $error ) {
+			return new \WP_REST_Response(
+				array(
+					'code'    => 'cybermaps_publication_unavailable',
+					'message' => $error->getMessage(),
+				),
+				503,
+				array(
+					'Retry-After'   => BuildUnavailableException::RETRY_AFTER,
+					'Cache-Control' => 'no-store, max-age=0',
+				)
+			);
+		}
 	}
 
 	/**
