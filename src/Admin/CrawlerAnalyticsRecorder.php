@@ -98,7 +98,7 @@ final class CrawlerAnalyticsRecorder {
 
 		$path           = URLManager::get_request_path();
 		$accept         = isset( $_SERVER['HTTP_ACCEPT'] ) && is_scalar( $_SERVER['HTTP_ACCEPT'] )
-			? (string) wp_unslash( (string) $_SERVER['HTTP_ACCEPT'] )
+			? sanitize_text_field( wp_unslash( (string) $_SERVER['HTTP_ACCEPT'] ) )
 			: '';
 		$classification = $this->classifier->classify( $path, $rest_route, $accept );
 		$user_agent     = isset( $_SERVER['HTTP_USER_AGENT'] )

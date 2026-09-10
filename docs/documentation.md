@@ -1,6 +1,6 @@
 # Cybermaps — Technical Documentation
 
-> Version 7.4.0 · PHP 8.2 · WordPress 7.1
+> Version 7.4.1 · PHP 8.2 · WordPress 7.1
 
 Cybermaps is a fast sitemap and AI-discovery plugin for WordPress.
 It combines XML, RSS, and HTML sitemap publishing with compact machine-readable

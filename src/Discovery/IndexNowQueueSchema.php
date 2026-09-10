@@ -87,8 +87,8 @@ final class IndexNowQueueSchema {
 			return false;
 		}
 
-		$result = $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$wpdb->prepare( 'DROP TABLE IF EXISTS %i', self::table_name() )
+		$result = $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange -- Remove only the plugin-owned queue table during requested uninstall cleanup.
+			$wpdb->prepare( 'DROP TABLE IF EXISTS %i', self::table_name() ) // phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange -- Requested cleanup of the plugin-owned queue table.
 		);
 		\delete_option( self::VERSION_OPTION );
 		\delete_option( IndexNowQueue::OPTION );

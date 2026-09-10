@@ -217,7 +217,7 @@ class Throttler {
 
 	private function is_negotiated_request(): bool {
 		$accept = isset( $_SERVER['HTTP_ACCEPT'] ) && is_scalar( $_SERVER['HTTP_ACCEPT'] )
-			? (string) wp_unslash( (string) $_SERVER['HTTP_ACCEPT'] )
+			? sanitize_text_field( wp_unslash( (string) $_SERVER['HTTP_ACCEPT'] ) )
 			: '';
 		return MarkdownNegotiation::is_enabled() && AcceptNegotiator::prefers_markdown( $accept );
 	}

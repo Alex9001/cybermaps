@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: CYBERMAPS: XML Sitemaps & llms.txt 7.4.0\n"
+"Project-Id-Version: CYBERMAPS: XML Sitemaps & llms.txt 7.4.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/cybermaps\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-10T01:07:35+00:00\n"
+"POT-Creation-Date: 2026-09-10T14:22:44+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: cybermaps\n"
@@ -607,85 +607,85 @@ msgstr ""
 msgid "fixed path"
 msgstr ""
 
-#: src/Admin/CloudflareOAuthClient.php:33
+#: src/Admin/CloudflareOAuthClient.php:36
 msgid "The Cloudflare PKCE verifier is invalid."
 msgstr ""
 
-#: src/Admin/CloudflareOAuthClient.php:45
+#: src/Admin/CloudflareOAuthClient.php:48
 msgid "The custom Cloudflare OAuth configuration is invalid."
 msgstr ""
 
-#: src/Admin/CloudflareOAuthClient.php:48
-#: src/Admin/CloudflareOAuthClient.php:88
+#: src/Admin/CloudflareOAuthClient.php:51
+#: src/Admin/CloudflareOAuthClient.php:91
 msgid "The Cloudflare PKCE challenge is invalid."
 msgstr ""
 
-#: src/Admin/CloudflareOAuthClient.php:98
+#: src/Admin/CloudflareOAuthClient.php:101
 msgid "Cybermaps Connect returned an invalid transaction."
 msgstr ""
 
-#: src/Admin/CloudflareOAuthClient.php:107
+#: src/Admin/CloudflareOAuthClient.php:110
 msgid "The Cloudflare authorization transaction is invalid."
 msgstr ""
 
-#: src/Admin/CloudflareOAuthClient.php:114
+#: src/Admin/CloudflareOAuthClient.php:117
 msgid "Cybermaps Connect returned an invalid authorization result."
 msgstr ""
 
-#: src/Admin/CloudflareOAuthClient.php:117
+#: src/Admin/CloudflareOAuthClient.php:120
 msgid "Cybermaps Connect returned an unknown authorization state."
 msgstr ""
 
-#: src/Admin/CloudflareOAuthClient.php:124
+#: src/Admin/CloudflareOAuthClient.php:127
 msgid "Cloudflare returned an invalid authorization code exchange."
 msgstr ""
 
-#: src/Admin/CloudflareOAuthClient.php:137
+#: src/Admin/CloudflareOAuthClient.php:140
 msgid "Cloudflare did not return a usable access token."
 msgstr ""
 
-#: src/Admin/CloudflareOAuthClient.php:141
+#: src/Admin/CloudflareOAuthClient.php:144
 msgid "Cloudflare did not return a usable bearer token."
 msgstr ""
 
-#: src/Admin/CloudflareOAuthClient.php:148
+#: src/Admin/CloudflareOAuthClient.php:151
 msgid "The temporary Cloudflare token could not be revoked because its metadata was invalid."
 msgstr ""
 
-#: src/Admin/CloudflareOAuthClient.php:158
+#: src/Admin/CloudflareOAuthClient.php:161
 msgid "Cloudflare token revocation could not be confirmed."
 msgstr ""
 
-#: src/Admin/CloudflareOAuthClient.php:167
+#: src/Admin/CloudflareOAuthClient.php:170
 msgid "Cybermaps Connect must use HTTPS."
 msgstr ""
 
-#: src/Admin/CloudflareOAuthClient.php:184
+#: src/Admin/CloudflareOAuthClient.php:187
 msgid "Cybermaps Connect returned incomplete transaction metadata."
 msgstr ""
 
-#: src/Admin/CloudflareOAuthClient.php:188
+#: src/Admin/CloudflareOAuthClient.php:191
 msgid "Cybermaps Connect returned unsafe OAuth client metadata."
 msgstr ""
 
-#: src/Admin/CloudflareOAuthClient.php:198
+#: src/Admin/CloudflareOAuthClient.php:201
 msgid "Cybermaps Connect returned an unsafe Cloudflare authorization URL."
 msgstr ""
 
-#: src/Admin/CloudflareOAuthClient.php:203
+#: src/Admin/CloudflareOAuthClient.php:206
 msgid "Cybermaps Connect returned mismatched OAuth transaction metadata."
 msgstr ""
 
-#: src/Admin/CloudflareOAuthClient.php:240
+#: src/Admin/CloudflareOAuthClient.php:244
 msgid "Cybermaps could not encode the OAuth request."
 msgstr ""
 
-#: src/Admin/CloudflareOAuthClient.php:293
+#: src/Admin/CloudflareOAuthClient.php:297
 msgid "The Cloudflare authorization service could not be reached securely."
 msgstr ""
 
 #. translators: 1: HTTP status code, 2: operation description.
-#: src/Admin/CloudflareOAuthClient.php:297
+#: src/Admin/CloudflareOAuthClient.php:301
 #, php-format
 msgid "Cloudflare authorization error %1$d: %2$s"
 msgstr ""
@@ -2852,7 +2852,7 @@ msgid "Cybermaps publishes both established and emerging discovery formats. RFC 
 msgstr ""
 
 #: src/Admin/MaturityGuidance.php:32
-#: src/Admin/MaturityGuidance.php:90
+#: src/Admin/MaturityGuidance.php:91
 msgid "RFC 9727"
 msgstr ""
 
@@ -2908,19 +2908,19 @@ msgstr ""
 msgid "This emerging negotiation convention prepares eligible pages for Markdown-capable agents. HTML remains the default, and shared caches must honor Vary: Accept."
 msgstr ""
 
-#: src/Admin/MaturityGuidance.php:86
+#: src/Admin/MaturityGuidance.php:87
 msgid "RFC standard"
 msgstr ""
 
-#: src/Admin/MaturityGuidance.php:87
+#: src/Admin/MaturityGuidance.php:88
 msgid "RFC 9727 is a formal standard. 'Enabled' means Cybermaps generated the catalog; use AI Discovery Status to confirm that the origin serves the canonical well-known URL."
 msgstr ""
 
-#: src/Admin/MaturityGuidance.php:96
+#: src/Admin/MaturityGuidance.php:97
 msgid "Deployment required"
 msgstr ""
 
-#: src/Admin/MaturityGuidance.php:97
+#: src/Admin/MaturityGuidance.php:98
 msgid "Cybermaps materializes ownership-safe canonical fallback bodies when the origin bypasses WordPress. Debugging reports header conformance, and Advanced can optionally install scoped Cloudflare response rules."
 msgstr ""
 
@@ -3857,240 +3857,240 @@ msgstr ""
 msgid "Uses Authorization Code with PKCE. Cybermaps Connect briefly holds an unusable authorization code, but never receives the PKCE verifier, access token, WordPress identity, site URL, or rule payload. WordPress exchanges and revokes the token directly with Cloudflare."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:130
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:131
 msgid "Choose the managed connection for zero-configuration setup. Choose your own client when your organization wants authorization to stay between Cloudflare and this WordPress installation. Save this Advanced page after changing the mode or client ID."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:131
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:132
 msgid "OAuth connection mode"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:133
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:134
 msgid "Cybermaps managed connection"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:134
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:135
 msgid "Your Cloudflare OAuth client"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:137
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:138
 msgid "Cloudflare OAuth public client ID"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:140
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:141
 msgid "Exact callback / redirect URI"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:142
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:143
 msgid "Copy callback URI"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:143
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:144
 msgid "Register the client in Cloudflare"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:145
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:146
 msgid "Create an OAuth client in the Cloudflare account that owns the target zone. The client name is your choice."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:146
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:147
 msgid "Set Response type to code, Grant type to authorization_code, Token endpoint authentication method to none, and PKCE method to S256."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:147
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:148
 msgid "Register the exact callback URI shown above. Do not add or remove a slash, change the hostname, or substitute the WordPress REST URL."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:148
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:149
 msgid "Grant exactly Zone Read, Zone Transform Rules Write, and Cache Settings Write: zone.read, zone-transform-rules.write, and cache-settings.write."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:149
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:150
 msgid "Copy the public client ID into the field above, select Your Cloudflare OAuth client, and save this page before connecting."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:151
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:152
 msgid "Open Cloudflare’s OAuth client documentation"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:152
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:153
 msgid "Private visibility is sufficient when every administrator authorizing the plugin belongs to the Cloudflare account that owns the client. Serving unrelated customer accounts requires Cloudflare’s public-client approval and verified-domain process; public promotion is permanent."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:153
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:154
 msgid "This mode stores only the public client ID. Client secrets are unsupported and unnecessary. Authorization state, PKCE verifier, and code expire after five minutes; the access token is held only in memory for the operation and is then revoked and discarded."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:161
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:164
 msgid "Use this fallback only when a Cloudflare administrator blocks public OAuth applications or Cybermaps Connect is unavailable. The browser sends the token to this WordPress site, which uses it directly with api.cloudflare.com for the selected operation."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:162
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:165
 msgid "Create a least-privilege temporary token"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:165
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:168
 msgid "Open Cloudflare API Tokens"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:166
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:169
 msgid "and select Create Token, then Create Custom Token. Do not use the Global API Key."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:169
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:172
 msgid "Give the token a recognizable temporary name, such as Cybermaps setup, and add these three permissions:"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:171
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:174
 msgid "Zone Read"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:171
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:174
 msgid "finds the zone that owns this WordPress hostname."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:172
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:175
 msgid "Zone Transform Rules Write"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:172
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:175
 msgid "installs and removes Cybermaps discovery-response headers."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:173
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:176
 msgid "Cache Settings Write"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:173
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:176
 msgid "installs and removes the Cybermaps cache-safety rule."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:176
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:179
 msgid "Under Zone Resources, choose Include and select only the zone for this site. Selecting all zones is unnecessary."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:177
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:180
 msgid "Set a short expiration when available. Complete Cloudflare’s summary, create the token, and copy it immediately; Cloudflare will not show it again."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:178
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:181
 msgid "Paste only the token value below. Do not include “Bearer”, quotation marks, or surrounding spaces."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:181
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:184
 msgid "Review Cloudflare’s current permission reference"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:184
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:187
 msgid "Important:"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:184
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:187
 msgid "“One-time” describes Cybermaps handling: the field is cleared after every request and the token is never saved by the plugin. Cybermaps cannot revoke an API token. Revoke it in Cloudflare immediately after finishing, or rely on the short expiration you selected."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:185
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:188
 msgid "The header and cache buttons are separate operations. Paste the same still-valid token again before the second operation because Cybermaps clears the field after the first."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:187
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:190
 msgid "Temporary Cloudflare API token"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:189
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:192
 msgid "Use all three permissions to install or remove both Cybermaps rule families. The token is transmitted only when you press one of these buttons."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:191
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:194
 msgid "Install/repair discovery headers"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:192
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:195
 msgid "Install/repair cache safety"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:193
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:196
 msgid "Remove Cybermaps Cloudflare rules"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:195
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:198
 msgid "If Cloudflare rejects the token"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:197
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:200
 msgid "Confirm the token belongs to the Cloudflare account containing this site’s active zone."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:198
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:201
 msgid "Confirm Zone Read is present. DNS Read or DNS Write does not replace Zone Read."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:199
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:202
 msgid "Confirm the token includes the specific site zone, has not expired, and is not restricted to a different client IP."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:200
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:203
 msgid "If only one button fails, confirm its matching Write permission is present and supported by the zone’s Cloudflare plan."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:202
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:205
 msgid "Prefer your own OAuth client?"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:203
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:206
 msgid "Use the custom OAuth section above instead of an API token. It keeps the authorization callback, PKCE transaction, code exchange, and token revocation on this WordPress site while storing only Cloudflare’s public client ID."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:214
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:217
 msgid "Copy snippet"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:221
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:224
 msgid "Portable configuration."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:222
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:225
 msgid "Export this site’s complete Cybermaps configuration as a versioned JSON backup for migration, client handoff, or recovery. The AI Configuration Brief is a separate workflow that excludes the private Cybermaps REST API secret and IndexNow key."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:223
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:226
 msgid "The complete backup can contain the private Cybermaps REST API secret and information entered in plugin settings. Keep it private. Network-wide settings, cross-site translation relationships, analytics history, report runs, WordPress content, media, and generated files are not included."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:228
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:231
 msgid "Headless & sitemap-media URLs."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:228
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:231
 msgid "If your WordPress backend is decoupled from your frontend, set the frontend base URL so publication locations use the public site. The frontend must proxy Cybermaps routes it advertises; IndexNow additionally requires the generated <code>/{key}.txt</code> verification path on that same public host. The optional CDN origin rewrites same-site media URLs inside XML sitemap entries; it does not publish Cybermaps files or assets to a CDN."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:229
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:232
 msgid "REST API Security"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:240
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:243
 msgid "Housekeeping & safety nets."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:240
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:243
 msgid "Remove unchanged Core-owned static files and control opt-in uninstall cleanup."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:240
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:243
 msgid "Files that existed before Cybermaps or were edited afterward are retained as conflicts."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:243
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:246
 msgid "Trust forwarding headers only from infrastructure you control."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:243
+#: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:246
 msgid "Leave this disabled unless a reverse proxy or load balancer terminates requests in front of WordPress. Cybermaps will use the selected header only when the direct remote address matches one of the configured CIDRs."
 msgstr ""
 
 #: src/Admin/Settings/Tabs/ContentReview.php:26
-#: src/Admin/Settings/Tabs/ContentReview.php:315
+#: src/Admin/Settings/Tabs/ContentReview.php:317
 #: assets/js/setup-wizard.js:491
 msgid "Reports"
 msgstr ""
@@ -4236,235 +4236,235 @@ msgstr ""
 msgid "Another Content Intelligence Report is already running. Wait for it to finish before starting another."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:314
+#: src/Admin/Settings/Tabs/ContentReview.php:316
 msgid "Professional deliverables"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:316
+#: src/Admin/Settings/Tabs/ContentReview.php:318
 msgid "Create client-ready measurement reports, focused action lists, and a validated inventory of your AI discovery publications."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:328
+#: src/Admin/Settings/Tabs/ContentReview.php:330
 msgid "Measured content intelligence"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:329
+#: src/Admin/Settings/Tabs/ContentReview.php:331
 #: src/Audit/AuditExporter.php:74
 msgid "Content Intelligence Report"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:330
+#: src/Admin/Settings/Tabs/ContentReview.php:332
 msgid "Measure public search-indexable content, save the policy and measurements, compare against the prior report, and export a branded resolution plan."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:335
+#: src/Admin/Settings/Tabs/ContentReview.php:337
 msgid "Run new report"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:337
+#: src/Admin/Settings/Tabs/ContentReview.php:339
 msgid "View report"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:345
+#: src/Admin/Settings/Tabs/ContentReview.php:347
 msgid "Live validation"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:346
+#: src/Admin/Settings/Tabs/ContentReview.php:348
 #: src/Audit/DiscoveryReportExporter.php:30
 msgid "AI Discovery Publication Report"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:347
+#: src/Admin/Settings/Tabs/ContentReview.php:349
 msgid "Generate a point-in-time, client-facing inventory of discovery publications, intended delivery, media types, and public HTTP validation."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:350
+#: src/Admin/Settings/Tabs/ContentReview.php:352
 msgid "Generate report"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:351
+#: src/Admin/Settings/Tabs/ContentReview.php:353
 msgid "Export JSON"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:394
+#: src/Admin/Settings/Tabs/ContentReview.php:396
 msgid "Saved report"
 msgstr ""
 
 #. translators: %d: saved report ID.
-#: src/Admin/Settings/Tabs/ContentReview.php:400
+#: src/Admin/Settings/Tabs/ContentReview.php:402
 #, php-format
 msgid "Report #%d"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:409
+#: src/Admin/Settings/Tabs/ContentReview.php:411
 msgid "Printable report"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:410
-#: src/Admin/Settings/Tabs/ContentReview.php:472
-#: src/Admin/Settings/Tabs/ContentReview.php:557
+#: src/Admin/Settings/Tabs/ContentReview.php:412
+#: src/Admin/Settings/Tabs/ContentReview.php:474
+#: src/Admin/Settings/Tabs/ContentReview.php:559
 msgid "CSV"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:411
+#: src/Admin/Settings/Tabs/ContentReview.php:413
 msgid "JSON"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:416
+#: src/Admin/Settings/Tabs/ContentReview.php:418
 msgid "Delete this saved report? This cannot be undone."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:416
+#: src/Admin/Settings/Tabs/ContentReview.php:418
 msgid "Delete report"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:429
+#: src/Admin/Settings/Tabs/ContentReview.php:431
 #: src/Audit/AuditExporter.php:96
 msgid "Resources reviewed"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:430
-#: src/Admin/Settings/Tabs/ContentReview.php:492
+#: src/Admin/Settings/Tabs/ContentReview.php:432
+#: src/Admin/Settings/Tabs/ContentReview.php:494
 #: src/Audit/AuditExporter.php:97
 msgid "Current findings"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:432
+#: src/Admin/Settings/Tabs/ContentReview.php:434
 msgid "Added"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:433
+#: src/Admin/Settings/Tabs/ContentReview.php:435
 msgid "Resolved"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:434
+#: src/Admin/Settings/Tabs/ContentReview.php:436
 msgid "Persisting"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:436
+#: src/Admin/Settings/Tabs/ContentReview.php:438
 #: src/Audit/AuditExporter.php:156
 msgid "Comparison"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:436
+#: src/Admin/Settings/Tabs/ContentReview.php:438
 #: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:415
 #: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:700
 #: src/Audit/AuditExporter.php:157
 msgid "Baseline"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:453
+#: src/Admin/Settings/Tabs/ContentReview.php:455
 msgid "Focused deliverables"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:454
+#: src/Admin/Settings/Tabs/ContentReview.php:456
 msgid "Action reports"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:456
+#: src/Admin/Settings/Tabs/ContentReview.php:458
 msgid "Export a client-ready list for one review category from the saved report data."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:463
+#: src/Admin/Settings/Tabs/ContentReview.php:465
 #: src/Admin/SetupWizard/SetupWizardRegistry.php:195
 msgid "Review"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:471
+#: src/Admin/Settings/Tabs/ContentReview.php:473
 msgid "HTML report"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:491
+#: src/Admin/Settings/Tabs/ContentReview.php:493
 msgid "Report preview"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:494
+#: src/Admin/Settings/Tabs/ContentReview.php:496
 msgid "The printable report includes recommendations and the measurement summary for every finding."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:497
+#: src/Admin/Settings/Tabs/ContentReview.php:499
 #: src/Audit/AuditExporter.php:103
 msgid "Resource"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:497
+#: src/Admin/Settings/Tabs/ContentReview.php:499
 #: src/Audit/AuditExporter.php:48
 #: src/Audit/AuditExporter.php:104
 msgid "Finding"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:497
+#: src/Admin/Settings/Tabs/ContentReview.php:499
 #: src/Audit/AuditExporter.php:104
 msgid "Measurement"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:507
+#: src/Admin/Settings/Tabs/ContentReview.php:509
 msgid "This run recorded no policy findings."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:512
+#: src/Admin/Settings/Tabs/ContentReview.php:514
 msgid "Showing the first 25 findings. Export the report for the complete inventory."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:536
+#: src/Admin/Settings/Tabs/ContentReview.php:538
 msgid "Report history"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:537
+#: src/Admin/Settings/Tabs/ContentReview.php:539
 msgid "Other saved reports"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:539
+#: src/Admin/Settings/Tabs/ContentReview.php:541
 msgid "Open or export another saved report."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:542
+#: src/Admin/Settings/Tabs/ContentReview.php:544
 msgid "Run"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:542
+#: src/Admin/Settings/Tabs/ContentReview.php:544
 #: src/Audit/AuditExporter.php:94
 msgid "Completed"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:542
+#: src/Admin/Settings/Tabs/ContentReview.php:544
 #: src/Admin/SettingsPage.php:518
 msgid "Resources"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:542
+#: src/Admin/Settings/Tabs/ContentReview.php:544
 msgid "Findings"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:542
+#: src/Admin/Settings/Tabs/ContentReview.php:544
 msgid "Exports"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:555
+#: src/Admin/Settings/Tabs/ContentReview.php:557
 msgid "HTML"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:572
+#: src/Admin/Settings/Tabs/ContentReview.php:574
 msgid "No content report exists yet"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:573
+#: src/Admin/Settings/Tabs/ContentReview.php:575
 msgid "Run the first report to establish a baseline. Later reports show exactly which findings were added, resolved, or persisted."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:583
+#: src/Admin/Settings/Tabs/ContentReview.php:585
 msgid "Content measurement policy"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:584
+#: src/Admin/Settings/Tabs/ContentReview.php:586
 msgid "These explicit rules are saved with every report."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:590
+#: src/Admin/Settings/Tabs/ContentReview.php:592
 msgid "Client presentation"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:591
+#: src/Admin/Settings/Tabs/ContentReview.php:593
 msgid "Brand and theme printable deliverables generated from the saved measurements."
 msgstr ""
 

@@ -171,7 +171,7 @@ final class AtomicOneTimeStateStore {
 		$args    = $require_match
 			? array( $wpdb->options, $option_name, $raw_value )
 			: array( $wpdb->options, $option_name );
-		$deleted = $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$deleted = $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter -- SQL is selected from two literal DELETE templates; identifiers and values use placeholders.
 			$wpdb->prepare( $sql, ...$args ) // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- SQL is selected from fixed statements; values remain placeholders.
 		);
 		if ( false === $deleted ) {

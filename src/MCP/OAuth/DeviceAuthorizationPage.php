@@ -104,7 +104,7 @@ final class DeviceAuthorizationPage {
 	}
 
 	private function relative_request_path(): string {
-		$request_uri = isset( $_SERVER['REQUEST_URI'] ) && is_scalar( $_SERVER['REQUEST_URI'] ) ? wp_unslash( (string) $_SERVER['REQUEST_URI'] ) : '';
+		$request_uri = isset( $_SERVER['REQUEST_URI'] ) && is_scalar( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( (string) $_SERVER['REQUEST_URI'] ) ) : '';
 		$path        = wp_parse_url( $request_uri, PHP_URL_PATH );
 		$base        = wp_parse_url( home_url( '/' ), PHP_URL_PATH );
 		$path        = is_string( $path ) ? $path : '';
@@ -120,8 +120,8 @@ final class DeviceAuthorizationPage {
 
 	private function request_value( string $key, int $maximum_length ): string {
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.NonceVerification.Recommended -- POST nonce verification is performed before a decision; GET only looks up a short-lived public user code.
-		$value = $_REQUEST[ $key ] ?? '';
-		$value = is_scalar( $value ) ? sanitize_text_field( wp_unslash( (string) $value ) ) : '';
+		$value = isset( $_REQUEST[ $key ] ) && is_scalar( $_REQUEST[ $key ] )
+			? sanitize_text_field( wp_unslash( (string) $_REQUEST[ $key ] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.NonceVerification.Recommended -- Decision nonce verified by the caller; GET only reads a public user code.
 		return strlen( $value ) <= $maximum_length ? trim( $value ) : '';
 	}
 

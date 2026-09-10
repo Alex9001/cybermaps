@@ -1,6 +1,6 @@
 # AI-Assisted Configuration
 
-> Cybermaps 7.4.0 · AI Configuration Brief format 2
+> Cybermaps 7.4.1 · AI Configuration Brief format 2
 
 Cybermaps can prepare a site-aware configuration handoff for an AI assistant
 without exposing the private values required for an exact site restoration.
@@ -12,8 +12,8 @@ This guide is the human-readable companion to the versioned machine contracts
 referenced at the end of every Brief:
 
 - Guide: `https://cybermaps.dev/docs/ai-configuration/`
-- JSON Schema: `https://cybermaps.dev/specs/ai-configuration/7.4.0/schema.json`
-- Field catalog: `https://cybermaps.dev/specs/ai-configuration/7.4.0/catalog.json`
+- JSON Schema: `https://cybermaps.dev/specs/ai-configuration/7.4.1/schema.json`
+- Field catalog: `https://cybermaps.dev/specs/ai-configuration/7.4.1/catalog.json`
 
 The same schema and catalog are committed in this repository at
 [`docs/dev/ai-configuration/schema.json`](./dev/ai-configuration/schema.json)
@@ -232,10 +232,10 @@ value**, not only the value the AI supplied.
 
 ## Versioned schema and field catalog
 
-For Cybermaps 7.4.0, the public machine contracts are:
+For Cybermaps 7.4.1, the public machine contracts are:
 
-- `https://cybermaps.dev/specs/ai-configuration/7.4.0/schema.json`
-- `https://cybermaps.dev/specs/ai-configuration/7.4.0/catalog.json`
+- `https://cybermaps.dev/specs/ai-configuration/7.4.1/schema.json`
+- `https://cybermaps.dev/specs/ai-configuration/7.4.1/catalog.json`
 
 The JSON Schema is Draft 2020-12 and describes the strict JSON changes envelope,
 not the surrounding Markdown wrapper. The catalog contains the same field

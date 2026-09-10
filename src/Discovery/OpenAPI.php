@@ -505,7 +505,7 @@ final class OpenAPI {
 		}
 
 		$accept = isset( $_SERVER['HTTP_ACCEPT'] ) && is_scalar( $_SERVER['HTTP_ACCEPT'] )
-			? strtolower( (string) $_SERVER['HTTP_ACCEPT'] )
+			? strtolower( sanitize_text_field( wp_unslash( (string) $_SERVER['HTTP_ACCEPT'] ) ) )
 			: '';
 		if ( preg_match( '/application\/vnd\.oai\.openapi\+json\s*;\s*version\s*=\s*3\.1(?:\.2)?/', $accept ) ) {
 			return self::COMPATIBILITY_VERSION;

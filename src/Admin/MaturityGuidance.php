@@ -78,6 +78,7 @@ final class MaturityGuidance {
 				'links' => array(
 					array(
 						'label' => __( 'Markdown for Agents', 'cybermaps' ),
+						// phpcs:ignore PluginCheck.CodeAnalysis.Offloading.OffloadedContent -- Documentation hyperlink; no remote assets are loaded.
 						'url'   => 'https://developers.cloudflare.com/fundamentals/reference/markdown-for-agents/',
 					),
 				),

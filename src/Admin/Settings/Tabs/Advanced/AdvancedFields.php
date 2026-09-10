@@ -125,6 +125,7 @@ class AdvancedFields {
 	}
 
 	private static function render_custom_oauth_settings( string $oauth_mode, string $client_id, string $callback_url ): void {
+		// phpcs:ignore PluginCheck.CodeAnalysis.Offloading.OffloadedContent -- Administrator documentation/navigation link; no remote assets are loaded.
 		$docs_url = 'https://developers.cloudflare.com/fundamentals/oauth/create-an-oauth-client/';
 		?>
 		<p><?php esc_html_e( 'Choose the managed connection for zero-configuration setup. Choose your own client when your organization wants authorization to stay between Cloudflare and this WordPress installation. Save this Advanced page after changing the mode or client ID.', 'cybermaps' ); ?></p>
@@ -155,7 +156,9 @@ class AdvancedFields {
 	}
 
 	private static function render_cloudflare_token_troubleshooting(): void {
-		$tokens_url      = 'https://dash.cloudflare.com/profile/api-tokens';
+		// phpcs:ignore PluginCheck.CodeAnalysis.Offloading.OffloadedContent -- Administrator documentation/navigation link; no remote assets are loaded.
+		$tokens_url = 'https://dash.cloudflare.com/profile/api-tokens';
+		// phpcs:ignore PluginCheck.CodeAnalysis.Offloading.OffloadedContent -- Administrator documentation/navigation link; no remote assets are loaded.
 		$permissions_url = 'https://developers.cloudflare.com/fundamentals/api/reference/permissions/';
 		?>
 		<p><?php esc_html_e( 'Use this fallback only when a Cloudflare administrator blocks public OAuth applications or Cybermaps Connect is unavailable. The browser sends the token to this WordPress site, which uses it directly with api.cloudflare.com for the selected operation.', 'cybermaps' ); ?></p>

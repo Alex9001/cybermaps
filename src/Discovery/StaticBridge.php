@@ -1997,8 +1997,8 @@ class StaticBridge {
 				'posts_per_page' => self::TRANSITION_CANDIDATE_LIMIT + 1,
 				'orderby'        => 'meta_value_num',
 				'order'          => 'ASC',
-				'meta_key'       => AIMetadata::TRANSITION_META_KEY,
-				'meta_query'     => array(
+				'meta_key'       => AIMetadata::TRANSITION_META_KEY, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Bounded transition reconciliation requires this metadata predicate and ordering to preserve publication freshness.
+				'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Bounded transition reconciliation requires this metadata predicate and ordering to preserve publication freshness.
 					array(
 						'key'     => AIMetadata::TRANSITION_META_KEY,
 						'value'   => array( $checkpoint, $now ),
@@ -2024,7 +2024,7 @@ class StaticBridge {
 				'posts_per_page' => $limit + 1,
 				'orderby'        => 'ID',
 				'order'          => 'ASC',
-				'meta_query'     => array(
+				'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Bounded transition reconciliation requires this metadata predicate and ordering to preserve publication freshness.
 					array(
 						'key'     => AIMetadata::TRANSITION_META_KEY,
 						'compare' => 'NOT EXISTS',
@@ -2049,8 +2049,8 @@ class StaticBridge {
 				'posts_per_page' => $limit + 1,
 				'orderby'        => 'ID',
 				'order'          => 'ASC',
-				'meta_key'       => AIMetadata::TRANSITION_META_KEY,
-				'meta_value'     => $checkpoint,
+				'meta_key'       => AIMetadata::TRANSITION_META_KEY, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Bounded transition reconciliation requires this metadata predicate and ordering to preserve publication freshness.
+				'meta_value'     => $checkpoint, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- Bounded transition reconciliation requires this metadata predicate and ordering to preserve publication freshness.
 				'meta_compare'   => '<',
 				'meta_type'      => 'NUMERIC',
 			)
@@ -2086,8 +2086,8 @@ class StaticBridge {
 				'post_status'    => 'publish',
 				'posts_per_page' => 1,
 				'fields'         => 'ids',
-				'meta_key'       => AIMetadata::TRANSITION_META_KEY,
-				'meta_value'     => $now,
+				'meta_key'       => AIMetadata::TRANSITION_META_KEY, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Bounded transition reconciliation requires this metadata predicate and ordering to preserve publication freshness.
+				'meta_value'     => $now, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- Bounded transition reconciliation requires this metadata predicate and ordering to preserve publication freshness.
 				'meta_compare'   => '>',
 				'meta_type'      => 'NUMERIC',
 				'orderby'        => 'meta_value_num',

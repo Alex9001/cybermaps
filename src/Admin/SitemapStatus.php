@@ -468,8 +468,8 @@ class SitemapStatus {
 				'posts_per_page' => 1,
 				'fields'         => 'ids',
 				'no_found_rows'  => false,
-				'meta_key'       => '_cybermaps_exclude_sitemap',
-				'meta_value'     => '1',
+				'meta_key'       => '_cybermaps_exclude_sitemap', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Administrator status count for the explicit sitemap exclusion flag; IDs only and one returned row.
+				'meta_value'     => '1', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- Administrator status count for the explicit sitemap exclusion flag; IDs only and one returned row.
 			)
 		);
 		return max( 0, (int) $query->found_posts );

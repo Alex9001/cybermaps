@@ -1,6 +1,13 @@
 Cybermaps release history
 =========================
 
+7.4.1
+-----
+
+* Sanitized request flags, headers, OAuth callback values, and request paths at the input boundary.
+* Prepared OAuth lookup column identifiers and documented intentional custom-table queries and bounded metadata lookups.
+* Documented Cloudflare OAuth and specification links incorrectly flagged as offloaded assets by older Plugin Check versions.
+
 7.4.0
 -----
 

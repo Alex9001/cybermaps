@@ -75,6 +75,7 @@ readonly class StandardsRegistry {
 			'markdown-for-agents-2026'  => self::profile(
 				'Markdown for Agents',
 				'Cloudflare',
+				// phpcs:ignore PluginCheck.CodeAnalysis.Offloading.OffloadedContent -- Canonical specification reference; no remote assets are loaded.
 				'https://developers.cloudflare.com/fundamentals/reference/markdown-for-agents/',
 				'2026-07-13',
 				'vendor-convention',

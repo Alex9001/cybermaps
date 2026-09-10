@@ -1,8 +1,8 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://cybermaps.dev/specs/ai-configuration/7.4.0/schema.json",
+    "$id": "https://cybermaps.dev/specs/ai-configuration/7.4.1/schema.json",
     "format_version": 2,
-    "plugin_version": "7.4.0",
+    "plugin_version": "7.4.1",
     "title": "Cybermaps AI configuration changes",
     "description": "A merge-only set of reviewed Cybermaps configuration changes. Null and omitted values preserve the destination.",
     "type": "object",
@@ -21,7 +21,7 @@
         },
         "plugin_version": {
             "type": "string",
-            "const": "7.4.0"
+            "const": "7.4.1"
         },
         "changes": {
             "type": "object",

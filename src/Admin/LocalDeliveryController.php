@@ -128,7 +128,7 @@ final class LocalDeliveryController {
 	}
 
 	public function handle(): void {
-		if ( ! current_user_can( 'manage_options' ) || 'POST' !== ( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
+		if ( ! current_user_can( 'manage_options' ) || 'POST' !== sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) ) ) {
 			wp_die( esc_html__( 'An administrator POST request is required.', 'cybermaps' ), '', array( 'response' => 403 ) );
 		}
 		check_admin_referer( self::ACTION, 'cybermaps_delivery_nonce' );

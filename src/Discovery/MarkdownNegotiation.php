@@ -154,7 +154,7 @@ final class MarkdownNegotiation {
 
 	private function accept_header(): string {
 		return isset( $_SERVER['HTTP_ACCEPT'] ) && is_scalar( $_SERVER['HTTP_ACCEPT'] )
-			? (string) wp_unslash( (string) $_SERVER['HTTP_ACCEPT'] )
+			? sanitize_text_field( wp_unslash( (string) $_SERVER['HTTP_ACCEPT'] ) )
 			: '';
 	}
 }

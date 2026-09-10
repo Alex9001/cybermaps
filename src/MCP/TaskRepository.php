@@ -91,6 +91,7 @@ KEY user_id (user_id)
 			'updated_gmt'  => $this->gmt( $now ),
 			'expires_gmt'  => $this->gmt( $now + $ttl ),
 		);
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Authoritative custom-table write; wpdb escapes the data and reads must observe current task/OAuth state.
 		if ( false === $wpdb->insert( $table, $data ) ) {
 			if ( null !== $this->find_active( $task_type ) ) {
 				throw new \LogicException( 'An MCP task of this type is already active.' );
@@ -144,6 +145,7 @@ KEY user_id (user_id)
 		if ( 'cancelled' === $status ) {
 			$data['cancelled_gmt'] = $this->gmt( $now );
 		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Authoritative custom-table write; wpdb escapes the data and reads must observe current task/OAuth state.
 		return false !== $wpdb->update( $table, $data, array( 'task_id' => $task_id ) );
 	}
 

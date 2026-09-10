@@ -1,9 +1,9 @@
 {
     "plugin": "CYBERMAPS: XML Sitemaps & llms.txt",
-    "version": "7.4.0",
+    "version": "7.4.1",
     "php_min": "8.2",
     "wp_min": "7.1",
-    "generated_at": "2026-09-10T05:24:46+00:00",
+    "generated_at": "2026-09-10T14:22:43+00:00",
     "discovery_endpoints": [
         {
             "id": "manifest",
@@ -1304,12 +1304,12 @@
             "api_secret",
             "delete_data_on_uninstall"
         ],
-        "catalog_hash": "ef971106b3b96afe8bcdcacafda912e7bdcda84ad01fd19e84bcb42bedc22a1a",
-        "schema_hash": "476b9602de63902a2d144e4d1a16c613509f4e7daa99837345e6b0b0d4d3e19d",
+        "catalog_hash": "de5bface143211c38a6ca084049c4fde1ae0c1c1b4ecb074c4bc0cf1cfb2e6c2",
+        "schema_hash": "3747d45b215377afd94be963b742765e5b1f9bfa51c59bdccebf9710e5c65191",
         "guide_path": "docs/ai-configuration.md",
         "guide_url": "https://cybermaps.dev/docs/ai-configuration/",
-        "schema_url": "https://cybermaps.dev/specs/ai-configuration/7.4.0/schema.json",
-        "catalog_url": "https://cybermaps.dev/specs/ai-configuration/7.4.0/catalog.json",
+        "schema_url": "https://cybermaps.dev/specs/ai-configuration/7.4.1/schema.json",
+        "catalog_url": "https://cybermaps.dev/specs/ai-configuration/7.4.1/catalog.json",
         "compatibility": {
             "format_version": "exact",
             "plugin_version": "warning_on_mismatch",

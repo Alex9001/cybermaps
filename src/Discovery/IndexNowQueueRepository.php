@@ -709,7 +709,7 @@ final class IndexNowQueueRepository {
 		}
 
 		$sql = "UPDATE %i SET state = %s, attempts = 0, next_attempt_at = %d, claim_token = %s, lease_expires_at = 0, queued_again = 0, last_status = %d, last_error = %s, updated_at = %d WHERE claim_token = %s AND url_hash IN ({$hash_list}) AND queued_again = 1";
-		return (int) $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return (int) $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- Hash lists contain only strict 64-character hexadecimal values; identifiers and all other values use prepare placeholders.
 			$wpdb->prepare(
 				$sql, // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- SQL contains a sanitized URL-hash list; scalar values remain placeholders.
 				IndexNowQueueSchema::table_name(),
@@ -737,7 +737,7 @@ final class IndexNowQueueRepository {
 		$queued_again_sql = $include_requeued ? '' : ' AND queued_again = 0';
 		$sql              = "DELETE FROM %i WHERE claim_token = %s AND url_hash IN ({$hash_list}){$queued_again_sql}";
 
-		return (int) $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return (int) $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- Hash lists contain only strict 64-character hexadecimal values; identifiers and all other values use prepare placeholders.
 			$wpdb->prepare( $sql, IndexNowQueueSchema::table_name(), $token ) // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- SQL contains a sanitized URL-hash list.
 		);
 	}
@@ -775,7 +775,7 @@ final class IndexNowQueueRepository {
 		}
 
 		$sql  = "SELECT * FROM %i WHERE state = %s AND claim_token = %s AND url_hash IN ({$hash_list})";
-		$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- Hash lists contain only strict 64-character hexadecimal values; identifiers and all other values use prepare placeholders.
 			$wpdb->prepare( $sql, IndexNowQueueSchema::table_name(), self::STATE_CLAIMED, $token ), // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- SQL contains a sanitized URL-hash list.
 			ARRAY_A
 		);

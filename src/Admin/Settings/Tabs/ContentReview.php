@@ -298,14 +298,16 @@ final class ContentReview implements SettingsTab {
 
 	private static function report_deleted_notice_requested(): bool {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only success notice after a nonce-protected action.
-		$value = $_GET['cybermaps_report_deleted'] ?? null;
-		return is_scalar( $value ) && absint( wp_unslash( (string) $value ) ) > 0;
+		$value = isset( $_GET['cybermaps_report_deleted'] ) && is_scalar( $_GET['cybermaps_report_deleted'] )
+			? absint( wp_unslash( (string) $_GET['cybermaps_report_deleted'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only notice after the protected action.
+		return $value > 0;
 	}
 
 	private static function report_busy_notice_requested(): bool {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only result notice after a nonce-protected run request.
-		$value = $_GET['cybermaps_report_busy'] ?? null;
-		return is_scalar( $value ) && '1' === sanitize_text_field( wp_unslash( (string) $value ) );
+		$value = isset( $_GET['cybermaps_report_busy'] ) && is_scalar( $_GET['cybermaps_report_busy'] )
+			? sanitize_text_field( wp_unslash( (string) $_GET['cybermaps_report_busy'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only notice after the protected action.
+		return '1' === $value;
 	}
 
 	private static function render_reports_heading(): void {

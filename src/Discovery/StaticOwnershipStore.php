@@ -965,7 +965,7 @@ final class StaticOwnershipStore {
 			$args[] = $fence['name'];
 			$args[] = $fence['connection_id'];
 		}
-		return $wpdb->query( $wpdb->prepare( $sql, ...$args ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared -- Built only from fixed SQL fragments; values remain placeholders.
+		return $wpdb->query( $wpdb->prepare( $sql, ...$args ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- Private helper receives fixed SQL templates; appended lock predicates are literal and all values/identifiers are prepared.
 	}
 
 	private static function direct_noop_matches( mixed $wpdb, string $option_name, array $observed, mixed $next_value, bool $delete, ?array $fence ): bool {

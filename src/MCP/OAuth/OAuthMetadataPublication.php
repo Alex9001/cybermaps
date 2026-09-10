@@ -55,7 +55,7 @@ final class OAuthMetadataPublication {
 
 	/** @return array<string,mixed>|null */
 	private function metadata_for_request(): ?array {
-		$request_uri = isset( $_SERVER['REQUEST_URI'] ) && \is_string( $_SERVER['REQUEST_URI'] ) ? \wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
+		$request_uri = isset( $_SERVER['REQUEST_URI'] ) && \is_string( $_SERVER['REQUEST_URI'] ) ? \sanitize_text_field( \wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
 		$path        = \wp_parse_url( $request_uri, PHP_URL_PATH );
 		$path        = \is_string( $path ) ? $path : '';
 		$base_path   = \wp_parse_url( \home_url( '/' ), PHP_URL_PATH );

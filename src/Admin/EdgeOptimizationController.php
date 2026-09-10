@@ -306,8 +306,8 @@ final class EdgeOptimizationController {
 
 	private function callback_value( string $key, int $limit ): string {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- OAuth state is the callback CSRF protection and is verified before use.
-		$value = isset( $_GET[ $key ] ) && is_scalar( $_GET[ $key ] ) ? wp_unslash( (string) $_GET[ $key ] ) : '';
-		return substr( sanitize_text_field( $value ), 0, $limit );
+		$value = isset( $_GET[ $key ] ) && is_scalar( $_GET[ $key ] ) ? sanitize_text_field( wp_unslash( (string) $_GET[ $key ] ) ) : '';
+		return substr( $value, 0, $limit );
 	}
 
 	/** @param array<string,mixed> $transaction @return array<string,mixed> */
@@ -435,7 +435,7 @@ final class EdgeOptimizationController {
 
 	private function request_token(): string {
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- authorize() verifies the action nonce before this helper runs.
-		$token = isset( $_POST['token'] ) && is_scalar( $_POST['token'] ) ? trim( wp_unslash( (string) $_POST['token'] ) ) : '';
+		$token = isset( $_POST['token'] ) && is_scalar( $_POST['token'] ) ? sanitize_text_field( wp_unslash( (string) $_POST['token'] ) ) : '';
 		if ( strlen( $token ) < 20 || strlen( $token ) > 512 || 1 !== preg_match( '/\A[A-Za-z0-9._-]+\z/', $token ) ) {
 			wp_send_json_error( array( 'message' => __( 'Enter a valid scoped Cloudflare API token. The token is used once and is not stored.', 'cybermaps' ) ), 400 );
 		}

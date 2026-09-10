@@ -3,7 +3,7 @@ Contributors: oreshkin
 Tags: sitemap, llms-txt, technical-seo, content-audit, indexnow
 Requires at least: 7.1
 Tested up to: 7.1
-Stable tag: 7.4.0
+Stable tag: 7.4.1
 Requires PHP: 8.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -22,8 +22,6 @@ Cybermaps honors Genesis/Mai, Yoast, Rank Math, and All in One SEO signals.
 
 = An AI-readable publication layer =
 
-Machine endpoints avoid theme chrome:
-
 * `llms.txt`, briefings, manifests, AI sitemap, JSON Feed, knowledge graph,
   policies, actions, Site Guide, chunks, catalogs, and crawler controls
 * Optional MCP 2026-07-28 Streamable HTTP with authorized operations
@@ -39,16 +37,15 @@ No AI account is required; full output is bounded to 32 MiB.
 Static modes are `off`, default `well_known`, and `all`. Dynamic routes retain
 CORS/validators; static files use ownership hashes and bounded safe repair.
 
-Generation-fenced WordPress caches support Redis/Memcached and isolated APCu.
-LiteSpeed hooks run with LSCWP; exact-URL Varnish PURGE is opt-in.
+WordPress caches support Redis/Memcached and isolated APCu.
+LSCWP hooks and opt-in exact-URL Varnish PURGE are supported.
 
-Debugging reports optimization use and creates bounded, redacted support bundles.
-Advanced covers cache maintenance, Cloudflare OAuth, and unsaved token fallback.
+Debugging provides redacted support bundles. Advanced manages caches, Cloudflare
+OAuth, and temporary tokens.
 
 = Standards and controlled agent access =
 
-OpenAPI is 3.2.0, or 3.1.2 by negotiation. Draft/early features are labelled;
-optional AIPREF is off by default.
+OpenAPI supports 3.2.0 and 3.1.2. Draft features are labelled; AIPREF defaults off.
 
 MCP operations require OAuth 2.1 PKCE, consent, and WordPress capabilities.
 OAuth discovery never fabricates OIDC/JWKS metadata; RFC 8628 registration
@@ -65,7 +62,7 @@ requires logged-in review.
 
 = How do I avoid competing XML sitemaps with Yoast, Rank Math, or AIOSEO? =
 
-Choose one owner for the primary XML sitemap. Cybermaps still honors supported singular noindex/canonical signals.
+Choose one XML sitemap owner. Cybermaps honors supported noindex/canonical signals.
 
 = Does Cybermaps make ChatGPT or other AI systems cite or rank my site? =
 
@@ -125,6 +122,9 @@ Persistent settings, tables, and post metadata remain after uninstall unless
 **Uninstall Cleanup** was enabled beforehand.
 
 == Changelog ==
+
+= 7.4.1 =
+* Hardened request sanitization and SQL identifiers; documented Plugin Check false positives.
 
 = 7.4.0 =
 * Fixed delivery and reports.
@@ -199,6 +199,9 @@ Persistent settings, tables, and post metadata remain after uninstall unless
 Earlier release history is included in `changelog.txt`.
 
 == Upgrade Notice ==
+
+= 7.4.1 =
+Improves request handling and WordPress.org Plugin Check compatibility.
 
 = 7.4.0 =
 Delivery fixes.

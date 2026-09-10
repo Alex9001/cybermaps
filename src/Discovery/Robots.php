@@ -52,7 +52,7 @@ class Robots {
 		}
 
 		$uri   = isset( $_SERVER['REQUEST_URI'] ) && is_string( $_SERVER['REQUEST_URI'] )
-			? wp_unslash( $_SERVER['REQUEST_URI'] )
+			? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) )
 			: '/';
 		$path  = wp_parse_url( $uri, PHP_URL_PATH );
 		$path  = is_string( $path ) ? $path : '/';

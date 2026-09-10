@@ -432,7 +432,7 @@ final class Upgrade {
 
 		dbDelta( RuntimeCounterStore::schema_sql() );
 		$table_name = RuntimeCounterStore::table_name();
-		$exists     = $wpdb->get_var(
+		$exists     = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Verify the schema immediately after dbDelta; a cached result could mark a failed installation ready.
 			$wpdb->prepare(
 				'SHOW TABLES LIKE %s',
 				$table_name

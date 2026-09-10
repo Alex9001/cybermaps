@@ -153,7 +153,7 @@ class ShortcodeHandler {
 
 		return array(
 			'only'         => $a['only'],
-			'exclude'      => $a['exclude'],
+			'exclude'      => $a['exclude'], // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude -- Normalized shortcode attribute, not a database query.
 			'limit'        => min( self::MAX_RENDER_ITEMS, max( 1, (int) $a['limit'] ) ),
 			'depth'        => (int) $a['depth'],
 			'sort_order'   => strtoupper( $a['sort'] ) === 'DESC' ? 'DESC' : 'ASC',

@@ -64,6 +64,7 @@ final class WpdbOAuthRepository implements OAuthRepository {
 			'metadata_uri'  => (string) ( $client['metadata_uri'] ?? '' ),
 			'created_gmt'   => $this->gmt( time() ),
 		);
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Authoritative custom-table write; wpdb escapes the data and reads must observe current task/OAuth state.
 		if ( false === $wpdb->replace( $table, $data ) ) {
 			throw new \RuntimeException( 'Unable to save the OAuth client.' );
 		}
@@ -88,6 +89,7 @@ final class WpdbOAuthRepository implements OAuthRepository {
 	public function save_authorization_code( array $code ): void {
 		global $wpdb;
 		$table = $wpdb->prefix . 'cybermaps_mcp_oauth_codes';
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Authoritative custom-table write; wpdb escapes the data and reads must observe current task/OAuth state.
 		if ( false === $wpdb->insert( $table, $this->encode_code( $code ) ) ) {
 			throw new \RuntimeException( 'Unable to save the OAuth authorization code.' );
 		}
@@ -120,6 +122,7 @@ final class WpdbOAuthRepository implements OAuthRepository {
 	public function save_device_authorization( array $authorization ): void {
 		global $wpdb;
 		$table = $wpdb->prefix . 'cybermaps_mcp_oauth_devices';
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Authoritative custom-table write; wpdb escapes the data and reads must observe current task/OAuth state.
 		if ( false === $wpdb->insert( $table, $this->encode_device_authorization( $authorization ) ) ) {
 			throw new \RuntimeException( 'Unable to save the OAuth device authorization.' );
 		}
@@ -182,6 +185,7 @@ final class WpdbOAuthRepository implements OAuthRepository {
 			'created_gmt' => $this->gmt( $now ),
 			'updated_gmt' => $this->gmt( $now ),
 		);
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Authoritative custom-table write; wpdb escapes the data and reads must observe current task/OAuth state.
 		if ( false === $wpdb->replace( $table, $data ) ) {
 			throw new \RuntimeException( 'Unable to save the OAuth grant.' );
 		}
@@ -191,6 +195,7 @@ final class WpdbOAuthRepository implements OAuthRepository {
 	public function save_token( array $token ): void {
 		global $wpdb;
 		$table = $wpdb->prefix . 'cybermaps_mcp_oauth_tokens';
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Authoritative custom-table write; wpdb escapes the data and reads must observe current task/OAuth state.
 		if ( false === $wpdb->insert( $table, $this->encode_token( $token ) ) ) {
 			throw new \RuntimeException( 'Unable to save the OAuth token.' );
 		}
@@ -295,7 +300,7 @@ final class WpdbOAuthRepository implements OAuthRepository {
 		global $wpdb;
 		$table = $wpdb->prefix . 'cybermaps_mcp_oauth_devices';
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM %i WHERE $column = %s", $table, $hash ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Column is selected from the fixed allowlist above.
+		$row = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM %i WHERE %i = %s', $table, $column, $hash ), ARRAY_A );
 		return is_array( $row ) ? $this->decode_device_authorization( $row ) : null;
 	}
 

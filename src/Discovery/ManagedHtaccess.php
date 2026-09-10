@@ -34,7 +34,7 @@ final class ManagedHtaccess {
 			return __( 'Automatic root configuration is unavailable on multisite because sites share server configuration.', 'cybermaps' );
 		}
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Server capability hint only; never emitted or used as a filesystem path.
-		$server = strtolower( (string) ( $_SERVER['SERVER_SOFTWARE'] ?? '' ) );
+		$server = strtolower( sanitize_text_field( wp_unslash( $_SERVER['SERVER_SOFTWARE'] ?? '' ) ) );
 		if ( ! str_contains( $server, 'apache' ) && ! str_contains( $server, 'litespeed' ) ) {
 			return __( 'Apache or LiteSpeed was not detected. nginx does not read .htaccess; this action will not edit nginx or CDN configuration.', 'cybermaps' );
 		}

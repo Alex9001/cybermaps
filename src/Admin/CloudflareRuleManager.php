@@ -175,10 +175,10 @@ final class CloudflareRuleManager {
 
 	public static function request_is_cloudflare(): bool {
 		$ray  = isset( $_SERVER['HTTP_CF_RAY'] ) && is_scalar( $_SERVER['HTTP_CF_RAY'] )
-			? trim( (string) $_SERVER['HTTP_CF_RAY'] )
+			? sanitize_text_field( wp_unslash( (string) $_SERVER['HTTP_CF_RAY'] ) )
 			: '';
 		$host = isset( $_SERVER['HTTP_HOST'] ) && is_scalar( $_SERVER['HTTP_HOST'] )
-			? wp_parse_url( 'http://' . trim( (string) $_SERVER['HTTP_HOST'] ), PHP_URL_HOST )
+			? wp_parse_url( 'http://' . sanitize_text_field( wp_unslash( (string) $_SERVER['HTTP_HOST'] ) ), PHP_URL_HOST )
 			: '';
 		return '' !== $ray && strlen( $ray ) <= 256 && is_string( $host ) && hash_equals( self::public_host(), strtolower( trim( $host, '.' ) ) );
 	}

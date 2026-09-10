@@ -1,7 +1,7 @@
 {
     "format": "cybermaps-ai-configuration-catalog",
     "format_version": 2,
-    "plugin_version": "7.4.0",
+    "plugin_version": "7.4.1",
     "sections": [
         {
             "id": "core_settings",

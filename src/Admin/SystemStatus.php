@@ -236,7 +236,7 @@ final class SystemStatus {
 
 	/** Authorize a Debugging AJAX mutation or export. */
 	private function authorize_debug_request(): void {
-		if ( 'POST' !== strtoupper( (string) ( $_SERVER['REQUEST_METHOD'] ?? '' ) ) ) {
+		if ( 'POST' !== strtoupper( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) ) ) ) {
 			wp_send_json_error( array( 'message' => __( 'POST requests are required.', 'cybermaps' ) ), 405 );
 		}
 		if ( ! current_user_can( 'manage_options' ) ) {

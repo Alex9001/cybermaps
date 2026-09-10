@@ -16,8 +16,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 /** Performs PKCE authorization support without persisting OAuth credentials. */
 final class CloudflareOAuthClient {
 	private const DEFAULT_RELAY_BASE = 'https://connect.cybermaps.dev';
-	private const AUTH_ENDPOINT      = 'https://dash.cloudflare.com/oauth2/auth';
-	private const TOKEN_ENDPOINT     = 'https://dash.cloudflare.com/oauth2/token';
+	// phpcs:ignore PluginCheck.CodeAnalysis.Offloading.OffloadedContent -- Documented Cloudflare OAuth service endpoint/origin validation; no remote assets are loaded.
+	private const AUTH_ENDPOINT = 'https://dash.cloudflare.com/oauth2/auth';
+	// phpcs:ignore PluginCheck.CodeAnalysis.Offloading.OffloadedContent -- Documented Cloudflare OAuth service endpoint/origin validation; no remote assets are loaded.
+	private const TOKEN_ENDPOINT = 'https://dash.cloudflare.com/oauth2/token';
+	// phpcs:ignore PluginCheck.CodeAnalysis.Offloading.OffloadedContent -- Documented Cloudflare OAuth service endpoint/origin validation; no remote assets are loaded.
 	private const REVOKE_ENDPOINT    = 'https://dash.cloudflare.com/oauth2/revoke';
 	private const REQUIRED_SCOPES    = 'zone.read zone-transform-rules.write cache-settings.write';
 	private const MAX_RESPONSE_BYTES = 1048576;
@@ -208,6 +211,7 @@ final class CloudflareOAuthClient {
 	private function is_cloudflare_authorization_url( array|false $parts ): bool {
 		return is_array( $parts )
 			&& 'https' === ( $parts['scheme'] ?? '' )
+			// phpcs:ignore PluginCheck.CodeAnalysis.Offloading.OffloadedContent -- Documented Cloudflare OAuth service endpoint/origin validation; no remote assets are loaded.
 			&& 'dash.cloudflare.com' === ( $parts['host'] ?? '' )
 			&& '/oauth2/auth' === ( $parts['path'] ?? '' );
 	}
