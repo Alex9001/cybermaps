@@ -1,5 +1,5 @@
 <p align="center">
-  <img src=".wordpress-org/icon-256x256.png" width="100" alt="Cybermaps logo">
+  <a href="https://cybermaps.dev/"><img src="docs/cybermaps-icon.png" width="112" alt="Cybermaps logo"></a>
 </p>
 
 <h1 align="center">CYBERMAPS</h1>
@@ -10,12 +10,12 @@
 </p>
 
 <p align="center">
-  <img src=".wordpress-org/banner-1544x500.png" width="100%" alt="Cybermaps — WordPress sitemaps and AI-readable publishing">
+  <a href="https://cybermaps.dev/"><img src="docs/cybermaps-social-card.png" width="100%" alt="Cybermaps — publish, verify, and improve WordPress XML sitemaps, llms.txt, Markdown, and JSON discovery"></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/Alex9001/cybermaps/releases"><img src="https://img.shields.io/github/v/release/Alex9001/cybermaps?include_prereleases&amp;style=flat&amp;color=ef2929&amp;label=release" alt="Latest release including open beta"></a>
-  <a href="https://github.com/Alex9001/cybermaps/releases"><img src="https://img.shields.io/github/downloads/Alex9001/cybermaps/total?style=flat&amp;color=f4c430" alt="Release downloads"></a>
+  <a href="https://github.com/Alex9001/cybermaps/releases"><img src="https://img.shields.io/github/v/release/Alex9001/cybermaps?include_prereleases&amp;style=flat&amp;color=0ea5e9&amp;label=release" alt="Latest release including open beta"></a>
+  <a href="https://github.com/Alex9001/cybermaps/releases"><img src="https://img.shields.io/github/downloads/Alex9001/cybermaps/total?style=flat&amp;color=22d3ee" alt="Release downloads"></a>
   <a href="#install"><img src="https://img.shields.io/badge/WordPress-7.1%2B-21759b?style=flat" alt="WordPress 7.1 or newer"></a>
   <a href="#install"><img src="https://img.shields.io/badge/PHP-8.2%2B-777bb4?style=flat" alt="PHP 8.2 or newer"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--2.0--or--later-6366f1?style=flat" alt="GPL-2.0-or-later license"></a>
