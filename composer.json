@@ -23,7 +23,8 @@
         "exclude-from-classmap": [
             "/tests/bootstrap.php",
             "/tests/mocks/",
-            "/tests/fixtures/"
+            "/tests/fixtures/",
+            "/tests/integration/"
         ]
     },
     "scripts": {
