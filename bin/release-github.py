@@ -76,6 +76,7 @@ def release_notes(version, beta, commit):
         require(value is not None, "Missing requirement: " + field)
         requirements.append(label + " " + value[1].strip() + "+")
     return (f"{'Open beta prerelease' if beta else 'Stable release'} — Cybermaps {version}\n\n"
+            + ("This open beta is ready for use on live WordPress sites. Feedback and bug reports are welcome.\n\n" if beta else "")
             + match[1].strip() + "\n\nRequirements: " + "; ".join(requirements)
             + f".\n\nDownload `cybermaps_{version}.zip` below (not GitHub's source archives). "
             "In WordPress, open Plugins → Add New Plugin → Upload Plugin, select the ZIP, "

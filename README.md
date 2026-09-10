@@ -102,6 +102,9 @@ without executing shortcodes or dynamic blocks.
 
 **Open beta is available on [GitHub Releases](https://github.com/Alex9001/cybermaps/releases).**
 
+The open beta is ready for use on live WordPress sites. Feedback and bug reports
+are welcome.
+
 1. Download the versioned **`cybermaps_<version>.zip`** release asset. GitHub's
    automatic “Source code” archives are development copies.
 2. In WordPress, open **Plugins → Add New Plugin → Upload Plugin**.
