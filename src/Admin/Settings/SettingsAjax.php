@@ -275,7 +275,7 @@ class SettingsAjax {
 
 	/**
 	 * Keep the configuration-exchange acknowledgement contract local while
-	 * sharing its exact rule with Guided Setup.
+	 * sharing its exact rule with Quick Setup.
 	 *
 	 * @param array<string,mixed> $preview
 	 */

@@ -22,11 +22,15 @@ def mock():
         state_path.write_text(json.dumps(state))
     def option(name):
         return args[args.index(name) + 1]
+    if sys.argv[1] in ('node', 'npm'):
+        sys.exit(1 if failure == 'website-docs' else 0)
     if sys.argv[1] == 'composer':
         with open(str(state_path) + '.checks', 'a') as log:
             log.write(' '.join(args) + '\n')
         if failure == 'source-change':
             Path('cybermaps.php').write_text(' * Version: 0.0.0\n')
+        if failure == 'website-change':
+            (Path(os.environ['CYBERMAPS_WEBSITE_DIR']) / 'product/release.json').write_text('{}')
         if failure == 'checks':
             sys.exit(1)
         if args == ['run', 'release:build']:
@@ -91,7 +95,7 @@ class PublisherTest(unittest.TestCase):
         self.git('config', 'url.' + str(self.remote) + '.insteadOf',
                  'https://github.com/Alex9001/cybermaps.git')
         (self.repo / 'bin').mkdir()
-        for name in ['release-github.sh', 'release-github.py']:
+        for name in ['release-github.sh', 'release-github.py', 'check-website.py']:
             shutil.copy(ROOT / 'bin' / name, self.repo / 'bin' / name)
         (self.repo / 'cybermaps.php').write_text(' * Version: 7.4.0\n')
         (self.repo / 'readme.txt').write_text('Requires at least: 7.0\nRequires PHP: 8.2\n')
@@ -102,7 +106,10 @@ class PublisherTest(unittest.TestCase):
         self.git('push', str(self.remote), 'main')
         executables = self.base / 'mock-bin'
         executables.mkdir()
-        for name in ['gh', 'composer']:
+        self.website = self.base / 'website'
+        (self.website / 'product').mkdir(parents=True)
+        self.env['CYBERMAPS_WEBSITE_DIR'] = str(self.website)
+        for name in ['gh', 'composer', 'node', 'npm']:
             p = executables / name
             p.write_text('#!' + sys.executable + '\nimport runpy,sys\nsys.argv = ['
                          + repr(str(Path(__file__).resolve())) + ', ' + repr(name)
@@ -119,6 +126,10 @@ class PublisherTest(unittest.TestCase):
         return json.loads(p.read_text()) if p.exists() else None
 
     def publish(self, success=True, stable=False, failure=''):
+        (self.website / 'product/release.json').write_text(json.dumps({
+            'commit': 'wrong' if failure == 'website-commit' else self.git('rev-parse', 'HEAD'),
+            'channel': 'stable' if stable else 'beta',
+        }))
         result = subprocess.run(['bash', 'bin/release-github.sh'] + (['--stable'] if stable else []),
                                 cwd=self.repo, env=dict(self.env, MOCK_FAIL=failure),
                                 text=True, capture_output=True)
@@ -232,8 +243,24 @@ class PublisherTest(unittest.TestCase):
         self.publish(False)
 
 
+    def test_unreviewed_website_blocks_publication(self):
+        self.publish(False, failure='website-docs')
+        self.assertEqual(self.git('tag'), '')
+        self.assertIsNone(self.state())
+
+    def test_wrong_website_commit_blocks_publication(self):
+        self.publish(False, failure='website-commit')
+        self.assertEqual(self.git('tag'), '')
+        self.assertIsNone(self.state())
+
+    def test_website_change_during_validation_blocks_publication(self):
+        self.publish(False, failure='website-change')
+        self.assertEqual(self.git('tag'), '')
+        self.assertIsNone(self.state())
+
+
 if __name__ == '__main__':
-    if len(sys.argv) > 1 and sys.argv[1] in ('gh', 'composer'):
+    if len(sys.argv) > 1 and sys.argv[1] in ('gh', 'composer', 'node', 'npm'):
         mock()
     else:
         unittest.main()

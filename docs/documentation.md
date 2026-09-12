@@ -1,6 +1,6 @@
 # Cybermaps — Technical Documentation
 
-> Version 7.4.2 · PHP 8.2 · WordPress 7.1
+> Version 7.5.0 · PHP 8.2 · WordPress 7.1
 
 Cybermaps is a fast sitemap and AI-discovery plugin for WordPress.
 It combines XML, RSS, and HTML sitemap publishing with compact machine-readable
@@ -131,30 +131,32 @@ Cybermaps adds one top-level administration area with seven primary tabs:
 **Debugging** is a separate submenu, with expiring diagnostic logging, redacted
 support bundles, runtime and optimization status, and public delivery checks.
 
-### Guided Setup
+### Quick Setup
 
-**Guided Setup** is an optional workspace launched from **Overview**. It is a
-short, site-aware questionnaire for an administrator who wants a clean starting
-configuration without manually visiting every workspace first. The site-profile
-recommendation uses the same published-structure analysis as Content Discovery
-Strategy; it never changes settings merely by being viewed.
+**Quick Setup** is an optional three-step survey launched from **Overview**. It
+asks what kind of website is being published, whether basic AI discovery should
+be enabled, whether the administrator prefers anonymized activity insights or
+lighter static delivery, and how the site should identify itself publicly. The
+suggested website type uses the same published-structure analysis as Content
+Discovery Strategy; viewing or leaving the survey never changes settings.
 
-Each area can independently be left as **Keep current**, set to **Configure**,
-or set to **Reset guided fields**. The wizard deliberately covers only its
-declared, bounded field set: strategy, sitemap surfaces and delivery
-integrations, AI publishing and usage declarations, the primary identity plus
-one automatic catalog action, crawler-analytics privacy, static delivery, and
-report policy/presentation. Detailed custom instructions, crawler matrices,
-identity addresses/contacts/hours/social profiles, manual catalogs, API
-credentials, route slugs, and other expert settings remain untouched unless an
-administrator edits them in their normal workspace.
+Answers become a bounded site-wide preset. Website type selects a content
+profile and matching sitemap surfaces; AI interest controls the basic Discovery
+Hub package; the activity preference selects anonymized 30-day logging with
+dynamic delivery or no logging with static delivery; and the identity step sets
+the broad Schema.org type, public name, description, and image. Multisite keeps
+its required dynamic-only delivery behavior.
 
-The final screen sends an AI Configuration Brief v2 changes envelope to the
-existing server-side preview/apply transaction. Cybermaps validates and
-sanitizes the proposal, compares it with the destination fingerprint, displays
-the final values and high-impact fields, and applies only the reviewed plan.
-Reset actions require their own acknowledgement. There is no saved wizard
-completion state or recurring setup notice.
+The preset preserves custom content-group adjustments, crawler policy, AI usage
+permissions, detailed AI features, identity addresses/contacts/hours/social
+profiles and catalogs, credentials, route slugs, reports, and other expert
+settings. Turning AI discovery off also turns off WebSub when it is active,
+because that notification feature depends on the Discovery Hub. Finish Setup
+uses the existing server-side preview/apply transaction,
+including sanitization plus content, environment, and destination fingerprints.
+After applying, the completion screen summarizes the choices and provides an
+expandable receipt of the final settings. There is no saved completion state or
+recurring setup notice.
 
 The **Crawler & Robots Policy** workspace is shown directly within AI
 Publishing. Its category rows provide bulk controls for every crawler currently

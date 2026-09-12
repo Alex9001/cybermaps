@@ -36,8 +36,8 @@ class SettingsAssets {
 
 	private static function enqueue_setup_assets(): void {
 		wp_enqueue_media();
-		wp_enqueue_style( 'cybermaps-setup-wizard', CYBERMAPS_PLUGIN_URL . 'assets/css/setup-wizard.css', array( 'cybermaps-command-center' ), CYBERMAPS_VERSION );
-		wp_enqueue_script( 'cybermaps-setup-wizard', CYBERMAPS_PLUGIN_URL . 'assets/js/setup-wizard.js', array( 'wp-element', 'wp-components', 'wp-i18n', 'wp-api-fetch' ), CYBERMAPS_VERSION, true );
+		wp_enqueue_style( 'cybermaps-setup-wizard', CYBERMAPS_PLUGIN_URL . 'assets/css/setup-wizard.css', array( 'cybermaps-command-center' ), self::setup_asset_version( 'assets/css/setup-wizard.css' ) );
+		wp_enqueue_script( 'cybermaps-setup-wizard', CYBERMAPS_PLUGIN_URL . 'assets/js/setup-wizard.js', array( 'wp-element', 'wp-i18n' ), self::setup_asset_version( 'assets/js/setup-wizard.js' ), true );
 		wp_localize_script(
 			'cybermaps-setup-wizard',
 			'cybermapsSetupWizard',
@@ -45,12 +45,17 @@ class SettingsAssets {
 				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
 				'nonce'   => wp_create_nonce( \Cybermaps\Admin\SetupWizard\SetupWizardController::nonce_action() ),
 				'strings' => array(
-					'connectionError' => __( 'Cybermaps could not contact Guided Setup. Try again.', 'cybermaps' ),
-					'leaveWarning'    => __( 'You have unfinished Guided Setup answers. Leave without applying them?', 'cybermaps' ),
+					'connectionError' => __( 'Cybermaps could not contact Quick Setup. Try again.', 'cybermaps' ),
+					'leaveWarning'    => __( 'You have unfinished Quick Setup answers. Leave without applying them?', 'cybermaps' ),
 				),
 			)
 		);
 		wp_set_script_translations( 'cybermaps-setup-wizard', 'cybermaps', CYBERMAPS_PLUGIN_DIR . 'languages' );
+	}
+
+	/** Keep cached setup clients in sync with same-version testing builds. */
+	private static function setup_asset_version( string $path ): string {
+		return CYBERMAPS_VERSION . '-' . substr( (string) hash_file( 'sha256', CYBERMAPS_PLUGIN_DIR . $path ), 0, 12 );
 	}
 
 	private static function active_tab(): string {

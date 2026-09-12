@@ -3,21 +3,19 @@ declare(strict_types=1);
 
 namespace Cybermaps\Admin\SetupWizard;
 
-use Cybermaps\Admin\ConfigurationReviewGuard;
 use Cybermaps\Admin\MigrationHub;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** Protected admin endpoints for Guided Setup. */
+/** Protected admin endpoints for Quick Setup. */
 final class SetupWizardController {
 	private const NONCE_ACTION      = 'cybermaps_setup_wizard';
 	private const MAX_PAYLOAD_BYTES = 65536;
 
 	public static function register_hooks(): void {
 		add_action( 'wp_ajax_cybermaps_setup_wizard_bootstrap', array( self::class, 'bootstrap' ) );
-		add_action( 'wp_ajax_cybermaps_setup_wizard_search_pages', array( self::class, 'search_pages' ) );
 		add_action( 'wp_ajax_cybermaps_setup_wizard_preview', array( self::class, 'preview' ) );
 		add_action( 'wp_ajax_cybermaps_setup_wizard_apply', array( self::class, 'apply' ) );
 	}
@@ -29,20 +27,6 @@ final class SetupWizardController {
 	public static function bootstrap(): void {
 		self::authorize();
 		wp_send_json_success( SetupWizardContext::build()->client_data() );
-	}
-
-	public static function search_pages(): void {
-		self::authorize();
-		// phpcs:disable WordPress.Security.NonceVerification.Missing -- authorize() verifies the action nonce before this payload is read.
-		$query = isset( $_POST['query'] ) && is_scalar( $_POST['query'] )
-			? sanitize_text_field( wp_unslash( (string) $_POST['query'] ) ) : '';
-		$page  = isset( $_POST['page'] ) && is_scalar( $_POST['page'] ) ? absint( $_POST['page'] ) : 1;
-		// phpcs:enable WordPress.Security.NonceVerification.Missing
-		wp_send_json_success(
-			array(
-				'items' => SetupWizardContext::build()->search_catalog_parents( $query, $page ),
-			)
-		);
 	}
 
 	public static function preview(): void {
@@ -65,7 +49,7 @@ final class SetupWizardController {
 		} catch ( \RuntimeException $error ) {
 			wp_send_json_error( array( 'message' => $error->getMessage() ), 500 );
 		} catch ( \Throwable $error ) {
-			wp_send_json_error( array( 'message' => __( 'Cybermaps could not preview Guided Setup. No settings were changed.', 'cybermaps' ) ), 500 );
+			wp_send_json_error( array( 'message' => __( 'Cybermaps could not prepare Quick Setup. No settings were changed.', 'cybermaps' ) ), 500 );
 		}
 	}
 
@@ -83,21 +67,13 @@ final class SetupWizardController {
 				|| ! hash_equals( (string) $plan['environment_hash'], $posted_environment )
 				|| ! hash_equals( (string) $plan['content'], $posted_content )
 			) {
-				throw new \InvalidArgumentException( __( 'The Guided Setup plan changed after preview. Preview it again before applying.', 'cybermaps' ) );
+				throw new \InvalidArgumentException( __( 'The Quick Setup preset changed while it was being prepared. Try again.', 'cybermaps' ) );
 			}
 			if ( '' === $content_hash || '' === $configuration_hash ) {
-				throw new \InvalidArgumentException( __( 'Preview Guided Setup before applying it.', 'cybermaps' ) );
+				throw new \InvalidArgumentException( __( 'Prepare Quick Setup before applying it.', 'cybermaps' ) );
 			}
 
-			$hub     = MigrationHub::get_instance();
-			$preview = $hub->preview( (string) $plan['content'], 'merge' );
-			if ( ConfigurationReviewGuard::has_high_impact_changes( $preview ) && ! self::posted_flag( 'acknowledge_high_impact' ) ) {
-				throw new \InvalidArgumentException( __( 'Acknowledge the high-impact changes before applying Guided Setup.', 'cybermaps' ) );
-			}
-			if ( ! empty( $plan['reset_sections'] ) && ! self::posted_flag( 'acknowledge_reset' ) ) {
-				throw new \InvalidArgumentException( __( 'Acknowledge the guided-field resets before applying Guided Setup.', 'cybermaps' ) );
-			}
-
+			$hub    = MigrationHub::get_instance();
 			$result = $hub->import_previewed(
 				(string) $plan['content'],
 				'merge',
@@ -106,7 +82,7 @@ final class SetupWizardController {
 			);
 			wp_send_json_success(
 				array(
-					'message' => __( 'Guided Setup applied successfully.', 'cybermaps' ),
+					'message' => __( 'Quick Setup applied successfully.', 'cybermaps' ),
 					'result'  => $result,
 				)
 			);
@@ -115,7 +91,7 @@ final class SetupWizardController {
 		} catch ( \RuntimeException $error ) {
 			wp_send_json_error( array( 'message' => $error->getMessage() ), 500 );
 		} catch ( \Throwable $error ) {
-			wp_send_json_error( array( 'message' => __( 'Guided Setup could not be applied. Review your current settings and try again.', 'cybermaps' ) ), 500 );
+			wp_send_json_error( array( 'message' => __( 'Quick Setup could not be applied. Review your current settings and try again.', 'cybermaps' ) ), 500 );
 		}
 	}
 
@@ -133,17 +109,17 @@ final class SetupWizardController {
 		$raw = isset( $_POST['payload'] ) && is_string( $_POST['payload'] ) ? wp_unslash( $_POST['payload'] ) : '';
 		if ( '' === trim( $raw ) || strlen( $raw ) > self::MAX_PAYLOAD_BYTES ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception messages are plain JSON data; HTML escaping belongs at the presentation boundary.
-			throw new \InvalidArgumentException( __( 'The Guided Setup request is missing or exceeds its safe size limit.', 'cybermaps' ) );
+			throw new \InvalidArgumentException( __( 'The Quick Setup request is missing or exceeds its safe size limit.', 'cybermaps' ) );
 		}
 		try {
 			$payload = json_decode( $raw, true, 64, JSON_THROW_ON_ERROR );
 		} catch ( \JsonException $error ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception messages are plain JSON data; HTML escaping belongs at the presentation boundary.
-			throw new \InvalidArgumentException( __( 'The Guided Setup request is invalid JSON.', 'cybermaps' ) );
+			throw new \InvalidArgumentException( __( 'The Quick Setup request is invalid JSON.', 'cybermaps' ) );
 		}
 		if ( ! is_array( $payload ) || ( ! empty( $payload ) && array_is_list( $payload ) ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception messages are plain JSON data; HTML escaping belongs at the presentation boundary.
-			throw new \InvalidArgumentException( __( 'The Guided Setup request must be an object.', 'cybermaps' ) );
+			throw new \InvalidArgumentException( __( 'The Quick Setup request must be an object.', 'cybermaps' ) );
 		}
 
 		return $payload;
@@ -156,7 +132,7 @@ final class SetupWizardController {
 		$value = self::posted_raw( 'configuration' );
 		if ( '' === $value || strlen( $value ) > MigrationHub::get_max_import_bytes() ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception messages are plain JSON data; HTML escaping belongs at the presentation boundary.
-			throw new \InvalidArgumentException( __( 'The reviewed Guided Setup configuration is missing or too large.', 'cybermaps' ) );
+			throw new \InvalidArgumentException( __( 'The prepared Quick Setup configuration is missing or too large.', 'cybermaps' ) );
 		}
 		return $value;
 	}
@@ -170,10 +146,6 @@ final class SetupWizardController {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- authorize() verifies the action nonce before this payload is read.
 		return isset( $_POST[ $key ] ) && is_scalar( $_POST[ $key ] ) ? sanitize_text_field( wp_unslash( (string) $_POST[ $key ] ) ) : '';
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
-	}
-
-	private static function posted_flag( string $key ): bool {
-		return '1' === self::posted_scalar( $key );
 	}
 
 	private static function require_post_request(): void {

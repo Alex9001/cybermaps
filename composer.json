@@ -42,7 +42,8 @@
             "@lint:phpcs",
             "@i18n:check",
             "@manifest:check",
-            "@ai-config:check"
+            "@ai-config:check",
+            "@test:website-contract"
         ],
         "release:build": "bash clean.sh",
         "release:validate": [
@@ -51,7 +52,8 @@
         ],
         "tooling:lint": "bash -n clean.sh && bash -n bin/validate-release.sh && bash -n bin/generate-pot.sh && bash -n bin/release-github.sh && php -l bin/check-manifest.php && php -l bin/check-ai-configuration.php",
         "release:github": "bash bin/release-github.sh",
-        "test:release-github": "python3 tests/tooling/test_release_github.py"
+        "test:release-github": "python3 tests/tooling/test_release_github.py",
+        "test:website-contract": "python3 tests/tooling/test_website_contract.py"
     },
     "config": {
         "allow-plugins": {

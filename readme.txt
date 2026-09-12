@@ -3,7 +3,7 @@ Contributors: oreshkin
 Tags: sitemap, llms-txt, technical-seo, content-audit, indexnow
 Requires at least: 7.1
 Tested up to: 7.1
-Stable tag: 7.4.2
+Stable tag: 7.5.0
 Requires PHP: 8.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -52,35 +52,31 @@ requires logged-in review.
 == Installation ==
 
 1. Install and activate Cybermaps.
-2. Run **Guided Setup** from **Cybermaps → Overview**.
-3. Review sitemaps, schema, and AI publishing.
-4. Validate status; optionally enable analytics and reports.
+2. Run the three-step **Quick Setup** from **Cybermaps → Overview**.
+3. Fine-tune sitemaps, schema, and AI publishing; check publication status.
 
 == Frequently Asked Questions ==
 
-= How do I avoid competing XML sitemaps with Yoast, Rank Math, or AIOSEO? =
+= Can I use another SEO plugin? =
 
-Choose one XML sitemap owner. Cybermaps honors supported noindex/canonical signals.
+Choose one XML sitemap owner; supported noindex/canonical signals are honored.
 
-= Does Cybermaps make ChatGPT or other AI systems cite or rank my site? =
+= Does this guarantee AI citations? =
 
-No. Machine-readable files do not guarantee crawling, indexing, ranking, citation, recommendation, or use.
+No. Publication guarantees neither crawling, indexing, ranking, citation, nor use.
 
 == External Services ==
 
 = Cybermaps Cloudflare OAuth Relay =
 
-When an administrator explicitly clicks Connect Cloudflare & optimize,
-Cybermaps contacts https://connect.cybermaps.dev to create and consume a
-five-minute one-time OAuth transaction. The relay receives a PKCE challenge,
-random transaction state, and Cloudflare's short-lived authorization code. It
-does not receive the PKCE verifier, Cloudflare access token, WordPress identity,
-site URL, or rule payload. WordPress exchanges and revokes the token directly
-with Cloudflare. The relay is not contacted for ordinary publication, crawling,
-status collection, the manual-token fallback, or self-managed OAuth mode. In
-self-managed mode, the administrator registers this site's exact WordPress
-callback as a secretless PKCE client. Cloudflare returns directly to WordPress;
-only the public client ID is saved.
+Connect Cloudflare & optimize contacts https://connect.cybermaps.dev for a
+five-minute, one-time OAuth transaction. The relay receives the PKCE challenge,
+random state, and short-lived authorization code, never the verifier, access
+token, WordPress identity, site URL, or rules. WordPress exchanges and revokes
+tokens directly with Cloudflare. Publication, crawling, status checks, manual
+tokens, and self-managed OAuth do not contact the relay. Self-managed OAuth
+uses the site's exact callback as a secretless PKCE client and saves only the
+public client ID.
 
 Service information and privacy: https://cybermaps.dev/privacy/
 Cloudflare terms: https://www.cloudflare.com/website-terms/
@@ -120,6 +116,10 @@ Persistent settings, tables, and post metadata remain after uninstall unless
 **Uninstall Cleanup** was enabled beforehand.
 
 == Changelog ==
+
+= 7.5.0 =
+* Added three-step Quick Setup with site presets, basic identity, and a settings receipt.
+* Fixed setup asset caching and rendering; synchronized release documentation.
 
 = 7.4.2 =
 * Bounded LLMS work, prevented overlapping rebuilds, reduced cache reads, and corrected scan coverage.
@@ -200,6 +200,9 @@ Persistent settings, tables, and post metadata remain after uninstall unless
 Earlier release history is included in `changelog.txt`.
 
 == Upgrade Notice ==
+
+= 7.5.0 =
+Quick Setup now applies a three-step preset while preserving advanced configuration.
 
 = 7.4.2 =
 Prevents overlapping LLMS rebuilds and bounds scans of excluded posts.

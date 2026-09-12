@@ -91,7 +91,12 @@ def release_notes(version, beta, commit):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--stable", action="store_true", help="publish a stable release instead of open beta")
+    parser.add_argument("--website", default=os.environ.get("CYBERMAPS_WEBSITE_DIR"),
+                        help="Astro website checkout (or set CYBERMAPS_WEBSITE_DIR)")
     args = parser.parse_args()
+    if not args.website:
+        parser.error("--website is required so the release documentation can be validated")
+    website = Path(args.website).resolve()
     os.chdir(Path(__file__).resolve().parent.parent)
     os.environ["GH_HOST"] = "github.com"
     os.environ["GH_PROMPT_DISABLED"] = "1"
@@ -108,6 +113,8 @@ def main():
     state = release_state(tag)
     if state:
         matching_draft(state, tag, commit, beta, notes, title)
+    run("python3", "bin/check-website.py", str(website), "--commit", commit,
+        "--channel", "beta" if beta else "stable", capture=False)
     for command in [("composer", "test"), ("composer", "run", "release:check"),
                     ("composer", "run", "lint:complexity"), ("composer", "run", "release:build")]:
         run(*command, capture=False)
@@ -117,6 +124,8 @@ def main():
     require(checksum.read_text() == expected, "Local checksum does not match the ZIP.")
     artifacts = {p.name: p.read_bytes() for p in (archive, checksum)}
     require(source_commit() == commit, "Source changed during validation.")
+    run("python3", "bin/check-website.py", str(website), "--commit", commit,
+        "--channel", "beta" if beta else "stable", "--source-only", capture=False)
     local, remote = verify_tag(tag, commit)
     if not local:
         run("git", "tag", tag, commit)
@@ -158,6 +167,8 @@ def main():
         require(all(a in final["assets"] for a in state["assets"]), "Draft assets were replaced.")
         require(source_commit() == commit, "Source changed before publication.")
         require(verify_tag(tag, commit)[1], "Remote tag disappeared before publication.")
+        run("python3", "bin/check-website.py", str(website), "--commit", commit,
+            "--channel", "beta" if beta else "stable", "--source-only", capture=False)
         run("gh", "release", "edit", tag, "--repo", REPO, "--draft=false",
             "--prerelease=" + str(beta).lower(), "--latest=" + str(not beta).lower(), capture=False)
     print("Published https://github.com/" + REPO + "/releases/tag/" + tag)

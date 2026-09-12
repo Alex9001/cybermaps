@@ -19,6 +19,7 @@ declare(strict_types=1);
  *     php docs/dev/generate-docs.php > docs/dev/manifest.json
  *     php docs/dev/generate-docs.php --ai-schema > docs/dev/ai-configuration/schema.json
  *     php docs/dev/generate-docs.php --ai-catalog > docs/dev/ai-configuration/catalog.json
+ *     php docs/dev/generate-docs.php --website
  *     php docs/dev/generate-docs.php | python3 -c "import json,sys; ..."
  *
  * WHAT TO UPDATE WHEN THE PLUGIN CHANGES:
@@ -66,6 +67,14 @@ declare(strict_types=1);
  *                            field_count, artifacts}
  *   source_classes[]      — {namespace, class, fqcn, file, summary}
  *   class_count           — integer
+ *   publication_limits / publication_defaults — values from runtime constants
+ *   public_routes[] / public_route_count — combined public route-family inventory
+ *
+ * WEBSITE EXPORT:
+ *   --website emits deterministic release facts and runtime-source hashes for
+ *   cybermaps-astro. CYBERMAPS_DOCS_SOURCE_ROOT may point to an isolated Git
+ *   archive; the exporter implementation remains in this checkout. Historical
+ *   manifests and schema bytes are copied from their original release unchanged.
  *
  * TROUBLESHOOTING:
  *   - "Namespace declaration statement has to be the very first statement":
@@ -82,7 +91,14 @@ declare(strict_types=1);
 
 // --- Bootstrap: paths and version detection ---
 
-define( 'CYBERMAPS_PLUGIN_DIR', dirname( __DIR__, 2 ) . '/' );
+// Release tooling can inspect an isolated, immutable Git archive with this
+// exporter, including releases made before the website contract was introduced.
+$_cybermaps_source_root = getenv( 'CYBERMAPS_DOCS_SOURCE_ROOT' ) ?: dirname( __DIR__, 2 );
+if ( ! is_file( $_cybermaps_source_root . '/cybermaps.php' ) ) {
+    fwrite( STDERR, "Invalid Cybermaps documentation source root.\n" );
+    exit( 2 );
+}
+define( 'CYBERMAPS_PLUGIN_DIR', realpath( $_cybermaps_source_root ) . '/' );
 define( 'CYBERMAPS_PLUGIN_URL', '' );
 
 // Detect release metadata from the main plugin file header.
@@ -112,6 +128,7 @@ if ( file_exists( $_cybermaps_main_file ) ) {
 define( 'CYBERMAPS_VERSION', $_cybermaps_headers['version'] );
 define( 'CYBERMAPS_PLUGIN_BASENAME', 'cybermaps/cybermaps.php' );
 define( 'ABSPATH', CYBERMAPS_PLUGIN_DIR . '../../../../' );
+define( 'HOUR_IN_SECONDS', 3600 );
 
 // ============================================================================
 // WordPress function stubs — makes the script runnable without WP bootstrap.
@@ -161,6 +178,7 @@ if ( ! function_exists( '__' ) ) {
     function wp_kses( string $s, array $c ): string { return $s; }
     function wp_kses_post( string $s ): string { return $s; }
     function status_header( int $c ): void {}
+    function wp_parse_url( string $url, int $component = -1 ): mixed { return parse_url( $url, $component ); }
     function nocache_headers(): void {}
     function wp_die( string $m = '' ): void { exit( 1 ); }
     function wp_send_json_success( mixed $d = null ): void { echo json_encode( [ 'success' => true, 'data' => $d ] ); exit; }
@@ -1295,6 +1313,12 @@ $manifest = [
     'class_count'          => count( $all_classes ),
 ];
 
+require_once __DIR__ . '/website-contract.php';
+$manifest['publication_limits'] = cybermaps_website_limits();
+$manifest['publication_defaults'] = cybermaps_website_defaults( $manifest );
+$manifest['public_routes'] = cybermaps_website_routes( $manifest );
+$manifest['public_route_count'] = count( $manifest['public_routes'] );
+
 // ============================================================================
 // OUTPUT — JSON to stdout. AI agents consuming this should parse with:
 //   php docs/dev/generate-docs.php | python3 -c "import json,sys; d=json.load(sys.stdin); print(d['version'])"
@@ -1305,10 +1329,11 @@ $output = match ( $output_mode ) {
 	'--manifest'    => $manifest,
 	'--ai-schema'   => $ai_configuration_schema,
 	'--ai-catalog'  => $ai_configuration_catalog,
+	'--website'     => cybermaps_website_contract( $manifest ),
 	default         => null,
 };
 if ( null === $output ) {
-	fwrite( STDERR, "Unknown output mode. Use --manifest, --ai-schema, or --ai-catalog.\n" );
+	fwrite( STDERR, "Unknown output mode. Use --manifest, --ai-schema, --ai-catalog, or --website.\n" );
 	exit( 2 );
 }
 

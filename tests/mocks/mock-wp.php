@@ -1375,6 +1375,10 @@ function wp_script_is( $handle, $status = 'enqueued' ) {
 	return isset( $GLOBALS['cybermaps_mock_enqueued_scripts'][ $handle ] );
 }
 
+function wp_enqueue_media( $args = array() ) {
+	$GLOBALS['cybermaps_mock_media_enqueued'] = $args;
+}
+
 function wp_localize_script( $handle, $object_name, $data ) {
 	$GLOBALS['cybermaps_mock_localized_scripts'][ $handle ][ $object_name ] = $data;
 	return true;

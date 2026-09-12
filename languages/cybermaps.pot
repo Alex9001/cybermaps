@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: CYBERMAPS: XML Sitemaps & llms.txt 7.4.2\n"
+"Project-Id-Version: CYBERMAPS: XML Sitemaps & llms.txt 7.5.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/cybermaps\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-10T17:08:32+00:00\n"
+"POT-Creation-Date: 2026-09-12T00:05:27+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: cybermaps\n"
@@ -221,7 +221,6 @@ msgstr ""
 #: src/Admin/SystemStatusCollector.php:164
 #: src/Audit/DiscoveryReportExporter.php:40
 #: src/Audit/DiscoveryReportExporter.php:142
-#: assets/js/setup-wizard.js:162
 msgid "Disabled"
 msgstr ""
 
@@ -253,7 +252,6 @@ msgstr ""
 #: src/Admin/AIDiscoveryStatus.php:350
 #: src/Admin/DashboardRenderer.php:85
 #: src/Admin/DiscoveryAnalytics.php:1055
-#: assets/js/setup-wizard.js:24
 msgid "Dynamic only"
 msgstr ""
 
@@ -804,7 +802,7 @@ msgstr ""
 #: src/Admin/NetworkSettings.php:89
 #: src/Admin/Settings.php:493
 #: src/Admin/Settings/SettingsAjax.php:339
-#: src/Admin/SetupWizard/SetupWizardController.php:183
+#: src/Admin/SetupWizard/SetupWizardController.php:155
 #: src/Sitemap/Orchestrator.php:440
 msgid "Invalid request method."
 msgstr ""
@@ -863,7 +861,7 @@ msgstr ""
 #: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:696
 #: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:697
 #: src/Admin/SystemStatus.php:70
-#: assets/js/setup-wizard.js:484
+#: assets/js/setup-wizard.js:135
 msgid "Off"
 msgstr ""
 
@@ -898,7 +896,6 @@ msgstr ""
 #: src/Admin/DashboardRenderer.php:58
 #: src/Admin/SystemStatusCollector.php:94
 #: src/Admin/SystemStatusCollector.php:164
-#: assets/js/setup-wizard.js:162
 msgid "Enabled"
 msgstr ""
 
@@ -907,7 +904,6 @@ msgid "Master state of the public AI discovery surface."
 msgstr ""
 
 #: src/Admin/DashboardRenderer.php:62
-#: assets/js/setup-wizard.js:21
 msgid "Complete content file"
 msgstr ""
 
@@ -1579,6 +1575,7 @@ msgstr ""
 
 #: src/Admin/DiscoveryAnalytics.php:1020
 #: src/Admin/ShortcodeBuilder.php:219
+#: assets/js/setup-wizard.js:136
 msgid "None"
 msgstr ""
 
@@ -1611,7 +1608,7 @@ msgstr ""
 #: src/Admin/EdgeOptimizationController.php:404
 #: src/Admin/Settings/SettingsAjax.php:155
 #: src/Admin/Settings/SettingsAjax.php:191
-#: src/Admin/SetupWizard/SetupWizardController.php:126
+#: src/Admin/SetupWizard/SetupWizardController.php:102
 msgid "Insufficient permissions."
 msgstr ""
 
@@ -2323,6 +2320,7 @@ msgstr ""
 #: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:141
 #: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:243
 #: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:280
+#: assets/js/setup-wizard.js:126
 msgid "Remove"
 msgstr ""
 
@@ -2446,14 +2444,12 @@ msgstr ""
 #: src/Admin/IdentityHub.php:443
 #: src/Admin/IdentityHub.php:558
 #: src/Core/IdentityEntityBuilder.php:348
-#: assets/js/setup-wizard.js:27
 msgid "Services"
 msgstr ""
 
 #: src/Admin/IdentityHub.php:444
 #: src/Admin/IdentityHub.php:559
 #: src/Core/IdentityEntityBuilder.php:348
-#: assets/js/setup-wizard.js:27
 msgid "Products"
 msgstr ""
 
@@ -3499,103 +3495,103 @@ msgid "Settings"
 msgstr ""
 
 #: src/Admin/Settings/SettingsAssets.php:48
-msgid "Cybermaps could not contact Guided Setup. Try again."
+msgid "Cybermaps could not contact Quick Setup. Try again."
 msgstr ""
 
 #: src/Admin/Settings/SettingsAssets.php:49
-msgid "You have unfinished Guided Setup answers. Leave without applying them?"
-msgstr ""
-
-#: src/Admin/Settings/SettingsAssets.php:115
-msgid "Working…"
-msgstr ""
-
-#: src/Admin/Settings/SettingsAssets.php:116
-msgid "Cloudflare opened in a new tab. Select the account, review the permissions, and authorize Cybermaps."
-msgstr ""
-
-#: src/Admin/Settings/SettingsAssets.php:117
-msgid "Waiting for Cloudflare authorization…"
-msgstr ""
-
-#: src/Admin/Settings/SettingsAssets.php:118
-msgid "Operation complete. Open Debugging to see the latest evidence."
-msgstr ""
-
-#: src/Admin/Settings/SettingsAssets.php:119
-msgid "The optimization request did not complete."
+msgid "You have unfinished Quick Setup answers. Leave without applying them?"
 msgstr ""
 
 #: src/Admin/Settings/SettingsAssets.php:120
-msgid "Cloudflare rules were updated. Verifying each public resource from this browser…"
+msgid "Working…"
 msgstr ""
 
 #: src/Admin/Settings/SettingsAssets.php:121
-msgid "The browser could not reach this resource."
+msgid "Cloudflare opened in a new tab. Select the account, review the permissions, and authorize Cybermaps."
 msgstr ""
 
 #: src/Admin/Settings/SettingsAssets.php:122
-msgid "Cloudflare proxy traffic was detected. Cloudflare rule tools are available."
+msgid "Waiting for Cloudflare authorization…"
 msgstr ""
 
 #: src/Admin/Settings/SettingsAssets.php:123
-msgid "Manual Cloudflare confirmation accepted for this page. Authorization and public verification are still required."
+msgid "Operation complete. Open Debugging to see the latest evidence."
 msgstr ""
 
 #: src/Admin/Settings/SettingsAssets.php:124
-msgid "Cloudflare proxy traffic was not detected. These controls remain disabled unless you explicitly confirm that this hostname is orange-cloud proxied."
+msgid "The optimization request did not complete."
 msgstr ""
 
 #: src/Admin/Settings/SettingsAssets.php:125
-msgid "Checking the configured public hostname for Cloudflare proxy traffic…"
+msgid "Cloudflare rules were updated. Verifying each public resource from this browser…"
 msgstr ""
 
 #: src/Admin/Settings/SettingsAssets.php:126
-msgid "Cybermaps could not check the public hostname from this browser. Confirm the orange-cloud proxy manually only if you have verified it in Cloudflare DNS."
+msgid "The browser could not reach this resource."
 msgstr ""
 
 #: src/Admin/Settings/SettingsAssets.php:127
-msgid "Snippet copied."
+msgid "Cloudflare proxy traffic was detected. Cloudflare rule tools are available."
 msgstr ""
 
 #: src/Admin/Settings/SettingsAssets.php:128
+msgid "Manual Cloudflare confirmation accepted for this page. Authorization and public verification are still required."
+msgstr ""
+
+#: src/Admin/Settings/SettingsAssets.php:129
+msgid "Cloudflare proxy traffic was not detected. These controls remain disabled unless you explicitly confirm that this hostname is orange-cloud proxied."
+msgstr ""
+
+#: src/Admin/Settings/SettingsAssets.php:130
+msgid "Checking the configured public hostname for Cloudflare proxy traffic…"
+msgstr ""
+
+#: src/Admin/Settings/SettingsAssets.php:131
+msgid "Cybermaps could not check the public hostname from this browser. Confirm the orange-cloud proxy manually only if you have verified it in Cloudflare DNS."
+msgstr ""
+
+#: src/Admin/Settings/SettingsAssets.php:132
+msgid "Snippet copied."
+msgstr ""
+
+#: src/Admin/Settings/SettingsAssets.php:133
 msgid "The snippet could not be copied automatically."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAssets.php:167
+#: src/Admin/Settings/SettingsAssets.php:172
 msgid "Save Changes after selecting a media discovery mode, then start the rescan."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAssets.php:168
+#: src/Admin/Settings/SettingsAssets.php:173
 #: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:305
 msgid "Rescan Media Now"
 msgstr ""
 
-#: src/Admin/Settings/SettingsAssets.php:169
+#: src/Admin/Settings/SettingsAssets.php:174
 msgid "Rescanning…"
 msgstr ""
 
-#: src/Admin/Settings/SettingsAssets.php:170
+#: src/Admin/Settings/SettingsAssets.php:175
 msgid "The media rescan cursor did not advance."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAssets.php:171
+#: src/Admin/Settings/SettingsAssets.php:176
 msgid "The media rescan exceeded its expected batch count."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAssets.php:172
+#: src/Admin/Settings/SettingsAssets.php:177
 msgid "Media rescan failed: "
 msgstr ""
 
-#: src/Admin/Settings/SettingsAssets.php:173
+#: src/Admin/Settings/SettingsAssets.php:178
 msgid "Media rescan complete."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAssets.php:174
+#: src/Admin/Settings/SettingsAssets.php:179
 msgid "The server did not return a usable response."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAssets.php:175
+#: src/Admin/Settings/SettingsAssets.php:180
 msgid "Connection error."
 msgstr ""
 
@@ -4091,7 +4087,6 @@ msgstr ""
 
 #: src/Admin/Settings/Tabs/ContentReview.php:26
 #: src/Admin/Settings/Tabs/ContentReview.php:317
-#: assets/js/setup-wizard.js:491
 msgid "Reports"
 msgstr ""
 
@@ -4104,7 +4099,6 @@ msgid "Rules are explicit and saved with each report. They apply to public, sear
 msgstr ""
 
 #: src/Admin/Settings/Tabs/ContentReview.php:45
-#: assets/js/setup-wizard.js:521
 msgid "Post minimum words"
 msgstr ""
 
@@ -4121,7 +4115,6 @@ msgid "Flag posts whose stored modified date is older than this many days. Use 0
 msgstr ""
 
 #: src/Admin/Settings/Tabs/ContentReview.php:59
-#: assets/js/setup-wizard.js:524
 msgid "Page minimum words"
 msgstr ""
 
@@ -4142,7 +4135,6 @@ msgid "Post media review"
 msgstr ""
 
 #: src/Admin/Settings/Tabs/ContentReview.php:101
-#: assets/js/setup-wizard.js:523
 msgid "Review posts without an image or media block"
 msgstr ""
 
@@ -4155,7 +4147,6 @@ msgid "Page media review"
 msgstr ""
 
 #: src/Admin/Settings/Tabs/ContentReview.php:114
-#: assets/js/setup-wizard.js:526
 msgid "Review pages without an image or media block"
 msgstr ""
 
@@ -4174,7 +4165,6 @@ msgstr ""
 #: src/Admin/Settings/Tabs/ContentReview.php:131
 #: src/Audit/AuditExporter.php:140
 #: src/Audit/DiscoveryReportExporter.php:100
-#: assets/js/setup-wizard.js:534
 msgid "Prepared by"
 msgstr ""
 
@@ -4187,7 +4177,6 @@ msgid "Optional professional or agency name."
 msgstr ""
 
 #: src/Admin/Settings/Tabs/ContentReview.php:136
-#: assets/js/setup-wizard.js:535
 msgid "Prepared-by URL"
 msgstr ""
 
@@ -4196,7 +4185,6 @@ msgid "Optional link used with the prepared-by name."
 msgstr ""
 
 #: src/Admin/Settings/Tabs/ContentReview.php:141
-#: assets/js/setup-wizard.js:536
 msgid "Client site name"
 msgstr ""
 
@@ -4205,17 +4193,14 @@ msgid "Optional client-facing display name."
 msgstr ""
 
 #: src/Admin/Settings/Tabs/ContentReview.php:163
-#: assets/js/setup-wizard.js:539
 msgid "Prepared-by logo"
 msgstr ""
 
 #: src/Admin/Settings/Tabs/ContentReview.php:169
-#: assets/js/setup-wizard.js:540
 msgid "Optional logo displayed in printable reports."
 msgstr ""
 
 #: src/Admin/Settings/Tabs/ContentReview.php:174
-#: assets/js/setup-wizard.js:537
 msgid "Report theme"
 msgstr ""
 
@@ -4366,7 +4351,6 @@ msgid "Export a client-ready list for one review category from the saved report 
 msgstr ""
 
 #: src/Admin/Settings/Tabs/ContentReview.php:465
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:195
 msgid "Review"
 msgstr ""
 
@@ -4469,20 +4453,19 @@ msgid "Brand and theme printable deliverables generated from the saved measureme
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Dashboard.php:43
-#: src/Admin/SetupWizard/SetupWizardPage.php:24
-msgid "Optional configuration assistant"
+msgid "A quick starting point"
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Dashboard.php:44
-msgid "Set up Cybermaps with a guided review"
+msgid "Set up Cybermaps in three easy steps"
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Dashboard.php:45
-msgid "Answer a short set of questions, review the exact settings Cybermaps recommends, and apply only when you are ready."
+msgid "Tell us about your website and priorities. Cybermaps will apply a sensible site-wide preset you can fine-tune anytime."
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Dashboard.php:48
-msgid "Launch Guided Setup"
+msgid "Start Quick Setup"
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Dashboard.php:53
@@ -4507,7 +4490,6 @@ msgstr ""
 
 #: src/Admin/Settings/Tabs/Discovery.php:18
 #: src/Admin/Settings/Tabs/Discovery.php:529
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:177
 msgid "AI Publishing"
 msgstr ""
 
@@ -4869,7 +4851,6 @@ msgid "Read-only"
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:22
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:189
 msgid "Operations"
 msgstr ""
 
@@ -5063,17 +5044,14 @@ msgid "Comma-separated taxonomy names, such as <code>category</code> or <code>po
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:411
-#: assets/js/setup-wizard.js:22
 msgid "Declare content search"
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:412
-#: assets/js/setup-wizard.js:22
 msgid "Declare article reading"
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:413
-#: assets/js/setup-wizard.js:22
 msgid "Declare entity extraction"
 msgstr ""
 
@@ -5090,7 +5068,6 @@ msgid "<strong>No assertion:</strong> Cybermaps will not claim that your site co
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:437
-#: assets/js/setup-wizard.js:28
 msgid "CC BY 4.0"
 msgstr ""
 
@@ -5099,7 +5076,6 @@ msgid "<strong>Operator assertion:</strong> Publishes the CC BY 4.0 label. Revie
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:442
-#: assets/js/setup-wizard.js:28
 msgid "CC BY-SA 4.0"
 msgstr ""
 
@@ -5108,7 +5084,6 @@ msgid "<strong>Operator assertion:</strong> Publishes the CC BY-SA 4.0 label. Re
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:447
-#: assets/js/setup-wizard.js:29
 msgid "CC BY-NC 4.0"
 msgstr ""
 
@@ -5157,8 +5132,6 @@ msgid "<strong>Operator assertion:</strong> Publishes an All Rights Reserved lab
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:477
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:380
-#: assets/js/setup-wizard.js:419
 msgid "Content license assertion"
 msgstr ""
 
@@ -5545,7 +5518,6 @@ msgstr ""
 #: src/Admin/Settings/Tabs/Robots/RobotsFields.php:470
 #: src/Admin/Settings/Tabs/Robots/RobotsFields.php:517
 #: src/Admin/Settings/Tabs/Robots/RobotsFields.php:518
-#: assets/js/setup-wizard.js:23
 msgid "Allow"
 msgstr ""
 
@@ -6367,7 +6339,6 @@ msgid "Regenerate Publications"
 msgstr ""
 
 #: src/Admin/SettingsPage.php:404
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:171
 msgid "Sitemaps"
 msgstr ""
 
@@ -6499,625 +6470,359 @@ msgstr ""
 msgid "The stored recovery journal is malformed. Cybermaps will not delete it or mutate generated files automatically. Preserve a database backup and inspect the cybermaps_static_write_intent option before taking manual action."
 msgstr ""
 
-#. translators: %d: WordPress page ID.
-#: src/Admin/SetupWizard/SetupWizardContext.php:569
-#, php-format
-msgid "Page #%d"
+#: src/Admin/SetupWizard/SetupWizardController.php:52
+msgid "Cybermaps could not prepare Quick Setup. No settings were changed."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardController.php:68
-msgid "Cybermaps could not preview Guided Setup. No settings were changed."
+#: src/Admin/SetupWizard/SetupWizardController.php:70
+msgid "The Quick Setup preset changed while it was being prepared. Try again."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardController.php:86
-msgid "The Guided Setup plan changed after preview. Preview it again before applying."
+#: src/Admin/SetupWizard/SetupWizardController.php:73
+msgid "Prepare Quick Setup before applying it."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardController.php:89
-msgid "Preview Guided Setup before applying it."
+#: src/Admin/SetupWizard/SetupWizardController.php:85
+msgid "Quick Setup applied successfully."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardController.php:95
-msgid "Acknowledge the high-impact changes before applying Guided Setup."
+#: src/Admin/SetupWizard/SetupWizardController.php:94
+msgid "Quick Setup could not be applied. Review your current settings and try again."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardController.php:98
-msgid "Acknowledge the guided-field resets before applying Guided Setup."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardController.php:109
-msgid "Guided Setup applied successfully."
+#: src/Admin/SetupWizard/SetupWizardController.php:112
+msgid "The Quick Setup request is missing or exceeds its safe size limit."
 msgstr ""
 
 #: src/Admin/SetupWizard/SetupWizardController.php:118
-msgid "Guided Setup could not be applied. Review your current settings and try again."
+msgid "The Quick Setup request is invalid JSON."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardController.php:136
-msgid "The Guided Setup request is missing or exceeds its safe size limit."
+#: src/Admin/SetupWizard/SetupWizardController.php:122
+msgid "The Quick Setup request must be an object."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardController.php:142
-msgid "The Guided Setup request is invalid JSON."
+#: src/Admin/SetupWizard/SetupWizardController.php:135
+msgid "The prepared Quick Setup configuration is missing or too large."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardController.php:146
-msgid "The Guided Setup request must be an object."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardController.php:159
-msgid "The reviewed Guided Setup configuration is missing or too large."
-msgstr ""
-
+#: src/Admin/SetupWizard/SetupWizardPage.php:22
 #: src/Admin/SetupWizard/SetupWizardPage.php:25
-msgid "Guided Setup"
+msgid "Cybermaps Quick Setup"
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPage.php:26
-msgid "Answer a short set of questions, inspect every proposed change, and apply only when you are ready."
+#: src/Admin/SetupWizard/SetupWizardPage.php:28
+msgid "Skip for now"
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPage.php:29
-msgid "Back to Overview"
+#: src/Admin/SetupWizard/SetupWizardPage.php:32
+#: assets/js/setup-wizard.js:286
+msgid "Getting your site ready…"
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPage.php:33
-#: assets/js/setup-wizard.js:314
-msgid "Loading Guided Setup…"
+#: src/Admin/SetupWizard/SetupWizardPage.php:35
+msgid "Quick Setup requires JavaScript. You can configure every Cybermaps setting from its normal workspace."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPage.php:36
-msgid "Guided Setup requires JavaScript. You can configure every Cybermaps setting from its normal workspace."
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:37
+msgid "This Quick Setup session is out of date. Reload it before continuing."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:47
-msgid "This Guided Setup session is out of date. Reload it before continuing."
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:43
+msgid "Quick Setup answers must be an object."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:52
-msgid "Guided Setup answers must be an object."
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:72
+msgid "Cybermaps could not prepare the Quick Setup preset."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:57
-msgid "Guided Setup section choices must be an object."
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:85
+msgid "Matches the kind of website you selected."
 msgstr ""
 
-#. translators: %s: Guided Setup section identifier.
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:70
-#, php-format
-msgid "The %s setup choice is invalid."
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:92
+msgid "Makes the homepage part of the sitemap."
+msgstr ""
+
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:93
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:94
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:101
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:102
+msgid "Matches the publishing style you selected."
+msgstr ""
+
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:95
+msgid "Keeps empty archive pages out of the sitemap."
+msgstr ""
+
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:96
+msgid "Helps crawlers find your public maps."
 msgstr ""
 
 #: src/Admin/SetupWizard/SetupWizardPlanFactory.php:97
-msgid "Cybermaps could not prepare the Guided Setup configuration document."
+msgid "Keeps dynamic sitemap delivery responsive."
+msgstr ""
+
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:98
+msgid "Uses Cybermaps as the main sitemap."
+msgstr ""
+
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:99
+msgid "Makes the visual sitemap available when you need it."
+msgstr ""
+
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:100
+msgid "Uses a balanced level of media discovery."
+msgstr ""
+
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:104
+msgid "Publishes recent articles in the RSS sitemap."
+msgstr ""
+
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:107
+msgid "Includes the languages already active on this site."
 msgstr ""
 
 #: src/Admin/SetupWizard/SetupWizardPlanFactory.php:116
-msgid "Reset guided strategy fields to their Cybermaps defaults."
+msgid "Publishes a machine-readable guide to your content."
 msgstr ""
 
 #: src/Admin/SetupWizard/SetupWizardPlanFactory.php:117
-msgid "Reset custom publication weights."
+msgid "Keeps AI discovery switched off for now."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:118
-msgid "Reset custom content intents."
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:121
+msgid "Turns off the notification feature that depends on AI discovery."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:119
-msgid "Reset custom disabled content groups."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:125
-msgid "Confirmed site profile."
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:126
+msgid "Points compatible tools to your discovery publications."
 msgstr ""
 
 #: src/Admin/SetupWizard/SetupWizardPlanFactory.php:127
-msgid "Replace custom weights with the selected profile baseline."
+msgid "Adds useful context to AI sitemap entries."
 msgstr ""
 
 #: src/Admin/SetupWizard/SetupWizardPlanFactory.php:128
-msgid "Replace custom intents with the selected profile baseline."
+msgid "Connects the AI guide to your sitemap."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:129
-msgid "Re-enable custom-disabled content groups."
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:130
+msgid "Publishes discovery guides for active site languages."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:141
-msgid "Reset guided sitemap fields to their Cybermaps defaults."
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:136
+msgid "Uses the public content types available on this site."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:147
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:148
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:149
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:139
+msgid "Uses the same public content in the AI sitemap."
+msgstr ""
+
 #: src/Admin/SetupWizard/SetupWizardPlanFactory.php:150
-msgid "Selected sitemap archive coverage."
+msgid "Lists the basic discovery publications while preserving existing choices."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:154
-msgid "Selected media discovery depth."
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:153
+msgid "Uses your public introduction as the initial site summary."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:155
 #: src/Admin/SetupWizard/SetupWizardPlanFactory.php:156
-msgid "Selected media publishing enhancement."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:159
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:160
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:161
-msgid "Selected specialized publication."
+msgid "Uses your public introduction as the initial discovery summary."
 msgstr ""
 
 #: src/Admin/SetupWizard/SetupWizardPlanFactory.php:162
+msgid "Matches who this website represents."
+msgstr ""
+
 #: src/Admin/SetupWizard/SetupWizardPlanFactory.php:163
-msgid "Selected notification service."
+msgid "Keeps a compatible detailed identity type when one is already set."
+msgstr ""
+
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:164
+msgid "Sets the public name for this website."
 msgstr ""
 
 #: src/Admin/SetupWizard/SetupWizardPlanFactory.php:165
-msgid "Selected RSS content types."
+msgid "Sets the public introduction for this website."
+msgstr ""
+
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:166
+msgid "Sets the public logo or profile image."
 msgstr ""
 
 #: src/Admin/SetupWizard/SetupWizardPlanFactory.php:168
-msgid "Added the default public WebSub hubs because none were configured."
+msgid "Connects the public identity to AI discovery output."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:172
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:173
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:174
-msgid "Selected WordPress integration."
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:178
+msgid "Shows crawler activity observed by WordPress."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:176
-msgid "Selected alternate-language sitemap support."
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:179
+msgid "Skips crawler activity logging."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:191
-msgid "Reset guided AI publishing fields to their Cybermaps defaults."
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:182
+msgid "Masks IP addresses before activity is stored."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:197
-msgid "Selected AI Publication Hub state."
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:183
+msgid "Keeps activity for 30 days."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:198
-msgid "Selected Model Context Protocol access tier."
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:189
+msgid "Lets WordPress observe eligible discovery requests."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:204
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:205
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:206
-msgid "Selected AI publication feature."
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:190
+msgid "Favors static delivery for lower runtime work."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:207
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:208
-msgid "Selected optional LLMS publication."
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:202
+msgid "Add the public name for this website."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:209
-msgid "Selected optional retrieval publication."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:213
-msgid "Selected localized AI publication support."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:217
-msgid "Selected LLMS and search content types."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:221
-msgid "Selected AI sitemap content types."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:223
-msgid "Confirmed LLMS site summary."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:224
-msgid "Confirmed AI Discovery Manifest summary."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:225
-msgid "Confirmed site topics."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:226
-msgid "Confirmed truthful capability declarations."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:228
-msgid "Confirmed retrieval-use preference."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:229
-msgid "Confirmed training-use preference."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:230
-msgid "Confirmed commercial-reuse preference."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:231
-msgid "Confirmed content license assertion."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:232
-msgid "Confirmed public licensing contact."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:250
-msgid "Published matching Content-Signal preferences."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:267
-msgid "Updated the AI manifest with the selected publication package while preserving manual guide and action entries."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:279
-msgid "Reset guided identity fields while preserving detailed identity and catalog data."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:286
-msgid "Confirmed public identity type."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:287
-msgid "Confirmed public identity subtype."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:288
-msgid "Confirmed public identity name."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:289
-msgid "Confirmed public identity description."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:290
-msgid "Selected public identity image."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:291
-msgid "Selected Knowledge Graph identity link."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:303
-msgid "Choose a published parent Page with at least one published direct child for the automatic catalog."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:351
-msgid "The maximum number of offer catalogs is already configured. Edit an existing automatic catalog or remove one in Schema."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:356
-msgid "Added an automatic catalog while preserving existing catalogs."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:371
-msgid "The selected automatic catalog is no longer available. Reload Guided Setup and choose it again."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:376
-msgid "Updated the selected automatic catalog while preserving every other catalog."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:388
-msgid "Reset crawler analytics to their Cybermaps defaults."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:393
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:394
-msgid "Selected crawler analytics privacy mode."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:395
-msgid "Selected crawler analytics retention period."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:405
-msgid "Reset static publication delivery to its applicable default."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:409
-msgid "Selected Static File Engine delivery mode."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:420
-msgid "Reset report policy and presentation to their Cybermaps defaults."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:440
-msgid "Report measurement choices must be an object."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:457
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:460
-msgid "Configured report measurement policy."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:473
-msgid "Report presentation choices must be an object."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:485
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:488
-msgid "Configured client report presentation."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:495
-msgid "WebSub requires the AI Publication Hub. Enable the Hub or remove WebSub from specialized publications."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:499
-msgid "Localized AI publications require translation integrations. Enable alternate-language sitemap relationships or turn off localized AI publishing."
-msgstr ""
-
-#. translators: %s: Guided Setup question identifier.
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:595
+#. translators: %s: Quick Setup question identifier.
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:284
 #, php-format
-msgid "The %s selection is invalid."
+msgid "Choose an answer for %s."
 msgstr ""
 
-#. translators: %s: Guided Setup question identifier.
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:610
-#, php-format
-msgid "The %s selection must be a list."
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:84
+msgid "Your website"
 msgstr ""
 
-#. translators: %s: Guided Setup question identifier.
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:616
-#, php-format
-msgid "The %s selection contains an unsupported value."
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:85
+msgid "Tell us what you publish so Cybermaps can choose a useful starting point."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:629
-msgid "Select at least one public content type."
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:89
+msgid "Your priorities"
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:643
-msgid "Site topics must be a comma-separated list."
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:90
+msgid "Choose how visible and hands-on you want Cybermaps to be."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:664
-msgid "The content license selection is invalid."
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:94
+msgid "About you"
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:165
-#: assets/js/setup-wizard.js:384
-msgid "Site Profile"
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:95
+msgid "Give search engines and AI tools a clear, public introduction."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:166
-msgid "Choose the content strategy that best fits this website."
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:104
+msgid "Blog"
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:172
-msgid "Set the public sitemap surfaces and practical delivery choices."
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:104
+msgid "Articles, essays, and regular posts."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:178
-msgid "Configure machine-readable discovery and publisher preferences."
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:105
+msgid "News or magazine"
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:183
-msgid "Identity"
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:105
+msgid "Timely stories from multiple sections or authors."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:184
-msgid "Optionally publish factual identity details and an automatic offer catalog."
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:106
+msgid "Online store"
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:190
-msgid "Set analytics privacy, publication delivery, and report defaults."
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:106
+msgid "Products, collections, and shopping pages."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:196
-msgid "Review the exact sanitized changes before applying them."
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:107
+msgid "Guides or documentation"
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:215
-#: assets/js/setup-wizard.js:385
-msgid "What best describes this site?"
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:107
+msgid "Help content, reference material, or a knowledge base."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:222
-msgid "Replace custom content-group adjustments with the selected profile baseline"
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:108
+msgid "Portfolio or agency"
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:229
-#: assets/js/setup-wizard.js:391
-msgid "Include these sitemap surfaces"
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:108
+msgid "Projects, services, and work samples."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:237
-#: assets/js/setup-wizard.js:392
-msgid "Media discovery depth"
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:109
+msgid "Local business"
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:245
-#: assets/js/setup-wizard.js:393
-msgid "Media publishing enhancements"
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:109
+msgid "A business serving customers in a place or region."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:253
-#: assets/js/setup-wizard.js:394
-msgid "Specialized publications"
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:110
+msgid "Company"
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:261
-#: assets/js/setup-wizard.js:395
-msgid "RSS content types"
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:110
+msgid "A mix of company, service, and editorial content."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:268
-#: assets/js/setup-wizard.js:396
-msgid "WordPress integration"
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:113
+msgid "Yes, help them find me"
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:276
-#: assets/js/setup-wizard.js:397
-msgid "Publish alternate-language sitemap relationships"
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:113
+msgid "Publish a clear, machine-readable guide to your content."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:283
-#: assets/js/setup-wizard.js:403
-msgid "Enable the AI Publication Hub"
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:114
+msgid "Not right now"
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:290
-msgid "Model Context Protocol access"
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:114
+msgid "Leave AI discovery switched off for now."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:298
-#: assets/js/setup-wizard.js:405
-msgid "LLMS and search content types"
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:117
+msgid "Show me crawler activity"
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:305
-#: assets/js/setup-wizard.js:406
-msgid "Use different content types for the AI sitemap"
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:117
+msgid "Keep a private, anonymized 30-day activity history."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:312
-#: assets/js/setup-wizard.js:407
-msgid "AI sitemap content types"
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:118
+msgid "Keep things lightweight"
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:319
-#: assets/js/setup-wizard.js:408
-msgid "AI publication features"
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:118
+msgid "Skip activity logging and favor static delivery."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:327
-#: assets/js/setup-wizard.js:410
-msgid "LLMS site summary"
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:121
+msgid "A person"
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:334
-#: assets/js/setup-wizard.js:411
-msgid "AI Discovery Manifest summary"
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:121
+msgid "A personal site, creator, or independent expert."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:341
-#: assets/js/setup-wizard.js:413
-msgid "Site topics"
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:122
+msgid "A business or organization"
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:348
-#: assets/js/setup-wizard.js:414
-msgid "Truthful capability declarations"
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:122
+msgid "A company, nonprofit, team, or brand."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:356
-#: assets/js/setup-wizard.js:416
-msgid "Retrieval and RAG use"
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:123
+msgid "A local business"
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:364
-#: assets/js/setup-wizard.js:417
-msgid "Model training use"
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:372
-#: assets/js/setup-wizard.js:418
-msgid "Commercial reuse"
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:387
-#: assets/js/setup-wizard.js:421
-msgid "Public licensing email"
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:394
-msgid "Publish matching Content-Signal declarations"
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:401
-#: assets/js/setup-wizard.js:423
-msgid "Search indexing preference"
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:409
-#: assets/js/setup-wizard.js:431
-msgid "What does this website represent?"
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:417
-#: assets/js/setup-wizard.js:432
-msgid "Specific Schema.org type"
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:424
-#: assets/js/setup-wizard.js:434
-msgid "Public identity name"
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:431
-#: assets/js/setup-wizard.js:435
-msgid "Public identity description"
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:438
-#: assets/js/setup-wizard.js:438
-msgid "Identity image"
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:445
-#: assets/js/setup-wizard.js:442
-msgid "Link this identity to the website in the Knowledge Graph"
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:452
-#: assets/js/setup-wizard.js:443
-msgid "Automatic catalog"
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:460
-msgid "Existing automatic catalog"
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:467
-msgid "Parent Page"
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:474
-#: assets/js/setup-wizard.js:475
-msgid "Catalog items represent"
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:482
-#: assets/js/setup-wizard.js:476
-msgid "Catalog name"
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:489
-#: assets/js/setup-wizard.js:484
-msgid "Crawler analytics"
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:497
-msgid "Analytics retention days"
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:504
-#: assets/js/setup-wizard.js:489
-msgid "Static File Engine delivery"
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:512
-msgid "Content Intelligence measurement policy"
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:519
-#: assets/js/setup-wizard.js:493
-msgid "Configure client report presentation"
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardRegistry.php:526
-msgid "Client report presentation"
+#: src/Admin/SetupWizard/SetupWizardRegistry.php:123
+msgid "A customer-facing business tied to a location."
 msgstr ""
 
 #: src/Admin/ShortcodeBuilder.php:28
@@ -7623,7 +7328,6 @@ msgid "Stale"
 msgstr ""
 
 #: src/Admin/SitemapStatus.php:585
-#: assets/js/setup-wizard.js:23
 msgid "Limited"
 msgstr ""
 
@@ -7776,7 +7480,6 @@ msgid "Evidence and next step"
 msgstr ""
 
 #: src/Admin/SystemStatus.php:149
-#: assets/js/setup-wizard.js:140
 msgid "Configure"
 msgstr ""
 
@@ -8015,6 +7718,7 @@ msgid "Run public delivery checks to verify the observed edge response."
 msgstr ""
 
 #: src/Admin/SystemStatusCollector.php:205
+#: assets/js/setup-wizard.js:122
 msgid "Optional"
 msgstr ""
 
@@ -10045,7 +9749,7 @@ msgstr ""
 
 #: src/MCP/OAuth/DeviceAuthorizationPage.php:89
 #: assets/js/admin-command-center.js:790
-#: assets/js/setup-wizard.js:354
+#: assets/js/setup-wizard.js:314
 msgid "Continue"
 msgstr ""
 
@@ -10159,7 +9863,6 @@ msgstr ""
 #: assets/js/admin-command-center.js:179
 #: assets/js/admin-command-center.js:734
 #: assets/js/admin-command-center.js:789
-#: assets/js/setup-wizard.js:351
 msgid "Cancel"
 msgstr ""
 
@@ -10415,12 +10118,10 @@ msgid "Configuration value"
 msgstr ""
 
 #: assets/js/admin-command-center.js:678
-#: assets/js/setup-wizard.js:370
 msgid "High impact"
 msgstr ""
 
 #: assets/js/admin-command-center.js:681
-#: assets/js/setup-wizard.js:372
 msgid "Current"
 msgstr ""
 
@@ -10429,7 +10130,6 @@ msgid "Proposed"
 msgstr ""
 
 #: assets/js/admin-command-center.js:683
-#: assets/js/setup-wizard.js:373
 msgid "Final sanitized value"
 msgstr ""
 
@@ -10473,431 +10173,132 @@ msgstr ""
 msgid "Confirm Action"
 msgstr ""
 
-#: assets/js/setup-wizard.js:15
-msgid "Homepage"
+#: assets/js/setup-wizard.js:63
+msgid "What kind of website is this?"
 msgstr ""
 
-#: assets/js/setup-wizard.js:15
-msgid "Author archives"
+#: assets/js/setup-wizard.js:64
+msgid "Pick the closest match. You can fine-tune everything later."
 msgstr ""
 
-#: assets/js/setup-wizard.js:15
-msgid "Date archives"
+#: assets/js/setup-wizard.js:78
+msgid "Would you like AI tools to discover your content?"
 msgstr ""
 
-#: assets/js/setup-wizard.js:15
-msgid "Empty terms"
+#: assets/js/setup-wizard.js:87
+msgid "What matters more to you?"
 msgstr ""
 
-#: assets/js/setup-wizard.js:16
-msgid "No media discovery"
+#: assets/js/setup-wizard.js:94
+msgid "This is a multisite network, so Cybermaps will use its safe dynamic delivery mode."
 msgstr ""
 
-#: assets/js/setup-wizard.js:16
-msgid "Attachments and featured media"
+#: assets/js/setup-wizard.js:102
+msgid "This website represents…"
 msgstr ""
 
-#: assets/js/setup-wizard.js:16
-msgid "Include embedded media"
+#: assets/js/setup-wizard.js:112
+msgid "Public name"
 msgstr ""
 
-#: assets/js/setup-wizard.js:17
-msgid "Video schema"
+#: assets/js/setup-wizard.js:116
+msgid "A short introduction"
 msgstr ""
 
-#: assets/js/setup-wizard.js:17
-msgid "AI media hints"
+#: assets/js/setup-wizard.js:117
+msgid "What do you do, make, write, or help people with?"
 msgstr ""
 
-#: assets/js/setup-wizard.js:17
-msgid "Google News sitemap"
+#: assets/js/setup-wizard.js:121
+msgid "Logo or profile photo"
 msgstr ""
 
-#: assets/js/setup-wizard.js:17
-msgid "Recent-content RSS sitemap"
+#: assets/js/setup-wizard.js:122
+msgid "Image selected"
 msgstr ""
 
-#: assets/js/setup-wizard.js:18
-msgid "HTML sitemap shortcode"
+#: assets/js/setup-wizard.js:125
+msgid "Change image"
 msgstr ""
 
-#: assets/js/setup-wizard.js:18
-msgid "IndexNow notifications"
+#: assets/js/setup-wizard.js:125
+msgid "Choose image"
 msgstr ""
 
-#: assets/js/setup-wizard.js:18
-msgid "WebSub notifications"
+#: assets/js/setup-wizard.js:134
+msgid "On"
 msgstr ""
 
-#: assets/js/setup-wizard.js:19
-msgid "Redirect WordPress Core sitemap"
+#: assets/js/setup-wizard.js:137
+msgid "Not set"
 msgstr ""
 
-#: assets/js/setup-wizard.js:19
-msgid "Advertise publications in robots.txt"
+#: assets/js/setup-wizard.js:148
+msgid "Website profile"
 msgstr ""
 
-#: assets/js/setup-wizard.js:19
-msgid "Cache dynamic sitemap responses"
-msgstr ""
-
-#: assets/js/setup-wizard.js:20
-msgid "Response discovery headers"
-msgstr ""
-
-#: assets/js/setup-wizard.js:20
-msgid "Metadata excerpts"
-msgstr ""
-
-#: assets/js/setup-wizard.js:20
-msgid "Sitemap link in LLMS"
-msgstr ""
-
-#: assets/js/setup-wizard.js:21
-msgid "Budgeted site briefing"
-msgstr ""
-
-#: assets/js/setup-wizard.js:21
-msgid "Literal retrieval chunks"
-msgstr ""
-
-#: assets/js/setup-wizard.js:21
-msgid "Localized LLMS routes"
-msgstr ""
-
-#: assets/js/setup-wizard.js:23
-msgid "Forbid"
-msgstr ""
-
-#: assets/js/setup-wizard.js:23
-msgid "Yes"
-msgstr ""
-
-#: assets/js/setup-wizard.js:23
-msgid "No"
-msgstr ""
-
-#: assets/js/setup-wizard.js:24
-msgid ".well-known compatibility files"
-msgstr ""
-
-#: assets/js/setup-wizard.js:24
-msgid "Full static publication"
-msgstr ""
-
-#: assets/js/setup-wizard.js:25
-#: assets/js/setup-wizard.js:484
-msgid "On with anonymized IP addresses"
-msgstr ""
-
-#: assets/js/setup-wizard.js:25
-#: assets/js/setup-wizard.js:484
-msgid "On with full IP addresses"
-msgstr ""
-
-#: assets/js/setup-wizard.js:26
-msgid "Organization"
-msgstr ""
-
-#: assets/js/setup-wizard.js:26
-msgid "Local Business"
-msgstr ""
-
-#: assets/js/setup-wizard.js:26
-msgid "Person"
-msgstr ""
-
-#: assets/js/setup-wizard.js:28
-msgid "No assertion"
-msgstr ""
-
-#: assets/js/setup-wizard.js:29
-msgid "CC BY-ND 4.0"
-msgstr ""
-
-#: assets/js/setup-wizard.js:29
-msgid "All rights reserved"
-msgstr ""
-
-#: assets/js/setup-wizard.js:132
-msgid "Section choice"
-msgstr ""
-
-#: assets/js/setup-wizard.js:135
-msgid "Keep current"
-msgstr ""
-
-#: assets/js/setup-wizard.js:136
-msgid "Make no changes in this section."
-msgstr ""
-
-#: assets/js/setup-wizard.js:141
-msgid "Use guided recommendations and your answers."
-msgstr ""
-
-#: assets/js/setup-wizard.js:145
-msgid "Reset guided fields"
-msgstr ""
-
-#: assets/js/setup-wizard.js:146
-msgid "Restore only fields owned by this wizard to defaults."
+#: assets/js/setup-wizard.js:149
+msgid "AI discovery"
 msgstr ""
 
 #: assets/js/setup-wizard.js:150
-msgid "This reset preserves detailed settings that Guided Setup does not manage. You will confirm it again before applying."
+msgid "Activity & delivery"
 msgstr ""
 
-#: assets/js/setup-wizard.js:283
-msgid "The WordPress media library is unavailable on this page."
+#: assets/js/setup-wizard.js:151
+msgid "Public identity"
 msgstr ""
 
-#: assets/js/setup-wizard.js:286
-#: assets/js/setup-wizard.js:440
-msgid "Select image"
+#: assets/js/setup-wizard.js:155
+msgid "Quick Setup complete"
 msgstr ""
 
-#: assets/js/setup-wizard.js:317
-msgid "Guided Setup could not be loaded."
+#: assets/js/setup-wizard.js:156
+msgid "You’re all set"
 msgstr ""
 
-#: assets/js/setup-wizard.js:322
-msgid "Guided Setup applied"
+#: assets/js/setup-wizard.js:157
+msgid "Cybermaps has a solid starting point. The full workspaces are ready whenever you want to go deeper."
 msgstr ""
 
-#: assets/js/setup-wizard.js:323
-msgid "Your reviewed Cybermaps settings were applied."
+#: assets/js/setup-wizard.js:165
+msgid "See settings applied"
 msgstr ""
 
-#: assets/js/setup-wizard.js:323
-msgid "The site already matched the reviewed settings."
+#: assets/js/setup-wizard.js:177
+msgid "Go to Overview"
 msgstr ""
 
-#: assets/js/setup-wizard.js:325
-msgid "Return to Overview"
+#: assets/js/setup-wizard.js:178
+msgid "Explore AI Publishing"
 msgstr ""
 
-#: assets/js/setup-wizard.js:327
-msgid "Review AI Publishing"
+#: assets/js/setup-wizard.js:250
+msgid "Choose a public image"
 msgstr ""
 
-#: assets/js/setup-wizard.js:338
-msgid "Guided Setup progress"
+#: assets/js/setup-wizard.js:289
+msgid "Quick Setup could not be loaded."
 msgstr ""
 
-#: assets/js/setup-wizard.js:344
-msgid "Review exact changes"
+#: assets/js/setup-wizard.js:302
+msgid "of"
 msgstr ""
 
-#: assets/js/setup-wizard.js:345
-msgid "Cybermaps has sanitized these values without saving them. Return to a step to revise its answers."
+#: assets/js/setup-wizard.js:311
+msgid "Exit setup"
 msgstr ""
 
-#: assets/js/setup-wizard.js:347
-msgid "I understand that the marked high-impact changes affect public output, privacy, or physical publication."
-msgstr ""
-
-#: assets/js/setup-wizard.js:348
-msgid "I understand that Guided Setup will reset fields in: "
-msgstr ""
-
-#: assets/js/setup-wizard.js:353
+#: assets/js/setup-wizard.js:313
 msgid "Back"
 msgstr ""
 
-#: assets/js/setup-wizard.js:354
-msgid "Applying…"
+#: assets/js/setup-wizard.js:314
+msgid "Applying your setup…"
 msgstr ""
 
-#: assets/js/setup-wizard.js:354
-msgid "Apply reviewed settings"
-msgstr ""
-
-#: assets/js/setup-wizard.js:354
-msgid "Preparing review…"
-msgstr ""
-
-#: assets/js/setup-wizard.js:364
-msgid "No settings would change. The current site already matches these answers."
-msgstr ""
-
-#: assets/js/setup-wizard.js:367
-msgid "Sanitized from your Guided Setup answers."
-msgstr ""
-
-#: assets/js/setup-wizard.js:373
-msgid "New value"
-msgstr ""
-
-#: assets/js/setup-wizard.js:374
-msgid "Why"
-msgstr ""
-
-#: assets/js/setup-wizard.js:386
-msgid "Replace existing custom content-group adjustments with the selected profile baseline"
-msgstr ""
-
-#: assets/js/setup-wizard.js:390
-msgid "XML & HTML Sitemaps"
-msgstr ""
-
-#: assets/js/setup-wizard.js:392
-msgid "Standard covers attachments and featured media. Advanced also examines embedded media."
-msgstr ""
-
-#: assets/js/setup-wizard.js:394
-msgid "IndexNow and WebSub can notify external services. WebSub also needs the AI Publication Hub."
-msgstr ""
-
-#: assets/js/setup-wizard.js:402
-msgid "AI Publishing & Usage"
-msgstr ""
-
-#: assets/js/setup-wizard.js:413
-msgid "Separate topical labels with commas."
-msgstr ""
-
-#: assets/js/setup-wizard.js:414
-msgid "These labels describe your published surface; they do not create a new external API."
-msgstr ""
-
-#: assets/js/setup-wizard.js:422
-msgid "Publish matching Content-Signal declarations in robots.txt"
-msgstr ""
-
-#: assets/js/setup-wizard.js:424
-msgid "Turning the Hub off changes only its master switch. Existing detailed AI configuration remains preserved."
-msgstr ""
-
-#: assets/js/setup-wizard.js:430
-msgid "Public Identity & Automatic Catalog"
-msgstr ""
-
-#: assets/js/setup-wizard.js:430
-msgid "This reset clears only Guided Setup identity fields. It preserves addresses, contacts, hours, social profiles, and every catalog."
-msgstr ""
-
-#: assets/js/setup-wizard.js:432
-msgid "No narrower type"
-msgstr ""
-
-#: assets/js/setup-wizard.js:439
-msgid "A WordPress media attachment is selected."
-msgstr ""
-
-#: assets/js/setup-wizard.js:439
-msgid "Optional public logo or identity image."
-msgstr ""
-
-#: assets/js/setup-wizard.js:440
-msgid "Replace image"
-msgstr ""
-
-#: assets/js/setup-wizard.js:443
-msgid "Do not change catalogs"
-msgstr ""
-
-#: assets/js/setup-wizard.js:443
-msgid "Add an automatic catalog"
-msgstr ""
-
-#: assets/js/setup-wizard.js:443
-msgid "Edit an automatic catalog"
-msgstr ""
-
-#: assets/js/setup-wizard.js:451
-msgid "An automatic catalog publishes Service or Product offers from the direct child pages of one parent Page."
-msgstr ""
-
-#: assets/js/setup-wizard.js:452
-msgid "Automatic catalog to edit"
-msgstr ""
-
-#: assets/js/setup-wizard.js:452
-msgid "Untitled catalog"
-msgstr ""
-
-#: assets/js/setup-wizard.js:464
-msgid "Find a parent Page"
-msgstr ""
-
-#: assets/js/setup-wizard.js:467
-msgid "Search pages"
-msgstr ""
-
-#: assets/js/setup-wizard.js:469
-msgid "Selected parent Page ID: "
-msgstr ""
-
-#: assets/js/setup-wizard.js:476
-msgid "Optional; the parent Page title is used when blank."
-msgstr ""
-
-#: assets/js/setup-wizard.js:483
-msgid "Crawler Analytics"
-msgstr ""
-
-#: assets/js/setup-wizard.js:483
-msgid "Choose whether Cybermaps records endpoint requests and how long it retains them."
-msgstr ""
-
-#: assets/js/setup-wizard.js:485
-msgid "Full IP addresses are personal data in many jurisdictions. Confirm that this matches your privacy obligations."
-msgstr ""
-
-#: assets/js/setup-wizard.js:486
-msgid "Retention days"
-msgstr ""
-
-#: assets/js/setup-wizard.js:488
-msgid "Publication Delivery"
-msgstr ""
-
-#: assets/js/setup-wizard.js:488
-msgid "WordPress multisite is dynamic-only. Cybermaps will store the compatible Dynamic setting."
-msgstr ""
-
-#: assets/js/setup-wizard.js:488
-msgid "Choose whether Cybermaps materializes eligible public publications as static files."
-msgstr ""
-
-#: assets/js/setup-wizard.js:489
-msgid "Static publication is disabled on multisite to prevent sites competing for shared web-root filenames."
-msgstr ""
-
-#: assets/js/setup-wizard.js:489
-msgid "Core discovery files publish only the small extension-bearing JSON inventory. The Discovery Index and API Catalog remain dynamic."
-msgstr ""
-
-#: assets/js/setup-wizard.js:491
-msgid "Set literal measurement thresholds and optionally brand client-ready reports."
-msgstr ""
-
-#: assets/js/setup-wizard.js:499
-msgid "Ready to review"
-msgstr ""
-
-#: assets/js/setup-wizard.js:500
-msgid "Continue to ask Cybermaps for a non-writing preview of the exact settings changes."
-msgstr ""
-
-#: assets/js/setup-wizard.js:522
-msgid "Post review interval days"
-msgstr ""
-
-#: assets/js/setup-wizard.js:525
-msgid "Page review interval days"
-msgstr ""
-
-#: assets/js/setup-wizard.js:540
-msgid "A public media URL is selected."
-msgstr ""
-
-#: assets/js/setup-wizard.js:541
-msgid "Replace logo"
-msgstr ""
-
-#: assets/js/setup-wizard.js:541
-msgid "Select logo"
+#: assets/js/setup-wizard.js:314
+msgid "Finish setup"
 msgstr ""
 
 #: assets/js/shortcode-builder.js:58

@@ -1,6 +1,14 @@
 Cybermaps release history
 =========================
 
+7.5.0
+-----
+
+* Replaced Guided Setup with a three-step Quick Setup survey covering website type, AI discovery, activity logging versus lightweight delivery, and basic public identity.
+* Apply bounded site-wide presets and show a settings receipt while preserving advanced configuration outside the setup fields.
+* Fixed stale setup assets in same-version testing builds, adopted modern React mounting, and removed the placeholder brand mark.
+* Added generated publication limits and route inventories plus a documentation handoff checked against the exact release commit.
+
 7.4.2
 -----
 

@@ -14,7 +14,7 @@
     --text-muted: #64748b;
 }
 
-/* Optional Guided Setup launcher on the Overview workspace. */
+/* Optional Quick Setup launcher on the Overview workspace. */
 .cm-setup-launcher {
     display: flex;
     align-items: center;

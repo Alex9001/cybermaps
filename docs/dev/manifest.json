@@ -1,9 +1,9 @@
 {
     "plugin": "CYBERMAPS: XML Sitemaps & llms.txt",
-    "version": "7.4.2",
+    "version": "7.5.0",
     "php_min": "8.2",
     "wp_min": "7.1",
-    "generated_at": "2026-09-10T17:00:34+00:00",
+    "generated_at": "2026-09-12T00:05:27+00:00",
     "discovery_endpoints": [
         {
             "id": "manifest",
@@ -1304,12 +1304,12 @@
             "api_secret",
             "delete_data_on_uninstall"
         ],
-        "catalog_hash": "823879f328c6d2485c4fdb4084eb72606857c108ac5e3692be7414680454c1ed",
-        "schema_hash": "ec2b4b9764d0236db3427c00d1f80fa64a477cd816f6fb373302fec014254873",
+        "catalog_hash": "4649f53399ee41ccaa250eb5d1e1264e1dce9a95f326b279e98280f56bc80bc5",
+        "schema_hash": "570622bde750f1b33f4e47080718b427184f7479965d1f9229d9c4e5bb4751fe",
         "guide_path": "docs/ai-configuration.md",
         "guide_url": "https://cybermaps.dev/docs/ai-configuration/",
-        "schema_url": "https://cybermaps.dev/specs/ai-configuration/7.4.2/schema.json",
-        "catalog_url": "https://cybermaps.dev/specs/ai-configuration/7.4.2/catalog.json",
+        "schema_url": "https://cybermaps.dev/specs/ai-configuration/7.5.0/schema.json",
+        "catalog_url": "https://cybermaps.dev/specs/ai-configuration/7.5.0/catalog.json",
         "compatibility": {
             "format_version": "exact",
             "plugin_version": "warning_on_mismatch",
@@ -1740,35 +1740,35 @@
             "class": "SetupWizardContext",
             "fqcn": "Cybermaps\\Admin\\SetupWizard\\SetupWizardContext",
             "file": "src/Admin/SetupWizard/SetupWizardContext.php",
-            "summary": "Bounded, read-only facts used by Guided Setup recommendations."
+            "summary": "Bounded, read-only facts used by Quick Setup recommendations."
         },
         {
             "namespace": "Cybermaps\\Admin\\SetupWizard",
             "class": "SetupWizardController",
             "fqcn": "Cybermaps\\Admin\\SetupWizard\\SetupWizardController",
             "file": "src/Admin/SetupWizard/SetupWizardController.php",
-            "summary": "Protected admin endpoints for Guided Setup."
+            "summary": "Protected admin endpoints for Quick Setup."
         },
         {
             "namespace": "Cybermaps\\Admin\\SetupWizard",
             "class": "SetupWizardPage",
             "fqcn": "Cybermaps\\Admin\\SetupWizard\\SetupWizardPage",
             "file": "src/Admin/SetupWizard/SetupWizardPage.php",
-            "summary": "Dedicated, optional workspace for the Guided Setup client."
+            "summary": "Dedicated, optional workspace for the Quick Setup client."
         },
         {
             "namespace": "Cybermaps\\Admin\\SetupWizard",
             "class": "SetupWizardPlanFactory",
             "fqcn": "Cybermaps\\Admin\\SetupWizard\\SetupWizardPlanFactory",
             "file": "src/Admin/SetupWizard/SetupWizardPlanFactory.php",
-            "summary": "Converts reviewed Guided Setup answers into the canonical configuration"
+            "summary": "Converts Quick Setup answers into a bounded configuration changes envelope."
         },
         {
             "namespace": "Cybermaps\\Admin\\SetupWizard",
             "class": "SetupWizardRegistry",
             "fqcn": "Cybermaps\\Admin\\SetupWizard\\SetupWizardRegistry",
             "file": "src/Admin/SetupWizard/SetupWizardRegistry.php",
-            "summary": "Declarative contract for the optional Guided Setup workspace."
+            "summary": "Declarative contract for the three-step Quick Setup survey."
         },
         {
             "namespace": "Cybermaps\\Admin",
@@ -3045,5 +3045,539 @@
             "summary": "Small sitemap XML writer with a native XMLWriter fast path."
         }
     ],
-    "class_count": 246
+    "class_count": 246,
+    "publication_limits": {
+        "llms_summary_bytes": 4194303,
+        "llms_full_bytes": 33554431,
+        "llms_tldr_bytes": 800000,
+        "llms_tldr_tokens_min": 1000,
+        "llms_tldr_tokens_max": 200000,
+        "llms_links_min": 20,
+        "llms_links_max": 500,
+        "llms_summary_candidates": 1000,
+        "llms_tldr_candidates": 250,
+        "llms_work_seconds": 20
+    },
+    "publication_defaults": {
+        "static_engine_mode": "well_known",
+        "llms_links": 100,
+        "llms_tldr_tokens": 80000,
+        "feed_items": 10,
+        "ai_sitemap_items": 100
+    },
+    "public_routes": [
+        {
+            "path": "/.well-known/agent-skills/cybermaps-site-guide/SKILL.md",
+            "category": "publication",
+            "media_type": "text/markdown",
+            "label": "Agent Skill Site Guide",
+            "condition": "Publication Hub and publication configuration",
+            "static_mode": "well_known"
+        },
+        {
+            "path": "/.well-known/agent-skills/index.json",
+            "category": "publication",
+            "media_type": "application/json",
+            "label": "Agent Skills Index",
+            "condition": "Publication Hub and publication configuration",
+            "static_mode": "well_known"
+        },
+        {
+            "path": "/.well-known/ai-catalog.json",
+            "category": "publication",
+            "media_type": "application/json",
+            "label": "Agentic Resource Catalog",
+            "condition": "enable_discovery_hub",
+            "static_mode": "well_known"
+        },
+        {
+            "path": "/.well-known/api-catalog",
+            "category": "publication",
+            "media_type": "application/linkset+json",
+            "label": "API Catalog",
+            "condition": "Publication Hub and publication configuration",
+            "static_mode": "well_known"
+        },
+        {
+            "path": "/.well-known/mcp/server-card.json",
+            "category": "publication",
+            "media_type": "application/mcp-server-card+json",
+            "label": "MCP Server Card Compatibility URL",
+            "condition": "Publication Hub and publication configuration",
+            "static_mode": "well_known"
+        },
+        {
+            "path": "/.well-known/oauth-authorization-server",
+            "category": "publication",
+            "media_type": "application/json",
+            "label": "OAuth Authorization Server Metadata",
+            "condition": "Publication Hub and publication configuration",
+            "static_mode": "well_known"
+        },
+        {
+            "path": "/.well-known/oauth-protected-resource",
+            "category": "publication",
+            "media_type": "application/json",
+            "label": "OAuth Protected Resource Metadata",
+            "condition": "Publication Hub and publication configuration",
+            "static_mode": "well_known"
+        },
+        {
+            "path": "/ai-actions.json",
+            "category": "publication",
+            "media_type": "application/ld+json",
+            "label": "AI Actions",
+            "condition": "Publication Hub and publication configuration",
+            "static_mode": "well_known"
+        },
+        {
+            "path": "/ai-catalog.json",
+            "category": "publication",
+            "media_type": "application/json",
+            "label": "Agentic Resource Catalog (alternate)",
+            "condition": "enable_discovery_hub",
+            "static_mode": "dynamic"
+        },
+        {
+            "path": "/ai-discovery",
+            "category": "publication",
+            "media_type": "application/json",
+            "label": "Discovery Index",
+            "condition": "Publication Hub and publication configuration",
+            "static_mode": "well_known"
+        },
+        {
+            "path": "/ai-discovery.json",
+            "category": "publication",
+            "media_type": "application/json",
+            "label": "ADP Discovery Manifest",
+            "condition": "Publication Hub and publication configuration",
+            "static_mode": "dynamic"
+        },
+        {
+            "path": "/ai-sitemap.xml",
+            "category": "publication",
+            "media_type": "application/xml",
+            "label": "AI Sitemap",
+            "condition": "Publication Hub and publication configuration",
+            "static_mode": "all"
+        },
+        {
+            "path": "/ai-usage.json",
+            "category": "publication",
+            "media_type": "application/json",
+            "label": "AI Usage Policy",
+            "condition": "Publication Hub and publication configuration",
+            "static_mode": "well_known"
+        },
+        {
+            "path": "/ai.json",
+            "category": "publication",
+            "media_type": "application/json",
+            "label": "AI Discovery Manifest",
+            "condition": "Publication Hub and publication configuration",
+            "static_mode": "well_known"
+        },
+        {
+            "path": "/api-catalog",
+            "category": "publication",
+            "media_type": "application/linkset+json",
+            "label": "API Catalog (alternate)",
+            "condition": "Publication Hub and publication configuration",
+            "static_mode": "dynamic"
+        },
+        {
+            "path": "/auth.md",
+            "category": "publication",
+            "media_type": "text/markdown",
+            "label": "Agent Registration Guide",
+            "condition": "Publication Hub and publication configuration",
+            "static_mode": "dynamic"
+        },
+        {
+            "path": "/cybermaps-agent-auth",
+            "category": "authorization",
+            "media_type": "text/html",
+            "label": "Agent authorization",
+            "condition": "MCP user-claimed registration and WordPress login",
+            "static_mode": "dynamic"
+        },
+        {
+            "path": "/cybermaps-openapi.json",
+            "category": "publication",
+            "media_type": "application/vnd.oai.openapi+json",
+            "label": "OpenAPI Description",
+            "condition": "Publication Hub and publication configuration",
+            "static_mode": "dynamic"
+        },
+        {
+            "path": "/discovery/chunks/{post_id}.json",
+            "category": "publication-family",
+            "media_type": "application/json",
+            "label": "RAG Chunk",
+            "condition": "enable_rag_chunks",
+            "static_mode": "all"
+        },
+        {
+            "path": "/feed.json",
+            "category": "publication",
+            "media_type": "application/feed+json",
+            "label": "AI Activity Feed",
+            "condition": "Publication Hub and publication configuration",
+            "static_mode": "dynamic"
+        },
+        {
+            "path": "/knowledge-graph.json",
+            "category": "publication",
+            "media_type": "application/ld+json",
+            "label": "Knowledge Graph",
+            "condition": "Publication Hub and publication configuration",
+            "static_mode": "all"
+        },
+        {
+            "path": "/llms-full.txt",
+            "category": "publication",
+            "media_type": "text/markdown",
+            "label": "LLMS Full",
+            "condition": "enable_llms_full",
+            "static_mode": "all"
+        },
+        {
+            "path": "/llms-tldr.txt",
+            "category": "publication",
+            "media_type": "text/plain",
+            "label": "Budgeted Site Briefing",
+            "condition": "enable_llms_tldr",
+            "static_mode": "all"
+        },
+        {
+            "path": "/llms.txt",
+            "category": "publication",
+            "media_type": "text/markdown",
+            "label": "LLMS Summary",
+            "condition": "Publication Hub and publication configuration",
+            "static_mode": "all"
+        },
+        {
+            "path": "/news/archive.jsonl",
+            "category": "publication",
+            "media_type": "application/x-ndjson",
+            "label": "ADP News Archive",
+            "condition": "Publication Hub and publication configuration",
+            "static_mode": "all"
+        },
+        {
+            "path": "/news/changelog.json",
+            "category": "publication",
+            "media_type": "application/json",
+            "label": "ADP News Changelog",
+            "condition": "Publication Hub and publication configuration",
+            "static_mode": "all"
+        },
+        {
+            "path": "/news/llms.txt",
+            "category": "publication",
+            "media_type": "text/markdown",
+            "label": "ADP News Context",
+            "condition": "Publication Hub and publication configuration",
+            "static_mode": "all"
+        },
+        {
+            "path": "/news/speakable.json",
+            "category": "publication",
+            "media_type": "application/ld+json",
+            "label": "ADP Speakable News",
+            "condition": "Publication Hub and publication configuration",
+            "static_mode": "all"
+        },
+        {
+            "path": "/robots.txt",
+            "category": "robots",
+            "media_type": "text/plain",
+            "label": "WordPress virtual robots.txt with Cybermaps crawler policy",
+            "condition": "WordPress virtual route; physical robots.txt takes precedence",
+            "static_mode": "dynamic"
+        },
+        {
+            "path": "/sitemap-archives-{page}.xml",
+            "category": "sitemap",
+            "media_type": "application/xml",
+            "label": "Sitemap (default slug)",
+            "condition": "Enabled sitemap/provider; network index requires multisite",
+            "static_mode": "all (single site only)"
+        },
+        {
+            "path": "/sitemap-authors-{page}.xml",
+            "category": "sitemap",
+            "media_type": "application/xml",
+            "label": "Sitemap (default slug)",
+            "condition": "Enabled sitemap/provider; network index requires multisite",
+            "static_mode": "all (single site only)"
+        },
+        {
+            "path": "/sitemap-misc.xml",
+            "category": "sitemap",
+            "media_type": "application/xml",
+            "label": "Sitemap (default slug)",
+            "condition": "Enabled sitemap/provider; network index requires multisite",
+            "static_mode": "all (single site only)"
+        },
+        {
+            "path": "/sitemap-network.xml",
+            "category": "sitemap",
+            "media_type": "application/xml",
+            "label": "Sitemap (default slug)",
+            "condition": "Enabled sitemap/provider; network index requires multisite",
+            "static_mode": "dynamic"
+        },
+        {
+            "path": "/sitemap-news.xml",
+            "category": "sitemap",
+            "media_type": "application/xml",
+            "label": "Sitemap (default slug)",
+            "condition": "Enabled sitemap/provider; network index requires multisite",
+            "static_mode": "all (single site only)"
+        },
+        {
+            "path": "/sitemap-posts-{post_type}-{page}.xml",
+            "category": "sitemap",
+            "media_type": "application/xml",
+            "label": "Sitemap (default slug)",
+            "condition": "Enabled sitemap/provider; network index requires multisite",
+            "static_mode": "all (single site only)"
+        },
+        {
+            "path": "/sitemap-rss.xml",
+            "category": "sitemap",
+            "media_type": "application/rss+xml",
+            "label": "Sitemap (default slug)",
+            "condition": "Enabled sitemap/provider; network index requires multisite",
+            "static_mode": "all (single site only)"
+        },
+        {
+            "path": "/sitemap-taxonomies-{taxonomy}-{page}.xml",
+            "category": "sitemap",
+            "media_type": "application/xml",
+            "label": "Sitemap (default slug)",
+            "condition": "Enabled sitemap/provider; network index requires multisite",
+            "static_mode": "all (single site only)"
+        },
+        {
+            "path": "/sitemap.xml",
+            "category": "sitemap",
+            "media_type": "application/xml",
+            "label": "Sitemap (default slug)",
+            "condition": "Enabled sitemap/provider; network index requires multisite",
+            "static_mode": "all (single site only)"
+        },
+        {
+            "path": "/skill.md",
+            "category": "publication",
+            "media_type": "text/markdown",
+            "label": "Agent Skill Site Guide (alternate)",
+            "condition": "Publication Hub and publication configuration",
+            "static_mode": "dynamic"
+        },
+        {
+            "path": "/updates.json",
+            "category": "publication",
+            "media_type": "application/json",
+            "label": "Recent Updates",
+            "condition": "Publication Hub and publication configuration",
+            "static_mode": "all"
+        },
+        {
+            "path": "/wp-json/cybermaps/v1/audit-latest",
+            "category": "rest",
+            "media_type": "application/json",
+            "label": "/audit-latest",
+            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
+            "static_mode": "dynamic"
+        },
+        {
+            "path": "/wp-json/cybermaps/v1/audit-run",
+            "category": "rest",
+            "media_type": "application/json",
+            "label": "/audit-run",
+            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
+            "static_mode": "dynamic"
+        },
+        {
+            "path": "/wp-json/cybermaps/v1/discovery",
+            "category": "rest",
+            "media_type": "application/json",
+            "label": "/discovery",
+            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
+            "static_mode": "dynamic"
+        },
+        {
+            "path": "/wp-json/cybermaps/v1/editor/translation/{post_id}",
+            "category": "rest",
+            "media_type": "application/json",
+            "label": "/editor/translation/(?P<post_id>[1-9][0-9]*)",
+            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
+            "static_mode": "dynamic"
+        },
+        {
+            "path": "/wp-json/cybermaps/v1/health",
+            "category": "rest",
+            "media_type": "application/json",
+            "label": "/health",
+            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
+            "static_mode": "dynamic"
+        },
+        {
+            "path": "/wp-json/cybermaps/v1/llms-tldr",
+            "category": "rest",
+            "media_type": "application/json",
+            "label": "/llms-tldr",
+            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
+            "static_mode": "dynamic"
+        },
+        {
+            "path": "/wp-json/cybermaps/v1/mcp",
+            "category": "rest",
+            "media_type": "application/json",
+            "label": "/mcp",
+            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
+            "static_mode": "dynamic"
+        },
+        {
+            "path": "/wp-json/cybermaps/v1/mcp/server-card",
+            "category": "rest",
+            "media_type": "application/json",
+            "label": "/mcp/server-card",
+            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
+            "static_mode": "dynamic"
+        },
+        {
+            "path": "/wp-json/cybermaps/v1/oauth/authorization-server",
+            "category": "rest",
+            "media_type": "application/json",
+            "label": "/oauth/authorization-server",
+            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
+            "static_mode": "dynamic"
+        },
+        {
+            "path": "/wp-json/cybermaps/v1/oauth/authorize",
+            "category": "rest",
+            "media_type": "application/json",
+            "label": "/oauth/authorize",
+            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
+            "static_mode": "dynamic"
+        },
+        {
+            "path": "/wp-json/cybermaps/v1/oauth/clients",
+            "category": "rest",
+            "media_type": "application/json",
+            "label": "/oauth/clients",
+            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
+            "static_mode": "dynamic"
+        },
+        {
+            "path": "/wp-json/cybermaps/v1/oauth/device-authorization",
+            "category": "rest",
+            "media_type": "application/json",
+            "label": "/oauth/device-authorization",
+            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
+            "static_mode": "dynamic"
+        },
+        {
+            "path": "/wp-json/cybermaps/v1/oauth/protected-resource",
+            "category": "rest",
+            "media_type": "application/json",
+            "label": "/oauth/protected-resource",
+            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
+            "static_mode": "dynamic"
+        },
+        {
+            "path": "/wp-json/cybermaps/v1/oauth/revoke",
+            "category": "rest",
+            "media_type": "application/json",
+            "label": "/oauth/revoke",
+            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
+            "static_mode": "dynamic"
+        },
+        {
+            "path": "/wp-json/cybermaps/v1/oauth/token",
+            "category": "rest",
+            "media_type": "application/json",
+            "label": "/oauth/token",
+            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
+            "static_mode": "dynamic"
+        },
+        {
+            "path": "/wp-json/cybermaps/v1/purge",
+            "category": "rest",
+            "media_type": "application/json",
+            "label": "/purge",
+            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
+            "static_mode": "dynamic"
+        },
+        {
+            "path": "/wp-json/cybermaps/v1/search",
+            "category": "rest",
+            "media_type": "application/json",
+            "label": "/search",
+            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
+            "static_mode": "dynamic"
+        },
+        {
+            "path": "/wp-json/cybermaps/v1/status",
+            "category": "rest",
+            "media_type": "application/json",
+            "label": "/status",
+            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
+            "static_mode": "dynamic"
+        },
+        {
+            "path": "/wp-json/cybermaps/v1/urls",
+            "category": "rest",
+            "media_type": "application/json",
+            "label": "/urls",
+            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
+            "static_mode": "dynamic"
+        },
+        {
+            "path": "/{key}.txt",
+            "category": "verification",
+            "media_type": "text/plain",
+            "label": "IndexNow site-key verification",
+            "condition": "IndexNow enabled; the site key is generated when needed",
+            "static_mode": "dynamic"
+        },
+        {
+            "path": "/{language}/llms-full.txt",
+            "category": "publication-family",
+            "media_type": "text/markdown",
+            "label": "Localized LLMS Full",
+            "condition": "enable_llms_full",
+            "static_mode": "all"
+        },
+        {
+            "path": "/{language}/llms-tldr.txt",
+            "category": "publication-family",
+            "media_type": "text/plain",
+            "label": "Localized Budgeted Site Briefing",
+            "condition": "enable_llms_tldr",
+            "static_mode": "all"
+        },
+        {
+            "path": "/{language}/llms.txt",
+            "category": "publication-family",
+            "media_type": "text/markdown",
+            "label": "Localized LLMS Summary",
+            "condition": "enable_multilingual_hub",
+            "static_mode": "all"
+        },
+        {
+            "path": "/{permalink}/index.md",
+            "category": "publication-family",
+            "media_type": "text/markdown",
+            "label": "Per-resource Markdown Alternate",
+            "condition": "Publication Hub and publication configuration",
+            "static_mode": "dynamic"
+        }
+    ],
+    "public_route_count": 64
 }

@@ -76,7 +76,7 @@ class DiscoveryAuditor {
 
 	/**
 	 * Return the bounded site scan used by both the strategy workspace and
-	 * Guided Setup. Keeping this analysis in one place prevents the wizard
+	 * Quick Setup. Keeping this analysis in one place prevents the survey
 	 * from silently recommending a different profile than the normal UI.
 	 *
 	 * @return array{success:bool,stats:array<string,mixed>,archetype:string,reason:string}

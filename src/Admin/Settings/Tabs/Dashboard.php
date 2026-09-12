@@ -40,12 +40,12 @@ class Dashboard implements SettingsTab {
 		?>
 		<div class="cm-card cm-setup-launcher cm-mb-25">
 			<div>
-				<p class="cm-page-eyebrow"><?php esc_html_e( 'Optional configuration assistant', 'cybermaps' ); ?></p>
-				<h2><?php esc_html_e( 'Set up Cybermaps with a guided review', 'cybermaps' ); ?></h2>
-				<p class="cm-field-help"><?php esc_html_e( 'Answer a short set of questions, review the exact settings Cybermaps recommends, and apply only when you are ready.', 'cybermaps' ); ?></p>
+				<p class="cm-page-eyebrow"><?php esc_html_e( 'A quick starting point', 'cybermaps' ); ?></p>
+				<h2><?php esc_html_e( 'Set up Cybermaps in three easy steps', 'cybermaps' ); ?></h2>
+				<p class="cm-field-help"><?php esc_html_e( 'Tell us about your website and priorities. Cybermaps will apply a sensible site-wide preset you can fine-tune anytime.', 'cybermaps' ); ?></p>
 			</div>
 			<a class="button button-primary" href="<?php echo esc_url( $setup_url ); ?>">
-				<?php esc_html_e( 'Launch Guided Setup', 'cybermaps' ); ?>
+				<?php esc_html_e( 'Start Quick Setup', 'cybermaps' ); ?>
 			</a>
 		</div>
 		<div class="cm-card cm-mb-25">
