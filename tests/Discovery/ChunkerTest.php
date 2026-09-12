@@ -48,13 +48,14 @@ class ChunkerTest extends \WP_UnitTestCase {
 
 	public function test_html_processor_preserves_content() {
 		$chunker = new \Cybermaps\Discovery\Chunker();
-		$html = '<p>Start</p><h2>Header</h2><p>End</p>';
+		$html = '<p>Start</p><h2>Header</h2><p>End <a href="https://example.com/more/">more</a></p>';
 
 		$processed = $chunker->extract_headers_to_markdown( $html );
 
 		$this->assertStringContainsString('Start', $processed);
 		$this->assertStringContainsString('## Header', $processed);
 		$this->assertStringContainsString('End', $processed);
+		$this->assertStringContainsString('[more](https://example.com/more/)', $processed);
 	}
 
 	public function test_runtime_configuration_is_bounded_and_overlap_cannot_dominate(): void {

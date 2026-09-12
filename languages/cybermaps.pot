@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: CYBERMAPS: XML Sitemaps & llms.txt 7.5.0\n"
+"Project-Id-Version: CYBERMAPS: XML Sitemaps & llms.txt 7.5.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/cybermaps\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-12T00:05:27+00:00\n"
+"POT-Creation-Date: 2026-09-12T21:00:55+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: cybermaps\n"
@@ -4163,7 +4163,7 @@ msgid "Optional presentation details brand the printable deliverable without cha
 msgstr ""
 
 #: src/Admin/Settings/Tabs/ContentReview.php:131
-#: src/Audit/AuditExporter.php:140
+#: src/Audit/AuditExporter.php:141
 #: src/Audit/DiscoveryReportExporter.php:100
 msgid "Prepared by"
 msgstr ""
@@ -4217,7 +4217,7 @@ msgid "The selected content report was deleted."
 msgstr ""
 
 #: src/Admin/Settings/Tabs/ContentReview.php:295
-#: src/Audit/ContentAuditService.php:27
+#: src/Audit/ContentAuditService.php:32
 msgid "Another Content Intelligence Report is already running. Wait for it to finish before starting another."
 msgstr ""
 
@@ -4271,184 +4271,202 @@ msgstr ""
 msgid "Export JSON"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:396
+#: src/Admin/Settings/Tabs/ContentReview.php:397
 msgid "Saved report"
 msgstr ""
 
 #. translators: %d: saved report ID.
-#: src/Admin/Settings/Tabs/ContentReview.php:402
+#: src/Admin/Settings/Tabs/ContentReview.php:403
 #, php-format
 msgid "Report #%d"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:411
+#: src/Admin/Settings/Tabs/ContentReview.php:412
 msgid "Printable report"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:412
-#: src/Admin/Settings/Tabs/ContentReview.php:474
-#: src/Admin/Settings/Tabs/ContentReview.php:559
+#: src/Admin/Settings/Tabs/ContentReview.php:413
+#: src/Admin/Settings/Tabs/ContentReview.php:503
+#: src/Admin/Settings/Tabs/ContentReview.php:588
 msgid "CSV"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:413
+#: src/Admin/Settings/Tabs/ContentReview.php:414
 msgid "JSON"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:418
+#: src/Admin/Settings/Tabs/ContentReview.php:419
 msgid "Delete this saved report? This cannot be undone."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:418
+#: src/Admin/Settings/Tabs/ContentReview.php:419
 msgid "Delete report"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:431
-#: src/Audit/AuditExporter.php:96
+#: src/Admin/Settings/Tabs/ContentReview.php:432
+#: src/Audit/AuditExporter.php:97
 msgid "Resources reviewed"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:432
-#: src/Admin/Settings/Tabs/ContentReview.php:494
-#: src/Audit/AuditExporter.php:97
+#: src/Admin/Settings/Tabs/ContentReview.php:433
+#: src/Admin/Settings/Tabs/ContentReview.php:523
+#: src/Audit/AuditExporter.php:98
 msgid "Current findings"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:434
+#: src/Admin/Settings/Tabs/ContentReview.php:435
 msgid "Added"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:435
+#: src/Admin/Settings/Tabs/ContentReview.php:436
 msgid "Resolved"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:436
+#: src/Admin/Settings/Tabs/ContentReview.php:437
 msgid "Persisting"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:438
-#: src/Audit/AuditExporter.php:156
+#: src/Admin/Settings/Tabs/ContentReview.php:439
+#: src/Audit/AuditExporter.php:157
 msgid "Comparison"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:438
+#: src/Admin/Settings/Tabs/ContentReview.php:439
 #: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:415
 #: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:700
-#: src/Audit/AuditExporter.php:157
+#: src/Audit/AuditExporter.php:158
 msgid "Baseline"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:455
+#. translators: 1: resource count, 2: internal-link count, 3: navigation reference count.
+#: src/Admin/Settings/Tabs/ContentReview.php:454
+#, php-format
+msgid "Local link coverage: %1$d resources, %2$d unique content links, and %3$d assigned navigation references."
+msgstr ""
+
+#: src/Admin/Settings/Tabs/ContentReview.php:461
+msgid "The bounded scan was incomplete, so internal-link findings were suppressed."
+msgstr ""
+
+#: src/Admin/Settings/Tabs/ContentReview.php:464
+msgid "Homepage click depth was unavailable from local WordPress content and navigation."
+msgstr ""
+
+#: src/Admin/Settings/Tabs/ContentReview.php:467
+msgid "Internal-link trends were omitted because the baseline used different or incomplete link coverage."
+msgstr ""
+
+#: src/Admin/Settings/Tabs/ContentReview.php:484
 msgid "Focused deliverables"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:456
+#: src/Admin/Settings/Tabs/ContentReview.php:485
 msgid "Action reports"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:458
+#: src/Admin/Settings/Tabs/ContentReview.php:487
 msgid "Export a client-ready list for one review category from the saved report data."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:465
+#: src/Admin/Settings/Tabs/ContentReview.php:494
 msgid "Review"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:473
+#: src/Admin/Settings/Tabs/ContentReview.php:502
 msgid "HTML report"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:493
+#: src/Admin/Settings/Tabs/ContentReview.php:522
 msgid "Report preview"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:496
+#: src/Admin/Settings/Tabs/ContentReview.php:525
 msgid "The printable report includes recommendations and the measurement summary for every finding."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:499
-#: src/Audit/AuditExporter.php:103
+#: src/Admin/Settings/Tabs/ContentReview.php:528
+#: src/Audit/AuditExporter.php:104
 msgid "Resource"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:499
+#: src/Admin/Settings/Tabs/ContentReview.php:528
 #: src/Audit/AuditExporter.php:48
-#: src/Audit/AuditExporter.php:104
+#: src/Audit/AuditExporter.php:105
 msgid "Finding"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:499
-#: src/Audit/AuditExporter.php:104
+#: src/Admin/Settings/Tabs/ContentReview.php:528
+#: src/Audit/AuditExporter.php:105
 msgid "Measurement"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:509
+#: src/Admin/Settings/Tabs/ContentReview.php:538
 msgid "This run recorded no policy findings."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:514
+#: src/Admin/Settings/Tabs/ContentReview.php:543
 msgid "Showing the first 25 findings. Export the report for the complete inventory."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:538
+#: src/Admin/Settings/Tabs/ContentReview.php:567
 msgid "Report history"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:539
+#: src/Admin/Settings/Tabs/ContentReview.php:568
 msgid "Other saved reports"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:541
+#: src/Admin/Settings/Tabs/ContentReview.php:570
 msgid "Open or export another saved report."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:544
+#: src/Admin/Settings/Tabs/ContentReview.php:573
 msgid "Run"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:544
-#: src/Audit/AuditExporter.php:94
+#: src/Admin/Settings/Tabs/ContentReview.php:573
+#: src/Audit/AuditExporter.php:95
 msgid "Completed"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:544
+#: src/Admin/Settings/Tabs/ContentReview.php:573
 #: src/Admin/SettingsPage.php:518
 msgid "Resources"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:544
+#: src/Admin/Settings/Tabs/ContentReview.php:573
 msgid "Findings"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:544
+#: src/Admin/Settings/Tabs/ContentReview.php:573
 msgid "Exports"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:557
+#: src/Admin/Settings/Tabs/ContentReview.php:586
 msgid "HTML"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:574
+#: src/Admin/Settings/Tabs/ContentReview.php:603
 msgid "No content report exists yet"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:575
+#: src/Admin/Settings/Tabs/ContentReview.php:604
 msgid "Run the first report to establish a baseline. Later reports show exactly which findings were added, resolved, or persisted."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:585
+#: src/Admin/Settings/Tabs/ContentReview.php:614
 msgid "Content measurement policy"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:586
+#: src/Admin/Settings/Tabs/ContentReview.php:615
 msgid "These explicit rules are saved with every report."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:592
+#: src/Admin/Settings/Tabs/ContentReview.php:621
 msgid "Client presentation"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:593
+#: src/Admin/Settings/Tabs/ContentReview.php:622
 msgid "Brand and theme printable deliverables generated from the saved measurements."
 msgstr ""
 
@@ -7847,7 +7865,7 @@ msgid "Object ID"
 msgstr ""
 
 #: src/Audit/AuditExporter.php:48
-#: src/Audit/AuditExporter.php:103
+#: src/Audit/AuditExporter.php:104
 msgid "Title"
 msgstr ""
 
@@ -7876,131 +7894,181 @@ msgstr ""
 msgid "Generated by CYBER MAPS"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:99
+#: src/Audit/AuditExporter.php:100
 msgid "Content priorities"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:99
+#: src/Audit/AuditExporter.php:100
 msgid "Action inventory"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:101
+#: src/Audit/AuditExporter.php:102
 msgid "Content details"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:101
+#: src/Audit/AuditExporter.php:102
 msgid "Findings and recommendations"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:102
-msgid "Measurements capture visible text and media stored in WordPress at report time, using the saved policy for a clear, repeatable action plan."
+#: src/Audit/AuditExporter.php:103
+msgid "Measurements capture visible text, media, stored internal links, and assigned navigation in WordPress at report time, using the saved policy for a clear, repeatable action plan."
 msgstr ""
 
-#: src/Audit/AuditExporter.php:105
+#: src/Audit/AuditExporter.php:106
 msgid "Recommended review"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:119
+#: src/Audit/AuditExporter.php:120
 msgid "No findings were recorded for this report."
 msgstr ""
 
-#: src/Audit/AuditExporter.php:159
+#: src/Audit/AuditExporter.php:160
 msgid "Resolved since baseline"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:161
+#: src/Audit/AuditExporter.php:162
 msgid "Added since baseline"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:171
+#: src/Audit/AuditExporter.php:172
 msgid "Thin content"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:172
+#: src/Audit/AuditExporter.php:173
 msgid "Visible text below the configured policy minimum."
 msgstr ""
 
-#: src/Audit/AuditExporter.php:173
+#: src/Audit/AuditExporter.php:174
 msgid "Thin Content Action Report"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:176
+#: src/Audit/AuditExporter.php:177
 msgid "Freshness review"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:177
+#: src/Audit/AuditExporter.php:178
 msgid "Content beyond its configured review interval."
 msgstr ""
 
-#: src/Audit/AuditExporter.php:178
+#: src/Audit/AuditExporter.php:179
 msgid "Content Freshness Action Report"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:181
+#: src/Audit/AuditExporter.php:182
 msgid "Media review"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:182
+#: src/Audit/AuditExporter.php:183
 msgid "Content without detected stored media where policy requests review."
 msgstr ""
 
-#: src/Audit/AuditExporter.php:183
+#: src/Audit/AuditExporter.php:184
 msgid "Media Opportunity Action Report"
+msgstr ""
+
+#: src/Audit/AuditExporter.php:187
+msgid "Potential orphan"
+msgstr ""
+
+#: src/Audit/AuditExporter.php:188
+msgid "No stored page or assigned navigation item links to the resource."
+msgstr ""
+
+#: src/Audit/AuditExporter.php:189
+msgid "Potential Orphan Content Action Report"
+msgstr ""
+
+#: src/Audit/AuditExporter.php:192
+msgid "No homepage path"
+msgstr ""
+
+#: src/Audit/AuditExporter.php:193
+msgid "Links exist, but the local graph has no path from the homepage or assigned navigation."
+msgstr ""
+
+#: src/Audit/AuditExporter.php:194
+msgid "Homepage Reachability Action Report"
+msgstr ""
+
+#: src/Audit/AuditExporter.php:197
+msgid "Three-plus clicks deep"
+msgstr ""
+
+#: src/Audit/AuditExporter.php:198
+msgid "The shortest stored path is at least three clicks from the homepage."
+msgstr ""
+
+#: src/Audit/AuditExporter.php:199
+msgid "Internal Link Depth Action Report"
+msgstr ""
+
+#. translators: 1: resource count, 2: unique content-link count, 3: assigned-navigation reference count.
+#: src/Audit/AuditExporter.php:213
+#, php-format
+msgid "Local link coverage: %1$d stored resources, %2$d unique content links, and %3$d assigned navigation references."
+msgstr ""
+
+#: src/Audit/AuditExporter.php:219
+msgid "The bounded scan was incomplete, so Cybermaps suppressed internal-link findings."
+msgstr ""
+
+#: src/Audit/AuditExporter.php:221
+msgid "Homepage click depth could not be established from local WordPress data."
 msgstr ""
 
 #: src/Audit/AuditReadAPI.php:65
 msgid "The saved content report is too large for a synchronous JSON response."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:171
+#: src/Audit/AuditRunRepository.php:172
 msgid "Cybermaps could not acquire the content report lock."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:221
+#: src/Audit/AuditRunRepository.php:222
 msgid "Cybermaps could not renew the content report lock."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:368
+#: src/Audit/AuditRunRepository.php:369
 msgid "Cybermaps no longer owns the content report lock required for cleanup."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:422
+#: src/Audit/AuditRunRepository.php:423
 msgid "Cybermaps could not read incomplete content reports for cleanup."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:463
+#: src/Audit/AuditRunRepository.php:464
 msgid "Cybermaps could not remove incomplete content reports."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:566
+#: src/Audit/AuditRunRepository.php:568
 msgid "Cybermaps could not create the audit run."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:606
+#: src/Audit/AuditRunRepository.php:608
 msgid "Cybermaps could not store an audit resource."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:625
+#: src/Audit/AuditRunRepository.php:627
 msgid "Cybermaps could not store an audit finding."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:649
+#: src/Audit/AuditRunRepository.php:659
 msgid "Cybermaps could not finalize the content report."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:946
+#: src/Audit/AuditRunRepository.php:1002
 msgid "Only a running Cybermaps content report can be modified."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:958
+#: src/Audit/AuditRunRepository.php:1014
 msgid "Cybermaps could not read the saved content report data."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:965
+#: src/Audit/AuditRunRepository.php:1021
 msgid "Cybermaps could not update the content report lock."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:993
+#: src/Audit/AuditRunRepository.php:1049
 msgid "Cybermaps could not encode the content report lock."
 msgstr ""
 
@@ -8050,11 +8118,11 @@ msgstr ""
 msgid "Add useful visual media only if it improves comprehension or delivery; decorative media is not required."
 msgstr ""
 
-#: src/Audit/ContentAuditService.php:187
+#: src/Audit/ContentAuditService.php:258
 msgid "Cybermaps could not encode the content report snapshot."
 msgstr ""
 
-#: src/Audit/ContentAuditService.php:234
+#: src/Audit/ContentAuditService.php:305
 msgid "The Content Intelligence Report lock expired or changed ownership, so this run stopped safely."
 msgstr ""
 
@@ -8088,6 +8156,32 @@ msgstr ""
 
 #: src/Audit/DiscoveryReportExporter.php:73
 msgid "No discovery publications were registered when this report was generated."
+msgstr ""
+
+#: src/Audit/InternalLinkAnalyzer.php:684
+msgid "No stored page or assigned navigation item links to this resource."
+msgstr ""
+
+#: src/Audit/InternalLinkAnalyzer.php:686
+msgid "Add a useful contextual link from a related page or navigation area, or intentionally exclude the resource if it should not be discovered."
+msgstr ""
+
+#: src/Audit/InternalLinkAnalyzer.php:695
+msgid "Internal links exist, but no stored path from the homepage or assigned navigation reaches this resource."
+msgstr ""
+
+#: src/Audit/InternalLinkAnalyzer.php:697
+msgid "Connect this resource to a section that visitors and crawlers can reach from the homepage."
+msgstr ""
+
+#. translators: %d: shortest internal-link click depth from the homepage.
+#: src/Audit/InternalLinkAnalyzer.php:708
+#, php-format
+msgid "The shortest stored path is %d clicks from the homepage."
+msgstr ""
+
+#: src/Audit/InternalLinkAnalyzer.php:712
+msgid "Consider a direct contextual or navigation link when this resource is important to visitors."
 msgstr ""
 
 #: src/Audit/PublishedPostSource.php:73
@@ -8987,7 +9081,7 @@ msgstr ""
 msgid "Public %s taxonomy."
 msgstr ""
 
-#: src/Discovery/LLMS.php:480
+#: src/Discovery/LLMS.php:482
 msgid "LLMS publication exceeds the safe output limit."
 msgstr ""
 

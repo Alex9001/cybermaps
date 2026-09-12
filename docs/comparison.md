@@ -1,4 +1,4 @@
-# Cybermaps 7.5.0 — vs. Rank Math, Yoast, AIOSEO, and sitemap plugins
+# Cybermaps 7.5.1 — vs. Rank Math, Yoast, AIOSEO, and sitemap plugins
 
 **Publish. Verify. Improve. One complete WordPress discovery engine.**
 
@@ -12,7 +12,7 @@ clients, and practical reports that turn ongoing site work into a client deliver
 
 ## Compare at a glance
 
-**CYBERMAPS 7.5.0 · Official competitor sources reviewed September 8, 2026.**
+**CYBERMAPS 7.5.1 · Official competitor sources reviewed September 8, 2026.**
 AIOSEO is All in One SEO, formerly All in One SEO Pack. “Generic sitemap plugin”
 means a basic XML sitemap solution; additional features vary by the chosen plugin.
 
@@ -129,7 +129,7 @@ per sitemap or discovery URL when combining plugins. The
 
 ## Implementation and source notes
 
-CYBERMAPS 7.5.0 requires PHP 8.2+ and WordPress 7.1+. Its
+CYBERMAPS 7.5.1 requires PHP 8.2+ and WordPress 7.1+. Its
 [feature reference](./features.md) and [generated inventory](./dev/manifest.json)
 provide the detailed Core coverage behind these comparisons.
 

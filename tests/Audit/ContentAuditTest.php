@@ -236,6 +236,35 @@ final class ContentAuditTest extends TestCase {
 		$this->assertSame( 7, $diff['baseline_run_id'] );
 	}
 
+	public function test_diff_omits_link_findings_when_baseline_link_coverage_is_not_comparable(): void {
+		$baseline = array(
+			'id'       => 12,
+			'analysis' => array(),
+			'findings' => array(
+				array( 'resource_key' => 'post:1:1', 'finding_key' => 'thin_content' ),
+				array( 'resource_key' => 'post:1:2', 'finding_key' => 'potential_orphan' ),
+			),
+		);
+		$current  = array(
+			'id'       => 13,
+			'analysis' => array(
+				'internal_link_version' => 1,
+				'complete'              => true,
+			),
+			'findings' => array(
+				array( 'resource_key' => 'post:1:1', 'finding_key' => 'thin_content' ),
+				array( 'resource_key' => 'post:1:3', 'finding_key' => 'deeply_linked' ),
+			),
+		);
+
+		$diff = ( new ContentAuditService() )->compare( $current, $baseline );
+
+		$this->assertFalse( $diff['internal_links_comparable'] );
+		$this->assertSame( array(), $diff['added'] );
+		$this->assertSame( array(), $diff['resolved'] );
+		$this->assertCount( 1, $diff['persisting'] );
+	}
+
 	public function test_exports_use_preserved_findings_and_escape_spreadsheet_formulas(): void {
 		$run = array(
 			'id'              => 9,

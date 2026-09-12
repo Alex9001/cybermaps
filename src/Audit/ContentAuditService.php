@@ -13,14 +13,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class ContentAuditService {
 	public const RUN_LOCKED_ERROR_CODE = 40901;
 	private const RUN_LOCK_TTL_SECONDS = 10 * MINUTE_IN_SECONDS;
+	private InternalLinkAnalyzer $link_analyzer;
 
 	public function __construct(
 		private readonly AuditRunRepository $repository = new AuditRunRepository(),
 		private readonly ContentAuditEvaluator $evaluator = new ContentAuditEvaluator(),
-		private readonly PublishedPostSource $post_source = new PublishedPostSource()
-	) {}
+		private readonly PublishedPostSource $post_source = new PublishedPostSource(),
+		?InternalLinkAnalyzer $link_analyzer = null
+	) {
+		$this->link_analyzer = $link_analyzer ?? new InternalLinkAnalyzer( null, null, $this->post_source );
+	}
 
 	public function run( ?AuditPolicy $policy = null ): int {
+		AuditRunRepository::maybe_upgrade();
 		$lock_token = $this->repository->acquire_run_lock( self::RUN_LOCK_TTL_SECONDS );
 		if ( null === $lock_token ) {
 			throw new \RuntimeException(
@@ -44,10 +49,23 @@ final class ContentAuditService {
 				if ( empty( $post_types ) ) {
 					$post_types = array( 'post', 'page' );
 				}
+				$link_results   = $this->link_analyzer->analyze(
+					$post_types,
+					function () use ( $lock_token ): void {
+						$this->renew_run_lock( $lock_token );
+						$this->flush_runtime_cache();
+					}
+				);
 				$resource_count = 0;
 				$finding_count  = 0;
 				$snapshot       = hash_init( 'sha256' );
-				$this->update_snapshot_hash( $snapshot, array( 'policy' => $policy->to_array() ) );
+				$this->update_snapshot_hash(
+					$snapshot,
+					array(
+						'policy'   => $policy->to_array(),
+						'analysis' => $link_results['analysis'],
+					)
+				);
 
 				foreach ( $this->post_source->batches( $post_types ) as $posts ) {
 					$this->renew_run_lock( $lock_token );
@@ -57,11 +75,19 @@ final class ContentAuditService {
 							if ( ! is_object( $post ) || ! isset( $post->ID ) ) {
 								continue;
 							}
-							$result = $this->evaluator->evaluate(
+							$result  = $this->evaluator->evaluate(
 								$post,
 								$policy,
 								null,
 								isset( $attached_image_parents[ (int) $post->ID ] )
+							);
+							$post_id = (int) $post->ID;
+							$result['resource']['measurement']['internal_links'] = $link_results['measurements'][ $post_id ] ?? array(
+								'analysis_complete' => false,
+							);
+							$result['findings']                                  = array_merge(
+								$result['findings'],
+								$link_results['findings'][ $post_id ] ?? array()
 							);
 							$this->repository->add_resource( $run_id, $result['resource'], $result['findings'] );
 							++$resource_count;
@@ -84,7 +110,8 @@ final class ContentAuditService {
 					$run_id,
 					$resource_count,
 					$finding_count,
-					hash_final( $snapshot )
+					hash_final( $snapshot ),
+					$link_results['analysis']
 				);
 			} catch ( \Throwable $error ) {
 				$this->repository->fail( $run_id );
@@ -126,12 +153,26 @@ final class ContentAuditService {
 		if ( null === $run ) {
 			return null;
 		}
+		$baseline_id       = (int) ( $run['baseline_run_id'] ?? 0 );
+		$has_link_analysis = InternalLinkAnalyzer::ANALYSIS_VERSION === (int) ( $run['analysis']['internal_link_version'] ?? 0 );
+		$baseline_analysis = $has_link_analysis && $baseline_id > 0
+			? $this->repository->get_run_analysis( $baseline_id )
+			: null;
+		$link_comparable   = ! $has_link_analysis || $baseline_id < 1
+			|| (
+				is_array( $baseline_analysis )
+				&& $this->link_analyses_are_comparable( (array) ( $run['analysis'] ?? array() ), $baseline_analysis )
+			);
 
 		$run['diff'] = $this->repository->finding_diff_counts(
 			$run_id,
-			(int) ( $run['baseline_run_id'] ?? 0 ),
-			(int) ( $run['finding_count'] ?? 0 )
+			$baseline_id,
+			(int) ( $run['finding_count'] ?? 0 ),
+			$link_comparable
 		);
+		if ( $has_link_analysis ) {
+			$run['diff']['internal_links_comparable'] = $link_comparable;
+		}
 
 		return $run;
 	}
@@ -142,15 +183,45 @@ final class ContentAuditService {
 	 * @return array<string,mixed>
 	 */
 	public function compare( array $run, ?array $baseline ): array {
-		$current  = $this->finding_map( (array) ( $run['findings'] ?? array() ) );
-		$previous = $this->finding_map( (array) ( $baseline['findings'] ?? array() ) );
+		$current         = $this->finding_map( (array) ( $run['findings'] ?? array() ) );
+		$previous        = $this->finding_map( (array) ( $baseline['findings'] ?? array() ) );
+		$link_comparable = null === $baseline
+			|| $this->link_analyses_are_comparable(
+				(array) ( $run['analysis'] ?? array() ),
+				(array) ( $baseline['analysis'] ?? array() )
+			);
+		if ( ! $link_comparable ) {
+			$current  = $this->without_internal_link_findings( $current );
+			$previous = $this->without_internal_link_findings( $previous );
+		}
 
 		return array(
-			'baseline_run_id' => (int) ( $baseline['id'] ?? 0 ),
-			'added'           => array_values( array_diff_key( $current, $previous ) ),
-			'resolved'        => array_values( array_diff_key( $previous, $current ) ),
-			'persisting'      => array_values( array_intersect_key( $current, $previous ) ),
+			'baseline_run_id'           => (int) ( $baseline['id'] ?? 0 ),
+			'added'                     => array_values( array_diff_key( $current, $previous ) ),
+			'resolved'                  => array_values( array_diff_key( $previous, $current ) ),
+			'persisting'                => array_values( array_intersect_key( $current, $previous ) ),
+			'internal_links_comparable' => $link_comparable,
 		);
+	}
+
+	/** @param array<string,array<string,mixed>> $findings @return array<string,array<string,mixed>> */
+	private function without_internal_link_findings( array $findings ): array {
+		return array_filter(
+			$findings,
+			static fn( array $finding ): bool => ! in_array(
+				(string) ( $finding['finding_key'] ?? $finding['key'] ?? '' ),
+				array( 'potential_orphan', 'no_homepage_path', 'deeply_linked' ),
+				true
+			)
+		);
+	}
+
+	/** @param array<string,mixed> $current @param array<string,mixed> $baseline */
+	private function link_analyses_are_comparable( array $current, array $baseline ): bool {
+		return InternalLinkAnalyzer::ANALYSIS_VERSION === (int) ( $current['internal_link_version'] ?? 0 )
+			&& InternalLinkAnalyzer::ANALYSIS_VERSION === (int) ( $baseline['internal_link_version'] ?? 0 )
+			&& ! empty( $current['complete'] )
+			&& ! empty( $baseline['complete'] );
 	}
 
 	/**

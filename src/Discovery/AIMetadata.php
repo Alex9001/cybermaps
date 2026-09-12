@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace Cybermaps\Discovery;
 
+use Cybermaps\Content\ContentAnalyzer;
+use Cybermaps\Content\VisibleTextExtractor;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -236,8 +239,8 @@ final class AIMetadata {
 	 * Generate a regex- and excerpt-based metadata string.
 	 */
 	private static function generate_metadata_excerpt( \WP_Post $post ): string {
-		$content = wp_strip_all_tags( (string) ( $post->post_content ?? '' ) );
-		$content = (string) preg_replace( '/\s+/', ' ', $content );
+		$visible = (string) ( new ContentAnalyzer() )->analyze_post( $post )['text'];
+		$content = (string) preg_replace( '/\s+/', ' ', $visible );
 
 		// Surface capitalized tokens. These are candidates, not entity recognition.
 		preg_match_all( '/\b(?<!\. )[A-Z][a-z]{3,}\b/', $content, $matches );
@@ -249,9 +252,9 @@ final class AIMetadata {
 
 		// Use the final stored paragraph as a possible closing excerpt.
 		$conclusion = '';
-		$paragraphs = array_filter( explode( "\n", (string) ( $post->post_content ?? '' ) ) );
+		$paragraphs = array_filter( explode( "\n", $visible ) );
 		if ( ! empty( $paragraphs ) ) {
-			$last_paragraph = wp_strip_all_tags( (string) end( $paragraphs ) );
+			$last_paragraph = (string) end( $paragraphs );
 			$conclusion     = wp_trim_words( $last_paragraph, 30 );
 		}
 
@@ -304,12 +307,8 @@ final class AIMetadata {
 	 * Determine a literal length band using Unicode-aware stored-text tokens.
 	 */
 	private static function get_length_band( \WP_Post $post ): string {
-		$content    = wp_strip_all_tags( (string) ( $post->post_content ?? '' ) );
-		$word_count = preg_match_all(
-			"/[\\p{L}\\p{M}\\p{N}]+(?:['’\\-][\\p{L}\\p{M}\\p{N}]+)*/u",
-			$content
-		);
-		$word_count = false === $word_count ? str_word_count( $content ) : $word_count;
+		$content    = (string) ( new ContentAnalyzer() )->analyze_post( $post )['text'];
+		$word_count = ( new VisibleTextExtractor() )->word_count( $content );
 
 		if ( $word_count > 1000 ) {
 			return 'long';

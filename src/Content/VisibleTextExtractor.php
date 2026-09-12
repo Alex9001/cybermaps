@@ -13,41 +13,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class VisibleTextExtractor {
 	public const SUMMARY_SOURCE_MAX_BYTES = 256 * 1024;
 
+	private ContentAnalyzer $analyzer;
+
+	public function __construct( ?ContentAnalyzer $analyzer = null ) {
+		$this->analyzer = $analyzer ?? new ContentAnalyzer();
+	}
+
 	/**
 	 * Normalize stored post content into plain text.
 	 */
 	public function from_post( object|int $post ): string {
-		$object = is_object( $post ) ? $post : get_post( $post );
-		if ( ! is_object( $object ) || ! isset( $object->post_content ) ) {
-			return '';
-		}
-
-		return $this->normalize( (string) $object->post_content );
+		return (string) $this->analyzer->analyze_post( $post )['text'];
 	}
 
 	/**
 	 * Normalize arbitrary stored content without rendering dynamic WordPress data.
 	 */
 	public function normalize( string $content ): string {
-		$content = preg_replace( '#<(script|style|template|noscript)\b[^>]*>.*?(?:</\1>|$)#is', ' ', $content ) ?? $content;
-		$content = preg_replace( '/<!--.*?(?:-->|$)/s', ' ', $content ) ?? $content;
-
-		if ( function_exists( 'strip_shortcodes' ) ) {
-			$content = strip_shortcodes( $content );
-		}
-
-		$content = preg_replace(
-			'#</?(?:address|article|aside|blockquote|br|dd|div|dl|dt|figcaption|figure|footer|h[1-6]|header|hr|li|main|nav|ol|p|pre|section|table|td|th|tr|ul)\b[^>]*>#i',
-			"\n",
-			$content
-		) ?? $content;
-		$content = wp_strip_all_tags( $content, false );
-		$content = html_entity_decode( $content, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
-		$content = preg_replace( '/[^\S\r\n]+/u', ' ', $content ) ?? $content;
-		$content = preg_replace( '/ *\R */u', "\n", $content ) ?? $content;
-		$content = preg_replace( "/\n{3,}/", "\n\n", $content ) ?? $content;
-
-		return trim( $content );
+		return (string) $this->analyzer->analyze_content( $content )['text'];
 	}
 
 	/**

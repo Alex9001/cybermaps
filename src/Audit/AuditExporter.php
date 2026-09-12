@@ -85,6 +85,7 @@ final class AuditExporter {
 		$report_catalog     = isset( $catalog[ $filter ] ) ? array( $filter => $catalog[ $filter ] ) : $catalog;
 		$action_cards       = $this->action_cards( $report_catalog, $counts );
 		$comparison_metrics = $this->comparison_metrics( $has_baseline, $diff );
+		$analysis_notice    = $this->analysis_notice( $run );
 
 		return '<!doctype html><html lang="' . esc_attr( ReportPresentation::language() ) . '"><head><meta charset="utf-8">'
 			. '<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>'
@@ -95,11 +96,11 @@ final class AuditExporter {
 			. esc_html( (string) $identity['site_url'] ) . '</span>' . $prepared_by . '</div></header>'
 			. '<div class="report-body"><div class="metrics"><div class="metric"><span>' . esc_html__( 'Resources reviewed', 'cybermaps' ) . '</span><strong>'
 			. (int) ( $run['resource_count'] ?? 0 ) . '</strong></div><div class="metric"><span>' . esc_html__( 'Current findings', 'cybermaps' ) . '</span><strong>'
-			. count( $findings ) . '</strong></div>' . $comparison_metrics . '</div>'
+			. count( $findings ) . '</strong></div>' . $comparison_metrics . '</div>' . $analysis_notice
 			. '<section><div class="section-heading"><p>' . esc_html__( 'Content priorities', 'cybermaps' ) . '</p><h2>' . esc_html__( 'Action inventory', 'cybermaps' )
 			. '</h2></div><div class="actions">' . $action_cards . '</div></section>'
 			. '<section><div class="section-heading"><p>' . esc_html__( 'Content details', 'cybermaps' ) . '</p><h2>' . esc_html__( 'Findings and recommendations', 'cybermaps' )
-			. '</h2></div><p class="notice">' . esc_html__( 'Measurements capture visible text and media stored in WordPress at report time, using the saved policy for a clear, repeatable action plan.', 'cybermaps' )
+			. '</h2></div><p class="notice">' . esc_html__( 'Measurements capture visible text, media, stored internal links, and assigned navigation in WordPress at report time, using the saved policy for a clear, repeatable action plan.', 'cybermaps' )
 			. '</p><div class="table-wrap"><table><thead><tr><th>' . esc_html__( 'Resource', 'cybermaps' ) . '</th><th>' . esc_html__( 'Title', 'cybermaps' )
 			. '</th><th>' . esc_html__( 'Finding', 'cybermaps' ) . '</th><th>' . esc_html__( 'Measurement', 'cybermaps' ) . '</th><th>'
 			. esc_html__( 'Recommended review', 'cybermaps' ) . '</th></tr></thead><tbody>' . $rows . '</tbody></table></div></section></div><footer>'
@@ -167,22 +168,60 @@ final class AuditExporter {
 	 */
 	public static function finding_catalog(): array {
 		return array(
-			'thin_content'  => array(
+			'thin_content'     => array(
 				'label'        => __( 'Thin content', 'cybermaps' ),
 				'description'  => __( 'Visible text below the configured policy minimum.', 'cybermaps' ),
 				'report_title' => __( 'Thin Content Action Report', 'cybermaps' ),
 			),
-			'stale_content' => array(
+			'stale_content'    => array(
 				'label'        => __( 'Freshness review', 'cybermaps' ),
 				'description'  => __( 'Content beyond its configured review interval.', 'cybermaps' ),
 				'report_title' => __( 'Content Freshness Action Report', 'cybermaps' ),
 			),
-			'missing_media' => array(
+			'missing_media'    => array(
 				'label'        => __( 'Media review', 'cybermaps' ),
 				'description'  => __( 'Content without detected stored media where policy requests review.', 'cybermaps' ),
 				'report_title' => __( 'Media Opportunity Action Report', 'cybermaps' ),
 			),
+			'potential_orphan' => array(
+				'label'        => __( 'Potential orphan', 'cybermaps' ),
+				'description'  => __( 'No stored page or assigned navigation item links to the resource.', 'cybermaps' ),
+				'report_title' => __( 'Potential Orphan Content Action Report', 'cybermaps' ),
+			),
+			'no_homepage_path' => array(
+				'label'        => __( 'No homepage path', 'cybermaps' ),
+				'description'  => __( 'Links exist, but the local graph has no path from the homepage or assigned navigation.', 'cybermaps' ),
+				'report_title' => __( 'Homepage Reachability Action Report', 'cybermaps' ),
+			),
+			'deeply_linked'    => array(
+				'label'        => __( 'Three-plus clicks deep', 'cybermaps' ),
+				'description'  => __( 'The shortest stored path is at least three clicks from the homepage.', 'cybermaps' ),
+				'report_title' => __( 'Internal Link Depth Action Report', 'cybermaps' ),
+			),
 		);
+	}
+
+	/** @param array<string,mixed> $run Hydrated saved run. */
+	private function analysis_notice( array $run ): string {
+		$analysis = is_array( $run['analysis'] ?? null ) ? $run['analysis'] : array();
+		if ( InternalLinkAnalyzer::ANALYSIS_VERSION !== (int) ( $analysis['internal_link_version'] ?? 0 ) ) {
+			return '';
+		}
+
+		$message = sprintf(
+			/* translators: 1: resource count, 2: unique content-link count, 3: assigned-navigation reference count. */
+			__( 'Local link coverage: %1$d stored resources, %2$d unique content links, and %3$d assigned navigation references.', 'cybermaps' ),
+			(int) ( $analysis['resource_count'] ?? 0 ),
+			(int) ( $analysis['edge_count'] ?? 0 ),
+			(int) ( $analysis['navigation_references'] ?? 0 )
+		);
+		if ( empty( $analysis['complete'] ) ) {
+			$message .= ' ' . __( 'The bounded scan was incomplete, so Cybermaps suppressed internal-link findings.', 'cybermaps' );
+		} elseif ( empty( $analysis['depth_available'] ) ) {
+			$message .= ' ' . __( 'Homepage click depth could not be established from local WordPress data.', 'cybermaps' );
+		}
+
+		return '<p class="notice">' . esc_html( $message ) . '</p>';
 	}
 
 	private function styles(): string {

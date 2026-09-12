@@ -382,6 +382,7 @@ final class ContentReview implements SettingsTab {
 	private static function render_saved_report( array $run, array $history, array $catalog, array $counts ): void {
 		self::render_saved_report_header( $run );
 		self::render_saved_report_metrics( $run );
+		self::render_link_analysis_status( $run );
 		self::render_action_reports( $run, $catalog, $counts );
 		self::render_findings_preview( $run, $catalog );
 		self::render_report_history( $history, (int) $run['id'] );
@@ -442,6 +443,34 @@ final class ContentReview implements SettingsTab {
 		<?php
 	}
 
+	/** @param array<string,mixed> $run Selected report. */
+	private static function render_link_analysis_status( array $run ): void {
+		$analysis = self::report_array_value( $run, 'analysis' );
+		if ( empty( $analysis['internal_link_version'] ) ) {
+			return;
+		}
+		$message = sprintf(
+			/* translators: 1: resource count, 2: internal-link count, 3: navigation reference count. */
+			__( 'Local link coverage: %1$d resources, %2$d unique content links, and %3$d assigned navigation references.', 'cybermaps' ),
+			(int) self::report_value( $analysis, 'resource_count', 0 ),
+			(int) self::report_value( $analysis, 'edge_count', 0 ),
+			(int) self::report_value( $analysis, 'navigation_references', 0 )
+		);
+		$tone = 'info';
+		if ( empty( $analysis['complete'] ) ) {
+			$message .= ' ' . __( 'The bounded scan was incomplete, so internal-link findings were suppressed.', 'cybermaps' );
+			$tone     = 'warning';
+		} elseif ( empty( $analysis['depth_available'] ) ) {
+			$message .= ' ' . __( 'Homepage click depth was unavailable from local WordPress content and navigation.', 'cybermaps' );
+		}
+		if ( false === (bool) self::report_value( self::report_array_value( $run, 'diff' ), 'internal_links_comparable', true ) ) {
+			$message .= ' ' . __( 'Internal-link trends were omitted because the baseline used different or incomplete link coverage.', 'cybermaps' );
+		}
+		?>
+		<div class="notice notice-<?php echo esc_attr( $tone ); ?> inline"><p><?php echo esc_html( $message ); ?></p></div>
+		<?php
+	}
+
 	/**
 	 * @param array<string,mixed>               $run     Selected report.
 	 * @param array<string,array<string,mixed>> $catalog Finding catalog.
@@ -462,7 +491,7 @@ final class ContentReview implements SettingsTab {
 					<article class="cm-issue-card cm-report-issue-card">
 						<div class="cm-issue-header">
 							<div class="cm-issue-icon"><span class="dashicons <?php echo esc_attr( self::finding_icon( $key ) ); ?>"></span></div>
-							<span class="cm-priority-badge <?php echo 'thin_content' === $key ? 'high' : 'medium'; ?>"><?php esc_html_e( 'Review', 'cybermaps' ); ?></span>
+							<span class="cm-priority-badge <?php echo in_array( $key, array( 'thin_content', 'potential_orphan' ), true ) ? 'high' : 'medium'; ?>"><?php esc_html_e( 'Review', 'cybermaps' ); ?></span>
 						</div>
 						<div class="cm-issue-body">
 							<div class="cm-issue-count"><?php echo esc_html( (string) $counts[ $key ] ); ?></div>
@@ -652,6 +681,9 @@ final class ContentReview implements SettingsTab {
 		return match ( $finding_key ) {
 			'thin_content' => 'dashicons-editor-paragraph',
 			'stale_content' => 'dashicons-calendar-alt',
+			'potential_orphan' => 'dashicons-editor-unlink',
+			'no_homepage_path' => 'dashicons-randomize',
+			'deeply_linked' => 'dashicons-networking',
 			default => 'dashicons-format-image',
 		};
 	}

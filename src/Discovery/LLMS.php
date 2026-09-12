@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Cybermaps\Discovery;
 
+use Cybermaps\Content\ContentAnalyzer;
 use Cybermaps\Content\VisibleTextExtractor;
 use Cybermaps\Core\CacheManager;
 use Cybermaps\Core\BuildUnavailableException;
@@ -94,12 +95,13 @@ class LLMS {
 		if ( '' !== $language ) {
 			$key .= ':' . sanitize_key( $language );
 		}
-		$producer = function () use ( $is_full, $language ): string {
+		$producer = function () use ( $is_full, $language, $skip_cache ): string {
 			$settings  = \Cybermaps\Core\ConfigurationStore::settings();
 			$inventory = new PublicationInventory( $settings, null, $language );
-			$extractor = new VisibleTextExtractor();
+			$analyzer  = new ContentAnalyzer( ! $skip_cache && ! $is_full );
+			$extractor = new VisibleTextExtractor( $analyzer );
 			return $is_full
-				? $this->generate_full( $settings, $inventory, $extractor )
+				? $this->generate_full( $settings, $inventory, $analyzer )
 				: $this->generate_summary( $settings, $inventory, $extractor );
 		};
 
@@ -340,7 +342,7 @@ class LLMS {
 	private function generate_full(
 		array $settings,
 		PublicationInventory $inventory,
-		VisibleTextExtractor $extractor
+		ContentAnalyzer $analyzer
 	): string {
 		$output = '';
 		$this->append_complete(
@@ -350,7 +352,7 @@ class LLMS {
 			'llms-full.txt'
 		);
 		$this->append_full_intro( $output, $settings );
-		$eligible_count = $this->append_full_entries( $output, $inventory, $extractor );
+		$eligible_count = $this->append_full_entries( $output, $inventory, $analyzer );
 		if ( 0 === $eligible_count ) {
 			$this->append_complete(
 				$output,
@@ -389,17 +391,17 @@ class LLMS {
 	private function append_full_entries(
 		string &$output,
 		PublicationInventory $inventory,
-		VisibleTextExtractor $extractor
+		ContentAnalyzer $analyzer
 	): int {
 		$eligible_count = 0;
 		foreach ( $inventory->iterate_posts() as $post ) {
-			$this->append_full_post( $output, $post, $extractor );
+			$this->append_full_post( $output, $post, $analyzer );
 			++$eligible_count;
 		}
 		return $eligible_count;
 	}
 
-	private function append_full_post( string &$output, object $post, VisibleTextExtractor $extractor ): void {
+	private function append_full_post( string &$output, object $post, ContentAnalyzer $analyzer ): void {
 		$title     = $this->markdown_text( (string) get_the_title( $post ) );
 		$url       = URLManager::rewrite_url( (string) get_permalink( $post ) );
 		$modified  = (string) ( $post->post_modified_gmt ?? $post->post_date_gmt ?? '' );
@@ -417,7 +419,7 @@ class LLMS {
 			throw new PublicationSizeLimitException( 'llms-full.txt', self::FULL_OUTPUT_MAX_BYTES ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Domain exception data is later JSON-encoded or escaped by status views.
 		}
 		$this->require_memory_headroom( strlen( $raw_content ), 'llms-full.txt' );
-		$text = $extractor->from_post( $post );
+		$text = (string) $analyzer->analyze_post( $post )['markdown'];
 		$this->append_complete(
 			$output,
 			'' !== $text ? $text . "\n\n" : "[No visible stored text]\n\n",

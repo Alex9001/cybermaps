@@ -1,9 +1,9 @@
 {
     "plugin": "CYBERMAPS: XML Sitemaps & llms.txt",
-    "version": "7.5.0",
+    "version": "7.5.1",
     "php_min": "8.2",
     "wp_min": "7.1",
-    "generated_at": "2026-09-12T00:05:27+00:00",
+    "generated_at": "2026-09-12T21:00:55+00:00",
     "discovery_endpoints": [
         {
             "id": "manifest",
@@ -1304,12 +1304,12 @@
             "api_secret",
             "delete_data_on_uninstall"
         ],
-        "catalog_hash": "4649f53399ee41ccaa250eb5d1e1264e1dce9a95f326b279e98280f56bc80bc5",
-        "schema_hash": "570622bde750f1b33f4e47080718b427184f7479965d1f9229d9c4e5bb4751fe",
+        "catalog_hash": "43b1739025e620b01e771ee944131bdbf0c1cbdc110e37a946e79a2e2d2e2942",
+        "schema_hash": "dd3e07644c1263e9f145c9bd77c6d7b67275a1eb72b259e5bba13874441d2786",
         "guide_path": "docs/ai-configuration.md",
         "guide_url": "https://cybermaps.dev/docs/ai-configuration/",
-        "schema_url": "https://cybermaps.dev/specs/ai-configuration/7.5.0/schema.json",
-        "catalog_url": "https://cybermaps.dev/specs/ai-configuration/7.5.0/catalog.json",
+        "schema_url": "https://cybermaps.dev/specs/ai-configuration/7.5.1/schema.json",
+        "catalog_url": "https://cybermaps.dev/specs/ai-configuration/7.5.1/catalog.json",
         "compatibility": {
             "format_version": "exact",
             "plugin_version": "warning_on_mismatch",
@@ -1849,6 +1849,13 @@
         },
         {
             "namespace": "Cybermaps\\Audit",
+            "class": "InternalLinkAnalyzer",
+            "fqcn": "Cybermaps\\Audit\\InternalLinkAnalyzer",
+            "file": "src/Audit/InternalLinkAnalyzer.php",
+            "summary": "Builds a bounded graph from stored post content and assigned navigation."
+        },
+        {
+            "namespace": "Cybermaps\\Audit",
             "class": "PublishedPostSource",
             "fqcn": "Cybermaps\\Audit\\PublishedPostSource",
             "file": "src/Audit/PublishedPostSource.php",
@@ -1874,6 +1881,13 @@
             "fqcn": "Cybermaps\\CLI\\Command",
             "file": "src/CLI/Command.php",
             "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Content",
+            "class": "ContentAnalyzer",
+            "fqcn": "Cybermaps\\Content\\ContentAnalyzer",
+            "file": "src/Content/ContentAnalyzer.php",
+            "summary": "Extracts readable text, structural Markdown, headings, and links through one contract."
         },
         {
             "namespace": "Cybermaps\\Content",
@@ -3045,7 +3059,7 @@
             "summary": "Small sitemap XML writer with a native XMLWriter fast path."
         }
     ],
-    "class_count": 246,
+    "class_count": 248,
     "publication_limits": {
         "llms_summary_bytes": 4194303,
         "llms_full_bytes": 33554431,

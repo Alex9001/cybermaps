@@ -1,6 +1,14 @@
 Cybermaps release history
 =========================
 
+7.5.1
+-----
+
+* Added a bounded local internal-link graph using stored published content, assigned classic menus, and active-theme block navigation.
+* Added potential-orphan, unreachable-from-homepage, and three-plus-click-depth findings with evidence, focused action reports, and exports.
+* Suppressed link findings when coverage is incomplete and limited trend comparisons to reports with matching complete analysis contracts.
+* Preserved safe links and headings in Markdown alternates, full LLMS output, and RAG chunks through shared stored-content analysis.
+
 7.5.0
 -----
 

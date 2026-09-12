@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Cybermaps\Discovery;
 
-use Cybermaps\Content\VisibleTextExtractor;
+use Cybermaps\Content\ContentAnalyzer;
 use Cybermaps\Core\EndpointRegistry;
 use Cybermaps\Core\TranslationHelper;
 use Cybermaps\Core\URLManager;
@@ -184,8 +184,8 @@ final class MarkdownAlternate {
 		if ( \strlen( $raw_content ) > LLMS::OUTPUT_MAX_BYTES ) {
 			throw new PublicationSizeLimitException( 'markdown-alternate', LLMS::OUTPUT_MAX_BYTES ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Protocol error data is encoded before output.
 		}
-		$text    = ( new VisibleTextExtractor() )->from_post( $object );
-		$output .= '' !== $text ? $text . "\n" : "[No visible stored text]\n";
+		$markdown = (string) ( new ContentAnalyzer() )->analyze_post( $object )['markdown'];
+		$output  .= '' !== $markdown ? $markdown . "\n" : "[No visible stored text]\n";
 		if ( \strlen( $output ) > LLMS::OUTPUT_MAX_BYTES ) {
 			throw new PublicationSizeLimitException( 'markdown-alternate', LLMS::OUTPUT_MAX_BYTES ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Protocol error data is encoded before output.
 		}

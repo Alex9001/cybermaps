@@ -1,6 +1,6 @@
-# Cybermaps 7.5.0 Feature Reference
+# Cybermaps 7.5.1 Feature Reference
 
-This reference describes Cybermaps 7.5.0 using the
+This reference describes Cybermaps 7.5.1 using the
 [generated source inventory](./dev/manifest.json). Cloudflare automation,
 Debugging, compatibility publication, and independent LiteSpeed/APCu controls
 are included; availability and public delivery depend on the configuration.
@@ -370,6 +370,13 @@ do not execute PHP and therefore cannot appear in PHP-side analytics.
   Content Discovery Strategy.
 - Thin-content, freshness, and media findings with measured values and active
   thresholds.
+- Local internal-link graph from stored content, assigned classic menus, and
+  active-theme navigation blocks, with distinct incoming references and
+  shortest homepage paths.
+- Potential-orphan, unreachable-from-homepage, and three-plus-click-depth
+  findings for public search-indexable resources.
+- Explicit coverage metadata with 10,000-resource and 100,000-edge bounds;
+  incomplete scans suppress link findings instead of claiming absence.
 - Exact added, resolved, and persisting findings against the prior report.
 - Focused action lists for each finding category.
 - Five printable themes plus optional agency identity and site-name override.
@@ -401,7 +408,7 @@ translation relationships.
 
 The separate AI Configuration Brief is a credential-excluding, site-aware
 Markdown handoff with current non-secret context, 121 editable fields in the
-7.5.0 generated contract, field guidance,
+7.5.1 generated contract, field guidance,
 dependencies, examples, risk levels, and an initially null JSON changes
 envelope. Imports are merge-only and require a server-generated preview that
 shows canonical sanitized values. Unknown or malformed input is rejected;

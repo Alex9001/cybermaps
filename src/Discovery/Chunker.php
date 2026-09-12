@@ -2,6 +2,8 @@
 declare(strict_types=1);
 namespace Cybermaps\Discovery;
 
+use Cybermaps\Content\ContentAnalyzer;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -61,7 +63,7 @@ class Chunker {
 			}
 		}
 
-		$text        = $this->sanitize_content( $post->post_content );
+		$text        = (string) ( new ContentAnalyzer( $this->cache_enabled ) )->analyze_post( $post )['markdown'];
 		$chunks_text = $this->split_text( $text, $config['window_size'], $config['overlap'] );
 
 		$chunks = array();
@@ -215,58 +217,12 @@ class Chunker {
 	}
 
 	/**
-	 * Strip HTML while preserving heading text as Markdown.
-	 *
-	 * @param string $content HTML content.
-	 * @return string
-	 */
-	private function sanitize_content( $content ) {
-		// Convert headings for structural context
-		$content = $this->extract_headers_to_markdown( $content );
-		$content = wp_strip_all_tags( $content );
-		return trim( $content );
-	}
-
-	/**
 	 * Extract headers and convert them to markdown-style tags.
 	 *
 	 * @param string $content HTML content.
 	 * @return string
 	 */
 	public function extract_headers_to_markdown( $content ) {
-		// Comments are not visible page content. Remove them before either the
-		// HTML Processor or regex fallback sees heading-like markup inside them.
-		$content = preg_replace( '/<!--.*?-->/s', '', $content );
-
-		if ( ! class_exists( 'WP_HTML_Processor' ) ) {
-			// Fallback to regex if WP_HTML_Processor is not available (WP < 6.4)
-			return preg_replace_callback(
-				'/<h([1-6])[^>]*?>(.*?)<\/h\1>/is',
-				function ( $matches ) {
-					$level  = (int) $matches[1];
-					$hashes = str_repeat( '#', $level );
-					return "\n\n$hashes " . wp_strip_all_tags( $matches[2] ) . "\n\n";
-				},
-				$content
-			);
-		}
-
-		$processor = \WP_HTML_Processor::create_fragment( $content );
-		while ( $processor->next_tag( 'H1, H2, H3, H4, H5, H6' ) ) {
-			// Mark valid headers to allow in-place replacement while ignoring comments/scripts
-			$processor->set_attribute( 'data-cybermaps-marker', $processor->get_tag() );
-		}
-		$content = $processor->get_updated_html();
-
-		// Replace marked headers with markdown
-		return preg_replace_callback(
-			'/<h([1-6])(?:\s+[^>]*?)?\s+data-cybermaps-marker="H\1"[^>]*?>(.*?)<\/h\1>/is',
-			function ( $matches ) {
-				$level  = (int) $matches[1];
-				$hashes = str_repeat( '#', $level );
-				return "\n\n$hashes " . wp_strip_all_tags( $matches[2] ) . "\n\n";
-			},
-			$content
-		);
+		return (string) ( new ContentAnalyzer() )->analyze_content( (string) $content )['markdown'];
 	}
 }

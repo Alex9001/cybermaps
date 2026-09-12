@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Persists completed audit snapshots in three normalized tables.
  */
 final class AuditRunRepository {
-	public const SCHEMA_VERSION                = '2';
+	public const SCHEMA_VERSION                = '3';
 	public const RUN_LOCK_OPTION               = 'cybermaps_content_audit_run_lock';
 	private const SCHEMA_OPTION                = 'cybermaps_audit_schema_version';
 	private const MAINTENANCE_LOCK_TTL_SECONDS = 5 * MINUTE_IN_SECONDS;
@@ -41,6 +41,7 @@ completed_gmt datetime DEFAULT NULL,
 status varchar(20) NOT NULL,
 policy_json longtext NOT NULL,
 policy_hash char(64) NOT NULL,
+analysis_json longtext NOT NULL,
 baseline_run_id bigint(20) unsigned DEFAULT NULL,
 resource_count bigint(20) unsigned DEFAULT 0 NOT NULL,
 finding_count bigint(20) unsigned DEFAULT 0 NOT NULL,
@@ -555,6 +556,7 @@ KEY severity (severity)
 			'status'          => 'running',
 			'policy_json'     => (string) wp_json_encode( $policy->to_array() ),
 			'policy_hash'     => $policy->hash(),
+			'analysis_json'   => '{}',
 			'baseline_run_id' => $baseline_run_id > 0 ? $baseline_run_id : null,
 			'resource_count'  => 0,
 			'finding_count'   => 0,
@@ -627,7 +629,14 @@ KEY severity (severity)
 		}
 	}
 
-	public function complete( int $run_id, int $resource_count, int $finding_count, string $snapshot_hash ): void {
+	/** @param array<string,mixed> $analysis Run-level analysis metadata. */
+	public function complete(
+		int $run_id,
+		int $resource_count,
+		int $finding_count,
+		string $snapshot_hash,
+		array $analysis = array()
+	): void {
 		global $wpdb;
 		$table = $wpdb->prefix . 'cybermaps_audit_runs';
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching
@@ -639,6 +648,7 @@ KEY severity (severity)
 				'resource_count' => $resource_count,
 				'finding_count'  => $finding_count,
 				'snapshot_hash'  => $snapshot_hash,
+				'analysis_json'  => (string) wp_json_encode( $analysis ),
 			),
 			array(
 				'id'     => $run_id,
@@ -716,12 +726,42 @@ KEY severity (severity)
 		// phpcs:enable
 
 		$run['policy']   = self::decode_json_array( (string) $run['policy_json'] );
+		$run['analysis'] = self::decode_json_array( (string) ( $run['analysis_json'] ?? '' ) );
 		$run['findings'] = array_map( array( $this, 'hydrate_finding' ), is_array( $finding_rows ) ? $finding_rows : array() );
 		if ( $include_resources ) {
 			$run['resources'] = array_map( array( $this, 'hydrate_resource' ), is_array( $resource_rows ) ? $resource_rows : array() );
 		}
 
 		return $run;
+	}
+
+	/**
+	 * Return only the run-level analysis contract used to qualify comparisons.
+	 *
+	 * @return array<string,mixed>|null
+	 */
+	public function get_run_analysis( int $run_id ): ?array {
+		if ( $run_id < 1 ) {
+			return null;
+		}
+
+		global $wpdb;
+		$table = $wpdb->prefix . 'cybermaps_audit_runs';
+		$this->reset_database_error();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching -- Comparison qualification must read the exact immutable report metadata.
+		$json = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT analysis_json FROM %i WHERE id = %d AND status = 'complete'",
+				$table,
+				$run_id
+			)
+		);
+		$this->assert_database_read_succeeded();
+		if ( null === $json ) {
+			return null;
+		}
+
+		return self::decode_json_array( (string) $json );
 	}
 
 	/**
@@ -802,6 +842,7 @@ KEY severity (severity)
 		}
 
 		$run['policy']         = self::decode_json_array( (string) $run['policy_json'] );
+		$run['analysis']       = self::decode_json_array( (string) ( $run['analysis_json'] ?? '' ) );
 		$run['findings']       = array_map( array( $this, 'hydrate_finding' ), is_array( $finding_rows ) ? $finding_rows : array() );
 		$run['finding_counts'] = $finding_counts;
 
@@ -813,7 +854,12 @@ KEY severity (severity)
 	 *
 	 * @return array{baseline_run_id:int,added_count:int,resolved_count:int,persisting_count:int}
 	 */
-	public function finding_diff_counts( int $run_id, int $baseline_run_id, int $current_finding_count ): array {
+	public function finding_diff_counts(
+		int $run_id,
+		int $baseline_run_id,
+		int $current_finding_count,
+		bool $include_internal_links = true
+	): array {
 		global $wpdb;
 		$runs      = $wpdb->prefix . 'cybermaps_audit_runs';
 		$resources = $wpdb->prefix . 'cybermaps_audit_resources';
@@ -847,8 +893,13 @@ KEY severity (severity)
 			);
 		}
 
-		$added_query      = $wpdb->prepare(
-			'SELECT COUNT(*)
+		$current_filter  = $include_internal_links
+			? ''
+			: " AND current_finding.finding_key NOT IN ('potential_orphan','no_homepage_path','deeply_linked')";
+		$baseline_filter = $include_internal_links
+			? ''
+			: " AND baseline_finding.finding_key NOT IN ('potential_orphan','no_homepage_path','deeply_linked')";
+		$added_sql       = 'SELECT COUNT(*)
 			FROM %i current_finding
 			INNER JOIN %i current_resource
 				ON current_resource.id = current_finding.resource_id
@@ -861,7 +912,10 @@ KEY severity (severity)
 				AND baseline_finding.resource_id = baseline_resource.id
 				AND baseline_finding.finding_key = current_finding.finding_key
 			WHERE current_finding.run_id = %d
-			AND baseline_finding.id IS NULL',
+			AND baseline_finding.id IS NULL' . $current_filter;
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- SQL is assembled only from the fixed internal-link finding list above; identifiers and values remain placeholders.
+		$added_query      = $wpdb->prepare(
+			$added_sql,
 			$findings,
 			$resources,
 			$resources,
@@ -870,8 +924,7 @@ KEY severity (severity)
 			$baseline_run_id,
 			$run_id
 		);
-		$resolved_query   = $wpdb->prepare(
-			'SELECT COUNT(*)
+		$resolved_sql     = 'SELECT COUNT(*)
 			FROM %i baseline_finding
 			INNER JOIN %i baseline_resource
 				ON baseline_resource.id = baseline_finding.resource_id
@@ -884,7 +937,9 @@ KEY severity (severity)
 				AND current_finding.resource_id = current_resource.id
 				AND current_finding.finding_key = baseline_finding.finding_key
 			WHERE baseline_finding.run_id = %d
-			AND current_finding.id IS NULL',
+			AND current_finding.id IS NULL' . $baseline_filter;
+		$resolved_query   = $wpdb->prepare(
+			$resolved_sql,
 			$findings,
 			$resources,
 			$resources,
@@ -893,8 +948,7 @@ KEY severity (severity)
 			$run_id,
 			$baseline_run_id
 		);
-		$persisting_query = $wpdb->prepare(
-			'SELECT COUNT(*)
+		$persisting_sql   = 'SELECT COUNT(*)
 			FROM %i current_finding
 			INNER JOIN %i current_resource
 				ON current_resource.id = current_finding.resource_id
@@ -906,7 +960,9 @@ KEY severity (severity)
 				ON baseline_finding.run_id = %d
 				AND baseline_finding.resource_id = baseline_resource.id
 				AND baseline_finding.finding_key = current_finding.finding_key
-			WHERE current_finding.run_id = %d',
+			WHERE current_finding.run_id = %d' . $current_filter;
+		$persisting_query = $wpdb->prepare(
+			$persisting_sql,
 			$findings,
 			$resources,
 			$resources,
@@ -915,7 +971,6 @@ KEY severity (severity)
 			$baseline_run_id,
 			$run_id
 		);
-
 		$this->reset_database_error();
 		$added = (int) $wpdb->get_var( $added_query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- The complete identifier-and-value statement is prepared above.
 		$this->assert_database_read_succeeded();
@@ -925,6 +980,7 @@ KEY severity (severity)
 		$this->reset_database_error();
 		$persisting = (int) $wpdb->get_var( $persisting_query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- The complete identifier-and-value statement is prepared above.
 		$this->assert_database_read_succeeded();
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 		// phpcs:enable
 
 		return array(

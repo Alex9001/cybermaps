@@ -14,13 +14,13 @@ final class AuditRunRepositoryTest extends TestCase {
 		$this->previous_wpdb = $GLOBALS['wpdb'] ?? null;
 		$GLOBALS['wpdb']     = new AuditRunRepositoryWpdbStub();
 		delete_option( AuditRunRepository::RUN_LOCK_OPTION );
-		unset( $GLOBALS['cybermaps_mock_dbdelta_callback'] );
+		unset( $GLOBALS['cybermaps_mock_dbdelta_callback'], $GLOBALS['cybermaps_mock_dbdelta_queries'] );
 	}
 
 	protected function tearDown(): void {
 		delete_option( AuditRunRepository::RUN_LOCK_OPTION );
 		$GLOBALS['wpdb'] = $this->previous_wpdb;
-		unset( $GLOBALS['cybermaps_mock_dbdelta_callback'] );
+		unset( $GLOBALS['cybermaps_mock_dbdelta_callback'], $GLOBALS['cybermaps_mock_dbdelta_queries'] );
 	}
 
 	public function test_display_projection_is_bounded_and_does_not_hydrate_resources(): void {
@@ -44,6 +44,22 @@ final class AuditRunRepositoryTest extends TestCase {
 		$sql = implode( "\n", $GLOBALS['wpdb']->queries );
 		$this->assertStringContainsString( 'LIMIT 25', $sql );
 		$this->assertStringNotContainsString( 'SELECT * FROM wp_cybermaps_audit_resources', $sql );
+	}
+
+	public function test_diff_counts_can_exclude_incompatible_internal_link_findings(): void {
+		$diff = ( new AuditRunRepository() )->finding_diff_counts( 8, 7, 17, false );
+
+		$this->assertSame( 7, $diff['baseline_run_id'] );
+		$sql = implode( "\n", $GLOBALS['wpdb']->queries );
+		$this->assertStringContainsString(
+			"current_finding.finding_key NOT IN ('potential_orphan','no_homepage_path','deeply_linked')",
+			$sql
+		);
+		$this->assertStringContainsString(
+			"baseline_finding.finding_key NOT IN ('potential_orphan','no_homepage_path','deeply_linked')",
+			$sql
+		);
+		$this->assertStringNotContainsString( '{$current_filter}', $sql );
 	}
 
 	public function test_full_run_path_still_hydrates_complete_export_resources(): void {
@@ -287,6 +303,10 @@ final class AuditRunRepositoryTest extends TestCase {
 		$this->assertSame(
 			AuditRunRepository::SCHEMA_VERSION,
 			get_option( 'cybermaps_audit_schema_version' )
+		);
+		$this->assertStringContainsString(
+			'analysis_json longtext NOT NULL',
+			implode( "\n", (array) ( $GLOBALS['cybermaps_mock_dbdelta_queries'] ?? array() ) )
 		);
 	}
 

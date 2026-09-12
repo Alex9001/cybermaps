@@ -1,6 +1,6 @@
 # Cybermaps — Technical Documentation
 
-> Version 7.5.0 · PHP 8.2 · WordPress 7.1
+> Version 7.5.1 · PHP 8.2 · WordPress 7.1
 
 Cybermaps is a fast sitemap and AI-discovery plugin for WordPress.
 It combines XML, RSS, and HTML sitemap publishing with compact machine-readable
@@ -464,7 +464,9 @@ Eligible singular resources also have literal `text/markdown` alternates.
 Pretty permalinks use `/{permalink}/index.md`, filename permalinks append `.md`,
 and plain permalinks use `cybermaps_markdown=1`. The representation includes
 the canonical source URL, content type, language, modified time, and visible
-stored text. It does not execute shortcodes or dynamic blocks and is not
+stored content as structural Markdown. Stored headings remain headings, safe
+links remain clickable, relative links resolve against the canonical resource,
+and unsafe URL schemes are emitted only as text. It does not execute shortcodes or dynamic blocks and is not
 materialized by the Static File Engine.
 
 The endpoint registry records each fixed path, aliases, handler, body format,
@@ -494,8 +496,9 @@ that boundary and links the complete XML sitemap. Configured title, mission, sit
 license, and publisher guidance are included when available.
 
 `/llms-full.txt` is disabled by default because it can become large. It includes
-the literal visible stored text for eligible resources without executing
-shortcodes or dynamic blocks. LLMS inventory is traversed in bounded,
+structural Markdown for eligible stored resources without executing shortcodes
+or dynamic blocks. RAG chunks use the same structure-preserving representation,
+while summaries continue to use compact visible text. LLMS inventory is traversed in bounded,
 non-caching post batches rather than loaded as one corpus. Core applies a 32 MiB
 full-corpus encoded-response ceiling and a 4 MiB summary ceiling, with additional
 PHP memory headroom checks. It never emits a truncated entry or labels a partial
@@ -1013,9 +1016,34 @@ Each saved report records:
 - the active post and page measurement rules;
 - resource ID, type, title, URL, modified time, word count, age, media
   presence, indexability evidence, and content fingerprint;
-- findings for thin content, configured freshness intervals, and configured
-  media review; and
+- findings for thin content, configured freshness intervals, configured media
+  review, potential orphans, homepage reachability, and click depth; and
 - the prior completed report used for comparison.
+
+Internal-link findings use a local, repeatable graph rather than crawling the
+public site. The graph matches links in stored post content to the report's
+published-resource inventory and adds targets from assigned classic menus and
+navigation blocks referenced by the active theme templates. Self-links and
+fragments do not count as incoming links. A static front page starts at depth
+zero; assigned navigation targets are estimated at one click. Breadth-first
+search then records the shortest stored path. Cybermaps reports:
+
+- a **potential orphan** when no other stored resource or assigned navigation
+  item points to an indexable resource;
+- **no homepage path** when incoming links exist but the local graph cannot
+  reach the resource from the homepage or assigned navigation; and
+- **three-plus clicks deep** when the shortest local path is at least three
+  clicks.
+
+The local graph does not infer links from sitemaps, URL shape, page-parent
+relationships, rendered shortcodes, widgets, or remote frontend output. Report
+metadata states the number of resources, unique content edges, navigation
+references, and whether homepage depth was available. Analysis is capped at
+10,000 resources and 100,000 unique edges. If those bounds, oversized stored
+content, or navigation traversal prevent a complete scan, Cybermaps records the
+coverage limitation and suppresses all internal-link findings. Link findings
+participate in baseline trends only when both reports used the same complete
+analysis version; other finding categories remain comparable with older runs.
 
 Thin-content, freshness, and media findings apply only to public,
 search-indexable resources. Sitemap-only, AI-only, and Content Discovery Strategy
@@ -1026,7 +1054,7 @@ indexability decision and reasons.
 
 The report workspace shows total resources and findings, finding categories,
 and added, resolved, and persisting findings since the baseline. Focused action
-lists isolate thin-content, freshness, and media work. Exports are available as
+lists isolate thin-content, freshness, media, orphan, reachability, and depth work. Exports are available as
 printable themed HTML, spreadsheet-safe UTF-8 CSV, and JSON, with optional
 agency name, URL, logo, site-name override, and a choice of Swiss, Minimal,
 Monochrome, Midnight, or Cyberbrand presentation.

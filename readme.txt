@@ -3,7 +3,7 @@ Contributors: oreshkin
 Tags: sitemap, llms-txt, technical-seo, content-audit, indexnow
 Requires at least: 7.1
 Tested up to: 7.1
-Stable tag: 7.5.0
+Stable tag: 7.5.1
 Requires PHP: 8.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -34,12 +34,8 @@ No AI account required. Full output: up to 32 MiB.
 
 = Flexible, verified delivery =
 
-Static modes are `off`, default `well_known`, and `all`. Dynamic routes retain
-CORS/validators; static files use ownership hashes and bounded safe repair.
-
-Supports Redis/Memcached, isolated APCu, LSCWP, and opt-in Varnish PURGE.
-
-Debugging exports redacted support bundles; Advanced manages caches and tokens.
+Static modes are `off`, default `well_known`, and `all`, with ownership-safe
+repair. Supports object caches, APCu, LSCWP, and opt-in Varnish PURGE.
 
 = Standards and controlled agent access =
 
@@ -116,6 +112,10 @@ Persistent settings, tables, and post metadata remain after uninstall unless
 **Uninstall Cleanup** was enabled beforehand.
 
 == Changelog ==
+
+= 7.5.1 =
+* Added local orphan, homepage-path, and three-click-depth content findings.
+* Preserved headings and links across Markdown output.
 
 = 7.5.0 =
 * Added three-step Quick Setup with site presets, basic identity, and a settings receipt.
@@ -200,6 +200,9 @@ Persistent settings, tables, and post metadata remain after uninstall unless
 Earlier release history is included in `changelog.txt`.
 
 == Upgrade Notice ==
+
+= 7.5.1 =
+Reports now find potential orphans and deep pages from stored links and menus.
 
 = 7.5.0 =
 Quick Setup now applies a three-step preset while preserving advanced configuration.

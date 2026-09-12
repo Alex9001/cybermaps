@@ -108,9 +108,7 @@ final class MarkdownCollection {
 	}
 
 	private function summary( object $post ): string {
-		$text = ( new VisibleTextExtractor() )->from_post( $post );
-		$text = preg_replace( '/\s+/u', ' ', trim( $text ) ) ?? trim( $text );
-		return '' === $text ? '' : wp_trim_words( $text, self::SUMMARY_WORDS, '…' );
+		return ( new VisibleTextExtractor() )->summary( $post, self::SUMMARY_WORDS );
 	}
 
 	private function append_navigation( string $output, string $previous_url, string $next_url ): string {
