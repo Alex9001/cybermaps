@@ -139,8 +139,7 @@ class SettingsAjax {
 		header( 'Content-Type: ' . $mime . '; charset=utf-8' );
 		header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
 		header( 'Content-Length: ' . strlen( $content ) );
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Deliberate download response.
-		echo $content;
+		\Cybermaps\Core\ProtocolOutput::emit( $content, $include_values ? 'json' : 'text' );
 		exit;
 	}
 

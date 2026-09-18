@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Cybermaps\Discovery;
 
+use Cybermaps\Core\ProtocolOutput;
 use Cybermaps\Discovery\LLMSTLDR\TokenBudget;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -31,8 +32,7 @@ final class MarkdownResponder {
 
 		Integrity::send_headers( $content, HOUR_IN_SECONDS, $modified );
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Literal Markdown protocol body.
-			echo $content;
+			ProtocolOutput::emit( $content, 'text' );
 		}
 		exit;
 	}
@@ -67,7 +67,7 @@ final class MarkdownResponder {
 	 * Emit a complete problem response for an oversized representation.
 	 */
 	public function send_size_limit_error( PublicationSizeLimitException $error, bool $negotiated ): never {
-		$payload = wp_json_encode(
+		$payload = ProtocolOutput::json(
 			array(
 				'type'        => 'about:blank',
 				'title'       => __( 'Markdown representation exceeds the safe output limit.', 'cybermaps' ),
@@ -75,12 +75,8 @@ final class MarkdownResponder {
 				'detail'      => $error->getMessage(),
 				'publication' => $error->get_publication(),
 				'max_bytes'   => $error->get_maximum_bytes(),
-			),
-			JSON_UNESCAPED_SLASHES
+			)
 		);
-		if ( ! is_string( $payload ) ) {
-			$payload = '{"title":"Markdown representation exceeds the safe output limit.","status":507}';
-		}
 
 		if ( $negotiated ) {
 			self::add_vary_accept();
@@ -93,8 +89,7 @@ final class MarkdownResponder {
 		header( "Content-Security-Policy: default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'" );
 		header( 'Content-Type: application/problem+json; charset=utf-8' );
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- RFC 9457 JSON protocol body.
-			echo $payload;
+			ProtocolOutput::emit( $payload, 'json' );
 		}
 		exit;
 	}

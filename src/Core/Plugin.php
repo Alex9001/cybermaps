@@ -363,8 +363,22 @@ class Plugin {
 	 * @param mixed $location Redirect destination.
 	 */
 	public static function preserve_settings_tab_query( $location ): string {
-		$location = (string) $location;
-		// phpcs:disable WordPress.Security.NonceVerification.Missing -- no state change; preserves tab fragment on redirect
+		$location       = (string) $location;
+		$request_method = isset( $_SERVER['REQUEST_METHOD'] ) && is_scalar( $_SERVER['REQUEST_METHOD'] )
+			? strtoupper( sanitize_text_field( wp_unslash( (string) $_SERVER['REQUEST_METHOD'] ) ) )
+			: '';
+		$nonce          = isset( $_POST['_wpnonce'] ) && is_scalar( $_POST['_wpnonce'] )
+			? sanitize_text_field( wp_unslash( (string) $_POST['_wpnonce'] ) )
+			: '';
+		if (
+			'POST' !== $request_method
+			|| ! current_user_can( 'manage_options' )
+			|| '' === $nonce
+			|| ! wp_verify_nonce( $nonce, 'cybermaps_options_group-options' )
+		) {
+			return $location;
+		}
+
 		if (
 			! str_contains( $location, 'page=cybermaps-settings' )
 			|| empty( $_POST['cybermaps_active_tab'] )
@@ -374,7 +388,6 @@ class Plugin {
 		}
 
 		$tab = sanitize_key( wp_unslash( (string) $_POST['cybermaps_active_tab'] ) );
-		// phpcs:enable
 		if (
 			! in_array( $tab, array( 'sitemaps', 'shortcode', 'ai', 'schema', 'review', 'advanced' ), true )
 		) {

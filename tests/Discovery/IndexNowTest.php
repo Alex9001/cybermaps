@@ -466,7 +466,7 @@ final class IndexNowQueueTestWpdb {
 			);
 		}
 		if ( str_contains( $query, 'id IN' ) && str_contains( $query, 'SELECT url' ) ) {
-			$ids = $this->ids_from_query( $query );
+			$ids = array_map( 'intval', $this->values_from_in_clause( $query, $args, 'id' ) );
 			return array_map(
 				static fn( array $row ): array => array( 'url' => $row['url'] ),
 				$this->sort_rows(
@@ -479,7 +479,7 @@ final class IndexNowQueueTestWpdb {
 		}
 		if ( str_contains( $query, 'SELECT * FROM' ) && str_contains( $query, 'claim_token' ) ) {
 			$token  = (string) ( $args[2] ?? '' );
-			$hashes = $this->hashes_from_query( $query );
+			$hashes = array_map( 'strval', $this->values_from_in_clause( $query, $args, 'url_hash' ) );
 			return array_values(
 				array_filter(
 					$this->rows,
@@ -536,7 +536,7 @@ final class IndexNowQueueTestWpdb {
 			return 0;
 		}
 		if ( str_starts_with( $query, 'UPDATE' ) && str_contains( $query, 'claim_token' ) && str_contains( $query, 'id IN' ) ) {
-			$ids     = $this->ids_from_query( $query );
+			$ids     = array_map( 'intval', $this->values_from_in_clause( $query, $args, 'id' ) );
 			$claimed = 0;
 			foreach ( $this->rows as &$row ) {
 				if ( in_array( (int) $row['id'], $ids, true ) && ( 'queued' === $row['state'] || ( 'claimed' === $row['state'] && (int) $row['lease_expires_at'] <= time() ) ) ) {
@@ -597,7 +597,7 @@ final class IndexNowQueueTestWpdb {
 		}
 		if ( str_starts_with( $query, 'DELETE FROM' ) && str_contains( $query, 'claim_token' ) ) {
 			$token            = (string) ( $args[1] ?? '' );
-			$hashes           = $this->hashes_from_query( $query );
+			$hashes           = array_map( 'strval', $this->values_from_in_clause( $query, $args, 'url_hash' ) );
 			$require_no_again = str_contains( $query, 'queued_again = 0' );
 			$deleted          = 0;
 			foreach ( $this->rows as $id => $row ) {
@@ -687,22 +687,21 @@ final class IndexNowQueueTestWpdb {
 		return $rows;
 	}
 
-	/** @return int[] */
-	private function ids_from_query( string $query ): array {
-		if ( 1 !== preg_match( '/id IN \\(([^)]+)\\)/', $query, $matches ) ) {
+	/** @param array<int,mixed> $args @return array<int,mixed> */
+	private function values_from_in_clause( string $query, array $args, string $column ): array {
+		if ( 1 !== preg_match( '/' . preg_quote( $column, '/' ) . ' IN \\(([^)]+)\\)/', $query, $matches, PREG_OFFSET_CAPTURE ) ) {
 			return array();
 		}
-		return array_map( 'intval', array_filter( explode( ',', $matches[1] ) ) );
-	}
-
-	/** @return string[] */
-	private function hashes_from_query( string $query ): array {
-		if ( 1 !== preg_match( '/url_hash IN \\(([^)]+)\\)/', $query, $matches ) ) {
-			return array();
+		$clause = $matches[1][0];
+		if ( str_contains( $clause, '%' ) ) {
+			$prefix = substr( $query, 0, $matches[1][1] );
+			preg_match_all( '/%(?:d|f|i|s)/', $prefix, $before );
+			preg_match_all( '/%(?:d|f|i|s)/', $clause, $inside );
+			return array_slice( $args, count( $before[0] ), count( $inside[0] ) );
 		}
 		return array_map(
-			static fn( string $hash ): string => trim( $hash, " '" ),
-			array_filter( explode( ',', $matches[1] ) )
+			static fn( string $value ): string => trim( $value, " '" ),
+			array_filter( explode( ',', $clause ) )
 		);
 	}
 }

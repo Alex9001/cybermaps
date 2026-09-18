@@ -5,6 +5,7 @@ namespace Cybermaps\Discovery;
 
 use Cybermaps\Core\CacheManager;
 use Cybermaps\Core\BuildUnavailableException;
+use Cybermaps\Core\ProtocolOutput;
 use Cybermaps\Discovery\LLMSTLDR\LLMSTLDRGenerator;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -60,8 +61,7 @@ class LLMSTLDR {
 		Integrity::send_headers( $output );
 		header( 'Content-Type: text/plain; charset=utf-8' );
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text protocol body.
-			echo $output;
+			ProtocolOutput::emit( $output, 'text' );
 		}
 		exit;
 	}

@@ -351,7 +351,7 @@ class Logs {
 		header( 'X-Content-Type-Options: nosniff' );
 		header( 'Content-Type: text/csv; charset=utf-8' );
 		header( 'Content-Disposition: attachment; filename="cybermaps-crawler-logs-' . current_time( 'Y-m-d-His' ) . '.csv"' );
-		echo "\xEF\xBB\xBF"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- UTF-8 CSV BOM.
+		\Cybermaps\Core\ProtocolOutput::emit( "\xEF\xBB\xBF", 'csv' );
 		self::output_csv_row( self::export_header_fields() );
 
 		$before_id = null;
@@ -534,7 +534,7 @@ class Logs {
 			$fields
 		);
 
-		echo implode( ',', $escaped ) . "\r\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Deliberate CSV response.
+		\Cybermaps\Core\ProtocolOutput::emit( implode( ',', $escaped ) . "\r\n", 'csv' );
 	}
 
 	public function cleanup_old_logs(): void {

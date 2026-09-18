@@ -20,7 +20,7 @@ final class ContentAuditActionContractTest extends \WP_UnitTestCase {
 			'admin-post.php?action=cybermaps_run_content_audit',
 			$tab_source
 		);
-		$this->assertStringContainsString( "'POST' !== \$request_method", $manager_source );
+		$this->assertStringContainsString( "self::require_request_method( 'POST' )", $manager_source );
 		$this->assertStringContainsString(
 			"check_admin_referer( 'cybermaps_content_audit', 'cybermaps_content_audit_nonce' )",
 			$manager_source
@@ -72,6 +72,10 @@ final class ContentAuditActionContractTest extends \WP_UnitTestCase {
 		$this->assertStringContainsString( 'cybermaps_delete_nonce', $tab_source );
 		$this->assertStringContainsString( 'cybermaps_delete_content_audit_', $manager_source );
 		$this->assertStringContainsString( "is_scalar( \$_POST['run_id'] )", $manager_source );
-		$this->assertGreaterThanOrEqual( 2, substr_count( $manager_source, "'POST' !== \$request_method" ) );
+		$this->assertGreaterThanOrEqual( 2, substr_count( $manager_source, "self::require_request_method( 'POST' )" ) );
+		$this->assertStringContainsString(
+			"check_admin_referer( 'cybermaps_delete_content_audit', 'cybermaps_delete_authorization' )",
+			$manager_source
+		);
 	}
 }

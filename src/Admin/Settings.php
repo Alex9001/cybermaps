@@ -477,14 +477,6 @@ class Settings {
 	 * @return array{intent_id:string,nonce:string,confirmation:string,return_tab:string}
 	 */
 	private static function static_intent_request(): array {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die(
-				esc_html__( 'Unauthorized', 'cybermaps' ),
-				'',
-				array( 'response' => 403 )
-			);
-		}
-
 		$request_method = isset( $_SERVER['REQUEST_METHOD'] ) && is_scalar( $_SERVER['REQUEST_METHOD'] )
 			? strtoupper( sanitize_text_field( wp_unslash( (string) $_SERVER['REQUEST_METHOD'] ) ) )
 			: '';
@@ -495,8 +487,15 @@ class Settings {
 				array( 'response' => 405 )
 			);
 		}
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die(
+				esc_html__( 'Unauthorized', 'cybermaps' ),
+				'',
+				array( 'response' => 403 )
+			);
+		}
+		check_admin_referer( 'cybermaps_resolve_static_intent', 'cybermaps_static_intent_authorization' );
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- The intent ID selects the action-bound nonce verified immediately below.
 		$intent_id = isset( $_POST['cybermaps_static_intent_id'] ) && is_scalar( $_POST['cybermaps_static_intent_id'] )
 			? sanitize_text_field( wp_unslash( (string) $_POST['cybermaps_static_intent_id'] ) )
 			: '';
@@ -505,7 +504,6 @@ class Settings {
 			'cybermaps_static_intent_nonce'
 		);
 
-		// phpcs:disable WordPress.Security.NonceVerification.Missing -- The exact intent-bound nonce was verified immediately above.
 		$nonce        = isset( $_POST['cybermaps_static_intent_nonce'] ) && is_scalar( $_POST['cybermaps_static_intent_nonce'] )
 			? sanitize_text_field( wp_unslash( (string) $_POST['cybermaps_static_intent_nonce'] ) )
 			: '';
@@ -515,7 +513,6 @@ class Settings {
 		$return_tab   = isset( $_POST['cybermaps_return_tab'] ) && is_scalar( $_POST['cybermaps_return_tab'] )
 			? sanitize_key( wp_unslash( (string) $_POST['cybermaps_return_tab'] ) )
 			: 'advanced';
-		// phpcs:enable WordPress.Security.NonceVerification.Missing
 		if ( ! in_array( $return_tab, array( 'dashboard', 'sitemaps', 'shortcode', 'ai', 'schema', 'review', 'advanced' ), true ) ) {
 			$return_tab = 'advanced';
 		}

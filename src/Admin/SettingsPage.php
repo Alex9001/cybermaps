@@ -597,6 +597,7 @@ class SettingsPage {
 					</p>
 					<p><?php esc_html_e( 'Stop or quiesce every Cybermaps cron, web, and CLI worker first. This confirmation is manual because WordPress has no portable atomic transaction spanning the database and filesystem.', 'cybermaps' ); ?></p>
 					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+						<?php wp_nonce_field( 'cybermaps_resolve_static_intent', 'cybermaps_static_intent_authorization' ); ?>
 						<input type="hidden" name="action" value="cybermaps_resolve_static_intent">
 						<input type="hidden" name="cybermaps_return_tab" value="<?php echo esc_attr( $active_tab ); ?>">
 						<input type="hidden" name="cybermaps_static_intent_id" value="<?php echo esc_attr( (string) ( $status['intent_id'] ?? '' ) ); ?>">

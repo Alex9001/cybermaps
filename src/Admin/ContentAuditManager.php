@@ -9,6 +9,7 @@ use Cybermaps\Audit\AuditReadAPI;
 use Cybermaps\Audit\AuditRunRepository;
 use Cybermaps\Audit\ContentAuditService;
 use Cybermaps\Audit\DiscoveryReportExporter;
+use Cybermaps\Core\ProtocolOutput;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -39,18 +40,9 @@ final class ContentAuditManager {
 	}
 
 	public function handle_run(): void {
+		self::require_request_method( 'POST' );
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'Unauthorized', 'cybermaps' ) );
-		}
-		$request_method = isset( $_SERVER['REQUEST_METHOD'] )
-			? strtoupper( sanitize_text_field( wp_unslash( (string) $_SERVER['REQUEST_METHOD'] ) ) )
-			: '';
-		if ( 'POST' !== $request_method ) {
-			wp_die(
-				esc_html__( 'Invalid request method.', 'cybermaps' ),
-				'',
-				array( 'response' => 405 )
-			);
 		}
 		check_admin_referer( 'cybermaps_content_audit', 'cybermaps_content_audit_nonce' );
 
@@ -64,6 +56,7 @@ final class ContentAuditManager {
 							'page'                  => 'cybermaps-settings',
 							'tab'                   => 'review',
 							'cybermaps_report_busy' => '1',
+							'_wpnonce'              => wp_create_nonce( 'cybermaps_content_review_state' ),
 						),
 						admin_url( 'admin.php' )
 					)
@@ -87,6 +80,7 @@ final class ContentAuditManager {
 					'page'             => 'cybermaps-settings',
 					'tab'              => 'review',
 					'cybermaps_run_id' => $run_id,
+					'_wpnonce'         => wp_create_nonce( 'cybermaps_content_review_state' ),
 				),
 				admin_url( 'admin.php' )
 			)
@@ -95,22 +89,12 @@ final class ContentAuditManager {
 	}
 
 	public function handle_delete(): void {
+		self::require_request_method( 'POST' );
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'Unauthorized', 'cybermaps' ) );
 		}
+		check_admin_referer( 'cybermaps_delete_content_audit', 'cybermaps_delete_authorization' );
 
-		$request_method = isset( $_SERVER['REQUEST_METHOD'] )
-			? strtoupper( sanitize_text_field( wp_unslash( (string) $_SERVER['REQUEST_METHOD'] ) ) )
-			: '';
-		if ( 'POST' !== $request_method ) {
-			wp_die(
-				esc_html__( 'Invalid request method.', 'cybermaps' ),
-				'',
-				array( 'response' => 405 )
-			);
-		}
-
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- The report-specific nonce is verified immediately below.
 		$run_id = isset( $_POST['run_id'] ) && is_scalar( $_POST['run_id'] )
 			? absint( wp_unslash( (string) $_POST['run_id'] ) )
 			: 0;
@@ -129,6 +113,7 @@ final class ContentAuditManager {
 					'page'                     => 'cybermaps-settings',
 					'tab'                      => 'review',
 					'cybermaps_report_deleted' => $run_id,
+					'_wpnonce'                 => wp_create_nonce( 'cybermaps_content_review_state' ),
 				),
 				admin_url( 'admin.php' )
 			)
@@ -137,10 +122,11 @@ final class ContentAuditManager {
 	}
 
 	public function handle_export(): void {
-		check_admin_referer( 'cybermaps_content_audit' );
+		self::require_request_method( 'GET' );
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'Unauthorized', 'cybermaps' ) );
 		}
+		check_admin_referer( 'cybermaps_content_audit' );
 
 		$request    = self::export_request();
 		$repository = new AuditRunRepository();
@@ -260,19 +246,16 @@ final class ContentAuditManager {
 			header( 'Content-Type: text/csv; charset=utf-8' );
 			header( 'Content-Disposition: attachment; filename="' . $filename_base . '.csv"' );
 			foreach ( $exporter->csv_chunks( $run ) as $chunk ) {
-				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Deliberate, spreadsheet-safe CSV response.
-				echo $chunk;
+				ProtocolOutput::emit( $chunk, 'csv' );
 			}
 		} elseif ( 'json' === $format ) {
 			header( 'Content-Type: application/json; charset=utf-8' );
 			header( 'Content-Disposition: attachment; filename="' . $filename_base . '.json"' );
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Deliberate JSON response.
-			echo $exporter->json( $run );
+			ProtocolOutput::emit( $exporter->json( $run ), 'json' );
 		} else {
 			header( 'Content-Type: text/html; charset=utf-8' );
 			header( 'Content-Disposition: inline; filename="' . $filename_base . '.html"' );
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Exporter escapes every dynamic HTML field.
-			echo $exporter->html( $run );
+			ProtocolOutput::emit( $exporter->html( $run ), 'html' );
 		}
 		exit;
 	}
@@ -294,10 +277,11 @@ final class ContentAuditManager {
 	}
 
 	public function handle_discovery_export(): void {
-		check_admin_referer( 'cybermaps_reports' );
+		self::require_request_method( 'GET' );
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'Unauthorized', 'cybermaps' ) );
 		}
+		check_admin_referer( 'cybermaps_reports' );
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Verified above.
 		$format = isset( $_GET['format'] ) && is_scalar( $_GET['format'] )
@@ -320,13 +304,11 @@ final class ContentAuditManager {
 		if ( 'json' === $format ) {
 			header( 'Content-Type: application/json; charset=utf-8' );
 			header( 'Content-Disposition: attachment; filename="' . $filename . '.json"' );
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Deliberate JSON response.
-			echo $exporter->json( $status );
+			ProtocolOutput::emit( $exporter->json( $status ), 'json' );
 		} else {
 			header( 'Content-Type: text/html; charset=utf-8' );
 			header( 'Content-Disposition: inline; filename="' . $filename . '.html"' );
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Exporter escapes every dynamic HTML field.
-			echo $exporter->html( $status );
+			ProtocolOutput::emit( $exporter->html( $status ), 'html' );
 		}
 		exit;
 	}
@@ -357,5 +339,19 @@ final class ContentAuditManager {
 			array( 'response' => 413 )
 		);
 		exit;
+	}
+
+	private static function require_request_method( string $expected ): void {
+		$request_method = isset( $_SERVER['REQUEST_METHOD'] ) && is_scalar( $_SERVER['REQUEST_METHOD'] )
+			? strtoupper( sanitize_text_field( wp_unslash( (string) $_SERVER['REQUEST_METHOD'] ) ) )
+			: '';
+		if ( $expected === $request_method ) {
+			return;
+		}
+		wp_die(
+			esc_html__( 'Invalid request method.', 'cybermaps' ),
+			'',
+			array( 'response' => 405 )
+		);
 	}
 }

@@ -85,10 +85,13 @@ final class TimeSensitivePublicationTest extends \WP_UnitTestCase {
 		);
 		$this->assertFileExists( ABSPATH . 'discovery/chunks/41.json' );
 		$this->assertFileExists( ABSPATH . 'ai-sitemap.xml' );
-		$this->assertStringContainsString(
-			'"freshness": "established"',
-			(string) file_get_contents( ABSPATH . 'discovery/chunks/41.json' )
+		$chunk = json_decode(
+			(string) file_get_contents( ABSPATH . 'discovery/chunks/41.json' ),
+			true,
+			512,
+			JSON_THROW_ON_ERROR
 		);
+		$this->assertSame( 'established', $chunk['metadata']['freshness'] );
 		$this->assertStringContainsString(
 			'<ai:freshness>established</ai:freshness>',
 			(string) file_get_contents( ABSPATH . 'ai-sitemap.xml' )

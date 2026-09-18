@@ -893,94 +893,101 @@ KEY severity (severity)
 			);
 		}
 
-		$current_filter  = $include_internal_links
-			? ''
-			: " AND current_finding.finding_key NOT IN ('potential_orphan','no_homepage_path','deeply_linked')";
-		$baseline_filter = $include_internal_links
-			? ''
-			: " AND baseline_finding.finding_key NOT IN ('potential_orphan','no_homepage_path','deeply_linked')";
-		$added_sql       = 'SELECT COUNT(*)
-			FROM %i current_finding
-			INNER JOIN %i current_resource
-				ON current_resource.id = current_finding.resource_id
-				AND current_resource.run_id = current_finding.run_id
-			LEFT JOIN %i baseline_resource
-				ON baseline_resource.run_id = %d
-				AND baseline_resource.resource_key = current_resource.resource_key
-			LEFT JOIN %i baseline_finding
-				ON baseline_finding.run_id = %d
-				AND baseline_finding.resource_id = baseline_resource.id
-				AND baseline_finding.finding_key = current_finding.finding_key
-			WHERE current_finding.run_id = %d
-			AND baseline_finding.id IS NULL' . $current_filter;
-		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- SQL is assembled only from the fixed internal-link finding list above; identifiers and values remain placeholders.
-		$added_query      = $wpdb->prepare(
-			$added_sql,
-			$findings,
-			$resources,
-			$resources,
-			$baseline_run_id,
-			$findings,
-			$baseline_run_id,
-			$run_id
-		);
-		$resolved_sql     = 'SELECT COUNT(*)
-			FROM %i baseline_finding
-			INNER JOIN %i baseline_resource
-				ON baseline_resource.id = baseline_finding.resource_id
-				AND baseline_resource.run_id = baseline_finding.run_id
-			LEFT JOIN %i current_resource
-				ON current_resource.run_id = %d
-				AND current_resource.resource_key = baseline_resource.resource_key
-			LEFT JOIN %i current_finding
-				ON current_finding.run_id = %d
-				AND current_finding.resource_id = current_resource.id
-				AND current_finding.finding_key = baseline_finding.finding_key
-			WHERE baseline_finding.run_id = %d
-			AND current_finding.id IS NULL' . $baseline_filter;
-		$resolved_query   = $wpdb->prepare(
-			$resolved_sql,
-			$findings,
-			$resources,
-			$resources,
-			$run_id,
-			$findings,
-			$run_id,
-			$baseline_run_id
-		);
-		$persisting_sql   = 'SELECT COUNT(*)
-			FROM %i current_finding
-			INNER JOIN %i current_resource
-				ON current_resource.id = current_finding.resource_id
-				AND current_resource.run_id = current_finding.run_id
-			INNER JOIN %i baseline_resource
-				ON baseline_resource.run_id = %d
-				AND baseline_resource.resource_key = current_resource.resource_key
-			INNER JOIN %i baseline_finding
-				ON baseline_finding.run_id = %d
-				AND baseline_finding.resource_id = baseline_resource.id
-				AND baseline_finding.finding_key = current_finding.finding_key
-			WHERE current_finding.run_id = %d' . $current_filter;
-		$persisting_query = $wpdb->prepare(
-			$persisting_sql,
-			$findings,
-			$resources,
-			$resources,
-			$baseline_run_id,
-			$findings,
-			$baseline_run_id,
-			$run_id
-		);
 		$this->reset_database_error();
-		$added = (int) $wpdb->get_var( $added_query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- The complete identifier-and-value statement is prepared above.
+		$added = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT COUNT(*)
+				FROM %i current_finding
+				INNER JOIN %i current_resource
+					ON current_resource.id = current_finding.resource_id
+					AND current_resource.run_id = current_finding.run_id
+				LEFT JOIN %i baseline_resource
+					ON baseline_resource.run_id = %d
+					AND baseline_resource.resource_key = current_resource.resource_key
+				LEFT JOIN %i baseline_finding
+					ON baseline_finding.run_id = %d
+					AND baseline_finding.resource_id = baseline_resource.id
+					AND baseline_finding.finding_key = current_finding.finding_key
+				WHERE current_finding.run_id = %d
+				AND baseline_finding.id IS NULL
+				AND (%d = 1 OR current_finding.finding_key NOT IN (%s, %s, %s))',
+				$findings,
+				$resources,
+				$resources,
+				$baseline_run_id,
+				$findings,
+				$baseline_run_id,
+				$run_id,
+				(int) $include_internal_links,
+				'potential_orphan',
+				'no_homepage_path',
+				'deeply_linked'
+			)
+		);
 		$this->assert_database_read_succeeded();
 		$this->reset_database_error();
-		$resolved = (int) $wpdb->get_var( $resolved_query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- The complete identifier-and-value statement is prepared above.
+		$resolved = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT COUNT(*)
+				FROM %i baseline_finding
+				INNER JOIN %i baseline_resource
+					ON baseline_resource.id = baseline_finding.resource_id
+					AND baseline_resource.run_id = baseline_finding.run_id
+				LEFT JOIN %i current_resource
+					ON current_resource.run_id = %d
+					AND current_resource.resource_key = baseline_resource.resource_key
+				LEFT JOIN %i current_finding
+					ON current_finding.run_id = %d
+					AND current_finding.resource_id = current_resource.id
+					AND current_finding.finding_key = baseline_finding.finding_key
+				WHERE baseline_finding.run_id = %d
+				AND current_finding.id IS NULL
+				AND (%d = 1 OR baseline_finding.finding_key NOT IN (%s, %s, %s))',
+				$findings,
+				$resources,
+				$resources,
+				$run_id,
+				$findings,
+				$run_id,
+				$baseline_run_id,
+				(int) $include_internal_links,
+				'potential_orphan',
+				'no_homepage_path',
+				'deeply_linked'
+			)
+		);
 		$this->assert_database_read_succeeded();
 		$this->reset_database_error();
-		$persisting = (int) $wpdb->get_var( $persisting_query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- The complete identifier-and-value statement is prepared above.
+		$persisting = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT COUNT(*)
+				FROM %i current_finding
+				INNER JOIN %i current_resource
+					ON current_resource.id = current_finding.resource_id
+					AND current_resource.run_id = current_finding.run_id
+				INNER JOIN %i baseline_resource
+					ON baseline_resource.run_id = %d
+					AND baseline_resource.resource_key = current_resource.resource_key
+				INNER JOIN %i baseline_finding
+					ON baseline_finding.run_id = %d
+					AND baseline_finding.resource_id = baseline_resource.id
+					AND baseline_finding.finding_key = current_finding.finding_key
+				WHERE current_finding.run_id = %d
+				AND (%d = 1 OR current_finding.finding_key NOT IN (%s, %s, %s))',
+				$findings,
+				$resources,
+				$resources,
+				$baseline_run_id,
+				$findings,
+				$baseline_run_id,
+				$run_id,
+				(int) $include_internal_links,
+				'potential_orphan',
+				'no_homepage_path',
+				'deeply_linked'
+			)
+		);
 		$this->assert_database_read_succeeded();
-		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 		// phpcs:enable
 
 		return array(

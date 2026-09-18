@@ -58,7 +58,8 @@ final class ADPNews {
 			header( 'X-Total-Records: ' . count( $this->get_articles() ) );
 		}
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
-			echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Deliberate protocol response.
+			$protocol = in_array( $endpoint_id, array( 'adp_news_speakable', 'adp_news_changelog' ), true ) ? 'json' : 'text';
+			\Cybermaps\Core\ProtocolOutput::emit( $output, $protocol );
 		}
 		exit;
 	}
@@ -246,7 +247,8 @@ final class ADPNews {
 	}
 
 	private function encode_json( mixed $data, bool $pretty = true ): string {
-		$output = wp_json_encode( $data, JSON_UNESCAPED_SLASHES | ( $pretty ? JSON_PRETTY_PRINT : 0 ) );
+		unset( $pretty );
+		$output = wp_json_encode( $data );
 		if ( ! is_string( $output ) ) {
 			throw new \RuntimeException(
 				__( 'An ADP news publication could not be encoded as JSON.', 'cybermaps' ) // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception becomes escaped status data.

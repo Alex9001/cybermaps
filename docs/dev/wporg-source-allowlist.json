@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "request_boundary_files": [
+    "src/Admin/AIDiscoveryStatus.php",
+    "src/Admin/CloudflareRuleManager.php",
+    "src/Admin/ContentAuditManager.php",
+    "src/Admin/CrawlerAnalyticsRecorder.php",
+    "src/Admin/DiscoveryAnalytics.php",
+    "src/Admin/DiscoveryAuditor.php",
+    "src/Admin/DiscoveryScope.php",
+    "src/Admin/EdgeOptimizationController.php",
+    "src/Admin/IdentityHub.php",
+    "src/Admin/InternationalPanel.php",
+    "src/Admin/LocalDeliveryController.php",
+    "src/Admin/Logs.php",
+    "src/Admin/MediaAuditor.php",
+    "src/Admin/NetworkSettings.php",
+    "src/Admin/Settings.php",
+    "src/Admin/Settings/Sanitizers/SettingsSanitizer.php",
+    "src/Admin/Settings/SettingsAjax.php",
+    "src/Admin/Settings/SettingsAssets.php",
+    "src/Admin/Settings/Tabs/ContentReview.php",
+    "src/Admin/SettingsPage.php",
+    "src/Admin/SetupWizard/SetupWizardController.php",
+    "src/Admin/SystemStatus.php",
+    "src/Admin/SystemStatusCollector.php",
+    "src/Core/ClientIPResolver.php",
+    "src/Core/Plugin.php",
+    "src/Core/ReadOnlyRequest.php",
+    "src/Core/RequestInput.php",
+    "src/Core/URLManager.php",
+    "src/Discovery/APICatalog.php",
+    "src/Discovery/IndexNow.php",
+    "src/Discovery/Integrity.php",
+    "src/Discovery/ManagedHtaccess.php",
+    "src/Discovery/MarkdownAlternate.php",
+    "src/Discovery/MarkdownNegotiation.php",
+    "src/Discovery/NotFoundSuggestions.php",
+    "src/Discovery/Robots.php",
+    "src/Discovery/Throttler.php",
+    "src/Integration/RestResponseGuard.php",
+    "src/MCP/OAuth/DeviceAuthorizationPage.php",
+    "src/MCP/OAuth/OAuthMetadataPublication.php",
+    "src/Sitemap/Orchestrator.php"
+  ],
+  "high_risk_phpcs": {
+    "count": 318,
+    "sha256": "c07a238c24acbdc5122ac9b7ece88a2075f6d9376ba8aabafaf2611b0570a27d"
+  },
+  "annotation_blind_phpcs": {
+    "count": 195,
+    "sha256": "61c042923229e78c55bcaff29c6002d096b8f3cd9a92547034884fc482c57b51"
+  },
+  "protocol_output_exceptions": [
+    {
+      "path": "src/Core/ProtocolOutput.php",
+      "source": "WordPress.Security.EscapeOutput.OutputNotEscaped",
+      "line": 110,
+      "sha256": "d52b9659b52522d1b9db5d16c507961bb6e34ee9816dfa96322d268a478901e8"
+    }
+  ]
+}

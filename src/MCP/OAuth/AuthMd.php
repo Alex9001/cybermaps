@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Cybermaps\MCP\OAuth;
 
+use Cybermaps\Core\ProtocolOutput;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -60,8 +62,7 @@ final class AuthMd {
 		nocache_headers();
 		header( 'Content-Type: text/markdown; charset=utf-8' );
 		header( 'X-Robots-Tag: noindex, follow' );
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- The handler generates a fixed Markdown protocol document with escaped URL construction.
-		echo $this->get_content();
+		ProtocolOutput::emit( $this->get_content(), 'text' );
 		exit;
 	}
 }

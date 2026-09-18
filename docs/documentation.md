@@ -1,6 +1,6 @@
 # Cybermaps — Technical Documentation
 
-> Version 7.5.1 · PHP 8.2 · WordPress 7.1
+> Version 7.5.2 · PHP 8.2 · WordPress 7.0
 
 Cybermaps is a fast sitemap and AI-discovery plugin for WordPress.
 It combines XML, RSS, and HTML sitemap publishing with compact machine-readable
@@ -939,7 +939,11 @@ also report active integration settings, relevant runtime constants, and the
 WordPress hooks or filters that are active or unavailable in the current
 installation. Public extension points remain WordPress-native, including
 `cybermaps_static_publication_root` for alternate static roots and
-`cybermaps_client_ip_resolution` for validated proxy integrations.
+`cybermaps_client_ip_resolution` for validated proxy integrations. Its second
+argument is a bounded, sanitized allowlist containing only valid values from
+`REMOTE_ADDR`, `HTTP_CF_CONNECTING_IP`, `HTTP_FORWARDED`,
+`HTTP_X_FORWARDED_FOR`, and `HTTP_X_REAL_IP`; it is never the complete server
+environment.
 
 ## 7. Discovery Analytics and privacy
 

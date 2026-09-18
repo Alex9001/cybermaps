@@ -28,11 +28,6 @@ final class AtomicMinuteCounter {
 			return $table_count;
 		}
 
-		$table_count = self::increment_transient_option( $cache_key, $ttl_seconds );
-		if ( null !== $table_count ) {
-			return $table_count;
-		}
-
 		$current = max( 0, (int) \get_transient( $cache_key ) ) + 1;
 		\set_transient( $cache_key, $current, $ttl_seconds );
 		return $current;
@@ -48,60 +43,6 @@ final class AtomicMinuteCounter {
 		}
 		$count = \wp_cache_incr( $cache_key, 1, $group );
 		return false === $count ? ( \wp_cache_add( $cache_key, 1, $group, $ttl_seconds ) ? 1 : null ) : max( 1, (int) $count );
-	}
-
-	private static function increment_transient_option( string $cache_key, int $ttl_seconds ): ?int {
-		global $wpdb;
-		if ( ! ( \class_exists( '\\wpdb', false ) && $wpdb instanceof \wpdb && ! empty( $wpdb->options ) ) ) {
-			return null;
-		}
-		$data_option    = '_transient_' . $cache_key;
-		$timeout_option = '_transient_timeout_' . $cache_key;
-		$now            = \time();
-		$timeout        = (int) \get_option( $timeout_option, 0 );
-		if ( $timeout <= $now ) {
-			\delete_option( $data_option );
-			\delete_option( $timeout_option );
-		}
-		if ( \add_option( $data_option, 1, '', false ) ) {
-			\add_option( $timeout_option, $now + $ttl_seconds, '', false );
-			return 1;
-		}
-
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Atomic increment cannot use the non-atomic Transients API.
-		$updated = $wpdb->query(
-			$wpdb->prepare(
-				'UPDATE %i data
-				INNER JOIN %i timeout
-					ON timeout.option_name = %s
-				SET data.option_value = CAST(data.option_value AS UNSIGNED) + 1
-				WHERE data.option_name = %s
-					AND CAST(timeout.option_value AS UNSIGNED) > %d',
-				$wpdb->options,
-				$wpdb->options,
-				$timeout_option,
-				$data_option,
-				$now
-			)
-		);
-		$count   = false === $updated || $updated < 1
-			? null
-			: $wpdb->get_var(
-				$wpdb->prepare(
-					'SELECT option_value FROM %i WHERE option_name = %s',
-					$wpdb->options,
-					$data_option
-				)
-			);
-		// phpcs:enable
-		if ( null !== $count && false !== $count ) {
-			if ( \function_exists( 'wp_cache_delete' ) ) {
-				\wp_cache_delete( $data_option, 'options' );
-				\wp_cache_delete( $timeout_option, 'options' );
-			}
-			return max( 1, (int) $count );
-		}
-		return null;
 	}
 
 	/**

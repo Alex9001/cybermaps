@@ -1,9 +1,9 @@
 === CYBERMAPS: XML Sitemaps & llms.txt ===
 Contributors: oreshkin
 Tags: sitemap, llms-txt, technical-seo, content-audit, indexnow
-Requires at least: 7.1
+Requires at least: 7.0
 Tested up to: 7.1
-Stable tag: 7.5.1
+Stable tag: 7.5.2
 Requires PHP: 8.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -11,8 +11,6 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Publish WordPress sitemaps and machine-readable maps.
 
 == Description ==
-
-Cybermaps honors Genesis/Mai, Yoast, Rank Math, and All in One SEO signals.
 
 = A complete sitemap engine =
 
@@ -30,20 +28,10 @@ Cybermaps honors Genesis/Mai, Yoast, Rank Math, and All in One SEO signals.
   OAuth/Auth.md, and enabled capability catalogs
 * Draft MCP Server Card, ARD AI Catalog, and read-only WebMCP tools
 
-No AI account required. Full output: up to 32 MiB.
-
-= Flexible, verified delivery =
-
-Static modes are `off`, default `well_known`, and `all`, with ownership-safe
-repair. Supports object caches, APCu, LSCWP, and opt-in Varnish PURGE.
-
 = Standards and controlled agent access =
 
-OpenAPI supports 3.2.0 and 3.1.2. Draft features are labelled; AIPREF defaults off.
-
-MCP operations require OAuth 2.1 PKCE, consent, and WordPress capabilities.
-OAuth discovery never fabricates OIDC/JWKS metadata; RFC 8628 registration
-requires logged-in review.
+MCP operations require OAuth 2.1 PKCE, consent, capabilities, and logged-in
+review; discovery never fabricates OIDC/JWKS metadata.
 
 == Installation ==
 
@@ -112,6 +100,11 @@ Persistent settings, tables, and post metadata remain after uninstall unless
 **Uninstall Cleanup** was enabled beforehand.
 
 == Changelog ==
+
+= 7.5.2 =
+* Hardened request authorization, exact setup input schemas, contextual protocol output, SQL lists, and client-IP hook data.
+* Moved report CSS to an enqueued asset, removed reserved transient-option access, and added fail-closed WordPress.org release checks.
+* Restored the declared WordPress 7.0 baseline with PHP 8.2 and disposable runtime validation.
 
 = 7.5.1 =
 * Added local orphan, homepage-path, and three-click-depth content findings.
@@ -200,6 +193,9 @@ Persistent settings, tables, and post metadata remain after uninstall unless
 Earlier release history is included in `changelog.txt`.
 
 == Upgrade Notice ==
+
+= 7.5.2 =
+Security and WordPress.org compliance hardening; update is recommended.
 
 = 7.5.1 =
 Reports now find potential orphans and deep pages from stored links and menus.

@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Cybermaps\Audit;
 
+use Cybermaps\Core\ProtocolOutput;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -15,8 +17,7 @@ final class AuditExporter {
 	 * @param array<string,mixed> $run Hydrated saved run.
 	 */
 	public function json( array $run ): string {
-		$output = wp_json_encode( $run, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
-		return is_string( $output ) ? $output . "\n" : "{}\n";
+		return ProtocolOutput::json( $run ) . "\n";
 	}
 
 	/**
@@ -87,9 +88,9 @@ final class AuditExporter {
 		$comparison_metrics = $this->comparison_metrics( $has_baseline, $diff );
 		$analysis_notice    = $this->analysis_notice( $run );
 
-		return '<!doctype html><html lang="' . esc_attr( ReportPresentation::language() ) . '"><head><meta charset="utf-8">'
+		$document = '<!doctype html><html lang="' . esc_attr( ReportPresentation::language() ) . '"><head><meta charset="utf-8">'
 			. '<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>'
-			. esc_html( $title ) . '</title><style>' . ReportPresentation::theme_css() . $this->styles() . '</style></head><body><main class="report">'
+			. esc_html( $title ) . '</title>' . ReportPresentation::stylesheet_markup() . '</head><body class="' . esc_attr( ReportPresentation::theme_class() ) . '"><main class="report">'
 			. '<header><div class="brand">' . $logo . '<div><p>' . esc_html( (string) $identity['site_name'] ) . '</p><h1>' . esc_html( $title )
 			. '</h1></div></div><div class="meta"><span>'
 			. esc_html__( 'Completed', 'cybermaps' ) . ': ' . esc_html( $completed ) . ' GMT</span><span>'
@@ -105,6 +106,8 @@ final class AuditExporter {
 			. '</th><th>' . esc_html__( 'Finding', 'cybermaps' ) . '</th><th>' . esc_html__( 'Measurement', 'cybermaps' ) . '</th><th>'
 			. esc_html__( 'Recommended review', 'cybermaps' ) . '</th></tr></thead><tbody>' . $rows . '</tbody></table></div></section></div><footer>'
 			. $credit . '</footer></main></body></html>';
+
+		return ProtocolOutput::report_html( $document );
 	}
 
 	/** @param array<int,mixed> $findings @param array<string,array<string,string>> $catalog @param array<string,int> $counts */
@@ -222,23 +225,6 @@ final class AuditExporter {
 		}
 
 		return '<p class="notice">' . esc_html( $message ) . '</p>';
-	}
-
-	private function styles(): string {
-		return 'body{margin:0;padding:44px 20px;background:var(--cmr-bg);color:var(--cmr-text);font:14px/1.55 system-ui,-apple-system,sans-serif}'
-			. '.report{max-width:1100px;margin:auto;overflow:hidden;background:var(--cmr-surface);border:1px solid var(--cmr-border);border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.12)}'
-			. 'header{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(240px,.7fr);background:var(--cmr-primary);color:#fff}.brand{display:flex;gap:18px;align-items:center;padding:40px}'
-			. '.brand img{max-width:170px;max-height:60px}.brand p,.section-heading p{margin:0 0 7px;color:var(--cmr-accent);font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}'
-			. 'h1{margin:0;font-size:30px;line-height:1.16}.brand span{display:block;margin-top:8px;color:#cbd5e1}.meta{display:flex;flex-direction:column;justify-content:center;gap:9px;padding:40px;background:var(--cmr-primary-2);color:#cbd5e1;font-size:12px}'
-			. '.meta a{color:inherit}.report-body{padding:36px 40px}.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:34px}.metric{padding:17px;background:var(--cmr-accent-soft);border-top:3px solid var(--cmr-accent);border-radius:6px}'
-			. '.metric-good{border-top-color:var(--cmr-success)}.metric span{display:block;color:var(--cmr-muted);font-size:10px;font-weight:800;text-transform:uppercase}.metric strong{display:block;margin-top:6px;color:var(--cmr-text);font-size:27px}'
-			. 'section+section{margin-top:38px}.section-heading h2{margin:0 0 15px;font-size:21px}.actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.action{padding:16px;background:var(--cmr-accent-soft);border:1px solid var(--cmr-border);border-radius:7px}'
-			. '.action span,.action small{display:block}.action span{color:var(--cmr-muted);font-size:10px;font-weight:800;text-transform:uppercase}.action strong{display:block;margin:5px 0;color:var(--cmr-text);font-size:26px}.action small{color:var(--cmr-muted)}'
-			. '.notice{padding:14px 16px;background:var(--cmr-accent-soft);border-left:3px solid var(--cmr-accent)}table{width:100%;border-collapse:collapse}th,td{padding:12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--cmr-border)}'
-			. 'th{color:var(--cmr-muted);background:var(--cmr-accent-soft);font-size:10px;text-transform:uppercase}td a{color:var(--cmr-accent)}.finding{font-size:11px;font-weight:700;color:var(--cmr-warning)}'
-			. 'footer{display:flex;justify-content:center;min-height:18px;padding:18px;background:var(--cmr-accent-soft);color:var(--cmr-muted);font-size:11px}footer a{color:inherit;font-weight:700;text-decoration:none}footer a:hover{text-decoration:underline}'
-			. '@media(max-width:760px){body{padding:0}.report{border:0;border-radius:0}header{grid-template-columns:1fr}.brand,.meta,.report-body{padding:25px}.metrics{grid-template-columns:repeat(2,1fr)}.actions{grid-template-columns:1fr}.table-wrap{overflow-x:auto}}'
-			. '@media print{body{padding:0;background:#fff}.report{border:0;border-radius:0;box-shadow:none}header,.metric,.action,th,.notice{print-color-adjust:exact;-webkit-print-color-adjust:exact}}';
 	}
 
 	/**

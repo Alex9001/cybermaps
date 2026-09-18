@@ -522,8 +522,7 @@ final class StaticHeaderManifest {
 					'cache'  => 'bypass',
 				),
 				'note'   => 'Translate this vendor-neutral policy into the provider rule language; Cybermaps never changes edge configuration.',
-			),
-			JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
+			)
 		);
 
 		return is_string( $encoded ) ? $encoded : '';

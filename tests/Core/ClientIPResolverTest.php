@@ -202,11 +202,13 @@ final class ClientIPResolverTest extends TestCase {
 	}
 
 	public function test_explicit_trusted_proxy_filter_can_supply_a_valid_resolution(): void {
+		$context = array();
 		$GLOBALS['cybermaps_mock_filter_callbacks']['cybermaps_client_ip_resolution'] = array(
-			static function ( array $resolution, array $server ): array {
+			static function ( array $resolution, array $server ) use ( &$context ): array {
 				unset( $resolution );
+				$context = $server;
 				return array(
-					'ip'     => (string) $server['HTTP_X_TRUSTED_CLIENT_IP'],
+					'ip'     => (string) $server['HTTP_X_REAL_IP'],
 					'source' => 'site-proxy',
 				);
 			},
@@ -214,13 +216,15 @@ final class ClientIPResolverTest extends TestCase {
 
 		$resolution = ClientIPResolver::resolve(
 			array(
-				'REMOTE_ADDR'                 => '192.0.2.10',
-				'HTTP_X_TRUSTED_CLIENT_IP'    => '198.51.100.27',
+				'REMOTE_ADDR'       => '192.0.2.10',
+				'HTTP_X_REAL_IP'    => '198.51.100.27',
+				'HTTP_AUTHORIZATION' => 'Bearer secret',
 			)
 		);
 
 		$this->assertSame( '198.51.100.27', $resolution['ip'] );
 		$this->assertSame( 'site-proxy', $resolution['source'] );
+		$this->assertSame( array( 'REMOTE_ADDR', 'HTTP_X_REAL_IP' ), array_keys( $context ) );
 	}
 
 	/**

@@ -29,15 +29,13 @@ final class PublicHealth {
 			return;
 		}
 
-		$output = \wp_json_encode( $this->get_health_data(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
-		$output = \is_string( $output ) ? $output : '{}';
+		$output = \Cybermaps\Core\ProtocolOutput::json( $this->get_health_data() );
 
 		Integrity::send_headers( $output, MINUTE_IN_SECONDS );
 		\header( 'Content-Type: ' . self::MEDIA_TYPE );
 		\header( 'Access-Control-Allow-Origin: *' );
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Deliberate protocol JSON response.
-			echo $output;
+			\Cybermaps\Core\ProtocolOutput::emit( $output, 'json' );
 		}
 		exit;
 	}

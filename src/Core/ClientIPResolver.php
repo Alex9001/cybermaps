@@ -61,8 +61,8 @@ final class ClientIPResolver {
 	 * from explicitly configured proxy CIDRs.
 	 *
 	 * The final result is filterable for installations with another explicitly
-	 * trusted proxy. Filter callbacks receive the unmodified server array so
-	 * they can implement and document their own trust boundary. A callback must
+	 * trusted proxy. Filter callbacks receive only a bounded, sanitized allowlist
+	 * of the five supported address headers. A callback must
 	 * return an array containing a single valid `ip` and a stable `source` slug;
 	 * malformed filtered values are ignored.
 	 *
@@ -90,9 +90,9 @@ final class ClientIPResolver {
 		 * proxy's authoritative network list.
 		 *
 		 * @param array{ip: string, source: string} $resolution Core resolution.
-		 * @param array<string, mixed>               $server     Server variables.
+		 * @param array<string, string>             $context    Sanitized supported IP headers.
 		 */
-		$filtered = \apply_filters( 'cybermaps_client_ip_resolution', $resolution, $server );
+		$filtered = \apply_filters( 'cybermaps_client_ip_resolution', $resolution, self::filter_context( $server ) );
 
 		return self::validate_filtered_resolution( $filtered ) ?? $resolution;
 	}
@@ -184,6 +184,40 @@ final class ClientIPResolver {
 			'ip'     => $ip,
 			'source' => $source,
 		);
+	}
+
+	/**
+	 * Build the public filter context without exposing the complete server bag.
+	 *
+	 * @param array<string,mixed> $server Server variables.
+	 * @return array<string,string>
+	 */
+	private static function filter_context( array $server ): array {
+		$context = array();
+		foreach ( array( 'REMOTE_ADDR', 'HTTP_CF_CONNECTING_IP', 'HTTP_X_REAL_IP' ) as $key ) {
+			$value = self::normalize_ip( $server[ $key ] ?? null );
+			if ( null !== $value ) {
+				$context[ $key ] = $value;
+			}
+		}
+
+		$forwarded_for = $server['HTTP_X_FORWARDED_FOR'] ?? null;
+		if ( is_string( $forwarded_for ) && strlen( $forwarded_for ) <= 4096 ) {
+			$chain = self::parse_x_forwarded_for_chain( $forwarded_for );
+			if ( array() !== $chain ) {
+				$context['HTTP_X_FORWARDED_FOR'] = implode( ', ', $chain );
+			}
+		}
+
+		$forwarded = $server['HTTP_FORWARDED'] ?? null;
+		if ( is_string( $forwarded ) && strlen( $forwarded ) <= 4096 ) {
+			$chain = self::parse_forwarded_chain( $forwarded );
+			if ( array() !== $chain ) {
+				$context['HTTP_FORWARDED'] = implode( ', ', $chain );
+			}
+		}
+
+		return $context;
 	}
 
 	/**

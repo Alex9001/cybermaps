@@ -33,8 +33,7 @@ class KnowledgeGraph {
 		Integrity::send_headers( $output );
 		header( 'Content-Type: application/ld+json' );
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
-            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			echo $output;
+			\Cybermaps\Core\ProtocolOutput::emit( $output, 'json' );
 		}
 		exit;
 	}
@@ -72,7 +71,7 @@ class KnowledgeGraph {
 
 		$data = apply_filters( 'cybermaps_knowledge_graph_data', $data );
 
-		return (string) wp_json_encode( $data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
+		return \Cybermaps\Core\ProtocolOutput::json( $data );
 	}
 
 	/**

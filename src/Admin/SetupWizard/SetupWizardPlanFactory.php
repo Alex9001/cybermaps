@@ -12,6 +12,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** Converts Quick Setup answers into a bounded configuration changes envelope. */
 final class SetupWizardPlanFactory {
+	private const ANSWER_KEYS           = array(
+		'ai_visibility',
+		'identity_description',
+		'identity_image_id',
+		'identity_name',
+		'identity_type',
+		'operations',
+		'website_type',
+	);
+	private const MAX_NAME_BYTES        = 256;
+	private const MAX_DESCRIPTION_BYTES = 8192;
 	/** @var array<string,mixed> */
 	private array $answers;
 
@@ -31,20 +42,46 @@ final class SetupWizardPlanFactory {
 
 	/** @param array<string,mixed> $request */
 	private function __construct( array $request, SetupWizardContext $context ) {
-		$version = isset( $request['wizard_version'] ) ? (int) $request['wizard_version'] : 0;
+		self::validate_request_shape( $request );
+		$version = $request['wizard_version'];
 		if ( SetupWizardRegistry::VERSION !== $version ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception messages are non-HTML JSON data.
 			throw new \InvalidArgumentException( __( 'This Quick Setup session is out of date. Reload it before continuing.', 'cybermaps' ) );
 		}
 
-		$answers = $request['answers'] ?? array();
-		if ( ! is_array( $answers ) || array_is_list( $answers ) ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception messages are non-HTML JSON data.
-			throw new \InvalidArgumentException( __( 'Quick Setup answers must be an object.', 'cybermaps' ) );
-		}
-
-		$this->answers = $answers;
+		$this->answers = $request['answers'];
 		$this->context = $context;
+	}
+
+	/** @param array<string,mixed> $request */
+	private static function validate_request_shape( array $request ): void {
+		$keys = array_keys( $request );
+		sort( $keys, SORT_STRING );
+		if ( array( 'answers', 'wizard_version' ) !== $keys || ! is_int( $request['wizard_version'] ?? null ) ) {
+			throw new \InvalidArgumentException( esc_html__( 'The Quick Setup request has an invalid schema.', 'cybermaps' ) );
+		}
+		$answers = $request['answers'];
+		if ( ! is_array( $answers ) || array_is_list( $answers ) ) {
+			throw new \InvalidArgumentException( esc_html__( 'Quick Setup answers must be an object.', 'cybermaps' ) );
+		}
+		$answer_keys = array_keys( $answers );
+		sort( $answer_keys, SORT_STRING );
+		if ( self::ANSWER_KEYS !== $answer_keys ) {
+			throw new \InvalidArgumentException( esc_html__( 'Quick Setup answers do not match the documented schema.', 'cybermaps' ) );
+		}
+		foreach ( array( 'website_type', 'ai_visibility', 'operations', 'identity_type', 'identity_name', 'identity_description' ) as $key ) {
+			if ( ! is_string( $answers[ $key ] ) ) {
+				throw new \InvalidArgumentException( esc_html__( 'Quick Setup answer types are invalid.', 'cybermaps' ) );
+			}
+		}
+		if (
+			strlen( $answers['identity_name'] ) > self::MAX_NAME_BYTES
+			|| strlen( $answers['identity_description'] ) > self::MAX_DESCRIPTION_BYTES
+			|| ! is_int( $answers['identity_image_id'] )
+			|| $answers['identity_image_id'] < 0
+		) {
+			throw new \InvalidArgumentException( esc_html__( 'Quick Setup answer values exceed their documented bounds.', 'cybermaps' ) );
+		}
 	}
 
 	/** @return array<string,mixed> */
@@ -66,7 +103,7 @@ final class SetupWizardPlanFactory {
 			'plugin_version' => defined( 'CYBERMAPS_VERSION' ) ? (string) CYBERMAPS_VERSION : '',
 			'changes'        => $this->changes,
 		);
-		$content  = wp_json_encode( $document, JSON_UNESCAPED_SLASHES );
+		$content  = wp_json_encode( $document );
 		if ( ! is_string( $content ) || '' === $content ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception messages are non-HTML JSON data.
 			throw new \RuntimeException( __( 'Cybermaps could not prepare the Quick Setup preset.', 'cybermaps' ) );
@@ -196,7 +233,7 @@ final class SetupWizardPlanFactory {
 		$type        = $this->choice( 'identity_type', array_keys( SetupWizardRegistry::choices()['identity_type'] ) );
 		$name        = $this->text( 'identity_name' );
 		$description = $this->text( 'identity_description' );
-		$image_id    = max( 0, (int) $this->answer( 'identity_image_id', 0 ) );
+		$image_id    = $this->answers['identity_image_id'];
 		if ( '' === $name ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception messages are non-HTML JSON data.
 			throw new \InvalidArgumentException( __( 'Add the public name for this website.', 'cybermaps' ) );
@@ -271,14 +308,9 @@ final class SetupWizardPlanFactory {
 		return is_array( $value ) ? array_values( array_filter( $value, 'is_string' ) ) : array();
 	}
 
-	private function answer( string $key, mixed $fallback = null ): mixed {
-		return array_key_exists( $key, $this->answers ) ? $this->answers[ $key ] : $fallback;
-	}
-
 	/** @param string[] $allowed */
 	private function choice( string $key, array $allowed ): string {
-		$value = $this->answer( $key );
-		$value = is_scalar( $value ) ? (string) $value : '';
+		$value = $this->answers[ $key ];
 		if ( ! in_array( $value, $allowed, true ) ) {
 			/* translators: %s: Quick Setup question identifier. */
 			throw new \InvalidArgumentException( sprintf( __( 'Choose an answer for %s.', 'cybermaps' ), $key ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Question identifier in non-HTML exception data.
@@ -287,7 +319,6 @@ final class SetupWizardPlanFactory {
 	}
 
 	private function text( string $key ): string {
-		$value = $this->answer( $key, '' );
-		return is_scalar( $value ) ? trim( (string) $value ) : '';
+		return trim( $this->answers[ $key ] );
 	}
 }

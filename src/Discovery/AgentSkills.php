@@ -25,7 +25,7 @@ final class AgentSkills {
 		Integrity::send_headers( $output );
 		header( 'Content-Type: application/json; charset=utf-8' );
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
-			echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Deliberate JSON response.
+			\Cybermaps\Core\ProtocolOutput::emit( $output, 'json' );
 		}
 		exit;
 	}
@@ -34,12 +34,7 @@ final class AgentSkills {
 	 * Return the canonical index body used by dynamic and static delivery.
 	 */
 	public function get_json_content(): string {
-		$output = \wp_json_encode( $this->get_index_data(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
-		if ( ! \is_string( $output ) ) {
-			return '{}';
-		}
-
-		return $output;
+		return \Cybermaps\Core\ProtocolOutput::json( $this->get_index_data() );
 	}
 
 	/**

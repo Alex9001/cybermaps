@@ -23,7 +23,7 @@ final class LogsExportTest extends TestCase {
 	public function test_log_export_declares_utf8_bom_and_bounded_batches(): void {
 		$source = (string) file_get_contents( dirname( __DIR__, 2 ) . '/src/Admin/Logs.php' );
 
-		$this->assertStringContainsString( 'echo "\\xEF\\xBB\\xBF"', $source );
+		$this->assertStringContainsString( 'ProtocolOutput::emit( "\\xEF\\xBB\\xBF", \'csv\' )', $source );
 		$this->assertStringContainsString( '$batch_size = 500', $source );
 		$this->assertStringContainsString( 'get_export_batch', $source );
 		$this->assertStringContainsString( 'X-Content-Type-Options: nosniff', $source );

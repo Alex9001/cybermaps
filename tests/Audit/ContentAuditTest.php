@@ -299,7 +299,7 @@ final class ContentAuditTest extends TestCase {
 		$this->assertStringContainsString( '<meta name="referrer" content="no-referrer">', $exporter->html( $run ) );
 		$this->assertStringNotContainsString( 'Immutable evidence snapshot', $exporter->html( $run ) );
 		$this->assertStringNotContainsString( 'Evidence-based content findings', $exporter->html( $run ) );
-		$this->assertStringContainsString( '"finding_count": 1', $exporter->json( $run ) );
+		$this->assertSame( 1, json_decode( $exporter->json( $run ), true, 512, JSON_THROW_ON_ERROR )['finding_count'] );
 	}
 
 	public function test_printable_reports_restore_branding_themes_and_professional_sections(): void {
@@ -333,7 +333,10 @@ final class ContentAuditTest extends TestCase {
 		$this->assertStringContainsString( 'Action inventory', $html );
 		$this->assertStringContainsString( 'Added since baseline', $html );
 		$this->assertStringContainsString( 'Example Studio', $html );
-		$this->assertStringContainsString( '--cmr-bg:#0f172a', $html );
+		$this->assertStringContainsString( 'class="cm-report-theme-midnight"', $html );
+		$this->assertStringContainsString( 'assets/css/report.css', $html );
+		$this->assertStringNotContainsString( '<style', $html );
+		$this->assertSame( CYBERMAPS_PLUGIN_URL . 'assets/css/report.css', $GLOBALS['cybermaps_mock_enqueued_styles']['cybermaps-report']['src'] );
 		$this->assertArrayHasKey( 'cyberbrand', ReportPresentation::themes() );
 		$this->assertStringNotContainsString( 'Global Authority', $html );
 
@@ -410,10 +413,11 @@ final class ContentAuditTest extends TestCase {
 		$this->assertStringContainsString( 'Disabled', $html );
 		$this->assertStringNotContainsString( 'Authority Score', $html );
 		$this->assertStringNotContainsString( '/var/www/private', $json );
-		$this->assertStringContainsString( '"disabled_count": 1', $json );
-		$this->assertStringContainsString( '"observed_type": "text/plain; charset=utf-8"', $json );
-		$this->assertStringContainsString( '"content_type_valid": true', $json );
-		$this->assertStringContainsString( '"body_valid": true', $json );
+		$decoded = json_decode( $json, true, 512, JSON_THROW_ON_ERROR );
+		$this->assertSame( 1, $decoded['disabled_count'] );
+		$this->assertSame( 'text/plain; charset=utf-8', $decoded['endpoints'][0]['observed_type'] );
+		$this->assertTrue( $decoded['endpoints'][0]['content_type_valid'] );
+		$this->assertTrue( $decoded['endpoints'][0]['body_valid'] );
 		$this->assertStringContainsString( '<meta name="referrer" content="no-referrer">', $html );
 	}
 

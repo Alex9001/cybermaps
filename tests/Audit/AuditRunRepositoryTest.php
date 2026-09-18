@@ -52,11 +52,11 @@ final class AuditRunRepositoryTest extends TestCase {
 		$this->assertSame( 7, $diff['baseline_run_id'] );
 		$sql = implode( "\n", $GLOBALS['wpdb']->queries );
 		$this->assertStringContainsString(
-			"current_finding.finding_key NOT IN ('potential_orphan','no_homepage_path','deeply_linked')",
+			"current_finding.finding_key NOT IN ('potential_orphan', 'no_homepage_path', 'deeply_linked')",
 			$sql
 		);
 		$this->assertStringContainsString(
-			"baseline_finding.finding_key NOT IN ('potential_orphan','no_homepage_path','deeply_linked')",
+			"baseline_finding.finding_key NOT IN ('potential_orphan', 'no_homepage_path', 'deeply_linked')",
 			$sql
 		);
 		$this->assertStringNotContainsString( '{$current_filter}', $sql );

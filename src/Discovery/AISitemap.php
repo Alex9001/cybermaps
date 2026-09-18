@@ -46,8 +46,7 @@ class AISitemap {
 		Integrity::send_headers( $output );
 		header( 'Content-Type: application/xml; charset=utf-8' );
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
-            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			echo $output;
+			\Cybermaps\Core\ProtocolOutput::emit( $output, 'xml' );
 		}
 		exit;
 	}

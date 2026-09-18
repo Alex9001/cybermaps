@@ -60,16 +60,15 @@ final class OpenAPITest extends TestCase {
 	}
 
 	public function test_request_negotiation_prefers_query_then_compatibility_accept(): void {
-		$_GET['version']        = '';
-		$_SERVER['HTTP_ACCEPT'] = 'application/vnd.oai.openapi+json;version=3.1';
-		$this->assertSame( '3.1.2', OpenAPI::negotiate_version() );
-
-		$_GET['version']        = '3.1.2';
-		$_SERVER['HTTP_ACCEPT'] = 'application/vnd.oai.openapi+json;version=3.2';
-		$this->assertSame( '3.1.2', OpenAPI::negotiate_version() );
-
-		unset( $_GET['version'], $_SERVER['HTTP_ACCEPT'] );
-		$this->assertSame( '3.2.0', OpenAPI::negotiate_version() );
+		$this->assertSame(
+			'3.1.2',
+			OpenAPI::negotiate_version( '', 'application/vnd.oai.openapi+json;version=3.1' )
+		);
+		$this->assertSame(
+			'3.1.2',
+			OpenAPI::negotiate_version( '3.1.2', 'application/vnd.oai.openapi+json;version=3.2' )
+		);
+		$this->assertSame( '3.2.0', OpenAPI::negotiate_version( '', '' ) );
 	}
 
 	public function test_mcp_route_is_described_only_when_enabled(): void {

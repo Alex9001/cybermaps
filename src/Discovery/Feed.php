@@ -50,8 +50,7 @@ class Feed {
 		}
 
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
-            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			echo $output;
+			\Cybermaps\Core\ProtocolOutput::emit( $output, 'json' );
 		}
 		exit;
 	}
@@ -79,7 +78,7 @@ class Feed {
 		);
 		$this->append_hubs( $feed, $settings );
 		$feed = apply_filters( 'cybermaps_ai_feed_data', $feed );
-		return (string) wp_json_encode( $feed, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
+		return \Cybermaps\Core\ProtocolOutput::json( $feed );
 	}
 
 	/**

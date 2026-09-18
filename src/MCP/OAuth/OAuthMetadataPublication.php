@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Cybermaps\MCP\OAuth;
 
+use Cybermaps\Core\ProtocolOutput;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -31,8 +33,7 @@ final class OAuthMetadataPublication {
 		\header( 'Content-Type: application/json; charset=utf-8' );
 		\header( 'Cache-Control: no-store' );
 		\header( 'Access-Control-Allow-Origin: *' );
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Protocol JSON is encoded immediately before output.
-		echo \wp_json_encode( $metadata );
+		ProtocolOutput::emit( ProtocolOutput::json( $metadata ), 'json' );
 		exit;
 	}
 

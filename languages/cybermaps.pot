@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: CYBERMAPS: XML Sitemaps & llms.txt 7.5.1\n"
+"Project-Id-Version: CYBERMAPS: XML Sitemaps & llms.txt 7.5.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/cybermaps\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-12T21:00:55+00:00\n"
+"POT-Creation-Date: 2026-09-18T01:52:33+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: cybermaps\n"
@@ -187,7 +187,7 @@ msgid "Static publication reconciliation: %s."
 msgstr ""
 
 #: src/Admin/AIDiscoveryStatus.php:320
-#: src/Audit/DiscoveryReportExporter.php:139
+#: src/Audit/DiscoveryReportExporter.php:126
 msgid "Healthy"
 msgstr ""
 
@@ -195,7 +195,7 @@ msgstr ""
 #: src/Admin/AIDiscoveryStatus.php:352
 #: src/Admin/AIDiscoveryStatus.php:353
 #: src/Admin/SystemStatus.php:251
-#: src/Audit/DiscoveryReportExporter.php:37
+#: src/Audit/DiscoveryReportExporter.php:38
 msgid "Needs attention"
 msgstr ""
 
@@ -206,7 +206,7 @@ msgstr ""
 #: src/Admin/AIDiscoveryStatus.php:671
 #: src/Admin/AIDiscoveryStatus.php:687
 #: src/Admin/AIDiscoveryStatus.php:705
-#: src/Audit/DiscoveryReportExporter.php:141
+#: src/Audit/DiscoveryReportExporter.php:128
 msgid "Unverified"
 msgstr ""
 
@@ -219,8 +219,8 @@ msgstr ""
 #: src/Admin/Settings/Tabs/Advanced.php:155
 #: src/Admin/SVGMapper.php:193
 #: src/Admin/SystemStatusCollector.php:164
-#: src/Audit/DiscoveryReportExporter.php:40
-#: src/Audit/DiscoveryReportExporter.php:142
+#: src/Audit/DiscoveryReportExporter.php:41
+#: src/Audit/DiscoveryReportExporter.php:129
 msgid "Disabled"
 msgstr ""
 
@@ -275,7 +275,7 @@ msgstr ""
 #: src/Admin/AIDiscoveryStatus.php:373
 #: src/Admin/AIDiscoveryStatus.php:422
 #: src/Admin/LocalDeliveryController.php:67
-#: src/Audit/DiscoveryReportExporter.php:50
+#: src/Audit/DiscoveryReportExporter.php:51
 msgid "Publication"
 msgstr ""
 
@@ -288,13 +288,13 @@ msgstr ""
 
 #: src/Admin/AIDiscoveryStatus.php:373
 #: src/Admin/AIDiscoveryStatus.php:436
-#: src/Audit/DiscoveryReportExporter.php:51
+#: src/Audit/DiscoveryReportExporter.php:52
 msgid "Expected type"
 msgstr ""
 
 #: src/Admin/AIDiscoveryStatus.php:373
 #: src/Admin/AIDiscoveryStatus.php:447
-#: src/Audit/DiscoveryReportExporter.php:52
+#: src/Audit/DiscoveryReportExporter.php:53
 msgid "Intended"
 msgstr ""
 
@@ -342,7 +342,7 @@ msgstr ""
 
 #: src/Admin/AIDiscoveryStatus.php:459
 #: src/Admin/AIDiscoveryStatus.php:702
-#: src/Audit/DiscoveryReportExporter.php:137
+#: src/Audit/DiscoveryReportExporter.php:124
 msgid "Dynamic"
 msgstr ""
 
@@ -484,13 +484,13 @@ msgid "WordPress could not schedule the background static reconciliation."
 msgstr ""
 
 #: src/Admin/AIDiscoveryStatus.php:651
-#: src/Audit/DiscoveryReportExporter.php:35
+#: src/Audit/DiscoveryReportExporter.php:36
 msgid "Validated"
 msgstr ""
 
 #: src/Admin/AIDiscoveryStatus.php:652
 #: src/Admin/SitemapStatus.php:549
-#: src/Audit/DiscoveryReportExporter.php:140
+#: src/Audit/DiscoveryReportExporter.php:127
 msgid "Error"
 msgstr ""
 
@@ -541,7 +541,7 @@ msgid "Not conformant"
 msgstr ""
 
 #: src/Admin/AIDiscoveryStatus.php:703
-#: src/Audit/DiscoveryReportExporter.php:138
+#: src/Audit/DiscoveryReportExporter.php:125
 msgid "Static"
 msgstr ""
 
@@ -780,70 +780,69 @@ msgstr ""
 msgid "Cloudflare API error %1$d: %2$s"
 msgstr ""
 
-#: src/Admin/ContentAuditManager.php:43
-#: src/Admin/ContentAuditManager.php:99
-#: src/Admin/ContentAuditManager.php:142
-#: src/Admin/ContentAuditManager.php:299
+#: src/Admin/ContentAuditManager.php:45
+#: src/Admin/ContentAuditManager.php:94
+#: src/Admin/ContentAuditManager.php:127
+#: src/Admin/ContentAuditManager.php:282
 #: src/Admin/DiscoveryAnalytics.php:61
 #: src/Admin/Logs.php:299
 #: src/Admin/Logs.php:335
 #: src/Admin/MediaAuditor.php:163
 #: src/Admin/NetworkSettings.php:78
-#: src/Admin/Settings.php:482
+#: src/Admin/Settings.php:492
 #: src/Sitemap/Orchestrator.php:429
 msgid "Unauthorized"
 msgstr ""
 
-#: src/Admin/ContentAuditManager.php:50
-#: src/Admin/ContentAuditManager.php:107
-#: src/Admin/DiscoveryAuditor.php:44
-#: src/Admin/Logs.php:306
-#: src/Admin/MediaAuditor.php:156
-#: src/Admin/NetworkSettings.php:89
-#: src/Admin/Settings.php:493
-#: src/Admin/Settings/SettingsAjax.php:339
-#: src/Admin/SetupWizard/SetupWizardController.php:155
-#: src/Sitemap/Orchestrator.php:440
-msgid "Invalid request method."
-msgstr ""
-
 #. translators: %s: audit error
-#: src/Admin/ContentAuditManager.php:77
+#: src/Admin/ContentAuditManager.php:70
 #, php-format
 msgid "The content report could not be completed: %s"
 msgstr ""
 
-#: src/Admin/ContentAuditManager.php:120
+#: src/Admin/ContentAuditManager.php:104
 msgid "This report could not be deleted. It may be missing or still required as the baseline for a later report."
 msgstr ""
 
-#: src/Admin/ContentAuditManager.php:170
-#: src/Admin/ContentAuditManager.php:308
+#: src/Admin/ContentAuditManager.php:156
+#: src/Admin/ContentAuditManager.php:292
 msgid "Invalid export format."
 msgstr ""
 
-#: src/Admin/ContentAuditManager.php:173
+#: src/Admin/ContentAuditManager.php:159
 msgid "Invalid report filter."
 msgstr ""
 
-#: src/Admin/ContentAuditManager.php:218
+#: src/Admin/ContentAuditManager.php:204
 msgid "This report contains too many findings for a safe synchronous CSV export."
 msgstr ""
 
-#: src/Admin/ContentAuditManager.php:221
+#: src/Admin/ContentAuditManager.php:207
 msgid "This report and its comparison baseline are too large for a safe synchronous printable export. Use CSV for the current finding inventory."
 msgstr ""
 
-#: src/Admin/ContentAuditManager.php:224
+#: src/Admin/ContentAuditManager.php:210
 msgid "This full report snapshot is too large for a safe synchronous JSON export. Use CSV for the current finding inventory."
 msgstr ""
 
-#: src/Admin/ContentAuditManager.php:284
+#: src/Admin/ContentAuditManager.php:267
 msgid "The requested report could not be loaded from the database."
 msgstr ""
 
-#: src/Admin/ContentAuditManager.php:292
+#: src/Admin/ContentAuditManager.php:275
 msgid "The requested report was not found."
+msgstr ""
+
+#: src/Admin/ContentAuditManager.php:352
+#: src/Admin/DiscoveryAuditor.php:44
+#: src/Admin/Logs.php:306
+#: src/Admin/MediaAuditor.php:156
+#: src/Admin/NetworkSettings.php:89
+#: src/Admin/Settings.php:485
+#: src/Admin/Settings/SettingsAjax.php:338
+#: src/Admin/SetupWizard/SetupWizardController.php:141
+#: src/Sitemap/Orchestrator.php:440
+msgid "Invalid request method."
 msgstr ""
 
 #: src/Admin/CrawlerAnalyticsRecorder.php:271
@@ -1606,9 +1605,9 @@ msgstr ""
 #: src/Admin/DiscoveryAuditor.php:51
 #: src/Admin/EdgeOptimizationController.php:77
 #: src/Admin/EdgeOptimizationController.php:404
-#: src/Admin/Settings/SettingsAjax.php:155
-#: src/Admin/Settings/SettingsAjax.php:191
-#: src/Admin/SetupWizard/SetupWizardController.php:102
+#: src/Admin/Settings/SettingsAjax.php:154
+#: src/Admin/Settings/SettingsAjax.php:190
+#: src/Admin/SetupWizard/SetupWizardController.php:104
 msgid "Insufficient permissions."
 msgstr ""
 
@@ -3462,35 +3461,35 @@ msgstr ""
 msgid "Cybermaps could not generate the configuration download. Review the stored settings and try again."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAjax.php:171
+#: src/Admin/Settings/SettingsAjax.php:170
 msgid "Cybermaps could not preview this configuration file. No settings were changed."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAjax.php:204
+#: src/Admin/Settings/SettingsAjax.php:203
 #: assets/js/admin-command-center.js:501
 msgid "Preview this file before applying it."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAjax.php:228
+#: src/Admin/Settings/SettingsAjax.php:227
 msgid "The configuration import did not complete. Review the current settings before retrying."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAjax.php:256
+#: src/Admin/Settings/SettingsAjax.php:255
 msgid "No configuration data provided."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAjax.php:302
+#: src/Admin/Settings/SettingsAjax.php:301
 #: assets/js/admin-command-center.js:509
 msgid "Acknowledge the high-impact changes before applying this configuration."
 msgstr ""
 
 #. translators: 1: changed configuration groups, 2: unchanged configuration groups.
-#: src/Admin/Settings/SettingsAjax.php:319
+#: src/Admin/Settings/SettingsAjax.php:318
 #, php-format
 msgid "Configuration import complete. Changed groups: %1$d; already current: %2$d."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAjax.php:356
+#: src/Admin/Settings/SettingsAjax.php:355
 msgid "Settings"
 msgstr ""
 
@@ -4086,7 +4085,7 @@ msgid "Leave this disabled unless a reverse proxy or load balancer terminates re
 msgstr ""
 
 #: src/Admin/Settings/Tabs/ContentReview.php:26
-#: src/Admin/Settings/Tabs/ContentReview.php:317
+#: src/Admin/Settings/Tabs/ContentReview.php:338
 msgid "Reports"
 msgstr ""
 
@@ -4163,8 +4162,8 @@ msgid "Optional presentation details brand the printable deliverable without cha
 msgstr ""
 
 #: src/Admin/Settings/Tabs/ContentReview.php:131
-#: src/Audit/AuditExporter.php:141
-#: src/Audit/DiscoveryReportExporter.php:100
+#: src/Audit/AuditExporter.php:144
+#: src/Audit/DiscoveryReportExporter.php:101
 msgid "Prepared by"
 msgstr ""
 
@@ -4212,261 +4211,261 @@ msgstr ""
 msgid "Saved content reports could not be loaded from the database. The report tables may need repair."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:292
+#: src/Admin/Settings/Tabs/ContentReview.php:286
 msgid "The selected content report was deleted."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:295
+#: src/Admin/Settings/Tabs/ContentReview.php:289
 #: src/Audit/ContentAuditService.php:32
 msgid "Another Content Intelligence Report is already running. Wait for it to finish before starting another."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:316
+#: src/Admin/Settings/Tabs/ContentReview.php:337
 msgid "Professional deliverables"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:318
+#: src/Admin/Settings/Tabs/ContentReview.php:339
 msgid "Create client-ready measurement reports, focused action lists, and a validated inventory of your AI discovery publications."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:330
+#: src/Admin/Settings/Tabs/ContentReview.php:351
 msgid "Measured content intelligence"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:331
-#: src/Audit/AuditExporter.php:74
+#: src/Admin/Settings/Tabs/ContentReview.php:352
+#: src/Audit/AuditExporter.php:75
 msgid "Content Intelligence Report"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:332
+#: src/Admin/Settings/Tabs/ContentReview.php:353
 msgid "Measure public search-indexable content, save the policy and measurements, compare against the prior report, and export a branded resolution plan."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:337
+#: src/Admin/Settings/Tabs/ContentReview.php:358
 msgid "Run new report"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:339
+#: src/Admin/Settings/Tabs/ContentReview.php:360
 msgid "View report"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:347
+#: src/Admin/Settings/Tabs/ContentReview.php:368
 msgid "Live validation"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:348
-#: src/Audit/DiscoveryReportExporter.php:30
+#: src/Admin/Settings/Tabs/ContentReview.php:369
+#: src/Audit/DiscoveryReportExporter.php:31
 msgid "AI Discovery Publication Report"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:349
+#: src/Admin/Settings/Tabs/ContentReview.php:370
 msgid "Generate a point-in-time, client-facing inventory of discovery publications, intended delivery, media types, and public HTTP validation."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:352
+#: src/Admin/Settings/Tabs/ContentReview.php:373
 msgid "Generate report"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:353
+#: src/Admin/Settings/Tabs/ContentReview.php:374
 msgid "Export JSON"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:397
+#: src/Admin/Settings/Tabs/ContentReview.php:418
 msgid "Saved report"
 msgstr ""
 
 #. translators: %d: saved report ID.
-#: src/Admin/Settings/Tabs/ContentReview.php:403
+#: src/Admin/Settings/Tabs/ContentReview.php:424
 #, php-format
 msgid "Report #%d"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:412
+#: src/Admin/Settings/Tabs/ContentReview.php:433
 msgid "Printable report"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:413
-#: src/Admin/Settings/Tabs/ContentReview.php:503
-#: src/Admin/Settings/Tabs/ContentReview.php:588
+#: src/Admin/Settings/Tabs/ContentReview.php:434
+#: src/Admin/Settings/Tabs/ContentReview.php:525
+#: src/Admin/Settings/Tabs/ContentReview.php:610
 msgid "CSV"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:414
+#: src/Admin/Settings/Tabs/ContentReview.php:435
 msgid "JSON"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:419
+#: src/Admin/Settings/Tabs/ContentReview.php:441
 msgid "Delete this saved report? This cannot be undone."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:419
+#: src/Admin/Settings/Tabs/ContentReview.php:441
 msgid "Delete report"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:432
-#: src/Audit/AuditExporter.php:97
+#: src/Admin/Settings/Tabs/ContentReview.php:454
+#: src/Audit/AuditExporter.php:98
 msgid "Resources reviewed"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:433
-#: src/Admin/Settings/Tabs/ContentReview.php:523
-#: src/Audit/AuditExporter.php:98
+#: src/Admin/Settings/Tabs/ContentReview.php:455
+#: src/Admin/Settings/Tabs/ContentReview.php:545
+#: src/Audit/AuditExporter.php:99
 msgid "Current findings"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:435
+#: src/Admin/Settings/Tabs/ContentReview.php:457
 msgid "Added"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:436
+#: src/Admin/Settings/Tabs/ContentReview.php:458
 msgid "Resolved"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:437
+#: src/Admin/Settings/Tabs/ContentReview.php:459
 msgid "Persisting"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:439
-#: src/Audit/AuditExporter.php:157
+#: src/Admin/Settings/Tabs/ContentReview.php:461
+#: src/Audit/AuditExporter.php:160
 msgid "Comparison"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:439
+#: src/Admin/Settings/Tabs/ContentReview.php:461
 #: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:415
 #: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:700
-#: src/Audit/AuditExporter.php:158
+#: src/Audit/AuditExporter.php:161
 msgid "Baseline"
 msgstr ""
 
 #. translators: 1: resource count, 2: internal-link count, 3: navigation reference count.
-#: src/Admin/Settings/Tabs/ContentReview.php:454
+#: src/Admin/Settings/Tabs/ContentReview.php:476
 #, php-format
 msgid "Local link coverage: %1$d resources, %2$d unique content links, and %3$d assigned navigation references."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:461
+#: src/Admin/Settings/Tabs/ContentReview.php:483
 msgid "The bounded scan was incomplete, so internal-link findings were suppressed."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:464
+#: src/Admin/Settings/Tabs/ContentReview.php:486
 msgid "Homepage click depth was unavailable from local WordPress content and navigation."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:467
+#: src/Admin/Settings/Tabs/ContentReview.php:489
 msgid "Internal-link trends were omitted because the baseline used different or incomplete link coverage."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:484
+#: src/Admin/Settings/Tabs/ContentReview.php:506
 msgid "Focused deliverables"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:485
+#: src/Admin/Settings/Tabs/ContentReview.php:507
 msgid "Action reports"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:487
+#: src/Admin/Settings/Tabs/ContentReview.php:509
 msgid "Export a client-ready list for one review category from the saved report data."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:494
+#: src/Admin/Settings/Tabs/ContentReview.php:516
 msgid "Review"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:502
+#: src/Admin/Settings/Tabs/ContentReview.php:524
 msgid "HTML report"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:522
+#: src/Admin/Settings/Tabs/ContentReview.php:544
 msgid "Report preview"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:525
+#: src/Admin/Settings/Tabs/ContentReview.php:547
 msgid "The printable report includes recommendations and the measurement summary for every finding."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:528
-#: src/Audit/AuditExporter.php:104
+#: src/Admin/Settings/Tabs/ContentReview.php:550
+#: src/Audit/AuditExporter.php:105
 msgid "Resource"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:528
-#: src/Audit/AuditExporter.php:48
-#: src/Audit/AuditExporter.php:105
+#: src/Admin/Settings/Tabs/ContentReview.php:550
+#: src/Audit/AuditExporter.php:49
+#: src/Audit/AuditExporter.php:106
 msgid "Finding"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:528
-#: src/Audit/AuditExporter.php:105
+#: src/Admin/Settings/Tabs/ContentReview.php:550
+#: src/Audit/AuditExporter.php:106
 msgid "Measurement"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:538
+#: src/Admin/Settings/Tabs/ContentReview.php:560
 msgid "This run recorded no policy findings."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:543
+#: src/Admin/Settings/Tabs/ContentReview.php:565
 msgid "Showing the first 25 findings. Export the report for the complete inventory."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:567
+#: src/Admin/Settings/Tabs/ContentReview.php:589
 msgid "Report history"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:568
+#: src/Admin/Settings/Tabs/ContentReview.php:590
 msgid "Other saved reports"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:570
+#: src/Admin/Settings/Tabs/ContentReview.php:592
 msgid "Open or export another saved report."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:573
+#: src/Admin/Settings/Tabs/ContentReview.php:595
 msgid "Run"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:573
-#: src/Audit/AuditExporter.php:95
+#: src/Admin/Settings/Tabs/ContentReview.php:595
+#: src/Audit/AuditExporter.php:96
 msgid "Completed"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:573
+#: src/Admin/Settings/Tabs/ContentReview.php:595
 #: src/Admin/SettingsPage.php:518
 msgid "Resources"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:573
+#: src/Admin/Settings/Tabs/ContentReview.php:595
 msgid "Findings"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:573
+#: src/Admin/Settings/Tabs/ContentReview.php:595
 msgid "Exports"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:586
+#: src/Admin/Settings/Tabs/ContentReview.php:608
 msgid "HTML"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:603
+#: src/Admin/Settings/Tabs/ContentReview.php:625
 msgid "No content report exists yet"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:604
+#: src/Admin/Settings/Tabs/ContentReview.php:626
 msgid "Run the first report to establish a baseline. Later reports show exactly which findings were added, resolved, or persisted."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:614
+#: src/Admin/Settings/Tabs/ContentReview.php:636
 msgid "Content measurement policy"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:615
+#: src/Admin/Settings/Tabs/ContentReview.php:637
 msgid "These explicit rules are saved with every report."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:621
+#: src/Admin/Settings/Tabs/ContentReview.php:643
 msgid "Client presentation"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:622
+#: src/Admin/Settings/Tabs/ContentReview.php:644
 msgid "Brand and theme printable deliverables generated from the saved measurements."
 msgstr ""
 
@@ -4525,7 +4524,7 @@ msgid "Master switch for the public AI discovery surface. WordPress 7.1 native r
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Discovery.php:57
-#: src/Core/EndpointRegistry.php:836
+#: src/Core/EndpointRegistry.php:979
 msgid "Model Context Protocol"
 msgstr ""
 
@@ -4566,7 +4565,7 @@ msgid "Opt in to a complete literal publication of every eligible resource in th
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Discovery.php:113
-#: src/Core/EndpointRegistry.php:750
+#: src/Core/EndpointRegistry.php:957
 msgid "Budgeted Site Briefing"
 msgstr ""
 
@@ -5230,14 +5229,14 @@ msgstr ""
 #: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:551
 #: src/Admin/SettingsPage.php:474
 #: src/Admin/SVGMapper.php:116
-#: src/Core/EndpointRegistry.php:751
+#: src/Core/EndpointRegistry.php:958
 msgid "Knowledge Graph"
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:552
 #: src/Admin/SettingsPage.php:469
 #: src/Admin/SVGMapper.php:121
-#: src/Core/EndpointRegistry.php:758
+#: src/Core/EndpointRegistry.php:965
 msgid "AI Sitemap"
 msgstr ""
 
@@ -6411,7 +6410,7 @@ msgstr ""
 
 #: src/Admin/SettingsPage.php:495
 #: src/Admin/SVGMapper.php:150
-#: src/Core/EndpointRegistry.php:760
+#: src/Core/EndpointRegistry.php:967
 msgid "AI Actions"
 msgstr ""
 
@@ -6422,7 +6421,7 @@ msgstr ""
 
 #: src/Admin/SettingsPage.php:505
 #: src/Admin/SVGMapper.php:133
-#: src/Core/EndpointRegistry.php:763
+#: src/Core/EndpointRegistry.php:970
 msgid "API Catalog"
 msgstr ""
 
@@ -6476,52 +6475,48 @@ msgstr ""
 msgid "Stop or quiesce every Cybermaps cron, web, and CLI worker first. This confirmation is manual because WordPress has no portable atomic transaction spanning the database and filesystem."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:604
+#: src/Admin/SettingsPage.php:605
 msgid "Type this exact confirmation:"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:607
+#: src/Admin/SettingsPage.php:608
 msgid "Resolve Pending Static Operation"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:610
+#: src/Admin/SettingsPage.php:611
 msgid "The stored recovery journal is malformed. Cybermaps will not delete it or mutate generated files automatically. Preserve a database backup and inspect the cybermaps_static_write_intent option before taking manual action."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardController.php:52
+#: src/Admin/SetupWizard/SetupWizardController.php:51
 msgid "Cybermaps could not prepare Quick Setup. No settings were changed."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardController.php:70
+#: src/Admin/SetupWizard/SetupWizardController.php:68
 msgid "The Quick Setup preset changed while it was being prepared. Try again."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardController.php:73
+#: src/Admin/SetupWizard/SetupWizardController.php:76
 msgid "Prepare Quick Setup before applying it."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardController.php:85
+#: src/Admin/SetupWizard/SetupWizardController.php:88
 msgid "Quick Setup applied successfully."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardController.php:94
+#: src/Admin/SetupWizard/SetupWizardController.php:97
 msgid "Quick Setup could not be applied. Review your current settings and try again."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardController.php:112
+#: src/Admin/SetupWizard/SetupWizardController.php:115
 msgid "The Quick Setup request is missing or exceeds its safe size limit."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardController.php:118
+#: src/Admin/SetupWizard/SetupWizardController.php:121
 msgid "The Quick Setup request is invalid JSON."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardController.php:122
+#: src/Admin/SetupWizard/SetupWizardController.php:125
 msgid "The Quick Setup request must be an object."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardController.php:135
-msgid "The prepared Quick Setup configuration is missing or too large."
 msgstr ""
 
 #: src/Admin/SetupWizard/SetupWizardPage.php:22
@@ -6534,7 +6529,7 @@ msgid "Skip for now"
 msgstr ""
 
 #: src/Admin/SetupWizard/SetupWizardPage.php:32
-#: assets/js/setup-wizard.js:286
+#: assets/js/setup-wizard.js:285
 msgid "Getting your site ready…"
 msgstr ""
 
@@ -6542,167 +6537,183 @@ msgstr ""
 msgid "Quick Setup requires JavaScript. You can configure every Cybermaps setting from its normal workspace."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:37
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:49
 msgid "This Quick Setup session is out of date. Reload it before continuing."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:43
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:61
+msgid "The Quick Setup request has an invalid schema."
+msgstr ""
+
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:65
 msgid "Quick Setup answers must be an object."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:72
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:70
+msgid "Quick Setup answers do not match the documented schema."
+msgstr ""
+
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:74
+msgid "Quick Setup answer types are invalid."
+msgstr ""
+
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:83
+msgid "Quick Setup answer values exceed their documented bounds."
+msgstr ""
+
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:109
 msgid "Cybermaps could not prepare the Quick Setup preset."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:85
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:122
 msgid "Matches the kind of website you selected."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:92
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:129
 msgid "Makes the homepage part of the sitemap."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:93
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:94
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:101
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:102
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:130
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:131
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:138
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:139
 msgid "Matches the publishing style you selected."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:95
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:132
 msgid "Keeps empty archive pages out of the sitemap."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:96
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:133
 msgid "Helps crawlers find your public maps."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:97
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:134
 msgid "Keeps dynamic sitemap delivery responsive."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:98
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:135
 msgid "Uses Cybermaps as the main sitemap."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:99
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:136
 msgid "Makes the visual sitemap available when you need it."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:100
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:137
 msgid "Uses a balanced level of media discovery."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:104
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:141
 msgid "Publishes recent articles in the RSS sitemap."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:107
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:144
 msgid "Includes the languages already active on this site."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:116
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:153
 msgid "Publishes a machine-readable guide to your content."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:117
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:154
 msgid "Keeps AI discovery switched off for now."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:121
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:158
 msgid "Turns off the notification feature that depends on AI discovery."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:126
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:163
 msgid "Points compatible tools to your discovery publications."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:127
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:164
 msgid "Adds useful context to AI sitemap entries."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:128
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:165
 msgid "Connects the AI guide to your sitemap."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:130
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:167
 msgid "Publishes discovery guides for active site languages."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:136
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:173
 msgid "Uses the public content types available on this site."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:139
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:176
 msgid "Uses the same public content in the AI sitemap."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:150
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:187
 msgid "Lists the basic discovery publications while preserving existing choices."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:153
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:190
 msgid "Uses your public introduction as the initial site summary."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:156
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:193
 msgid "Uses your public introduction as the initial discovery summary."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:162
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:199
 msgid "Matches who this website represents."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:163
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:200
 msgid "Keeps a compatible detailed identity type when one is already set."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:164
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:201
 msgid "Sets the public name for this website."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:165
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:202
 msgid "Sets the public introduction for this website."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:166
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:203
 msgid "Sets the public logo or profile image."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:168
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:205
 msgid "Connects the public identity to AI discovery output."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:178
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:215
 msgid "Shows crawler activity observed by WordPress."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:179
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:216
 msgid "Skips crawler activity logging."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:182
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:219
 msgid "Masks IP addresses before activity is stored."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:183
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:220
 msgid "Keeps activity for 30 days."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:189
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:226
 msgid "Lets WordPress observe eligible discovery requests."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:190
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:227
 msgid "Favors static delivery for lower runtime work."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:202
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:239
 msgid "Add the public name for this website."
 msgstr ""
 
 #. translators: %s: Quick Setup question identifier.
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:284
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:316
 #, php-format
 msgid "Choose an answer for %s."
 msgstr ""
@@ -7366,7 +7377,7 @@ msgid "LLMS Compact"
 msgstr ""
 
 #: src/Admin/SVGMapper.php:94
-#: src/Core/EndpointRegistry.php:749
+#: src/Core/EndpointRegistry.php:956
 msgid "LLMS Full"
 msgstr ""
 
@@ -7848,171 +7859,171 @@ msgstr ""
 msgid "A persistent WordPress object-cache drop-in is active."
 msgstr ""
 
-#: src/Audit/AuditExporter.php:48
+#: src/Audit/AuditExporter.php:49
 msgid "Run ID"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:48
+#: src/Audit/AuditExporter.php:49
 msgid "Resource Key"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:48
+#: src/Audit/AuditExporter.php:49
 msgid "Post Type"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:48
+#: src/Audit/AuditExporter.php:49
 msgid "Object ID"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:48
-#: src/Audit/AuditExporter.php:104
+#: src/Audit/AuditExporter.php:49
+#: src/Audit/AuditExporter.php:105
 msgid "Title"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:48
+#: src/Audit/AuditExporter.php:49
 msgid "URL"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:48
+#: src/Audit/AuditExporter.php:49
 msgid "Severity"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:48
+#: src/Audit/AuditExporter.php:49
 msgid "Summary"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:48
+#: src/Audit/AuditExporter.php:49
 msgid "Evidence"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:48
+#: src/Audit/AuditExporter.php:49
 msgid "Recommendation"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:82
-#: src/Audit/DiscoveryReportExporter.php:107
+#: src/Audit/AuditExporter.php:83
+#: src/Audit/DiscoveryReportExporter.php:108
 msgid "Generated by CYBER MAPS"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:100
+#: src/Audit/AuditExporter.php:101
 msgid "Content priorities"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:100
+#: src/Audit/AuditExporter.php:101
 msgid "Action inventory"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:102
+#: src/Audit/AuditExporter.php:103
 msgid "Content details"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:102
+#: src/Audit/AuditExporter.php:103
 msgid "Findings and recommendations"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:103
+#: src/Audit/AuditExporter.php:104
 msgid "Measurements capture visible text, media, stored internal links, and assigned navigation in WordPress at report time, using the saved policy for a clear, repeatable action plan."
 msgstr ""
 
-#: src/Audit/AuditExporter.php:106
+#: src/Audit/AuditExporter.php:107
 msgid "Recommended review"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:120
+#: src/Audit/AuditExporter.php:123
 msgid "No findings were recorded for this report."
 msgstr ""
 
-#: src/Audit/AuditExporter.php:160
+#: src/Audit/AuditExporter.php:163
 msgid "Resolved since baseline"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:162
+#: src/Audit/AuditExporter.php:165
 msgid "Added since baseline"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:172
+#: src/Audit/AuditExporter.php:175
 msgid "Thin content"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:173
+#: src/Audit/AuditExporter.php:176
 msgid "Visible text below the configured policy minimum."
 msgstr ""
 
-#: src/Audit/AuditExporter.php:174
+#: src/Audit/AuditExporter.php:177
 msgid "Thin Content Action Report"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:177
+#: src/Audit/AuditExporter.php:180
 msgid "Freshness review"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:178
+#: src/Audit/AuditExporter.php:181
 msgid "Content beyond its configured review interval."
 msgstr ""
 
-#: src/Audit/AuditExporter.php:179
+#: src/Audit/AuditExporter.php:182
 msgid "Content Freshness Action Report"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:182
+#: src/Audit/AuditExporter.php:185
 msgid "Media review"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:183
+#: src/Audit/AuditExporter.php:186
 msgid "Content without detected stored media where policy requests review."
 msgstr ""
 
-#: src/Audit/AuditExporter.php:184
+#: src/Audit/AuditExporter.php:187
 msgid "Media Opportunity Action Report"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:187
+#: src/Audit/AuditExporter.php:190
 msgid "Potential orphan"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:188
+#: src/Audit/AuditExporter.php:191
 msgid "No stored page or assigned navigation item links to the resource."
 msgstr ""
 
-#: src/Audit/AuditExporter.php:189
+#: src/Audit/AuditExporter.php:192
 msgid "Potential Orphan Content Action Report"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:192
+#: src/Audit/AuditExporter.php:195
 msgid "No homepage path"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:193
+#: src/Audit/AuditExporter.php:196
 msgid "Links exist, but the local graph has no path from the homepage or assigned navigation."
 msgstr ""
 
-#: src/Audit/AuditExporter.php:194
+#: src/Audit/AuditExporter.php:197
 msgid "Homepage Reachability Action Report"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:197
+#: src/Audit/AuditExporter.php:200
 msgid "Three-plus clicks deep"
 msgstr ""
 
-#: src/Audit/AuditExporter.php:198
+#: src/Audit/AuditExporter.php:201
 msgid "The shortest stored path is at least three clicks from the homepage."
 msgstr ""
 
-#: src/Audit/AuditExporter.php:199
+#: src/Audit/AuditExporter.php:202
 msgid "Internal Link Depth Action Report"
 msgstr ""
 
 #. translators: 1: resource count, 2: unique content-link count, 3: assigned-navigation reference count.
-#: src/Audit/AuditExporter.php:213
+#: src/Audit/AuditExporter.php:216
 #, php-format
 msgid "Local link coverage: %1$d stored resources, %2$d unique content links, and %3$d assigned navigation references."
 msgstr ""
 
-#: src/Audit/AuditExporter.php:219
+#: src/Audit/AuditExporter.php:222
 msgid "The bounded scan was incomplete, so Cybermaps suppressed internal-link findings."
 msgstr ""
 
-#: src/Audit/AuditExporter.php:221
+#: src/Audit/AuditExporter.php:224
 msgid "Homepage click depth could not be established from local WordPress data."
 msgstr ""
 
@@ -8056,19 +8067,19 @@ msgstr ""
 msgid "Cybermaps could not finalize the content report."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:1002
+#: src/Audit/AuditRunRepository.php:1009
 msgid "Only a running Cybermaps content report can be modified."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:1014
+#: src/Audit/AuditRunRepository.php:1021
 msgid "Cybermaps could not read the saved content report data."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:1021
+#: src/Audit/AuditRunRepository.php:1028
 msgid "Cybermaps could not update the content report lock."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:1049
+#: src/Audit/AuditRunRepository.php:1056
 msgid "Cybermaps could not encode the content report lock."
 msgstr ""
 
@@ -8126,35 +8137,35 @@ msgstr ""
 msgid "The Content Intelligence Report lock expired or changed ownership, so this run stopped safely."
 msgstr ""
 
-#: src/Audit/DiscoveryReportExporter.php:31
+#: src/Audit/DiscoveryReportExporter.php:32
 msgid "Current publication intent and public HTTP validation"
 msgstr ""
 
-#: src/Audit/DiscoveryReportExporter.php:34
+#: src/Audit/DiscoveryReportExporter.php:35
 msgid "Publications"
 msgstr ""
 
-#: src/Audit/DiscoveryReportExporter.php:48
+#: src/Audit/DiscoveryReportExporter.php:49
 msgid "Publication inventory"
 msgstr ""
 
-#: src/Audit/DiscoveryReportExporter.php:48
+#: src/Audit/DiscoveryReportExporter.php:49
 msgid "Discovery endpoints"
 msgstr ""
 
-#: src/Audit/DiscoveryReportExporter.php:49
+#: src/Audit/DiscoveryReportExporter.php:50
 msgid "This report records a point-in-time HTTP validation. Static files, CDNs, server rules, and later configuration changes can alter public delivery after generation."
 msgstr ""
 
-#: src/Audit/DiscoveryReportExporter.php:51
+#: src/Audit/DiscoveryReportExporter.php:52
 msgid "Purpose"
 msgstr ""
 
-#: src/Audit/DiscoveryReportExporter.php:52
+#: src/Audit/DiscoveryReportExporter.php:53
 msgid "HTTP validation"
 msgstr ""
 
-#: src/Audit/DiscoveryReportExporter.php:73
+#: src/Audit/DiscoveryReportExporter.php:74
 msgid "No discovery publications were registered when this report was generated."
 msgstr ""
 
@@ -8660,263 +8671,263 @@ msgstr ""
 msgid "Used for link previews in Telegram conversations."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:745
+#: src/Core/EndpointRegistry.php:952
 msgid "AI Discovery Manifest"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:745
+#: src/Core/EndpointRegistry.php:952
 msgid "Primary machine-readable discovery manifest."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:746
+#: src/Core/EndpointRegistry.php:953
 msgid "ADP Discovery Manifest"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:746
+#: src/Core/EndpointRegistry.php:953
 msgid "AI Discovery Protocol 3.0 Level 3 manifest."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:747
+#: src/Core/EndpointRegistry.php:954
 msgid "Discovery Index"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:747
+#: src/Core/EndpointRegistry.php:954
 msgid "Index of Cybermaps discovery publications."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:748
+#: src/Core/EndpointRegistry.php:955
 msgid "LLMS Summary"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:748
+#: src/Core/EndpointRegistry.php:955
 msgid "Concise site summary for language models."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:749
+#: src/Core/EndpointRegistry.php:956
 msgid "Opt-in complete literal publication of eligible stored content."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:750
+#: src/Core/EndpointRegistry.php:957
 msgid "Experimental literal briefing with deterministic budget accounting."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:751
+#: src/Core/EndpointRegistry.php:958
 msgid "Schema.org identity and relationship graph."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:752
+#: src/Core/EndpointRegistry.php:959
 msgid "AI Activity Feed"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:752
+#: src/Core/EndpointRegistry.php:959
 msgid "JSON Feed publication of recent content."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:753
+#: src/Core/EndpointRegistry.php:960
 msgid "Recent Updates"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:753
+#: src/Core/EndpointRegistry.php:960
 msgid "Bounded seven-day ADP change stream for current public content."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:754
+#: src/Core/EndpointRegistry.php:961
 msgid "ADP News Context"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:754
+#: src/Core/EndpointRegistry.php:961
 msgid "Bounded Markdown context for recent eligible news content."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:755
+#: src/Core/EndpointRegistry.php:962
 msgid "ADP Speakable News"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:755
+#: src/Core/EndpointRegistry.php:962
 msgid "Schema.org speakable summaries for recent eligible content."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:756
+#: src/Core/EndpointRegistry.php:963
 msgid "ADP News Changelog"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:756
+#: src/Core/EndpointRegistry.php:963
 msgid "Version metadata for the Level 3 news publication surface."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:757
+#: src/Core/EndpointRegistry.php:964
 msgid "ADP News Archive"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:757
+#: src/Core/EndpointRegistry.php:964
 msgid "Bounded newline-delimited archive of eligible content."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:758
+#: src/Core/EndpointRegistry.php:965
 msgid "AI-oriented XML content inventory."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:759
+#: src/Core/EndpointRegistry.php:966
 msgid "AI Usage Policy"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:759
+#: src/Core/EndpointRegistry.php:966
 msgid "Machine-readable permissions for AI uses."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:760
+#: src/Core/EndpointRegistry.php:967
 msgid "Machine-readable action and capability inventory."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:761
+#: src/Core/EndpointRegistry.php:968
 msgid "Agent Skill Site Guide"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:761
+#: src/Core/EndpointRegistry.php:968
 msgid "Agent Skills-compatible guide to the site's public read-only resources."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:762
+#: src/Core/EndpointRegistry.php:969
 msgid "Agent Skills Index"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:762
+#: src/Core/EndpointRegistry.php:969
 msgid "Draft discovery index for the canonical Cybermaps site-guide skill."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:763
+#: src/Core/EndpointRegistry.php:970
 msgid "Dynamic Linkset catalog using the RFC 9727 media-type profile and api-catalog relation."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:764
+#: src/Core/EndpointRegistry.php:971
 msgid "Agentic Resource Catalog"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:764
+#: src/Core/EndpointRegistry.php:971
 msgid "Draft ARD catalog of active Cybermaps discovery resources."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:765
+#: src/Core/EndpointRegistry.php:972
 msgid "Agent Registration Guide"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:765
+#: src/Core/EndpointRegistry.php:972
 msgid "Opt-in Auth.md instructions for user-claimed OAuth device authorization."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:766
+#: src/Core/EndpointRegistry.php:973
 msgid "MCP Server Card Compatibility URL"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:766
+#: src/Core/EndpointRegistry.php:973
 msgid "Experimental well-known compatibility route for the current MCP Server Card draft."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:767
+#: src/Core/EndpointRegistry.php:974
 msgid "OAuth Authorization Server Metadata"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:767
+#: src/Core/EndpointRegistry.php:974
 msgid "RFC 8414 metadata describing how an agent obtains and refreshes access tokens."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:768
+#: src/Core/EndpointRegistry.php:975
 msgid "OAuth Protected Resource Metadata"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:768
+#: src/Core/EndpointRegistry.php:975
 msgid "RFC 9728 metadata identifying the MCP resource, issuers, and supported scopes."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:769
+#: src/Core/EndpointRegistry.php:976
 msgid "OpenAPI Description"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:769
+#: src/Core/EndpointRegistry.php:976
 msgid "Read-only public Cybermaps REST API contract."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:811
+#: src/Core/EndpointRegistry.php:977
 msgid "REST Discovery Index"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:812
+#: src/Core/EndpointRegistry.php:977
 msgid "REST API index of primary Cybermaps publications."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:824
+#: src/Core/EndpointRegistry.php:978
 msgid "Public Discovery Health"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:825
+#: src/Core/EndpointRegistry.php:978
 msgid "Bounded, non-sensitive health status for public Cybermaps discovery APIs."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:837
+#: src/Core/EndpointRegistry.php:979
 msgid "Optional dynamic Cybermaps MCP resource and tool endpoint."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:845
+#: src/Core/EndpointRegistry.php:980
 msgid "MCP Server Card"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:846
+#: src/Core/EndpointRegistry.php:980
 msgid "Current experimental MCP Server Card for the active Cybermaps MCP endpoint."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:856
+#: src/Core/EndpointRegistry.php:981
 msgid "Budgeted Site Briefing REST API"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:857
+#: src/Core/EndpointRegistry.php:981
 msgid "REST representation of the experimental budgeted site briefing."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:863
+#: src/Core/EndpointRegistry.php:982
 msgid "REST Search"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:864
+#: src/Core/EndpointRegistry.php:982
 msgid "Bounded public search over the configured, indexable AI publication inventory."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:870
+#: src/Core/EndpointRegistry.php:983
 msgid "Private Publication URLs"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:871
+#: src/Core/EndpointRegistry.php:983
 msgid "Secret-authenticated discovery and sitemap URL inventory."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:877
+#: src/Core/EndpointRegistry.php:984
 msgid "Private Publication Status"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:878
+#: src/Core/EndpointRegistry.php:984
 msgid "Secret-authenticated publication and static-sync status."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:884
+#: src/Core/EndpointRegistry.php:985
 msgid "Latest Content Report"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:885
+#: src/Core/EndpointRegistry.php:985
 msgid "Secret-authenticated latest completed content report with a bounded synchronous JSON snapshot."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:891
+#: src/Core/EndpointRegistry.php:986
 msgid "Content Report Run"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:892
+#: src/Core/EndpointRegistry.php:986
 msgid "Secret-authenticated saved content report by run ID with a bounded synchronous JSON snapshot."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:898
+#: src/Core/EndpointRegistry.php:987
 msgid "Static Publication Purge"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:899
+#: src/Core/EndpointRegistry.php:987
 msgid "Administrator-only removal of owned static publication files."
 msgstr ""
 
@@ -8978,11 +8989,11 @@ msgstr ""
 msgid "Static ownership migration did not verify its ownership schema and was deferred."
 msgstr ""
 
-#: src/Discovery/ADPNews.php:76
+#: src/Discovery/ADPNews.php:77
 msgid "An ADP news publication exceeded its safe output limit."
 msgstr ""
 
-#: src/Discovery/ADPNews.php:252
+#: src/Discovery/ADPNews.php:254
 msgid "An ADP news publication could not be encoded as JSON."
 msgstr ""
 
@@ -9053,30 +9064,30 @@ msgstr ""
 msgid "The public IndexNow key URL responded correctly."
 msgstr ""
 
-#: src/Discovery/KnowledgeGraph.php:110
+#: src/Discovery/KnowledgeGraph.php:109
 msgid "Informational Content Inventory"
 msgstr ""
 
-#: src/Discovery/KnowledgeGraph.php:111
+#: src/Discovery/KnowledgeGraph.php:110
 msgid "Public content types and taxonomies classified as informational by Cybermaps."
 msgstr ""
 
-#: src/Discovery/KnowledgeGraph.php:117
+#: src/Discovery/KnowledgeGraph.php:116
 msgid "Transactional Content Inventory"
 msgstr ""
 
-#: src/Discovery/KnowledgeGraph.php:118
+#: src/Discovery/KnowledgeGraph.php:117
 msgid "Public content types and taxonomies classified as transactional by Cybermaps."
 msgstr ""
 
 #. translators: %s: public post type label.
-#: src/Discovery/KnowledgeGraph.php:168
+#: src/Discovery/KnowledgeGraph.php:167
 #, php-format
 msgid "Public %s content type."
 msgstr ""
 
 #. translators: %s: public taxonomy label.
-#: src/Discovery/KnowledgeGraph.php:259
+#: src/Discovery/KnowledgeGraph.php:258
 #, php-format
 msgid "Public %s taxonomy."
 msgstr ""
@@ -9101,7 +9112,7 @@ msgstr ""
 msgid "Another Cybermaps server-configuration operation holds the lock. No file was changed."
 msgstr ""
 
-#: src/Discovery/ManagedHtaccess.php:88
+#: src/Discovery/ManagedHtaccess.php:87
 msgid "Automatic configuration requires direct WordPress filesystem access. No credentials are stored."
 msgstr ""
 
@@ -9174,17 +9185,17 @@ msgstr ""
 msgid "Markdown representation exceeds the safe output limit."
 msgstr ""
 
-#: src/Discovery/NotFoundSuggestions.php:85
+#: src/Discovery/NotFoundSuggestions.php:84
 msgid "Not Found"
 msgstr ""
 
 #. translators: %s: requested URL path.
-#: src/Discovery/NotFoundSuggestions.php:89
+#: src/Discovery/NotFoundSuggestions.php:88
 #, php-format
 msgid "The requested resource at %s does not exist or has been moved."
 msgstr ""
 
-#: src/Discovery/NotFoundSuggestions.php:97
+#: src/Discovery/NotFoundSuggestions.php:96
 msgid "Related eligible resources are listed in suggested_alternatives."
 msgstr ""
 
@@ -9214,7 +9225,7 @@ msgstr ""
 msgid "Cybermaps did not publish %1$s because its complete body exceeded the %2$s-byte safety limit. No partial output was returned or written."
 msgstr ""
 
-#: src/Discovery/RAGChunk.php:117
+#: src/Discovery/RAGChunk.php:116
 msgid "A RAG chunk publication could not be encoded as JSON."
 msgstr ""
 
@@ -9843,7 +9854,7 @@ msgstr ""
 
 #: src/MCP/OAuth/DeviceAuthorizationPage.php:89
 #: assets/js/admin-command-center.js:790
-#: assets/js/setup-wizard.js:314
+#: assets/js/setup-wizard.js:313
 msgid "Continue"
 msgstr ""
 
@@ -9884,7 +9895,7 @@ msgid "The sitemap occupancy background task returned an invalid scheduling erro
 msgstr ""
 
 #. translators: %s: site name
-#: src/Sitemap/RSSProvider.php:210
+#: src/Sitemap/RSSProvider.php:209
 #, php-format
 msgid "Latest content from %s"
 msgstr ""
@@ -10371,27 +10382,27 @@ msgstr ""
 msgid "Choose a public image"
 msgstr ""
 
-#: assets/js/setup-wizard.js:289
+#: assets/js/setup-wizard.js:288
 msgid "Quick Setup could not be loaded."
 msgstr ""
 
-#: assets/js/setup-wizard.js:302
+#: assets/js/setup-wizard.js:301
 msgid "of"
 msgstr ""
 
-#: assets/js/setup-wizard.js:311
+#: assets/js/setup-wizard.js:310
 msgid "Exit setup"
 msgstr ""
 
-#: assets/js/setup-wizard.js:313
+#: assets/js/setup-wizard.js:312
 msgid "Back"
 msgstr ""
 
-#: assets/js/setup-wizard.js:314
+#: assets/js/setup-wizard.js:313
 msgid "Applying your setup…"
 msgstr ""
 
-#: assets/js/setup-wizard.js:314
+#: assets/js/setup-wizard.js:313
 msgid "Finish setup"
 msgstr ""
 

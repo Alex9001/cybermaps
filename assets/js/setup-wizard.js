@@ -266,7 +266,6 @@
                 setPreview(result);
                 return ajax('cybermaps_setup_wizard_apply', {
                     payload: payload(),
-                    configuration: result.configuration,
                     environment_hash: result.environment_hash,
                     content_hash: result.preview.content_hash,
                     configuration_hash: result.preview.configuration_hash

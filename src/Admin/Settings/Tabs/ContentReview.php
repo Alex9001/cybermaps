@@ -246,13 +246,7 @@ final class ContentReview implements SettingsTab {
 	}
 
 	private static function requested_run_id(): int {
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only selection of an already completed report.
-		if ( ! isset( $_GET['cybermaps_run_id'] ) || ! is_scalar( $_GET['cybermaps_run_id'] ) ) {
-			return 0;
-		}
-		$value = absint( wp_unslash( (string) $_GET['cybermaps_run_id'] ) );
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended
-		return $value;
+		return self::review_state()['run_id'];
 	}
 
 	/** @return array<string,mixed>|null */
@@ -297,17 +291,44 @@ final class ContentReview implements SettingsTab {
 	}
 
 	private static function report_deleted_notice_requested(): bool {
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only success notice after a nonce-protected action.
-		$value = isset( $_GET['cybermaps_report_deleted'] ) && is_scalar( $_GET['cybermaps_report_deleted'] )
-			? absint( wp_unslash( (string) $_GET['cybermaps_report_deleted'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only notice after the protected action.
-		return $value > 0;
+		return self::review_state()['deleted'];
 	}
 
 	private static function report_busy_notice_requested(): bool {
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only result notice after a nonce-protected run request.
-		$value = isset( $_GET['cybermaps_report_busy'] ) && is_scalar( $_GET['cybermaps_report_busy'] )
-			? sanitize_text_field( wp_unslash( (string) $_GET['cybermaps_report_busy'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only notice after the protected action.
-		return '1' === $value;
+		return self::review_state()['busy'];
+	}
+
+	/** @return array{run_id:int,deleted:bool,busy:bool} */
+	private static function review_state(): array {
+		$empty = array(
+			'run_id'  => 0,
+			'deleted' => false,
+			'busy'    => false,
+		);
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return $empty;
+		}
+		$method = isset( $_SERVER['REQUEST_METHOD'] ) && is_scalar( $_SERVER['REQUEST_METHOD'] )
+			? strtoupper( sanitize_text_field( wp_unslash( (string) $_SERVER['REQUEST_METHOD'] ) ) )
+			: 'GET';
+		if ( 'GET' !== $method ) {
+			return $empty;
+		}
+		$nonce = isset( $_GET['_wpnonce'] ) && is_scalar( $_GET['_wpnonce'] )
+			? sanitize_text_field( wp_unslash( (string) $_GET['_wpnonce'] ) )
+			: '';
+		if ( '' === $nonce || ! wp_verify_nonce( $nonce, 'cybermaps_content_review_state' ) ) {
+			return $empty;
+		}
+
+		$run_id  = isset( $_GET['cybermaps_run_id'] ) && is_scalar( $_GET['cybermaps_run_id'] )
+			? absint( wp_unslash( (string) $_GET['cybermaps_run_id'] ) ) : 0;
+		$deleted = isset( $_GET['cybermaps_report_deleted'] ) && is_scalar( $_GET['cybermaps_report_deleted'] )
+			? absint( wp_unslash( (string) $_GET['cybermaps_report_deleted'] ) ) > 0 : false;
+		$busy    = isset( $_GET['cybermaps_report_busy'] ) && is_scalar( $_GET['cybermaps_report_busy'] )
+			? '1' === sanitize_text_field( wp_unslash( (string) $_GET['cybermaps_report_busy'] ) ) : false;
+
+		return compact( 'run_id', 'deleted', 'busy' );
 	}
 
 	private static function render_reports_heading(): void {
@@ -415,6 +436,7 @@ final class ContentReview implements SettingsTab {
 				<?php if ( empty( $run['is_baseline'] ) ) : ?>
 					<input type="hidden" name="action" value="cybermaps_delete_content_audit" form="cybermaps-delete-content-audit-form">
 					<input type="hidden" name="run_id" value="<?php echo esc_attr( (string) $run_id ); ?>" form="cybermaps-delete-content-audit-form">
+					<input type="hidden" name="cybermaps_delete_authorization" value="<?php echo esc_attr( wp_create_nonce( 'cybermaps_delete_content_audit' ) ); ?>" form="cybermaps-delete-content-audit-form">
 					<input type="hidden" name="cybermaps_delete_nonce" value="<?php echo esc_attr( wp_create_nonce( 'cybermaps_delete_content_audit_' . $run_id ) ); ?>" form="cybermaps-delete-content-audit-form">
 					<button type="submit" form="cybermaps-delete-content-audit-form" class="button button-link-delete" data-cybermaps-confirm="<?php echo esc_attr( __( 'Delete this saved report? This cannot be undone.', 'cybermaps' ) ); ?>"><?php esc_html_e( 'Delete report', 'cybermaps' ); ?></button>
 				<?php endif; ?>
@@ -658,13 +680,16 @@ final class ContentReview implements SettingsTab {
 	}
 
 	private static function report_url( int $run_id ): string {
-		return add_query_arg(
-			array(
-				'page'             => 'cybermaps-settings',
-				'tab'              => 'review',
-				'cybermaps_run_id' => $run_id,
+		return wp_nonce_url(
+			add_query_arg(
+				array(
+					'page'             => 'cybermaps-settings',
+					'tab'              => 'review',
+					'cybermaps_run_id' => $run_id,
+				),
+				admin_url( 'admin.php' )
 			),
-			admin_url( 'admin.php' )
+			'cybermaps_content_review_state'
 		);
 	}
 

@@ -61,87 +61,20 @@ final class ReportPresentation {
 		return '' !== $language ? $language : 'en-US';
 	}
 
-	/**
-	 * Fixed palettes only; settings never enter the CSS declaration.
-	 */
-	public static function theme_css(): string {
-		$palettes = array(
-			'swiss'      => array(
-				'bg'          => '#eef2f6',
-				'surface'     => '#ffffff',
-				'primary'     => '#172033',
-				'primary_2'   => '#26344a',
-				'accent'      => '#2271b1',
-				'accent_soft' => '#edf6fc',
-				'text'        => '#334155',
-				'muted'       => '#64748b',
-				'border'      => '#dbe2ea',
-				'success'     => '#047857',
-				'warning'     => '#b45309',
-				'danger'      => '#b91c1c',
-			),
-			'minimal'    => array(
-				'bg'          => '#ffffff',
-				'surface'     => '#ffffff',
-				'primary'     => '#18181b',
-				'primary_2'   => '#27272a',
-				'accent'      => '#18181b',
-				'accent_soft' => '#f4f4f5',
-				'text'        => '#3f3f46',
-				'muted'       => '#71717a',
-				'border'      => '#e4e4e7',
-				'success'     => '#166534',
-				'warning'     => '#92400e',
-				'danger'      => '#991b1b',
-			),
-			'mono'       => array(
-				'bg'          => '#f4f4f4',
-				'surface'     => '#ffffff',
-				'primary'     => '#000000',
-				'primary_2'   => '#202020',
-				'accent'      => '#505050',
-				'accent_soft' => '#f0f0f0',
-				'text'        => '#303030',
-				'muted'       => '#707070',
-				'border'      => '#d8d8d8',
-				'success'     => '#235f23',
-				'warning'     => '#75530b',
-				'danger'      => '#8a2424',
-			),
-			'midnight'   => array(
-				'bg'          => '#0f172a',
-				'surface'     => '#172033',
-				'primary'     => '#08101f',
-				'primary_2'   => '#111c31',
-				'accent'      => '#38bdf8',
-				'accent_soft' => '#1e293b',
-				'text'        => '#dbeafe',
-				'muted'       => '#94a3b8',
-				'border'      => '#334155',
-				'success'     => '#34d399',
-				'warning'     => '#fbbf24',
-				'danger'      => '#f87171',
-			),
-			'cyberbrand' => array(
-				'bg'          => '#0a0a0a',
-				'surface'     => '#141414',
-				'primary'     => '#000000',
-				'primary_2'   => '#111111',
-				'accent'      => '#ffc734',
-				'accent_soft' => '#211d12',
-				'text'        => '#e5e7eb',
-				'muted'       => '#9ca3af',
-				'border'      => '#303030',
-				'success'     => '#4ade80',
-				'warning'     => '#fbbf24',
-				'danger'      => '#f87171',
-			),
-		);
-		$palette  = $palettes[ self::theme() ] ?? $palettes['swiss'];
-		$css      = ':root{';
-		foreach ( $palette as $name => $value ) {
-			$css .= '--cmr-' . str_replace( '_', '-', $name ) . ':' . $value . ';';
-		}
-		return $css . '}';
+	/** Enqueue and print the registered standalone report stylesheet. */
+	public static function stylesheet_markup(): string {
+		$url = CYBERMAPS_PLUGIN_URL . 'assets/css/report.css';
+		wp_enqueue_style( 'cybermaps-report', $url, array(), CYBERMAPS_VERSION );
+
+		ob_start();
+		wp_print_styles( array( 'cybermaps-report' ) );
+		$markup = ob_get_clean();
+
+		return \is_string( $markup ) ? $markup : '';
+	}
+
+	/** Return the fixed body class that selects one of the five report themes. */
+	public static function theme_class(): string {
+		return 'cm-report-theme-' . self::theme();
 	}
 }

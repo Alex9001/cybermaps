@@ -8,6 +8,7 @@ use Cybermaps\Content\VisibleTextExtractor;
 use Cybermaps\Core\CacheManager;
 use Cybermaps\Core\BuildUnavailableException;
 use Cybermaps\Core\EndpointRegistry;
+use Cybermaps\Core\ProtocolOutput;
 use Cybermaps\Core\URLManager;
 use Cybermaps\Sitemap\Orchestrator;
 
@@ -76,8 +77,7 @@ class LLMS {
 		header( 'Content-Type: text/markdown; charset=utf-8' );
 
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text protocol body.
-			echo $output;
+			ProtocolOutput::emit( $output, 'text' );
 		}
 		exit;
 	}
@@ -476,7 +476,7 @@ class LLMS {
 	 * document when Core's hard publication ceiling is exceeded.
 	 */
 	private function serve_size_limit_error( PublicationSizeLimitException $error ): never {
-		$payload = wp_json_encode(
+		$payload = ProtocolOutput::json(
 			array(
 				'type'        => 'about:blank',
 				'title'       => __( 'LLMS publication exceeds the safe output limit.', 'cybermaps' ),
@@ -484,12 +484,8 @@ class LLMS {
 				'detail'      => $error->getMessage(),
 				'publication' => $error->get_publication(),
 				'max_bytes'   => $error->get_maximum_bytes(),
-			),
-			JSON_UNESCAPED_SLASHES
+			)
 		);
-		if ( ! is_string( $payload ) ) {
-			$payload = '{"title":"LLMS publication exceeds the safe output limit.","status":507}';
-		}
 
 		status_header( 507 );
 		nocache_headers();
@@ -498,8 +494,7 @@ class LLMS {
 		header( "Content-Security-Policy: default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'" );
 		header( 'Content-Type: application/problem+json; charset=utf-8' );
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- RFC 9457 JSON protocol body.
-			echo $payload;
+			ProtocolOutput::emit( $payload, 'json' );
 		}
 		exit;
 	}

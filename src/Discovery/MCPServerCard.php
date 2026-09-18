@@ -31,15 +31,13 @@ final class MCPServerCard {
 			return;
 		}
 
-		$output = \wp_json_encode( $this->get_card_data(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
-		$output = \is_string( $output ) ? $output : '{}';
+		$output = \Cybermaps\Core\ProtocolOutput::json( $this->get_card_data() );
 
 		Integrity::send_headers( $output, HOUR_IN_SECONDS );
 		\header( 'Content-Type: ' . self::MEDIA_TYPE );
 		\header( 'Access-Control-Allow-Origin: *' );
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Deliberate protocol JSON response.
-			echo $output;
+			\Cybermaps\Core\ProtocolOutput::emit( $output, 'json' );
 		}
 		exit;
 	}

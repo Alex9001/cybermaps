@@ -115,8 +115,8 @@ def main():
         matching_draft(state, tag, commit, beta, notes, title)
     run("python3", "bin/check-website.py", str(website), "--commit", commit,
         "--channel", "beta" if beta else "stable", capture=False)
-    for command in [("composer", "test"), ("composer", "run", "release:check"),
-                    ("composer", "run", "lint:complexity"), ("composer", "run", "release:build")]:
+    for command in [("composer", "test"), ("composer", "run", "lint:complexity"),
+                    ("composer", "run", "release:build"), ("composer", "run", "release:validate")]:
         run(*command, capture=False)
     archive = Path("clean") / ("cybermaps_" + version + ".zip")
     checksum = Path(str(archive) + ".sha256")

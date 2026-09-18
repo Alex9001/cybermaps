@@ -1350,6 +1350,21 @@ function wp_enqueue_style( $handle, $src = '', $deps = array(), $version = false
 }
 
 /**
+ * Mock wp_print_styles.
+ */
+function wp_print_styles( $handles = false ) {
+	$handles = false === $handles ? array_keys( $GLOBALS['cybermaps_mock_enqueued_styles'] ?? array() ) : (array) $handles;
+	foreach ( $handles as $handle ) {
+		$style = $GLOBALS['cybermaps_mock_enqueued_styles'][ $handle ] ?? null;
+		if ( ! is_array( $style ) ) {
+			continue;
+		}
+		$version = false === $style['version'] ? '' : '?ver=' . rawurlencode( (string) $style['version'] );
+		echo '<link rel="stylesheet" id="' . esc_attr( (string) $handle ) . '-css" href="' . esc_url( (string) $style['src'] . $version ) . '" media="' . esc_attr( (string) $style['media'] ) . '">';
+	}
+}
+
+/**
  * Mock wp_style_add_data
  */
 function wp_style_add_data( $handle, $key, $value ) {
@@ -1419,6 +1434,11 @@ function wp_parse_url( $url, $component = -1 ) {
  */
 function wp_unslash( $value ) {
 	return $value;
+}
+
+/** Mock wp_parse_str. */
+function wp_parse_str( $string, &$array ) {
+	parse_str( (string) $string, $array );
 }
 
 /**

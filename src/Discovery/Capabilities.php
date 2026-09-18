@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Cybermaps\Discovery;
 
 use Cybermaps\Core\EndpointRegistry;
+use Cybermaps\Core\ProtocolOutput;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -29,8 +30,7 @@ final class Capabilities {
 		Integrity::send_headers( $output );
 		header( 'Content-Type: text/markdown; charset=utf-8' );
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Deliberate Markdown response.
-			echo $output;
+			ProtocolOutput::emit( $output, 'text' );
 		}
 		exit;
 	}
@@ -111,7 +111,7 @@ final class Capabilities {
 	}
 
 	private function yaml_string( string $value ): string {
-		$encoded = \wp_json_encode( $this->plain_line( $value ), JSON_UNESCAPED_SLASHES );
+		$encoded = \wp_json_encode( $this->plain_line( $value ) );
 		return \is_string( $encoded ) ? $encoded : '""';
 	}
 }

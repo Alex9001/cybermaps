@@ -9,6 +9,9 @@ declare(strict_types=1);
 
 namespace Cybermaps\Discovery;
 
+use Cybermaps\Core\ProtocolOutput;
+use Cybermaps\Core\RequestInput;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -30,16 +33,17 @@ final class OpenAPI {
 			return;
 		}
 
-		$version = self::negotiate_version();
-		$output  = \wp_json_encode( $this->get_document( $version ), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
-		$output  = \is_string( $output ) ? $output : '{}';
+		$version = self::negotiate_version(
+			RequestInput::query_text( 'version', 16 ),
+			RequestInput::header( 'accept' )
+		);
+		$output  = ProtocolOutput::json( $this->get_document( $version ) );
 
 		Integrity::send_headers( $output, HOUR_IN_SECONDS );
 		header( 'Content-Type: ' . self::get_media_type( $version ) );
 		header( 'Vary: Accept' );
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Deliberate protocol JSON response.
-			echo $output;
+			ProtocolOutput::emit( $output, 'json' );
 		}
 		exit;
 	}
@@ -495,18 +499,13 @@ final class OpenAPI {
 	/**
 	 * Return the negotiated public representation version for the current request.
 	 */
-	public static function negotiate_version(): string {
-		$query_version = isset( $_GET['version'] ) && is_scalar( $_GET['version'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public version negotiation query, not a state-changing form.
-			? sanitize_text_field( wp_unslash( (string) $_GET['version'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public version negotiation query, not a state-changing form.
-			: '';
-		$normalized    = self::normalize_version( $query_version );
+	public static function negotiate_version( string $query_version, string $accept ): string {
+		$normalized = self::normalize_version( $query_version );
 		if ( null !== $normalized ) {
 			return $normalized;
 		}
 
-		$accept = isset( $_SERVER['HTTP_ACCEPT'] ) && is_scalar( $_SERVER['HTTP_ACCEPT'] )
-			? strtolower( sanitize_text_field( wp_unslash( (string) $_SERVER['HTTP_ACCEPT'] ) ) )
-			: '';
+		$accept = strtolower( $accept );
 		if ( preg_match( '/application\/vnd\.oai\.openapi\+json\s*;\s*version\s*=\s*3\.1(?:\.2)?/', $accept ) ) {
 			return self::COMPATIBILITY_VERSION;
 		}

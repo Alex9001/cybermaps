@@ -67,8 +67,7 @@ class NotFoundSuggestions {
 		header( 'Vary: User-Agent', false );
 		header( 'Content-Type: application/problem+json; charset=utf-8' );
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			echo wp_json_encode( $error_doc, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
+			\Cybermaps\Core\ProtocolOutput::emit( \Cybermaps\Core\ProtocolOutput::json( $error_doc ), 'json' );
 		}
 		exit;
 	}

@@ -541,7 +541,7 @@ final class IndexNowQueueRepository {
 		$table = IndexNowQueueSchema::table_name();
 		if ( $force ) {
 			$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-				$wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- SQL contains a sanitized integer ID list; scalar values remain placeholders.
+				$wpdb->prepare(
 					'SELECT id FROM %i WHERE state IN (%s, %s) ORDER BY next_attempt_at ASC, created_at ASC, id ASC LIMIT %d',
 					$table,
 					self::STATE_QUEUED,
@@ -585,38 +585,16 @@ final class IndexNowQueueRepository {
 		}
 
 		global $wpdb;
-		$id_list = implode( ',', array_map( 'intval', $ids ) );
-		if ( $force ) {
-			$sql = "UPDATE %i SET state = %s, claim_token = %s, lease_expires_at = %d, updated_at = %d WHERE id IN ({$id_list}) AND state IN (%s, %s)";
-			return (int) $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$wpdb->prepare(
-					$sql, // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- SQL contains a sanitized integer ID list; scalar values remain placeholders.
-					IndexNowQueueSchema::table_name(),
-					self::STATE_CLAIMED,
-					$token,
-					$now + $lease_ttl,
-					$now,
-					self::STATE_QUEUED,
-					self::STATE_CLAIMED
-				)
-			);
+		$ids = array_values( array_filter( array_map( 'intval', $ids ), static fn( int $id ): bool => $id > 0 ) );
+		if ( array() === $ids ) {
+			return 0;
 		}
 
-		$sql = "UPDATE %i SET state = %s, claim_token = %s, lease_expires_at = %d, updated_at = %d WHERE id IN ({$id_list}) AND ((state = %s AND next_attempt_at <= %d) OR (state = %s AND lease_expires_at > 0 AND lease_expires_at <= %d))";
-		return (int) $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$wpdb->prepare(
-				$sql, // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- SQL contains a sanitized integer ID list; scalar values remain placeholders.
-				IndexNowQueueSchema::table_name(),
-				self::STATE_CLAIMED,
-				$token,
-				$now + $lease_ttl,
-				$now,
-				self::STATE_QUEUED,
-				$now,
-				self::STATE_CLAIMED,
-				$now
-			)
-		);
+		$claimed = 0;
+		foreach ( array_chunk( $ids, 20 ) as $chunk ) {
+			$claimed += $this->claim_id_chunk( $chunk, $token, $now, $lease_ttl, $force );
+		}
+		return $claimed;
 	}
 
 	/**
@@ -678,20 +656,18 @@ final class IndexNowQueueRepository {
 		}
 
 		global $wpdb;
-		$id_list = implode( ',', array_map( 'intval', $ids ) );
-		$sql     = "SELECT url FROM %i WHERE id IN ({$id_list}) ORDER BY next_attempt_at ASC, created_at ASC, id ASC";
-		$rows    = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$wpdb->prepare(
-				$sql, // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- SQL contains a sanitized integer ID list.
-				IndexNowQueueSchema::table_name()
-			),
-			ARRAY_A
-		);
+		$ids = array_values( array_filter( array_map( 'intval', $ids ), static fn( int $id ): bool => $id > 0 ) );
+		if ( array() === $ids ) {
+			return array();
+		}
 
 		$urls = array();
-		foreach ( \is_array( $rows ) ? $rows : array() as $row ) {
-			if ( \is_string( $row['url'] ?? null ) ) {
-				$urls[] = $row['url'];
+		foreach ( array_chunk( $ids, 20 ) as $chunk ) {
+			$rows = $this->url_rows_for_id_chunk( $chunk );
+			foreach ( $rows as $row ) {
+				if ( \is_string( $row['url'] ?? null ) ) {
+					$urls[] = $row['url'];
+				}
 			}
 		}
 
@@ -702,44 +678,32 @@ final class IndexNowQueueRepository {
 	 * @param string[] $hashes
 	 */
 	private function requeue_repeated_claims( array $hashes, string $token, int $status_code, int $now ): int {
-		global $wpdb;
-		$hash_list = $this->quoted_hash_list( $hashes );
-		if ( '' === $hash_list ) {
+		$hashes = $this->valid_hashes( $hashes );
+		if ( array() === $hashes ) {
 			return 0;
 		}
 
-		$sql = "UPDATE %i SET state = %s, attempts = 0, next_attempt_at = %d, claim_token = %s, lease_expires_at = 0, queued_again = 0, last_status = %d, last_error = %s, updated_at = %d WHERE claim_token = %s AND url_hash IN ({$hash_list}) AND queued_again = 1";
-		return (int) $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- Hash lists contain only strict 64-character hexadecimal values; identifiers and all other values use prepare placeholders.
-			$wpdb->prepare(
-				$sql, // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- SQL contains a sanitized URL-hash list; scalar values remain placeholders.
-				IndexNowQueueSchema::table_name(),
-				self::STATE_QUEUED,
-				$now,
-				'',
-				$status_code,
-				'',
-				$now,
-				$token
-			)
-		);
+		$requeued = 0;
+		foreach ( array_chunk( $hashes, 20 ) as $chunk ) {
+			$requeued += $this->requeue_hash_chunk( $chunk, $token, $status_code, $now );
+		}
+		return $requeued;
 	}
 
 	/**
 	 * @param string[] $hashes
 	 */
 	private function delete_claims( array $hashes, string $token, bool $include_requeued ): int {
-		global $wpdb;
-		$hash_list = $this->quoted_hash_list( $hashes );
-		if ( '' === $hash_list ) {
+		$hashes = $this->valid_hashes( $hashes );
+		if ( array() === $hashes ) {
 			return 0;
 		}
 
-		$queued_again_sql = $include_requeued ? '' : ' AND queued_again = 0';
-		$sql              = "DELETE FROM %i WHERE claim_token = %s AND url_hash IN ({$hash_list}){$queued_again_sql}";
-
-		return (int) $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- Hash lists contain only strict 64-character hexadecimal values; identifiers and all other values use prepare placeholders.
-			$wpdb->prepare( $sql, IndexNowQueueSchema::table_name(), $token ) // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- SQL contains a sanitized URL-hash list.
-		);
+		$deleted = 0;
+		foreach ( array_chunk( $hashes, 20 ) as $chunk ) {
+			$deleted += $this->delete_hash_chunk( $chunk, $token, $include_requeued );
+		}
+		return $deleted;
 	}
 
 	private function release_for_retry( string $hash, string $token, int $attempts, int $next_attempt_at, int $status_code, string $reason, int $now ): bool {
@@ -768,18 +732,272 @@ final class IndexNowQueueRepository {
 	 * @return array<int,array<string,mixed>>
 	 */
 	private function claimed_rows( array $hashes, string $token ): array {
-		global $wpdb;
-		$hash_list = $this->quoted_hash_list( $hashes );
-		if ( '' === $hash_list ) {
+		$hashes = $this->valid_hashes( $hashes );
+		if ( array() === $hashes ) {
 			return array();
 		}
 
-		$sql  = "SELECT * FROM %i WHERE state = %s AND claim_token = %s AND url_hash IN ({$hash_list})";
-		$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- Hash lists contain only strict 64-character hexadecimal values; identifiers and all other values use prepare placeholders.
-			$wpdb->prepare( $sql, IndexNowQueueSchema::table_name(), self::STATE_CLAIMED, $token ), // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- SQL contains a sanitized URL-hash list.
+		$rows = array();
+		foreach ( array_chunk( $hashes, 20 ) as $chunk ) {
+			$rows = array_merge( $rows, $this->claimed_rows_for_hash_chunk( $chunk, $token ) );
+		}
+		return $rows;
+	}
+
+	/**
+	 * Claim one fixed-size ID chunk without interpolating SQL.
+	 *
+	 * @param int[] $ids
+	 */
+	private function claim_id_chunk( array $ids, string $token, int $now, int $lease_ttl, bool $force ): int {
+		global $wpdb;
+		$ids = array_pad( $ids, 20, 0 );
+		if ( $force ) {
+			return (int) $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+				$wpdb->prepare(
+					'UPDATE %i SET state = %s, claim_token = %s, lease_expires_at = %d, updated_at = %d WHERE id IN (%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d) AND state IN (%s, %s)',
+					IndexNowQueueSchema::table_name(),
+					self::STATE_CLAIMED,
+					$token,
+					$now + $lease_ttl,
+					$now,
+					$ids[0],
+					$ids[1],
+					$ids[2],
+					$ids[3],
+					$ids[4],
+					$ids[5],
+					$ids[6],
+					$ids[7],
+					$ids[8],
+					$ids[9],
+					$ids[10],
+					$ids[11],
+					$ids[12],
+					$ids[13],
+					$ids[14],
+					$ids[15],
+					$ids[16],
+					$ids[17],
+					$ids[18],
+					$ids[19],
+					self::STATE_QUEUED,
+					self::STATE_CLAIMED
+				)
+			);
+		}
+
+		return (int) $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->prepare(
+				'UPDATE %i SET state = %s, claim_token = %s, lease_expires_at = %d, updated_at = %d WHERE id IN (%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d) AND ((state = %s AND next_attempt_at <= %d) OR (state = %s AND lease_expires_at > 0 AND lease_expires_at <= %d))',
+				IndexNowQueueSchema::table_name(),
+				self::STATE_CLAIMED,
+				$token,
+				$now + $lease_ttl,
+				$now,
+				$ids[0],
+				$ids[1],
+				$ids[2],
+				$ids[3],
+				$ids[4],
+				$ids[5],
+				$ids[6],
+				$ids[7],
+				$ids[8],
+				$ids[9],
+				$ids[10],
+				$ids[11],
+				$ids[12],
+				$ids[13],
+				$ids[14],
+				$ids[15],
+				$ids[16],
+				$ids[17],
+				$ids[18],
+				$ids[19],
+				self::STATE_QUEUED,
+				$now,
+				self::STATE_CLAIMED,
+				$now
+			)
+		);
+	}
+
+	/**
+	 * @param int[] $ids
+	 * @return array<int,array<string,mixed>>
+	 */
+	private function url_rows_for_id_chunk( array $ids ): array {
+		global $wpdb;
+		$ids  = array_pad( $ids, 20, 0 );
+		$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->prepare(
+				'SELECT url FROM %i WHERE id IN (%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d) ORDER BY next_attempt_at ASC, created_at ASC, id ASC',
+				IndexNowQueueSchema::table_name(),
+				$ids[0],
+				$ids[1],
+				$ids[2],
+				$ids[3],
+				$ids[4],
+				$ids[5],
+				$ids[6],
+				$ids[7],
+				$ids[8],
+				$ids[9],
+				$ids[10],
+				$ids[11],
+				$ids[12],
+				$ids[13],
+				$ids[14],
+				$ids[15],
+				$ids[16],
+				$ids[17],
+				$ids[18],
+				$ids[19]
+			),
 			ARRAY_A
 		);
+		return \is_array( $rows ) ? $rows : array();
+	}
 
+	/** @param string[] $hashes */
+	private function requeue_hash_chunk( array $hashes, string $token, int $status_code, int $now ): int {
+		global $wpdb;
+		$hashes = array_pad( $hashes, 20, '' );
+		return (int) $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->prepare(
+				'UPDATE %i SET state = %s, attempts = 0, next_attempt_at = %d, claim_token = %s, lease_expires_at = 0, queued_again = 0, last_status = %d, last_error = %s, updated_at = %d WHERE claim_token = %s AND url_hash IN (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) AND queued_again = 1',
+				IndexNowQueueSchema::table_name(),
+				self::STATE_QUEUED,
+				$now,
+				'',
+				$status_code,
+				'',
+				$now,
+				$token,
+				$hashes[0],
+				$hashes[1],
+				$hashes[2],
+				$hashes[3],
+				$hashes[4],
+				$hashes[5],
+				$hashes[6],
+				$hashes[7],
+				$hashes[8],
+				$hashes[9],
+				$hashes[10],
+				$hashes[11],
+				$hashes[12],
+				$hashes[13],
+				$hashes[14],
+				$hashes[15],
+				$hashes[16],
+				$hashes[17],
+				$hashes[18],
+				$hashes[19]
+			)
+		);
+	}
+
+	/** @param string[] $hashes */
+	private function delete_hash_chunk( array $hashes, string $token, bool $include_requeued ): int {
+		global $wpdb;
+		$hashes = array_pad( $hashes, 20, '' );
+		if ( $include_requeued ) {
+			return (int) $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+				$wpdb->prepare(
+					'DELETE FROM %i WHERE claim_token = %s AND url_hash IN (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
+					IndexNowQueueSchema::table_name(),
+					$token,
+					$hashes[0],
+					$hashes[1],
+					$hashes[2],
+					$hashes[3],
+					$hashes[4],
+					$hashes[5],
+					$hashes[6],
+					$hashes[7],
+					$hashes[8],
+					$hashes[9],
+					$hashes[10],
+					$hashes[11],
+					$hashes[12],
+					$hashes[13],
+					$hashes[14],
+					$hashes[15],
+					$hashes[16],
+					$hashes[17],
+					$hashes[18],
+					$hashes[19]
+				)
+			);
+		}
+
+		return (int) $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->prepare(
+				'DELETE FROM %i WHERE claim_token = %s AND url_hash IN (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) AND queued_again = 0',
+				IndexNowQueueSchema::table_name(),
+				$token,
+				$hashes[0],
+				$hashes[1],
+				$hashes[2],
+				$hashes[3],
+				$hashes[4],
+				$hashes[5],
+				$hashes[6],
+				$hashes[7],
+				$hashes[8],
+				$hashes[9],
+				$hashes[10],
+				$hashes[11],
+				$hashes[12],
+				$hashes[13],
+				$hashes[14],
+				$hashes[15],
+				$hashes[16],
+				$hashes[17],
+				$hashes[18],
+				$hashes[19]
+			)
+		);
+	}
+
+	/**
+	 * @param string[] $hashes
+	 * @return array<int,array<string,mixed>>
+	 */
+	private function claimed_rows_for_hash_chunk( array $hashes, string $token ): array {
+		global $wpdb;
+		$hashes = array_pad( $hashes, 20, '' );
+		$rows   = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->prepare(
+				'SELECT * FROM %i WHERE state = %s AND claim_token = %s AND url_hash IN (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
+				IndexNowQueueSchema::table_name(),
+				self::STATE_CLAIMED,
+				$token,
+				$hashes[0],
+				$hashes[1],
+				$hashes[2],
+				$hashes[3],
+				$hashes[4],
+				$hashes[5],
+				$hashes[6],
+				$hashes[7],
+				$hashes[8],
+				$hashes[9],
+				$hashes[10],
+				$hashes[11],
+				$hashes[12],
+				$hashes[13],
+				$hashes[14],
+				$hashes[15],
+				$hashes[16],
+				$hashes[17],
+				$hashes[18],
+				$hashes[19]
+			),
+			ARRAY_A
+		);
 		return \is_array( $rows ) ? $rows : array();
 	}
 
@@ -882,15 +1100,13 @@ final class IndexNowQueueRepository {
 	/**
 	 * @param string[] $hashes
 	 */
-	private function quoted_hash_list( array $hashes ): string {
-		$quoted = array();
-		foreach ( $hashes as $hash ) {
-			if ( 1 === \preg_match( '/^[a-f0-9]{64}$/D', $hash ) ) {
-				$quoted[] = "'" . $hash . "'";
-			}
-		}
-
-		return implode( ',', $quoted );
+	private function valid_hashes( array $hashes ): array {
+		return array_values(
+			array_filter(
+				$hashes,
+				static fn( mixed $hash ): bool => is_string( $hash ) && 1 === \preg_match( '/^[a-f0-9]{64}$/D', $hash )
+			)
+		);
 	}
 
 	private function retry_delay_for_attempt( int $attempts, int $base_delay ): int {

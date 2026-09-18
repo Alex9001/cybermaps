@@ -196,7 +196,7 @@ class DiscoveryPublicationGenerator {
 	 * Encode JSON without allowing a false return to become an empty publication.
 	 */
 	private function encode_json( mixed $data ): string {
-		$encoded = \wp_json_encode( $data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
+		$encoded = \wp_json_encode( $data );
 		if ( ! \is_string( $encoded ) ) {
 			throw new \RuntimeException(
 				__( 'A discovery publication could not be encoded as JSON.', 'cybermaps' ) // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception-only diagnostic; JSON or escaped admin consumers own the eventual output boundary.

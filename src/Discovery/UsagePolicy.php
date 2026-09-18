@@ -30,13 +30,12 @@ class UsagePolicy {
 		}
 
 		$data   = $this->get_policy_data();
-		$output = wp_json_encode( $data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
+		$output = \Cybermaps\Core\ProtocolOutput::json( $data );
 
 		Integrity::send_headers( $output );
 		header( 'Content-Type: application/json; charset=utf-8' );
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			echo $output;
+			\Cybermaps\Core\ProtocolOutput::emit( $output, 'json' );
 		}
 		exit;
 	}

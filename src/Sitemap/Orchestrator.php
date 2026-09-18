@@ -870,7 +870,7 @@ class Orchestrator {
 
 		ob_end_clean();
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
-			echo $xml; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			\Cybermaps\Core\ProtocolOutput::emit( $xml, 'xml' );
 		}
 		exit;
 	}

@@ -70,6 +70,10 @@ final class AdminActionContractAuditTest extends TestCase {
 		$this->assertStringContainsString( "'POST' !== \$request_method", $static_request );
 		$this->assertStringContainsString( 'check_admin_referer(', $static_request );
 		$this->assertStringContainsString( 'cybermaps_recover_static_intent_', $static_request );
+		$this->assertLessThan(
+			strpos( $static_request, "\$_POST['cybermaps_static_intent_id']" ),
+			strpos( $static_request, "check_admin_referer( 'cybermaps_resolve_static_intent'" )
+		);
 		$this->assertStringContainsString( "'response' => 405", $static_request );
 
 		$regeneration = $this->method_source( $this->source( 'src/Sitemap/Orchestrator.php' ), 'handle_regeneration' );
@@ -84,9 +88,10 @@ final class AdminActionContractAuditTest extends TestCase {
 		$manager = $this->source( 'src/Admin/ContentAuditManager.php' );
 		$delete  = $this->method_source( $manager, 'handle_delete' );
 		$this->assertStringContainsString( "current_user_can( 'manage_options' )", $delete );
-		$this->assertStringContainsString( "'POST' !== \$request_method", $delete );
+		$this->assertStringContainsString( "self::require_request_method( 'POST' )", $delete );
+		$this->assertStringContainsString( 'cybermaps_delete_authorization', $delete );
 		$this->assertStringContainsString( 'cybermaps_delete_content_audit_', $delete );
-		$this->assertStringContainsString( "'response' => 405", $delete );
+		$this->assertStringContainsString( "'response' => 405", $manager );
 
 		$content_review = $this->source( 'src/Admin/Settings/Tabs/ContentReview.php' );
 		$this->assertStringContainsString( 'value="cybermaps_delete_content_audit"', $content_review );
@@ -380,8 +385,13 @@ final class AdminActionContractAuditTest extends TestCase {
 		$this->assertStringContainsString( "add_query_arg( 'tab', \$tab, \$location )", $plugin );
 		$this->assertStringNotContainsString( ") . '#review'", $review );
 
-		$previous_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Test fixture snapshots request data before exercising the redirect filter.
+		$previous_post         = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Test fixture snapshots request data before exercising the redirect filter.
+		$previous_server       = $_SERVER;
+		$previous_capabilities = $GLOBALS['cybermaps_mock_current_user_capabilities'] ?? array();
 		try {
+			$_SERVER['REQUEST_METHOD'] = 'POST';
+			$GLOBALS['cybermaps_mock_current_user_capabilities'] = array( 'manage_options' );
+			$_POST['_wpnonce'] = wp_create_nonce( 'cybermaps_options_group-options' );
 			$_POST['cybermaps_active_tab'] = 'review';
 
 			$destination = 'https://example.test/wp-admin/admin.php?page=cybermaps-settings&tab=review#review';
@@ -422,7 +432,9 @@ final class AdminActionContractAuditTest extends TestCase {
 				)
 			);
 		} finally {
-			$_POST = $previous_post;
+			$_POST   = $previous_post;
+			$_SERVER = $previous_server;
+			$GLOBALS['cybermaps_mock_current_user_capabilities'] = $previous_capabilities;
 		}
 	}
 

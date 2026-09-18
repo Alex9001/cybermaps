@@ -42,6 +42,17 @@ final class SetupWizardPlanFactoryTest extends TestCase {
 		self::assertSame( 'forbidden', $policies['ai_kg_expose_admin'] );
 	}
 
+	public function test_apply_regenerates_the_configuration_server_side(): void {
+		$controller = (string) file_get_contents( CYBERMAPS_PLUGIN_DIR . 'src/Admin/SetupWizard/SetupWizardController.php' );
+		$script     = (string) file_get_contents( CYBERMAPS_PLUGIN_DIR . 'assets/js/setup-wizard.js' );
+
+		self::assertStringContainsString( 'SetupWizardPlanFactory::build( self::payload(), $context )', $controller );
+		self::assertStringContainsString( "preview( (string) \$plan['content'], 'merge' )", $controller );
+		self::assertStringContainsString( "(string) \$plan['content']", $controller );
+		self::assertStringNotContainsString( "posted_scalar( 'configuration' )", $controller );
+		self::assertStringNotContainsString( 'configuration: state.configuration', $script );
+	}
+
 	public function test_insights_preset_is_sanitized_and_preserves_expert_configuration(): void {
 		update_option(
 			'cybermaps_settings',
@@ -206,6 +217,66 @@ final class SetupWizardPlanFactoryTest extends TestCase {
 				),
 			),
 			$context
+		);
+	}
+
+	/**
+	 * @dataProvider invalid_schema_provider
+	 *
+	 * @param callable(array<string,mixed>):array<string,mixed> $mutate
+	 */
+	public function test_request_schema_rejects_unknown_nested_wrong_type_and_oversized_values( callable $mutate ): void {
+		$context = SetupWizardContext::build();
+		$payload = $this->payload(
+			$context,
+			array(
+				'website_type'         => 'blog',
+				'ai_visibility'        => 'on',
+				'operations'           => 'insights',
+				'identity_type'        => 'Organization',
+				'identity_name'        => 'Example Studio',
+				'identity_description' => '',
+				'identity_image_id'    => 0,
+			)
+		);
+
+		$this->expectException( \InvalidArgumentException::class );
+		SetupWizardPlanFactory::build( $mutate( $payload ), $context );
+	}
+
+	/** @return array<string,array{callable(array<string,mixed>):array<string,mixed>}> */
+	public static function invalid_schema_provider(): array {
+		return array(
+			'unknown top-level field' => array(
+				static function ( array $payload ): array {
+					$payload['configuration'] = array();
+					return $payload;
+				},
+			),
+			'unknown answer'         => array(
+				static function ( array $payload ): array {
+					$payload['answers']['unexpected'] = 'value';
+					return $payload;
+				},
+			),
+			'nested string answer'   => array(
+				static function ( array $payload ): array {
+					$payload['answers']['identity_name'] = array( 'Example Studio' );
+					return $payload;
+				},
+			),
+			'wrong image type'       => array(
+				static function ( array $payload ): array {
+					$payload['answers']['identity_image_id'] = '7';
+					return $payload;
+				},
+			),
+			'oversized name'         => array(
+				static function ( array $payload ): array {
+					$payload['answers']['identity_name'] = str_repeat( 'x', 257 );
+					return $payload;
+				},
+			),
 		);
 	}
 

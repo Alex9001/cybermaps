@@ -32,15 +32,14 @@ class APICatalog {
 			return;
 		}
 
-		$output = \wp_json_encode( $this->get_catalog_data(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
+		$output = \Cybermaps\Core\ProtocolOutput::json( $this->get_catalog_data() );
 
 		header( 'Content-Type: ' . self::get_media_type() );
 		$this->send_link_header();
 		Integrity::send_headers( $output );
 
 		if ( self::request_has_body() ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			echo $output;
+			\Cybermaps\Core\ProtocolOutput::emit( $output, 'json' );
 		}
 
 		exit;

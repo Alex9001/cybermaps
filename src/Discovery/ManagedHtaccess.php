@@ -82,11 +82,11 @@ final class ManagedHtaccess {
 	/** @return array{0:object,1:string} */
 	private function filesystem(): array {
 		require_once ABSPATH . 'wp-admin/includes/file.php';
-		require_once ABSPATH . 'wp-admin/includes/misc.php';
 		global $wp_filesystem;
 		if ( ! WP_Filesystem() || ! is_object( $wp_filesystem ) || 'direct' !== $wp_filesystem->method ) {
 			throw new \RuntimeException( esc_html__( 'Automatic configuration requires direct WordPress filesystem access. No credentials are stored.', 'cybermaps' ) );
 		}
+		require_once ABSPATH . 'wp-admin/includes/misc.php';
 		$path = trailingslashit( get_home_path() ) . '.htaccess';
 		if ( is_link( $path ) || ! $wp_filesystem->exists( dirname( $path ) . '/index.php' ) ) {
 			throw new \RuntimeException( esc_html__( 'The WordPress front-controller root could not be safely identified.', 'cybermaps' ) );

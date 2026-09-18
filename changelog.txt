@@ -1,6 +1,16 @@
 Cybermaps release history
 =========================
 
+7.5.2
+-----
+
+* Hardened action authorization and setup survey validation before payload use.
+* Centralized contextual output, enqueued report CSS, bounded IP hook context,
+  and prepared every IndexNow list value.
+* Removed reserved transient-option access and added fail-closed source,
+  Plugin Check, artifact, and runtime release validation.
+* Restored and validated the WordPress 7.0 / PHP 8.2 runtime baseline.
+
 7.5.1
 -----
 

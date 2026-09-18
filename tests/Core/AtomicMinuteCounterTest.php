@@ -24,6 +24,16 @@ final class AtomicMinuteCounterTest extends TestCase {
 		$this->assertSame( 2, AtomicMinuteCounter::increment( $key ) );
 	}
 
+	public function test_counter_never_reads_reserved_transient_option_names_directly(): void {
+		$source = (string) file_get_contents( CYBERMAPS_PLUGIN_DIR . 'src/Core/AtomicMinuteCounter.php' );
+
+		$this->assertStringNotContainsString( "'_transient_'", $source );
+		$this->assertStringNotContainsString( 'get_option(', $source );
+		$this->assertStringNotContainsString( 'add_option(', $source );
+		$this->assertStringContainsString( 'get_transient(', $source );
+		$this->assertStringContainsString( 'set_transient(', $source );
+	}
+
 	public function test_unresolved_client_bucket_is_stable(): void {
 		$key = AtomicMinuteCounter::requester_bucket(
 			'test',

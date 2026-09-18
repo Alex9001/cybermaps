@@ -27,7 +27,7 @@ final class ADPDiscovery {
 		header( 'Content-Type: application/json; charset=utf-8' );
 		header( 'X-Update-Frequency: ' . self::UPDATE_FREQUENCY );
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
-			echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Deliberate JSON response.
+			\Cybermaps\Core\ProtocolOutput::emit( $output, 'json' );
 		}
 		exit;
 	}
@@ -36,12 +36,7 @@ final class ADPDiscovery {
 	 * Return the canonical JSON body used by dynamic and static delivery.
 	 */
 	public function get_json_content(): string {
-		$output = \wp_json_encode( $this->get_manifest_data(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
-		if ( ! \is_string( $output ) ) {
-			return '{}';
-		}
-
-		return $output;
+		return \Cybermaps\Core\ProtocolOutput::json( $this->get_manifest_data() );
 	}
 
 	/**

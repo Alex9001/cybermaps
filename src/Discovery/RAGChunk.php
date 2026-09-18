@@ -62,8 +62,7 @@ class RAGChunk {
 		\header( 'Content-Type: application/json; charset=utf-8' );
 
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			echo $output;
+			\Cybermaps\Core\ProtocolOutput::emit( $output, 'json' );
 		}
 		exit;
 	}
@@ -111,7 +110,7 @@ class RAGChunk {
 			return null;
 		}
 
-		$output = \wp_json_encode( $payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
+		$output = \wp_json_encode( $payload );
 		if ( ! \is_string( $output ) ) {
 			throw new \RuntimeException(
 				__( 'A RAG chunk publication could not be encoded as JSON.', 'cybermaps' ) // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception-only diagnostic; JSON or escaped admin consumers own the eventual output boundary.
@@ -131,8 +130,7 @@ class RAGChunk {
 		\header( 'Content-Type: application/json; charset=utf-8' );
 
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			echo '{"error":"not_found"}';
+			\Cybermaps\Core\ProtocolOutput::emit( '{"error":"not_found"}', 'json' );
 		}
 		exit;
 	}

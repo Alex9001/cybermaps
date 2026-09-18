@@ -54,7 +54,8 @@ final class MaturityDeploymentGuidanceTest extends TestCase {
 		self::assertStringContainsString( 'RewriteRule ^', $rules['apache_openlitespeed'] );
 		self::assertStringContainsString( 'E=Cache-Control:no-cache', $rules['litespeed_cache'] );
 		self::assertStringContainsString( 'return (pass);', $rules['varnish'] );
-		self::assertStringContainsString( '"origin": "wordpress"', $rules['reverse_proxy_cdn'] );
+		$reverse_proxy = json_decode( $rules['reverse_proxy_cdn'], true, 512, JSON_THROW_ON_ERROR );
+		self::assertSame( 'wordpress', $reverse_proxy['action']['origin'] );
 	}
 
 	public function test_status_summary_identifies_intercepted_well_known_canonical_path(): void {

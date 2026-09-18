@@ -43,7 +43,7 @@ class Schema {
 			+ \Cybermaps\Core\IdentityEntityBuilder::build( $data );
 
 		wp_print_inline_script_tag(
-			(string) wp_json_encode( $schema, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ),
+			(string) wp_json_encode( $schema ),
 			array( 'type' => 'application/ld+json' )
 		);
 	}
@@ -101,7 +101,7 @@ class Schema {
 			}
 
 			wp_print_inline_script_tag(
-				(string) wp_json_encode( $schema, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ),
+				(string) wp_json_encode( $schema ),
 				array( 'type' => 'application/ld+json' )
 			);
 		}

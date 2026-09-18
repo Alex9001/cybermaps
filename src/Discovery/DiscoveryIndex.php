@@ -24,17 +24,12 @@ class DiscoveryIndex {
 			return;
 		}
 
-		$output = \wp_json_encode(
-			$this->get_index(),
-			JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
-		);
-		$output = \is_string( $output ) ? $output : '{}';
+		$output = \Cybermaps\Core\ProtocolOutput::json( $this->get_index() );
 
 		Integrity::send_headers( $output, HOUR_IN_SECONDS );
 		\header( 'Content-Type: application/json; charset=utf-8' );
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Deliberate JSON response.
-			echo $output;
+			\Cybermaps\Core\ProtocolOutput::emit( $output, 'json' );
 		}
 		exit;
 	}

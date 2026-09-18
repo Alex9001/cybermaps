@@ -45,9 +45,15 @@ final class EndpointRegistry {
 	private array $registration_errors = array();
 
 	private bool $extension_registration_complete = false;
+	private bool $core_presentation_localized     = false;
 
 	private function __construct() {
 		$this->register_core_endpoints();
+		if ( function_exists( 'did_action' ) && did_action( 'init' ) ) {
+			$this->localize_core_presentation();
+		} elseif ( function_exists( 'add_action' ) ) {
+			add_action( 'init', array( $this, 'localize_core_presentation' ), -2 );
+		}
 	}
 
 	/**
@@ -742,31 +748,31 @@ final class EndpointRegistry {
 
 		// phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned -- Stable endpoint IDs vary in length; presentation metadata remains readable by entry.
 		$presentation   = array(
-			'manifest'        => array( __( 'AI Discovery Manifest', 'cybermaps' ), __( 'Primary machine-readable discovery manifest.', 'cybermaps' ) ),
-			'adp_discovery'   => array( __( 'ADP Discovery Manifest', 'cybermaps' ), __( 'AI Discovery Protocol 3.0 Level 3 manifest.', 'cybermaps' ) ),
-			'discovery_index' => array( __( 'Discovery Index', 'cybermaps' ), __( 'Index of Cybermaps discovery publications.', 'cybermaps' ) ),
-			'llms'            => array( __( 'LLMS Summary', 'cybermaps' ), __( 'Concise site summary for language models.', 'cybermaps' ) ),
-			'llms_full'       => array( __( 'LLMS Full', 'cybermaps' ), __( 'Opt-in complete literal publication of eligible stored content.', 'cybermaps' ) ),
-			'llms_tldr'       => array( __( 'Budgeted Site Briefing', 'cybermaps' ), __( 'Experimental literal briefing with deterministic budget accounting.', 'cybermaps' ) ),
-			'knowledge_graph' => array( __( 'Knowledge Graph', 'cybermaps' ), __( 'Schema.org identity and relationship graph.', 'cybermaps' ) ),
-			'feed'            => array( __( 'AI Activity Feed', 'cybermaps' ), __( 'JSON Feed publication of recent content.', 'cybermaps' ) ),
-			'updates'         => array( __( 'Recent Updates', 'cybermaps' ), __( 'Bounded seven-day ADP change stream for current public content.', 'cybermaps' ) ),
-			'adp_news_llms'      => array( __( 'ADP News Context', 'cybermaps' ), __( 'Bounded Markdown context for recent eligible news content.', 'cybermaps' ) ),
-			'adp_news_speakable' => array( __( 'ADP Speakable News', 'cybermaps' ), __( 'Schema.org speakable summaries for recent eligible content.', 'cybermaps' ) ),
-			'adp_news_changelog' => array( __( 'ADP News Changelog', 'cybermaps' ), __( 'Version metadata for the Level 3 news publication surface.', 'cybermaps' ) ),
-			'adp_news_archive'   => array( __( 'ADP News Archive', 'cybermaps' ), __( 'Bounded newline-delimited archive of eligible content.', 'cybermaps' ) ),
-			'ai_sitemap'      => array( __( 'AI Sitemap', 'cybermaps' ), __( 'AI-oriented XML content inventory.', 'cybermaps' ) ),
-			'usage_policy'    => array( __( 'AI Usage Policy', 'cybermaps' ), __( 'Machine-readable permissions for AI uses.', 'cybermaps' ) ),
-			'actions'         => array( __( 'AI Actions', 'cybermaps' ), __( 'Machine-readable action and capability inventory.', 'cybermaps' ) ),
-			'skill'           => array( __( 'Agent Skill Site Guide', 'cybermaps' ), __( 'Agent Skills-compatible guide to the site\'s public read-only resources.', 'cybermaps' ) ),
-			'agent_skills'    => array( __( 'Agent Skills Index', 'cybermaps' ), __( 'Draft discovery index for the canonical Cybermaps site-guide skill.', 'cybermaps' ) ),
-			'api_catalog'     => array( __( 'API Catalog', 'cybermaps' ), __( 'Dynamic Linkset catalog using the RFC 9727 media-type profile and api-catalog relation.', 'cybermaps' ) ),
-			'ai_catalog'      => array( __( 'Agentic Resource Catalog', 'cybermaps' ), __( 'Draft ARD catalog of active Cybermaps discovery resources.', 'cybermaps' ) ),
-			'auth_md'         => array( __( 'Agent Registration Guide', 'cybermaps' ), __( 'Opt-in Auth.md instructions for user-claimed OAuth device authorization.', 'cybermaps' ) ),
-			'mcp_server_card' => array( __( 'MCP Server Card Compatibility URL', 'cybermaps' ), __( 'Experimental well-known compatibility route for the current MCP Server Card draft.', 'cybermaps' ) ),
-			'oauth_authorization_server' => array( __( 'OAuth Authorization Server Metadata', 'cybermaps' ), __( 'RFC 8414 metadata describing how an agent obtains and refreshes access tokens.', 'cybermaps' ) ),
-			'oauth_protected_resource' => array( __( 'OAuth Protected Resource Metadata', 'cybermaps' ), __( 'RFC 9728 metadata identifying the MCP resource, issuers, and supported scopes.', 'cybermaps' ) ),
-			'openapi'         => array( __( 'OpenAPI Description', 'cybermaps' ), __( 'Read-only public Cybermaps REST API contract.', 'cybermaps' ) ),
+			'manifest'        => array( 'AI Discovery Manifest', 'Primary machine-readable discovery manifest.' ),
+			'adp_discovery'   => array( 'ADP Discovery Manifest', 'AI Discovery Protocol 3.0 Level 3 manifest.' ),
+			'discovery_index' => array( 'Discovery Index', 'Index of Cybermaps discovery publications.' ),
+			'llms'            => array( 'LLMS Summary', 'Concise site summary for language models.' ),
+			'llms_full'       => array( 'LLMS Full', 'Opt-in complete literal publication of eligible stored content.' ),
+			'llms_tldr'       => array( 'Budgeted Site Briefing', 'Experimental literal briefing with deterministic budget accounting.' ),
+			'knowledge_graph' => array( 'Knowledge Graph', 'Schema.org identity and relationship graph.' ),
+			'feed'            => array( 'AI Activity Feed', 'JSON Feed publication of recent content.' ),
+			'updates'         => array( 'Recent Updates', 'Bounded seven-day ADP change stream for current public content.' ),
+			'adp_news_llms'      => array( 'ADP News Context', 'Bounded Markdown context for recent eligible news content.' ),
+			'adp_news_speakable' => array( 'ADP Speakable News', 'Schema.org speakable summaries for recent eligible content.' ),
+			'adp_news_changelog' => array( 'ADP News Changelog', 'Version metadata for the Level 3 news publication surface.' ),
+			'adp_news_archive'   => array( 'ADP News Archive', 'Bounded newline-delimited archive of eligible content.' ),
+			'ai_sitemap'      => array( 'AI Sitemap', 'AI-oriented XML content inventory.' ),
+			'usage_policy'    => array( 'AI Usage Policy', 'Machine-readable permissions for AI uses.' ),
+			'actions'         => array( 'AI Actions', 'Machine-readable action and capability inventory.' ),
+			'skill'           => array( 'Agent Skill Site Guide', 'Agent Skills-compatible guide to the site\'s public read-only resources.' ),
+			'agent_skills'    => array( 'Agent Skills Index', 'Draft discovery index for the canonical Cybermaps site-guide skill.' ),
+			'api_catalog'     => array( 'API Catalog', 'Dynamic Linkset catalog using the RFC 9727 media-type profile and api-catalog relation.' ),
+			'ai_catalog'      => array( 'Agentic Resource Catalog', 'Draft ARD catalog of active Cybermaps discovery resources.' ),
+			'auth_md'         => array( 'Agent Registration Guide', 'Opt-in Auth.md instructions for user-claimed OAuth device authorization.' ),
+			'mcp_server_card' => array( 'MCP Server Card Compatibility URL', 'Experimental well-known compatibility route for the current MCP Server Card draft.' ),
+			'oauth_authorization_server' => array( 'OAuth Authorization Server Metadata', 'RFC 8414 metadata describing how an agent obtains and refreshes access tokens.' ),
+			'oauth_protected_resource' => array( 'OAuth Protected Resource Metadata', 'RFC 9728 metadata identifying the MCP resource, issuers, and supported scopes.' ),
+			'openapi'         => array( 'OpenAPI Description', 'Read-only public Cybermaps REST API contract.' ),
 		);
 		$throttle_tiers = array(
 			'llms_tldr'       => 'expensive',
@@ -808,8 +814,8 @@ final class EndpointRegistry {
 				'route'         => '/discovery',
 				'type'          => 'application/json',
 				'spec'          => 'WordPress REST API',
-				'label'         => __( 'REST Discovery Index', 'cybermaps' ),
-				'description'   => __( 'REST API index of primary Cybermaps publications.', 'cybermaps' ),
+				'label'         => 'REST Discovery Index',
+				'description'   => 'REST API index of primary Cybermaps publications.',
 				'advertise'     => true,
 				'throttle_tier' => 'cheap',
 			)
@@ -821,8 +827,8 @@ final class EndpointRegistry {
 				'route'           => \Cybermaps\Discovery\PublicHealth::REST_ROUTE,
 				'type'            => \Cybermaps\Discovery\PublicHealth::MEDIA_TYPE,
 				'spec'            => 'Cybermaps Public Discovery Health 1.0',
-				'label'           => __( 'Public Discovery Health', 'cybermaps' ),
-				'description'     => __( 'Bounded, non-sensitive health status for public Cybermaps discovery APIs.', 'cybermaps' ),
+				'label'           => 'Public Discovery Health',
+				'description'     => 'Bounded, non-sensitive health status for public Cybermaps discovery APIs.',
 				'advertise'       => false,
 				'throttle_tier'   => 'cheap',
 				'enabled_setting' => 'enable_discovery_hub',
@@ -833,8 +839,8 @@ final class EndpointRegistry {
 			'mcp'             => array(
 				'type'          => 'application/json',
 				'spec'          => 'Model Context Protocol 2026-07-28',
-				'label'         => __( 'Model Context Protocol', 'cybermaps' ),
-				'description'   => __( 'Optional dynamic Cybermaps MCP resource and tool endpoint.', 'cybermaps' ),
+				'label'         => 'Model Context Protocol',
+				'description'   => 'Optional dynamic Cybermaps MCP resource and tool endpoint.',
 				'advertise'     => true,
 				'throttle_tier' => 'medium',
 			),
@@ -842,8 +848,8 @@ final class EndpointRegistry {
 				'route'         => \Cybermaps\Discovery\MCPServerCard::REST_ROUTE,
 				'type'          => \Cybermaps\Discovery\MCPServerCard::MEDIA_TYPE,
 				'spec'          => 'MCP ext-server-card v1 draft',
-				'label'         => __( 'MCP Server Card', 'cybermaps' ),
-				'description'   => __( 'Current experimental MCP Server Card for the active Cybermaps MCP endpoint.', 'cybermaps' ),
+				'label'         => 'MCP Server Card',
+				'description'   => 'Current experimental MCP Server Card for the active Cybermaps MCP endpoint.',
 				'advertise'     => true,
 				'throttle_tier' => 'cheap',
 				'maturity'      => 'experimental-proposal',
@@ -853,50 +859,50 @@ final class EndpointRegistry {
 			'llms_tldr'       => array(
 				'type'          => 'application/json',
 				'spec'          => 'Cybermaps Budgeted Site Briefing 0.2-draft',
-				'label'         => __( 'Budgeted Site Briefing REST API', 'cybermaps' ),
-				'description'   => __( 'REST representation of the experimental budgeted site briefing.', 'cybermaps' ),
+				'label'         => 'Budgeted Site Briefing REST API',
+				'description'   => 'REST representation of the experimental budgeted site briefing.',
 				'throttle_tier' => 'expensive',
 			),
 			'search'          => array(
 				'type'          => 'application/json',
 				'spec'          => 'WordPress REST API',
-				'label'         => __( 'REST Search', 'cybermaps' ),
-				'description'   => __( 'Bounded public search over the configured, indexable AI publication inventory.', 'cybermaps' ),
+				'label'         => 'REST Search',
+				'description'   => 'Bounded public search over the configured, indexable AI publication inventory.',
 				'throttle_tier' => 'medium',
 			),
 			'urls'            => array(
 				'type'          => 'application/json',
 				'spec'          => 'Cybermaps Private Integration API',
-				'label'         => __( 'Private Publication URLs', 'cybermaps' ),
-				'description'   => __( 'Secret-authenticated discovery and sitemap URL inventory.', 'cybermaps' ),
+				'label'         => 'Private Publication URLs',
+				'description'   => 'Secret-authenticated discovery and sitemap URL inventory.',
 				'throttle_tier' => 'cheap',
 			),
 			'status'          => array(
 				'type'          => 'application/json',
 				'spec'          => 'Cybermaps Private Integration API',
-				'label'         => __( 'Private Publication Status', 'cybermaps' ),
-				'description'   => __( 'Secret-authenticated publication and static-sync status.', 'cybermaps' ),
+				'label'         => 'Private Publication Status',
+				'description'   => 'Secret-authenticated publication and static-sync status.',
 				'throttle_tier' => 'cheap',
 			),
 			'audit_latest'    => array(
 				'type'          => 'application/json',
 				'spec'          => 'Cybermaps Audit Read API 1.0',
-				'label'         => __( 'Latest Content Report', 'cybermaps' ),
-				'description'   => __( 'Secret-authenticated latest completed content report with a bounded synchronous JSON snapshot.', 'cybermaps' ),
+				'label'         => 'Latest Content Report',
+				'description'   => 'Secret-authenticated latest completed content report with a bounded synchronous JSON snapshot.',
 				'throttle_tier' => 'medium',
 			),
 			'audit_run'       => array(
 				'type'          => 'application/json',
 				'spec'          => 'Cybermaps Audit Read API 1.0',
-				'label'         => __( 'Content Report Run', 'cybermaps' ),
-				'description'   => __( 'Secret-authenticated saved content report by run ID with a bounded synchronous JSON snapshot.', 'cybermaps' ),
+				'label'         => 'Content Report Run',
+				'description'   => 'Secret-authenticated saved content report by run ID with a bounded synchronous JSON snapshot.',
 				'throttle_tier' => 'medium',
 			),
 			'purge'           => array(
 				'type'          => 'application/json',
 				'spec'          => 'Cybermaps Administrative REST API',
-				'label'         => __( 'Static Publication Purge', 'cybermaps' ),
-				'description'   => __( 'Administrator-only removal of owned static publication files.', 'cybermaps' ),
+				'label'         => 'Static Publication Purge',
+				'description'   => 'Administrator-only removal of owned static publication files.',
 				'throttle_tier' => 'expensive',
 			),
 		);
@@ -925,6 +931,72 @@ final class EndpointRegistry {
 				$metadata
 			);
 		}
+	}
+
+	/**
+	 * Localize presentation-only metadata once WordPress permits translations.
+	 *
+	 * The registry is intentionally constructed during `plugins_loaded` so the
+	 * early REST compatibility guard can classify the current request. Route,
+	 * protocol, and security metadata therefore starts with its source-language
+	 * labels and receives translations at `init`, before any public response or
+	 * administration screen consumes the presentation fields.
+	 */
+	public function localize_core_presentation(): void {
+		if ( $this->core_presentation_localized ) {
+			return;
+		}
+
+		// phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned -- Stable endpoint IDs vary in length; presentation metadata remains readable by entry.
+		$presentation = array(
+			'manifest'                   => array( __( 'AI Discovery Manifest', 'cybermaps' ), __( 'Primary machine-readable discovery manifest.', 'cybermaps' ) ),
+			'adp_discovery'              => array( __( 'ADP Discovery Manifest', 'cybermaps' ), __( 'AI Discovery Protocol 3.0 Level 3 manifest.', 'cybermaps' ) ),
+			'discovery_index'            => array( __( 'Discovery Index', 'cybermaps' ), __( 'Index of Cybermaps discovery publications.', 'cybermaps' ) ),
+			'llms'                       => array( __( 'LLMS Summary', 'cybermaps' ), __( 'Concise site summary for language models.', 'cybermaps' ) ),
+			'llms_full'                  => array( __( 'LLMS Full', 'cybermaps' ), __( 'Opt-in complete literal publication of eligible stored content.', 'cybermaps' ) ),
+			'llms_tldr'                  => array( __( 'Budgeted Site Briefing', 'cybermaps' ), __( 'Experimental literal briefing with deterministic budget accounting.', 'cybermaps' ) ),
+			'knowledge_graph'            => array( __( 'Knowledge Graph', 'cybermaps' ), __( 'Schema.org identity and relationship graph.', 'cybermaps' ) ),
+			'feed'                       => array( __( 'AI Activity Feed', 'cybermaps' ), __( 'JSON Feed publication of recent content.', 'cybermaps' ) ),
+			'updates'                    => array( __( 'Recent Updates', 'cybermaps' ), __( 'Bounded seven-day ADP change stream for current public content.', 'cybermaps' ) ),
+			'adp_news_llms'              => array( __( 'ADP News Context', 'cybermaps' ), __( 'Bounded Markdown context for recent eligible news content.', 'cybermaps' ) ),
+			'adp_news_speakable'         => array( __( 'ADP Speakable News', 'cybermaps' ), __( 'Schema.org speakable summaries for recent eligible content.', 'cybermaps' ) ),
+			'adp_news_changelog'         => array( __( 'ADP News Changelog', 'cybermaps' ), __( 'Version metadata for the Level 3 news publication surface.', 'cybermaps' ) ),
+			'adp_news_archive'           => array( __( 'ADP News Archive', 'cybermaps' ), __( 'Bounded newline-delimited archive of eligible content.', 'cybermaps' ) ),
+			'ai_sitemap'                 => array( __( 'AI Sitemap', 'cybermaps' ), __( 'AI-oriented XML content inventory.', 'cybermaps' ) ),
+			'usage_policy'               => array( __( 'AI Usage Policy', 'cybermaps' ), __( 'Machine-readable permissions for AI uses.', 'cybermaps' ) ),
+			'actions'                    => array( __( 'AI Actions', 'cybermaps' ), __( 'Machine-readable action and capability inventory.', 'cybermaps' ) ),
+			'skill'                      => array( __( 'Agent Skill Site Guide', 'cybermaps' ), __( 'Agent Skills-compatible guide to the site\'s public read-only resources.', 'cybermaps' ) ),
+			'agent_skills'               => array( __( 'Agent Skills Index', 'cybermaps' ), __( 'Draft discovery index for the canonical Cybermaps site-guide skill.', 'cybermaps' ) ),
+			'api_catalog'                => array( __( 'API Catalog', 'cybermaps' ), __( 'Dynamic Linkset catalog using the RFC 9727 media-type profile and api-catalog relation.', 'cybermaps' ) ),
+			'ai_catalog'                 => array( __( 'Agentic Resource Catalog', 'cybermaps' ), __( 'Draft ARD catalog of active Cybermaps discovery resources.', 'cybermaps' ) ),
+			'auth_md'                    => array( __( 'Agent Registration Guide', 'cybermaps' ), __( 'Opt-in Auth.md instructions for user-claimed OAuth device authorization.', 'cybermaps' ) ),
+			'mcp_server_card'            => array( __( 'MCP Server Card Compatibility URL', 'cybermaps' ), __( 'Experimental well-known compatibility route for the current MCP Server Card draft.', 'cybermaps' ) ),
+			'oauth_authorization_server' => array( __( 'OAuth Authorization Server Metadata', 'cybermaps' ), __( 'RFC 8414 metadata describing how an agent obtains and refreshes access tokens.', 'cybermaps' ) ),
+			'oauth_protected_resource'   => array( __( 'OAuth Protected Resource Metadata', 'cybermaps' ), __( 'RFC 9728 metadata identifying the MCP resource, issuers, and supported scopes.', 'cybermaps' ) ),
+			'openapi'                    => array( __( 'OpenAPI Description', 'cybermaps' ), __( 'Read-only public Cybermaps REST API contract.', 'cybermaps' ) ),
+			'rest_root'                  => array( __( 'REST Discovery Index', 'cybermaps' ), __( 'REST API index of primary Cybermaps publications.', 'cybermaps' ) ),
+			'public_health'              => array( __( 'Public Discovery Health', 'cybermaps' ), __( 'Bounded, non-sensitive health status for public Cybermaps discovery APIs.', 'cybermaps' ) ),
+			'rest_mcp'                   => array( __( 'Model Context Protocol', 'cybermaps' ), __( 'Optional dynamic Cybermaps MCP resource and tool endpoint.', 'cybermaps' ) ),
+			'rest_mcp_server_card'       => array( __( 'MCP Server Card', 'cybermaps' ), __( 'Current experimental MCP Server Card for the active Cybermaps MCP endpoint.', 'cybermaps' ) ),
+			'rest_llms_tldr'             => array( __( 'Budgeted Site Briefing REST API', 'cybermaps' ), __( 'REST representation of the experimental budgeted site briefing.', 'cybermaps' ) ),
+			'rest_search'                => array( __( 'REST Search', 'cybermaps' ), __( 'Bounded public search over the configured, indexable AI publication inventory.', 'cybermaps' ) ),
+			'rest_urls'                  => array( __( 'Private Publication URLs', 'cybermaps' ), __( 'Secret-authenticated discovery and sitemap URL inventory.', 'cybermaps' ) ),
+			'rest_status'                => array( __( 'Private Publication Status', 'cybermaps' ), __( 'Secret-authenticated publication and static-sync status.', 'cybermaps' ) ),
+			'rest_audit_latest'          => array( __( 'Latest Content Report', 'cybermaps' ), __( 'Secret-authenticated latest completed content report with a bounded synchronous JSON snapshot.', 'cybermaps' ) ),
+			'rest_audit_run'             => array( __( 'Content Report Run', 'cybermaps' ), __( 'Secret-authenticated saved content report by run ID with a bounded synchronous JSON snapshot.', 'cybermaps' ) ),
+			'rest_purge'                 => array( __( 'Static Publication Purge', 'cybermaps' ), __( 'Administrator-only removal of owned static publication files.', 'cybermaps' ) ),
+		);
+		// phpcs:enable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+
+		foreach ( $presentation as $id => $display ) {
+			if ( ! isset( $this->endpoints[ $id ] ) ) {
+				continue;
+			}
+			$this->endpoints[ $id ]['label']       = $display[0];
+			$this->endpoints[ $id ]['description'] = $display[1];
+		}
+
+		$this->core_presentation_localized = true;
 	}
 
 	/**

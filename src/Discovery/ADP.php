@@ -31,13 +31,12 @@ class ADP {
 
 		$manifest = $this->get_manifest_data();
 
-		$output = wp_json_encode( $manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
+		$output = \Cybermaps\Core\ProtocolOutput::json( $manifest );
 
 		Integrity::send_headers( $output );
 		header( 'Content-Type: application/json; charset=utf-8', true );
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
-            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			echo $output;
+			\Cybermaps\Core\ProtocolOutput::emit( $output, 'json' );
 		}
 		exit;
 	}
