@@ -1,6 +1,8 @@
 # Generated build and packaging artifacts
 /clean/
 /freemius/
+/cybermaps-astro-release-*/
+/cybermaps-release-repair-*/
 
 # Dependencies
 /vendor/

@@ -36,6 +36,10 @@ endpoints for WordPress, with a static-file delivery engine.
 9. **Do not lower the WordPress 7.1 baseline because an older smoke test
    passes.** Core's native Abilities API contract requires 7.1. Compatibility
    backports need an explicit product decision, not an inferred support change.
+10. **Keep every task-created clone, backup, report, download, and temporary
+    work directory inside this plugin directory.** Never create task artifacts
+    elsewhere (including sibling repositories, `/home/user/Documents/CODE`, or
+    another checkout) unless the user explicitly names that destination.
 
 ---
 
