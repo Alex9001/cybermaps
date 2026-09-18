@@ -40,7 +40,7 @@ const mount = ( targetEl, component ) => {
 };
 
 /**
- * Supply the WordPress 7.1 toggletip interaction contract on WordPress 7.0.
+ * Supply the toggletip interaction contract when the native helper is unavailable.
  * Native Core markup does not carry these Cybermaps-specific classes.
  */
 const initLegacyToggletips = () => {

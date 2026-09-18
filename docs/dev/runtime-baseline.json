@@ -1,0 +1,6 @@
+{
+    "schema_version": 1,
+    "minimum_floor_wordpress": "7.1",
+    "release_runtime_wordpress": "7.1",
+    "basis": "Cybermaps relies on the native WordPress 7.1 Abilities API filtering, public exposure, and client-compatible schema contract."
+}

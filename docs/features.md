@@ -5,7 +5,7 @@ This reference describes Cybermaps 7.5.2 using the
 Debugging, compatibility publication, and independent LiteSpeed/APCu controls
 are included; availability and public delivery depend on the configuration.
 
-> Standalone WordPress.org plugin · PHP 8.2+ · WordPress 7.0+ · PHP 8.3+ recommended
+> Standalone WordPress.org plugin · PHP 8.2+ · WordPress 7.1+
 
 Cybermaps is a focused search and AI-discovery stack for professional WordPress
 sites. It delivers fast sitemaps, token-efficient machine

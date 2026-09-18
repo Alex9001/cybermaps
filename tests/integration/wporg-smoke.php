@@ -10,6 +10,41 @@ $settings['report_theme']         = 'midnight';
 update_option( 'cybermaps_settings', $settings, false );
 \Cybermaps\Core\ConfigurationStore::reset_memo();
 
+if ( version_compare( get_bloginfo( 'version' ), '7.1', '<' ) ) {
+	throw new RuntimeException( 'The release runtime must be WordPress 7.1 or newer.' );
+}
+foreach ( array( 'wp_register_ability', 'wp_get_abilities', 'wp_has_ability' ) as $ability_function ) {
+	if ( ! function_exists( $ability_function ) ) {
+		throw new RuntimeException( "Native WordPress Abilities API function is unavailable: {$ability_function}." );
+	}
+}
+
+$expected_abilities = array(
+	'cybermaps/purge-static-publications',
+	'cybermaps/reconcile-static-publications',
+	'cybermaps/run-audit',
+	'cybermaps/search',
+	'cybermaps/submit-indexnow',
+);
+$public_abilities   = wp_get_abilities(
+	array(
+		'namespace' => 'cybermaps',
+		'meta'      => array( 'public' => true ),
+	)
+);
+$registered_names  = array_keys( $public_abilities );
+sort( $registered_names );
+if ( $expected_abilities !== $registered_names ) {
+	throw new RuntimeException(
+		'Native Cybermaps ability registration failed: ' . wp_json_encode( $registered_names )
+	);
+}
+foreach ( $expected_abilities as $ability_name ) {
+	if ( ! wp_has_ability( $ability_name ) ) {
+		throw new RuntimeException( "Native Cybermaps ability is unavailable: {$ability_name}." );
+	}
+}
+
 $openapi = ( new \Cybermaps\Discovery\OpenAPI() )->get_document();
 if ( '3.2.0' !== ( $openapi['openapi'] ?? '' ) || empty( $openapi['paths'] ) ) {
 	throw new RuntimeException( 'OpenAPI endpoint payload smoke test failed.' );
@@ -43,4 +78,4 @@ if (
 	throw new RuntimeException( 'Standalone report stylesheet smoke test failed.' );
 }
 
-echo "Cybermaps endpoint and report smoke tests passed.\n";
+echo "Cybermaps native ability, endpoint, and report smoke tests passed.\n";

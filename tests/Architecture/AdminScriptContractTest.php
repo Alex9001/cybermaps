@@ -29,7 +29,7 @@ final class AdminScriptContractTest extends TestCase {
 		$this->assertSame(
 			4,
 			substr_count( $script, '...legacyComponentSizeProps' ),
-			'Both SelectControls, the RangeControl, and the TextControl must retain the WordPress 7.0 size opt-in.'
+			'Both SelectControls, the RangeControl, and the TextControl must retain the defensive size opt-in.'
 		);
 		$this->assertStringContainsString( 'const { PluginDocumentSettingPanel } = wp.editPost;', $script );
 		$this->assertStringNotContainsString( 'wp.editor', $script );

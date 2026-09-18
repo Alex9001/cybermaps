@@ -2924,7 +2924,7 @@ tr.cybermaps-matrix-category td:first-child {
     color: #94a3b8;
 }
 
-/* --- Informational toggletips and the WordPress 7.0 compatibility path --- */
+/* --- Informational toggletips and the defensive compatibility path --- */
 .cybermaps-help-tip {
     margin-inline-start: 4px;
     vertical-align: middle;

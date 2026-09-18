@@ -2,8 +2,8 @@
     "plugin": "CYBERMAPS: XML Sitemaps & llms.txt",
     "version": "7.5.2",
     "php_min": "8.2",
-    "wp_min": "7.0",
-    "generated_at": "2026-09-18T01:36:07+00:00",
+    "wp_min": "7.1",
+    "generated_at": "2026-09-18T05:54:36+00:00",
     "discovery_endpoints": [
         {
             "id": "manifest",

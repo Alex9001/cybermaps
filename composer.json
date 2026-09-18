@@ -37,12 +37,17 @@
         "i18n:check": "bash bin/generate-pot.sh --check",
         "manifest:check": "php bin/check-manifest.php",
         "ai-config:check": "php bin/check-ai-configuration.php",
+        "runtime:check": [
+            "php bin/check-runtime-baseline.php",
+            "python3 tests/tooling/test_runtime_baseline.py"
+        ],
         "test:wporg-source": "python3 tests/tooling/test_wporg_source.py",
         "wporg:check": [
             "php bin/check-wporg-source.php",
             "@test:wporg-source"
         ],
         "release:check": [
+            "@runtime:check",
             "@lint:phpcompat",
             "@lint:phpcs",
             "@wporg:check",
@@ -56,7 +61,7 @@
             "@release:check",
             "bash bin/validate-release.sh"
         ],
-        "tooling:lint": "bash -n clean.sh && bash -n bin/validate-release.sh && bash -n bin/validate-plugin-check.sh && bash -n bin/generate-pot.sh && bash -n bin/release-github.sh && php -l bin/check-manifest.php && php -l bin/check-ai-configuration.php && php -l bin/check-wporg-source.php",
+        "tooling:lint": "bash -n clean.sh && bash -n bin/validate-release.sh && bash -n bin/validate-plugin-check.sh && bash -n bin/generate-pot.sh && bash -n bin/release-github.sh && php -l bin/check-manifest.php && php -l bin/check-ai-configuration.php && php -l bin/check-runtime-baseline.php && php -l bin/check-wporg-source.php",
         "release:github": "bash bin/release-github.sh",
         "test:release-github": "python3 tests/tooling/test_release_github.py",
         "test:website-contract": "python3 tests/tooling/test_website_contract.py"

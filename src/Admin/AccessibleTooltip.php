@@ -36,7 +36,7 @@ final class AccessibleTooltip {
 	}
 
 	/**
-	 * Render the WordPress 7.0 fallback without defining a global Core polyfill.
+	 * Render the defensive fallback without defining a global Core polyfill.
 	 *
 	 * @param string[] $classes Wrapper classes.
 	 */

@@ -5,7 +5,6 @@ PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ARTIFACT_DIR="${1:-${PROJECT_DIR}/clean/cybermaps}"
 ARCHIVE_PATH="${2:-}"
 REPORT_PATH="${3:-${PROJECT_DIR}/clean/plugin-check-validation.json}"
-WORDPRESS_VERSION="7.0"
 PLUGIN_CHECK_VERSION="2.0.0"
 
 fail() {
@@ -27,6 +26,19 @@ fi
 ARTIFACT_DIR="$(realpath "${ARTIFACT_DIR}")"
 ARCHIVE_PATH="$(realpath "${ARCHIVE_PATH}")"
 REPORT_PATH="$(realpath -m "${REPORT_PATH}")"
+WORDPRESS_VERSION="$(
+	php -r '
+		$main = file_get_contents($argv[1]);
+		if (
+			! is_string($main)
+			|| ! preg_match("/^[ \\t*]*Requires at least:[ \\t]*([0-9]+\\.[0-9]+)[ \\t]*$/mi", $main, $match)
+		) {
+			fwrite(STDERR, "Plugin Check validation failed: could not derive WordPress version from built artifact\\n");
+			exit(1);
+		}
+		echo $match[1];
+	' "${ARTIFACT_DIR}/cybermaps.php"
+)"
 
 RUNTIME_DIR="$(mktemp -d "${TMPDIR:-/tmp}/cybermaps-wporg.XXXXXX")"
 RUNTIME_ID="cybermaps-wporg-${RANDOM}-$$"

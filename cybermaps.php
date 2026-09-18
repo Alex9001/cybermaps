@@ -4,7 +4,7 @@
  * Plugin URI: https://cybermaps.dev
  * Description: XML sitemaps, literal Markdown and llms.txt publishing, diagnostics, analytics, and reports for WordPress.
  * Version: 7.5.2
- * Requires at least: 7.0
+ * Requires at least: 7.1
  * Requires PHP: 8.2
  * Author: Aleksandr Oreshkin
  * Author URI: https://profiles.wordpress.org/oreshkin/

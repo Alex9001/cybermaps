@@ -14,8 +14,8 @@ compatibility findings, tests, and focused code changes are welcome.
 
 ## Local setup
 
-Cybermaps requires PHP 8.2+ and targets WordPress 7.0+. PHP 8.3+ and WordPress
-7.1+ remain the recommended development pair.
+Cybermaps requires PHP 8.2+ and WordPress 7.1+. PHP 8.3+ remains the
+recommended development runtime.
 
 ```bash
 composer install
@@ -25,8 +25,8 @@ composer run lint:phpcs
 ```
 
 The test suite supplies its own WordPress stubs. Changes that depend on a real
-WordPress lifecycle changes should be checked on both WordPress 7.0/PHP 8.2 and
-WordPress 7.1/PHP 8.3 installations.
+WordPress lifecycle changes should be checked on both the minimum supported
+WordPress 7.1/PHP 8.2 runtime and the recommended PHP 8.3+ runtime.
 
 ## Pull requests
 

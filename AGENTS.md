@@ -6,7 +6,7 @@ before editing. It captures the conventions and tooling that are easy to miss.
 **Plugin:** Cybermaps: LLM & XML Sitemap SEO — XML sitemaps + AI discovery
 endpoints for WordPress, with a static-file delivery engine.
 
-- Language/runtime: **PHP 8.2+** (`declare(strict_types=1)` in every source file), WordPress 7.0+; PHP 8.3+/WordPress 7.1+ recommended.
+- Language/runtime: **PHP 8.2+** (`declare(strict_types=1)` in every source file), WordPress 7.1+; PHP 8.3+ recommended.
 - Namespace: `Cybermaps\` → `src/` (PSR-4 via `src/Autoloader.php` and Composer).
 - Configuration roots: the general `cybermaps_settings` array plus dedicated
   Discovery Center, crawler-policy, and identity options (see "Settings system").
@@ -21,7 +21,7 @@ endpoints for WordPress, with a static-file delivery engine.
 
 1. **Lint before claiming done:** `php -l` every PHP file you touched. No syntax errors.
 2. **Run the shipped-code standards gate:** `composer run lint:phpcs`. The ruleset
-   follows `WordPress-Extra` with WordPress 7.0, Cybermaps i18n/prefix settings,
+   follows `WordPress-Extra` with WordPress 7.1, Cybermaps i18n/prefix settings,
    selected public-contract documentation, and one documented PSR-4 filename
    exception.
 3. **Keep release metadata in sync** when bumping the version (see "Versioning").
@@ -33,6 +33,9 @@ endpoints for WordPress, with a static-file delivery engine.
 8. **Configuration keys live in their owning sanitizer.** `SettingsSanitizer`
    governs `cybermaps_settings`; each structured domain option has its own
    sanitizer and schema.
+9. **Do not lower the WordPress 7.1 baseline because an older smoke test
+   passes.** Core's native Abilities API contract requires 7.1. Compatibility
+   backports need an explicit product decision, not an inferred support change.
 
 ---
 
@@ -103,7 +106,7 @@ When you bump the version, update **all** of these so they agree:
 
 1. `cybermaps.php` — the `Version:` header **and** the `CYBERMAPS_VERSION` constant.
 2. `readme.txt` — `Stable tag:`, a new `== Changelog ==` entry, and a `== Upgrade Notice ==` entry.
-3. `docs/documentation.md` — the `> Version X · PHP 8.2 · WordPress 7.0` stamp near the top.
+3. `docs/documentation.md` — the `> Version X · PHP 8.2 · WordPress 7.1` stamp near the top.
 4. Regenerate `docs/dev/manifest.json` and both `docs/dev/ai-configuration/`
    artifacts (they read the version from the header automatically).
 

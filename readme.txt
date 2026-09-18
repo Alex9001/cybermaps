@@ -1,7 +1,7 @@
 === CYBERMAPS: XML Sitemaps & llms.txt ===
 Contributors: oreshkin
 Tags: sitemap, llms-txt, technical-seo, content-audit, indexnow
-Requires at least: 7.0
+Requires at least: 7.1
 Tested up to: 7.1
 Stable tag: 7.5.2
 Requires PHP: 8.2
@@ -104,7 +104,7 @@ Persistent settings, tables, and post metadata remain after uninstall unless
 = 7.5.2 =
 * Hardened request authorization, exact setup input schemas, contextual protocol output, SQL lists, and client-IP hook data.
 * Moved report CSS to an enqueued asset, removed reserved transient-option access, and added fail-closed WordPress.org release checks.
-* Restored the declared WordPress 7.0 baseline with PHP 8.2 and disposable runtime validation.
+* Restored the WordPress 7.1/PHP 8.2 baseline with native Abilities API checks.
 
 = 7.5.1 =
 * Added local orphan, homepage-path, and three-click-depth content findings.
@@ -195,7 +195,7 @@ Earlier release history is included in `changelog.txt`.
 == Upgrade Notice ==
 
 = 7.5.2 =
-Security and WordPress.org compliance hardening; update is recommended.
+Security and WordPress.org hardening with the WordPress 7.1 Abilities API baseline.
 
 = 7.5.1 =
 Reports now find potential orphans and deep pages from stored links and menus.

@@ -129,7 +129,7 @@ per sitemap or discovery URL when combining plugins. The
 
 ## Implementation and source notes
 
-CYBERMAPS 7.5.2 requires PHP 8.2+ and WordPress 7.0+. Its
+CYBERMAPS 7.5.2 requires PHP 8.2+ and WordPress 7.1+. Its
 [feature reference](./features.md) and [generated inventory](./dev/manifest.json)
 provide the detailed Core coverage behind these comparisons.
 

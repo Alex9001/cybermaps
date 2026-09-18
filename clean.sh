@@ -36,6 +36,7 @@ CHECKSUM_PATH="${ARCHIVE_PATH}.sha256"
 for release_tool in \
 	"${PLUGIN_DIR}/bin/check-manifest.php" \
 	"${PLUGIN_DIR}/bin/check-ai-configuration.php" \
+	"${PLUGIN_DIR}/bin/check-runtime-baseline.php" \
 	"${PLUGIN_DIR}/bin/generate-pot.sh" \
 	"${PLUGIN_DIR}/bin/validate-release.sh"; do
 	if [ ! -f "${release_tool}" ]; then
@@ -47,6 +48,7 @@ done
 echo "==> Verifying generated release inputs…"
 php "${PLUGIN_DIR}/bin/check-manifest.php"
 php "${PLUGIN_DIR}/bin/check-ai-configuration.php"
+php "${PLUGIN_DIR}/bin/check-runtime-baseline.php"
 bash "${PLUGIN_DIR}/bin/generate-pot.sh" --check
 
 if [ -n "${SOURCE_DATE_EPOCH:-}" ]; then

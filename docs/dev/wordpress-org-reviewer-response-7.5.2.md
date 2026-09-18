@@ -30,6 +30,7 @@ high-risk suppressions. These gates are part of both local release validation
 and the GitHub publisher; no GitHub Actions were added.
 
 The exact `cybermaps_7.5.2.zip` was installed and activated in a disposable
-WordPress 7.0 / PHP 8.2 environment with `WP_DEBUG` enabled. Official Plugin
+WordPress 7.1 / PHP 8.2 environment with `WP_DEBUG` enabled. Official Plugin
 Check 2.0.0 completed both new-plugin and experimental checks with no findings,
-the endpoint/report smoke tests passed, and the debug log remained clean.
+the endpoint/report smoke tests and native Cybermaps ability-registration checks
+passed, and the debug log remained clean.
