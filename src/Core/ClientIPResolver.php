@@ -113,12 +113,17 @@ final class ClientIPResolver {
 		return $headers;
 	}
 
-	/** Normalize the address grammar before applying WordPress text sanitation. */
+	/** Unslash and validate supported address grammar at the request boundary. */
 	private static function read_request_header( string $key ): string {
-		if ( ! isset( $_SERVER[ $key ] ) || ! is_string( $_SERVER[ $key ] ) || strlen( $_SERVER[ $key ] ) > 4096 ) {
+		if ( ! isset( $_SERVER[ $key ] ) || ! is_string( $_SERVER[ $key ] ) ) {
 			return '';
 		}
-		return sanitize_text_field( self::bounded_header( $key, wp_unslash( $_SERVER[ $key ] ) ) ?? '' );
+		$value = filter_var(
+			wp_unslash( $_SERVER[ $key ] ),
+			FILTER_CALLBACK,
+			array( 'options' => static fn( string $raw ): string => self::bounded_header( $key, $raw ) ?? '' )
+		);
+		return is_string( $value ) ? $value : '';
 	}
 
 	/** Reject oversized or control-bearing input before address parsing. */
