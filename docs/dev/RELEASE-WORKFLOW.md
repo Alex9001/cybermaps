@@ -3,7 +3,9 @@
 Work in `/home/user/Documents/CODE/cybermaps/`, the only plugin source checkout.
 The Local Sites directory is an installation, never a source editing location.
 Do not create automatic clones or worktrees. No checkout hooks or GitHub Actions
-are used.
+are used. Long release/install commands disable Composer's five-minute process
+timeout so package validation and deployment can finish; their validation
+gates remain mandatory.
 
 ## Configure once
 
