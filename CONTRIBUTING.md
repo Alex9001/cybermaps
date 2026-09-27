@@ -28,6 +28,21 @@ The test suite supplies its own WordPress stubs. Changes that depend on a real
 WordPress lifecycle changes should be checked on both the minimum supported
 WordPress 7.1/PHP 8.2 runtime and the recommended PHP 8.3+ runtime.
 
+The maintainer's only plugin source checkout is
+`/home/user/Documents/CODE/cybermaps/`. Do not create automatic clones or
+worktrees. The Local Sites plugin directory is an installation only: use
+`composer dev:install`; never edit that installed copy. Put temporary work in
+`docs/generated/tmp/`, release output in `docs/generated/releases/<version>/`,
+and backups in `docs/generated/backups/`. Tooling passes the workspace temporary
+directory to subprocesses.
+
+Copy `.cybermaps-workspace.example.json` to `.cybermaps-workspace.json` and
+review its two destination paths. The local config is ignored. Use
+`composer release` for the complete release and website workflow; it stops
+before any website write when staged, unstaged or untracked work exists.
+Existing work is never stashed, reset or committed automatically. See
+[the release workflow](docs/dev/RELEASE-WORKFLOW.md).
+
 ## Pull requests
 
 1. Keep the change focused and explain the user-visible reason for it.
@@ -38,8 +53,9 @@ WordPress 7.1/PHP 8.2 runtime and the recommended PHP 8.3+ runtime.
 6. Regenerate the AI configuration schema and catalog after registry changes.
 7. Update `readme.txt` and `docs/documentation.md` when public behavior changes.
 
-Generated files under `clean/` and historical files under `freemius/` are not
-source and must not be edited by hand.
+Generated files under `docs/generated/` are not source and must not be edited
+by hand. Tracked documentation, manifests, schemas and translations stay in
+their established locations.
 
 ## WordPress.org constraints
 

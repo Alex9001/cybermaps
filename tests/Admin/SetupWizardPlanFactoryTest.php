@@ -42,6 +42,20 @@ final class SetupWizardPlanFactoryTest extends TestCase {
 		self::assertSame( 'forbidden', $policies['ai_kg_expose_admin'] );
 	}
 
+	public function test_registry_assigns_clear_semantic_icons_to_wizard_choices(): void {
+		$choices = SetupWizardRegistry::choices();
+
+		self::assertSame( 'newspaper', $choices['website_type']['newspaper']['icon'] );
+		self::assertSame( 'shopping-bag', $choices['website_type']['ecommerce']['icon'] );
+		self::assertSame( 'document', $choices['website_type']['knowledgebase']['icon'] );
+		self::assertSame( 'building', $choices['website_type']['small-business']['icon'] );
+		self::assertSame( 'briefcase', $choices['website_type']['medium-business']['icon'] );
+		self::assertSame( 'feather', $choices['operations']['performance']['icon'] );
+		self::assertSame( 'person', $choices['identity_type']['Person']['icon'] );
+		self::assertSame( 'briefcase', $choices['identity_type']['Organization']['icon'] );
+		self::assertSame( 'building', $choices['identity_type']['LocalBusiness']['icon'] );
+	}
+
 	public function test_apply_regenerates_the_configuration_server_side(): void {
 		$controller = (string) file_get_contents( CYBERMAPS_PLUGIN_DIR . 'src/Admin/SetupWizard/SetupWizardController.php' );
 		$script     = (string) file_get_contents( CYBERMAPS_PLUGIN_DIR . 'assets/js/setup-wizard.js' );

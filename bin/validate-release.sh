@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
+source "$(dirname "${BASH_SOURCE[0]}")/workspace.sh"
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-ARTIFACT_DIR="${1:-${PROJECT_DIR}/clean/cybermaps}"
+RELEASE_DIR="$(python3 -B "${PROJECT_DIR}/bin/workspace.py" release-dir)"
+ARTIFACT_DIR="${1:-${RELEASE_DIR}/cybermaps}"
 ARCHIVE_PATH="${2:-}"
 
 fail() {
@@ -254,7 +256,7 @@ if find "${ARTIFACT_DIR}/assets" -type f -name '*.map' -print -quit | grep -q .;
 fi
 
 if [ -z "${ARCHIVE_PATH}" ]; then
-    ARCHIVE_PATH="${PROJECT_DIR}/clean/cybermaps_${PLUGIN_VERSION}.zip"
+    ARCHIVE_PATH="${RELEASE_DIR}/cybermaps_${PLUGIN_VERSION}.zip"
 fi
 if [ "$(basename "${ARCHIVE_PATH}")" != "cybermaps_${PLUGIN_VERSION}.zip" ]; then
     fail "archive name must be cybermaps_${PLUGIN_VERSION}.zip"
@@ -436,4 +438,4 @@ echo "Release ZIP valid: ${ARCHIVE_PATH}"
 bash "${PROJECT_DIR}/bin/validate-plugin-check.sh" \
 	"${ARTIFACT_DIR}" \
 	"${ARCHIVE_PATH}" \
-	"${PROJECT_DIR}/clean/plugin-check-validation.json"
+	"${RELEASE_DIR}/plugin-check-validation.json"

@@ -11,6 +11,28 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Renders accessible informational toggletips across supported WordPress versions.
  */
 final class AccessibleTooltip {
+	/** Exact phrasing-content contract for native and fallback toggletips. */
+	public static function allowed_html(): array {
+		$common = array_fill_keys( array( 'id', 'class', 'role', 'aria-label', 'aria-hidden', 'aria-controls', 'aria-expanded', 'aria-haspopup', 'tabindex', 'hidden' ), true );
+		return array(
+			'span'   => array_merge(
+				$common,
+				array(
+					'popover'   => true,
+					'autofocus' => true,
+				)
+			),
+			'button' => array_merge(
+				$common,
+				array(
+					'type'                => true,
+					'popovertarget'       => true,
+					'popovertargetaction' => true,
+				)
+			),
+		);
+	}
+
 	/**
 	 * Return a keyboard-accessible help trigger and dismissible information panel.
 	 */

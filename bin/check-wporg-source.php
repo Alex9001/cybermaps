@@ -97,6 +97,9 @@ function cybermaps_wporg_source_static_checks( array $files, array $config, bool
 
 	foreach ( $files as $path => $source ) {
 		$lines = preg_split( '/\R/', $source ) ?: array();
+		if ( ( $fixture || 'src/Core/ClientIPResolver.php' === $path ) && preg_match( '/\$_SERVER\s*(?:;|:|,|\))/', $source ) ) {
+			cybermaps_wporg_source_error( 'server-bag', "{$path} copies or forwards the complete server bag instead of reading bounded fields." );
+		}
 		if ( preg_match( '/<(?:script|style)(?:\s|>)/i', $source ) ) {
 			cybermaps_wporg_source_error( 'inline-asset', "{$path} contains a literal script or style block." );
 		}
@@ -218,6 +221,9 @@ function cybermaps_wporg_source_annotation_audit( string $project_dir ): array {
 	$entries = array();
 	foreach ( $report['files'] as $path => $file ) {
 		foreach ( (array) ( $file['messages'] ?? array() ) as $message ) {
+			if ( str_starts_with( str_replace( '\\', '/', (string) $path ), 'src/Admin/' ) && 'WordPress.Security.EscapeOutput.OutputNotEscaped' === ( $message['source'] ?? '' ) ) {
+				cybermaps_wporg_source_error( 'admin-output', "{$path}:{$message['line']} emits unescaped HTML; this cannot be allowlisted." );
+			}
 			$entries[] = str_replace( '\\', '/', (string) $path )
 				. ':' . (int) ( $message['line'] ?? 0 )
 				. ':' . (int) ( $message['column'] ?? 0 )
@@ -233,6 +239,12 @@ try {
 		throw new RuntimeException( 'The source scan root does not exist.' );
 	}
 	$config = null === $fixture_dir ? cybermaps_wporg_source_json( $config_path ) : array();
+	if ( null === $fixture_dir ) {
+		$readme = (string) file_get_contents( $project_dir . '/readme.txt' );
+		if ( ! str_contains( $readme, '== Source Code ==' ) || ! str_contains( $readme, 'https://github.com/Alex9001/cybermaps' ) || ! str_contains( $readme, 'composer release:build' ) ) {
+			cybermaps_wporg_source_error( 'asset-source', 'The shipped readme must identify editable sources and build instructions.' );
+		}
+	}
 	$files  = cybermaps_wporg_source_files( $scan_root, null !== $fixture_dir );
 	cybermaps_wporg_source_static_checks( $files, $config, null !== $fixture_dir );
 	if ( null === $fixture_dir ) {

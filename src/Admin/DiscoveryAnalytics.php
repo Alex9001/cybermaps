@@ -732,11 +732,11 @@ else :
 
 	/** @param array<string, mixed> $row Request row view model. @param array<string, string> $labels Category labels. */
 	private static function render_request_badges( array $row, array $labels ): void {
-		$kind_label = 'endpoint' === $row['kind'] ? esc_html__( 'endpoint', 'cybermaps' ) : esc_html__( 'content', 'cybermaps' );
+		$kind_label = 'endpoint' === $row['kind'] ? __( 'endpoint', 'cybermaps' ) : __( 'content', 'cybermaps' );
 		?>
 		<div class="cm-feed-badges">
 			<span class="cybermaps-badge cm-badge-<?php echo esc_attr( $row['category'] ); ?>"><?php echo esc_html( self::category_label( $row['category'], $labels ) ); ?></span>
-			<span class="cybermaps-badge cm-request-kind-badge cm-request-kind-badge--<?php echo esc_attr( $row['kind'] ); ?>"><?php echo $kind_label; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- translated and escaped above. ?></span>
+			<span class="cybermaps-badge cm-request-kind-badge cm-request-kind-badge--<?php echo esc_attr( $row['kind'] ); ?>"><?php echo esc_html( $kind_label ); ?></span>
 			<span class="cybermaps-badge cm-recognition-badge cm-recognition-badge--<?php echo esc_attr( self::identity_badge_tone( $row['identity_status'] ) ); ?>"><?php echo esc_html( self::identity_status_label( $row['identity_status'] ) ); ?></span>
 		</div>
 		<?php

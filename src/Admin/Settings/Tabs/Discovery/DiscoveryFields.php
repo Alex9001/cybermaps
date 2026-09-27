@@ -42,7 +42,7 @@ class DiscoveryFields {
 		foreach ( $public_types as $pt ) {
 			$checked = in_array( $pt->name, $types, true ) ? 'checked' : '';
 			echo '<label class="cm-checkbox-wrapper">';
-			echo '<input type="checkbox" name="cybermaps_settings[ai_sitemap_types][]" value="' . esc_attr( $pt->name ) . '" ' . checked( $checked, 'checked', false ) . '> ' . esc_html( $pt->label ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo '<input type="checkbox" name="cybermaps_settings[ai_sitemap_types][]" value="' . esc_attr( $pt->name ) . '" ' . checked( $checked, 'checked', false ) . '> ' . esc_html( $pt->label );
 			echo '</label>';
 		}
 		echo '</div>';
@@ -86,8 +86,8 @@ class DiscoveryFields {
 		echo '</div>';
 
 		echo '<div style="display: flex; flex-direction: column; gap: 5px;">';
-		echo '<label class="cm-checkbox-wrapper"><input type="checkbox" name="cybermaps_settings[ai_feed_full_content]" value="1" ' . checked( $full_content, true, false ) . '> ' . esc_html__( 'Include Full Stored Content', 'cybermaps' ) . '</label>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo '<label class="cm-checkbox-wrapper"><input type="checkbox" name="cybermaps_settings[ai_feed_include_authors]" value="1" ' . checked( $include_authors, true, false ) . '> ' . esc_html__( 'Include Author Metadata', 'cybermaps' ) . '</label>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<label class="cm-checkbox-wrapper"><input type="checkbox" name="cybermaps_settings[ai_feed_full_content]" value="1" ' . checked( $full_content, true, false ) . '> ' . esc_html__( 'Include Full Stored Content', 'cybermaps' ) . '</label>';
+		echo '<label class="cm-checkbox-wrapper"><input type="checkbox" name="cybermaps_settings[ai_feed_include_authors]" value="1" ' . checked( $include_authors, true, false ) . '> ' . esc_html__( 'Include Author Metadata', 'cybermaps' ) . '</label>';
 		echo '</div>';
 
 		echo '<div style="margin-top: 10px;">';
@@ -418,7 +418,7 @@ class DiscoveryFields {
 		foreach ( $options_list as $key => $label ) {
 			$checked = in_array( $key, $capabilities, true ) ? 'checked' : '';
 			echo '<label class="cm-checkbox-wrapper">';
-			echo '<input type="checkbox" name="cybermaps_settings[ai_capabilities][]" value="' . esc_attr( $key ) . '" ' . checked( $checked, 'checked', false ) . '> ' . esc_html( $label ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo '<input type="checkbox" name="cybermaps_settings[ai_capabilities][]" value="' . esc_attr( $key ) . '" ' . checked( $checked, 'checked', false ) . '> ' . esc_html( $label );
 			echo '</label>';
 		}
 		echo '</div>';
@@ -512,8 +512,8 @@ class DiscoveryFields {
 		$manifest_endpoints = isset( $options['ai_manifest_endpoints'] ) ? (array) $options['ai_manifest_endpoints'] : array( 'llms.txt', 'feed.json', 'knowledge-graph.json', 'ai-sitemap.xml' );
 
 		echo '<strong>' . esc_html__( 'Knowledge Graph Privacy:', 'cybermaps' ) . '</strong><br><div style="margin-top: 10px; display: flex; flex-direction: column; gap: 5px; margin-bottom: 15px;">';
-		echo '<label class="cm-checkbox-wrapper"><input type="checkbox" name="cybermaps_settings[ai_kg_expose_admin]" value="1" ' . checked( $expose_admin, true, false ) . '> ' . esc_html__( 'Expose Admin User as “Person”', 'cybermaps' ) . '</label>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo '<label class="cm-checkbox-wrapper"><input type="checkbox" name="cybermaps_settings[ai_kg_link_org]" value="1" ' . checked( $link_org, true, false ) . '> ' . esc_html__( 'Link Primary Entity to Website', 'cybermaps' ) . '</label>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<label class="cm-checkbox-wrapper"><input type="checkbox" name="cybermaps_settings[ai_kg_expose_admin]" value="1" ' . checked( $expose_admin, true, false ) . '> ' . esc_html__( 'Expose Admin User as “Person”', 'cybermaps' ) . '</label>';
+		echo '<label class="cm-checkbox-wrapper"><input type="checkbox" name="cybermaps_settings[ai_kg_link_org]" value="1" ' . checked( $link_org, true, false ) . '> ' . esc_html__( 'Link Primary Entity to Website', 'cybermaps' ) . '</label>';
 		echo '</div>';
 
 		$pinned_knowledge = isset( $options['llms_pinned_ids'] ) ? $options['llms_pinned_ids'] : '';
@@ -524,7 +524,7 @@ class DiscoveryFields {
 			__( 'Up to %d unique, comma-separated IDs considered first by the experimental budgeted briefing. Every item still has to fit the configured total budget.', 'cybermaps' ),
 			\Cybermaps\Discovery\PublicationConstraints::BRIEFING_PINNED_IDS_MAX
 		);
-		echo '<label for="llms_pinned_ids"><strong>' . esc_html__( 'Briefing Priority IDs:', 'cybermaps' ) . '</strong></label> ' . \Cybermaps\Admin\AccessibleTooltip::get( $pinned_help ) . '<br>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- The label and AccessibleTooltip markup are escaped.
+		echo '<label for="llms_pinned_ids"><strong>' . esc_html__( 'Briefing Priority IDs:', 'cybermaps' ) . '</strong></label> ' . wp_kses( \Cybermaps\Admin\AccessibleTooltip::get( $pinned_help ), \Cybermaps\Admin\AccessibleTooltip::allowed_html() ) . '<br>';
 		echo '<input type="text" id="llms_pinned_ids" name="cybermaps_settings[llms_pinned_ids]" value="' . esc_attr( $pinned_knowledge ) . '" class="regular-text" style="margin-top: 5px; width: 100%; max-width: 400px;" placeholder="' . esc_attr__( 'e.g. 102, 54, 8', 'cybermaps' ) . '">';
 		echo '<p class="cybermaps-desc">' . esc_html__( 'Priority affects selection order only; it is not a quality or authority score.', 'cybermaps' ) . '</p>';
 		echo '</div>';
@@ -534,7 +534,7 @@ class DiscoveryFields {
 			: \Cybermaps\Discovery\PublicationConstraints::BRIEFING_TOKEN_BUDGET_DEFAULT;
 
 		echo '<div style="margin-bottom: 20px; border-top: 1px solid var(--cm-soft-bg); padding-top: 15px;">';
-		echo '<label for="llms_tldr_token_budget"><strong>' . esc_html__( 'Briefing Token Budget:', 'cybermaps' ) . '</strong></label> ' . \Cybermaps\Admin\AccessibleTooltip::get( __( 'Approximate maximum for the entire file, including its header and priority entries. Cybermaps estimates one token per four UTF-8 bytes.', 'cybermaps' ) ) . '<br>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- The label and AccessibleTooltip markup are escaped.
+		echo '<label for="llms_tldr_token_budget"><strong>' . esc_html__( 'Briefing Token Budget:', 'cybermaps' ) . '</strong></label> ' . wp_kses( \Cybermaps\Admin\AccessibleTooltip::get( __( 'Approximate maximum for the entire file, including its header and priority entries. Cybermaps estimates one token per four UTF-8 bytes.', 'cybermaps' ) ), \Cybermaps\Admin\AccessibleTooltip::allowed_html() ) . '<br>';
 		echo '<input type="number" id="llms_tldr_token_budget" name="cybermaps_settings[llms_tldr_token_budget]" value="' . esc_attr( (string) $tldr_token_budget ) . '" min="' . esc_attr( (string) \Cybermaps\Discovery\PublicationConstraints::BRIEFING_TOKEN_BUDGET_MIN ) . '" max="' . esc_attr( (string) \Cybermaps\Discovery\PublicationConstraints::BRIEFING_TOKEN_BUDGET_MAX ) . '" step="1000" class="small-text" style="margin-top: 5px;">';
 		echo '<p class="cybermaps-desc">' . esc_html__( 'The full eligible inventory is considered. Entries are ordered deterministically and omitted only when they do not fit.', 'cybermaps' ) . '</p>';
 		echo '</div>';
@@ -562,7 +562,7 @@ class DiscoveryFields {
 						$label
 					)
 				)
-				. '</label>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				. '</label>';
 		}
 		echo '</div>';
 	}

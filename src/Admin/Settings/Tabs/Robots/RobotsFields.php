@@ -11,7 +11,7 @@ class RobotsFields {
 	public static function robots_section_callback() {
 		echo '<p class="cm-robots-summary">';
 		echo esc_html__( 'Control WordPress robots.txt rules, discovery-manifest targeting, endpoint rate limits, and machine-readable content preferences.', 'cybermaps' );
-		echo \Cybermaps\Admin\AccessibleTooltip::get( __( 'Robots rules and content-use declarations communicate publisher preferences. They are not authentication or access control, and each crawler decides whether to honor them.', 'cybermaps' ), 'tip-right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- AccessibleTooltip returns escaped trusted markup.
+		echo wp_kses( \Cybermaps\Admin\AccessibleTooltip::get( __( 'Robots rules and content-use declarations communicate publisher preferences. They are not authentication or access control, and each crawler decides whether to honor them.', 'cybermaps' ), 'tip-right' ), \Cybermaps\Admin\AccessibleTooltip::allowed_html() );
 		echo '</p>';
 	}
 	public static function render_crawler_matrix() {
@@ -53,7 +53,7 @@ class RobotsFields {
 		echo '<th scope="col" class="cybermaps-crawler-name-column">' . esc_html__( 'Bot / Crawler', 'cybermaps' ) . '</th>';
 		echo '<th scope="col">' . esc_html( $robots_rule_label ) . '</th>';
 		echo '<th scope="col">' . esc_html( $manifest_target_label ) . '</th>';
-		echo '<th scope="col">' . esc_html( $rpm_limit_label ) . ' ' . \Cybermaps\Admin\AccessibleTooltip::get( __( 'Requests per minute for Cybermaps discovery endpoints. A value of 0 uses the built-in limit for the endpoint tier. Exceeding the limit returns HTTP 429 with Retry-After.', 'cybermaps' ), 'tip-left' ) . '</th>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- The dynamic label and AccessibleTooltip markup are escaped.
+		echo '<th scope="col">' . esc_html( $rpm_limit_label ) . ' ' . wp_kses( \Cybermaps\Admin\AccessibleTooltip::get( __( 'Requests per minute for Cybermaps discovery endpoints. A value of 0 uses the built-in limit for the endpoint tier. Exceeding the limit returns HTTP 429 with Retry-After.', 'cybermaps' ), 'tip-left' ), \Cybermaps\Admin\AccessibleTooltip::allowed_html() ) . '</th>';
 		echo '</tr>';
 		echo '</thead>';
 		self::render_categories(
@@ -282,7 +282,7 @@ class RobotsFields {
 		echo '<span class="dashicons dashicons-arrow-right-alt2" aria-hidden="true"></span>';
 		echo '<span class="cybermaps-crawler-category-action">' . esc_html__( 'Customize', 'cybermaps' ) . '</span>';
 		echo '</button>';
-		echo \Cybermaps\Admin\AccessibleTooltip::get( self::get_category_tooltip( $cat_id ), 'tip-right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- AccessibleTooltip returns escaped trusted markup.
+		echo wp_kses( \Cybermaps\Admin\AccessibleTooltip::get( self::get_category_tooltip( $cat_id ), 'tip-right' ), \Cybermaps\Admin\AccessibleTooltip::allowed_html() );
 		echo '</div></td>';
 		echo '<td data-label="' . esc_attr( $robots_rule_label ) . '">';
 		echo '<label class="cm-checkbox-wrapper" style="margin: 0; display: inline-flex;">';
@@ -360,7 +360,7 @@ class RobotsFields {
 		echo '</td>';
 		echo '<td data-label="' . esc_attr( $robots_rule_label ) . '">';
 		echo '<label class="cm-checkbox-wrapper" style="margin: 0; display: inline-flex;">';
-		echo '<input type="checkbox" name="cybermaps_robots_manager[overrides][' . esc_attr( $bot_id ) . '][robots]" value="1" class="bot-robots-toggle" data-default="' . ( $bot_meta->default['robots'] ? '1' : '0' ) . '" aria-label="' . esc_attr( $robots_aria ) . '" ' . checked( $robots_checked, true, false ) . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<input type="checkbox" name="cybermaps_robots_manager[overrides][' . esc_attr( $bot_id ) . '][robots]" value="1" class="bot-robots-toggle" data-default="' . ( $bot_meta->default['robots'] ? '1' : '0' ) . '" aria-label="' . esc_attr( $robots_aria ) . '" ' . checked( $robots_checked, true, false ) . '>';
 		echo '</label>';
 		echo '</td>';
 		self::render_manifest_control( $bot_id, $bot_meta, $is_ai_bot, $llm_checked, $manifest_target_label, $manifest_aria );
@@ -381,13 +381,13 @@ class RobotsFields {
 		echo '<td data-label="' . esc_attr( $manifest_target_label ) . '">';
 		if ( $is_ai_bot ) {
 			echo '<label class="cm-checkbox-wrapper" style="margin: 0; display: inline-flex;">';
-			echo '<input type="checkbox" name="cybermaps_robots_manager[overrides][' . esc_attr( $bot_id ) . '][llm]" value="1" class="bot-llm-toggle" data-default="' . ( $bot_meta->default['llm'] ? '1' : '0' ) . '" aria-label="' . esc_attr( $aria_label ) . '" ' . checked( $checked, true, false ) . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo '<input type="checkbox" name="cybermaps_robots_manager[overrides][' . esc_attr( $bot_id ) . '][llm]" value="1" class="bot-llm-toggle" data-default="' . ( $bot_meta->default['llm'] ? '1' : '0' ) . '" aria-label="' . esc_attr( $aria_label ) . '" ' . checked( $checked, true, false ) . '>';
 			echo '</label>';
 		} else {
 			echo '<label class="cm-checkbox-wrapper" style="margin: 0; display: inline-flex; opacity: 0.3;">';
 			echo '<input type="checkbox" disabled aria-label="' . esc_attr( $aria_label ) . '">';
 			echo '</label>';
-			echo \Cybermaps\Admin\AccessibleTooltip::get( __( 'This setting controls Cybermaps publication hints for crawler entries classified as AI-related; it is separate from robots.txt enforcement.', 'cybermaps' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- AccessibleTooltip returns escaped trusted markup.
+			echo wp_kses( \Cybermaps\Admin\AccessibleTooltip::get( __( 'This setting controls Cybermaps publication hints for crawler entries classified as AI-related; it is separate from robots.txt enforcement.', 'cybermaps' ) ), \Cybermaps\Admin\AccessibleTooltip::allowed_html() );
 		}
 		echo '</td>';
 	}
@@ -486,7 +486,7 @@ class RobotsFields {
 		$options = \Cybermaps\Core\ConfigurationStore::robots();
 		$checked = isset( $options['takeover_enabled'] ) && $options['takeover_enabled'] ? 'checked' : '';
 		echo '<label class="cm-toggle-wrapper">';
-		echo '<input type="checkbox" name="cybermaps_robots_manager[takeover_enabled]" value="1" class="cm-toggle-input" ' . checked( $checked, 'checked', false ) . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<input type="checkbox" name="cybermaps_robots_manager[takeover_enabled]" value="1" class="cm-toggle-input" ' . checked( $checked, 'checked', false ) . '>';
 		echo '<span class="cm-toggle-switch"></span>';
 		echo '<span class="cm-toggle-label">' . esc_html__( 'Enable Cybermaps Robots.txt Takeover', 'cybermaps' ) . '</span>';
 		echo '</label>';

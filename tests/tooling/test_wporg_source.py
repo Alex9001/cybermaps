@@ -33,6 +33,7 @@ class WordPressOrgSourceCheckerTest(unittest.TestCase):
             "sql-list": "[sql-list]",
             "core-bootstrap": "[core-bootstrap]",
             "core-include-order": "[core-include-order]",
+            "server-bag": "[server-bag]",
         }
         for fixture, marker in cases.items():
             with self.subTest(fixture=fixture):

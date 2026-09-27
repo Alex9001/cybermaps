@@ -108,7 +108,7 @@ final class SetupWizardController {
 
 	/** @return array<string,mixed> */
 	private static function payload(): array {
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- authorize() verifies the nonce; raw JSON is decoded and structurally validated below.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- authorize() verifies the nonce; bounded JSON is decoded and passed to the exact field sanitizer before leaving this boundary.
 		$raw = isset( $_POST['payload'] ) && is_string( $_POST['payload'] ) ? wp_unslash( $_POST['payload'] ) : '';
 		if ( '' === trim( $raw ) || strlen( $raw ) > self::MAX_PAYLOAD_BYTES ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception messages are plain JSON data; HTML escaping belongs at the presentation boundary.
@@ -125,7 +125,7 @@ final class SetupWizardController {
 			throw new \InvalidArgumentException( __( 'The Quick Setup request must be an object.', 'cybermaps' ) );
 		}
 
-		return $payload;
+		return SetupWizardRequestSanitizer::sanitize( $payload );
 	}
 
 	private static function posted_scalar( string $key ): string {

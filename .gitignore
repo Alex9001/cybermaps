@@ -1,14 +1,9 @@
 # Generated build and packaging artifacts
-/clean/
-/freemius/
-/cybermaps-astro-release-*/
-/cybermaps-release-repair-*/
+/docs/generated/
+/.cybermaps-workspace.json
 
 # Dependencies
 /vendor/
-
-# Test caches
-/.phpunit.cache/
 
 # Local editor and development files
 /.cursor/
@@ -36,7 +31,6 @@ Thumbs.db
 /.claude/
 /.agents/
 /.codex/
-/AGENTS.md
 /CLAUDE.md
 /docs/superpowers/
 /docs/dev/agent-tasks/

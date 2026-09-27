@@ -1,7 +1,7 @@
 <?php
 /**
  * Real WordPress publication regression check for a disposable local database.
- * Usage: php tests/integration/publication-runtime.php /tmp/site/wp-load.php
+ * Usage: python3 bin/workspace.py run php tests/integration/publication-runtime.php "$PWD/docs/generated/tmp/site/wp-load.php"
  * Never run against a production database. Fixtures and options are restored.
  */
 declare(strict_types=1);

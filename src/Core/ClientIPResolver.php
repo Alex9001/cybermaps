@@ -70,7 +70,7 @@ final class ClientIPResolver {
 	 * @return array{ip: string, source: string}
 	 */
 	public static function resolve( ?array $server = null ): array {
-		$server     = null === $server ? $_SERVER : $server;
+		$server     = self::request_headers( $server );
 		$direct     = self::normalize_ip( $server['REMOTE_ADDR'] ?? null );
 		$resolution = self::cloudflare_resolution( $direct, $server ) ?? self::trusted_proxy_resolution( $direct, $server ) ?? array(
 			'ip'     => $direct ?? '',
@@ -95,6 +95,52 @@ final class ClientIPResolver {
 		$filtered = \apply_filters( 'cybermaps_client_ip_resolution', $resolution, self::filter_context( $server ) );
 
 		return self::validate_filtered_resolution( $filtered ) ?? $resolution;
+	}
+
+	/** Read only supported address metadata, never copy the entire server bag.
+	 *
+	 * @param array<string,mixed>|null $server Explicit test/integration input.
+	 * @return array<string,string>
+	 */
+	private static function request_headers( ?array $server ): array {
+		$headers = array();
+		foreach ( array( 'REMOTE_ADDR', 'HTTP_CF_CONNECTING_IP', 'HTTP_X_REAL_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_FORWARDED' ) as $key ) {
+			$normalized = null === $server ? self::read_request_header( $key ) : self::bounded_header( $key, $server[ $key ] ?? null );
+			if ( null !== $normalized && '' !== $normalized ) {
+				$headers[ $key ] = $normalized;
+			}
+		}
+		return $headers;
+	}
+
+	/** Normalize the address grammar before applying WordPress text sanitation. */
+	private static function read_request_header( string $key ): string {
+		if ( ! isset( $_SERVER[ $key ] ) || ! is_string( $_SERVER[ $key ] ) || strlen( $_SERVER[ $key ] ) > 4096 ) {
+			return '';
+		}
+		return sanitize_text_field( self::bounded_header( $key, wp_unslash( $_SERVER[ $key ] ) ) ?? '' );
+	}
+
+	/** Reject oversized or control-bearing input before address parsing. */
+	private static function bounded_header( string $key, mixed $value ): ?string {
+		if ( ! is_string( $value ) || strlen( $value ) > 4096 || 1 === preg_match( '/[\x00-\x08\x0A-\x1F\x7F]/', $value ) ) {
+			return null;
+		}
+		return self::normalize_header( $key, $value );
+	}
+
+	/** Parse address grammar before retaining any caller-supplied header. */
+	private static function normalize_header( string $key, string $value ): ?string {
+		if ( ! in_array( $key, array( 'HTTP_X_FORWARDED_FOR', 'HTTP_FORWARDED' ), true ) ) {
+			return self::normalize_ip( $value );
+		}
+		$chain = 'HTTP_FORWARDED' === $key ? self::parse_forwarded_chain( $value ) : self::parse_x_forwarded_for_chain( $value );
+		if ( array() === $chain ) {
+			return null;
+		}
+		return 'HTTP_FORWARDED' === $key
+			? implode( ', ', array_map( static fn( string $ip ): string => 'for="' . ( str_contains( $ip, ':' ) ? '[' . $ip . ']' : $ip ) . '"', $chain ) )
+			: implode( ', ', $chain );
 	}
 
 	/**
@@ -372,7 +418,11 @@ final class ClientIPResolver {
 	/** @return list<string> */
 	private static function parse_x_forwarded_for_chain( string $raw ): array {
 		$values = array();
-		foreach ( \array_slice( \explode( ',', $raw ), 0, 32 ) as $candidate ) {
+		$parts  = \explode( ',', $raw );
+		if ( count( $parts ) > 32 ) {
+			return array();
+		}
+		foreach ( $parts as $candidate ) {
 			$ip = self::normalize_ip( $candidate );
 			if ( null === $ip ) {
 				return array();
@@ -386,7 +436,11 @@ final class ClientIPResolver {
 	/** @return list<string> */
 	private static function parse_forwarded_chain( string $raw ): array {
 		$values = array();
-		foreach ( \array_slice( \explode( ',', $raw ), 0, 32 ) as $element ) {
+		$parts  = \explode( ',', $raw );
+		if ( count( $parts ) > 32 ) {
+			return array();
+		}
+		foreach ( $parts as $element ) {
 			$matched = \preg_match( '/(?:^|;)\\s*for=(?:"\\[([^\\]]+)\\]"|"?([^;",\\s]+)"?)/i', $element, $match );
 			if ( 1 !== $matched ) {
 				return array();

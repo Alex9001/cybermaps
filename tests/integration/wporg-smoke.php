@@ -78,4 +78,6 @@ if (
 	throw new RuntimeException( 'Standalone report stylesheet smoke test failed.' );
 }
 
+require __DIR__ . '/wporg-review-smoke.php';
+
 echo "Cybermaps native ability, endpoint, and report smoke tests passed.\n";

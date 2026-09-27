@@ -1,5 +1,5 @@
 """Verify public retry and HEAD contracts using a disposable WordPress site.
-Usage: python3 tests/integration/publication-http.py PHP_BINARY /tmp/site/wp-load.php
+Usage: python3 tests/integration/publication-http.py PHP_BINARY "$PWD/docs/generated/tmp/site/wp-load.php"
 """
 import os
 import pathlib
@@ -12,6 +12,10 @@ import urllib.error
 import urllib.request
 
 repo = pathlib.Path(__file__).resolve().parents[2]
+sys.dont_write_bytecode = True
+sys.path.insert(0, str(repo / 'bin'))
+from workspace import configure
+configure()
 with socket.socket() as reserve:
     reserve.bind(('127.0.0.1', 0))
     port = reserve.getsockname()[1]

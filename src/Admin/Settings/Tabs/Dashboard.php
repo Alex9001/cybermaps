@@ -51,18 +51,18 @@ class Dashboard implements SettingsTab {
 		<div class="cm-card cm-mb-25">
 			<div class="section-header">
 				<h2><?php esc_html_e( 'Discovery Architecture', 'cybermaps' ); ?></h2>
-				<?php echo \Cybermaps\Admin\AccessibleTooltip::get( __( 'Key endpoints your site exposes to search engines and AI agents. Enabled endpoints are shown in full color; disabled ones are dimmed. Click any endpoint to visit it.', 'cybermaps' ), 'tip-left' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- AccessibleTooltip returns escaped trusted markup. ?>
+				<?php echo wp_kses( \Cybermaps\Admin\AccessibleTooltip::get( __( 'Key endpoints your site exposes to search engines and AI agents. Enabled endpoints are shown in full color; disabled ones are dimmed. Click any endpoint to visit it.', 'cybermaps' ), 'tip-left' ), \Cybermaps\Admin\AccessibleTooltip::allowed_html() ); ?>
 			</div>
-			<?php echo \Cybermaps\Admin\SVGMapper::generate_html(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			<?php echo wp_kses_post( \Cybermaps\Admin\SVGMapper::generate_html() ); ?>
 			<p class="cm-field-help cm-mt-15"><?php esc_html_e( 'This grid summarizes the primary sitemap and discovery publications. The AI Publication Hub controls the AI publication surface; manifest visibility controls decide which enabled publications the AI manifest advertises.', 'cybermaps' ); ?></p>
 		</div>
 
 		<div class="cm-card cm-mb-25">
 			<div class="section-header">
 				<h2><?php esc_html_e( 'Publication State', 'cybermaps' ); ?></h2>
-				<?php echo \Cybermaps\Admin\AccessibleTooltip::get( __( 'Literal enabled, disabled, and delivery-scope state. These are not quality or ranking scores.', 'cybermaps' ), 'tip-left' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- AccessibleTooltip returns escaped trusted markup. ?>
+				<?php echo wp_kses( \Cybermaps\Admin\AccessibleTooltip::get( __( 'Literal enabled, disabled, and delivery-scope state. These are not quality or ranking scores.', 'cybermaps' ), 'tip-left' ), \Cybermaps\Admin\AccessibleTooltip::allowed_html() ); ?>
 			</div>
-			<?php echo \Cybermaps\Admin\DashboardRenderer::render_capability_strip(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			<?php echo wp_kses_post( \Cybermaps\Admin\DashboardRenderer::render_capability_strip() ); ?>
 		</div>
 		<?php
 	}

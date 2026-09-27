@@ -10,7 +10,7 @@ Describe the user-visible problem and the focused change.
 - [ ] I added or updated tests for changed behavior.
 - [ ] I updated public documentation where needed.
 - [ ] I regenerated the docs manifest and AI contracts when required.
-- [ ] I did not add licensing gates, remote telemetry, secrets, or generated `clean/` files.
+- [ ] I did not add licensing gates, remote telemetry, secrets, or generated `docs/generated/` files.
 
 ## Compatibility notes
 

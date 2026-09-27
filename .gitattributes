@@ -9,5 +9,5 @@
 
 /.github export-ignore
 /.wordpress-org export-ignore
-/freemius export-ignore
-/clean export-ignore
+/docs/generated export-ignore
+/.cybermaps-workspace.json export-ignore

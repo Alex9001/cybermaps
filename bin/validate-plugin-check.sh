@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
+source "$(dirname "${BASH_SOURCE[0]}")/workspace.sh"
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-ARTIFACT_DIR="${1:-${PROJECT_DIR}/clean/cybermaps}"
+RELEASE_DIR="$(python3 -B "${PROJECT_DIR}/bin/workspace.py" release-dir)"
+ARTIFACT_DIR="${1:-${RELEASE_DIR}/cybermaps}"
 ARCHIVE_PATH="${2:-}"
-REPORT_PATH="${3:-${PROJECT_DIR}/clean/plugin-check-validation.json}"
+REPORT_PATH="${3:-${RELEASE_DIR}/plugin-check-validation.json}"
 PLUGIN_CHECK_VERSION="2.0.0"
 
 fail() {
@@ -25,7 +27,7 @@ fi
 [ -f "${PROJECT_DIR}/tests/integration/wporg-smoke.php" ] || fail "smoke test is missing"
 ARTIFACT_DIR="$(realpath "${ARTIFACT_DIR}")"
 ARCHIVE_PATH="$(realpath "${ARCHIVE_PATH}")"
-REPORT_PATH="$(realpath -m "${REPORT_PATH}")"
+python3 -B "${PROJECT_DIR}/bin/workspace.py" check-generated "${REPORT_PATH}"
 WORDPRESS_VERSION="$(
 	php -r '
 		$main = file_get_contents($argv[1]);
@@ -40,17 +42,19 @@ WORDPRESS_VERSION="$(
 	' "${ARTIFACT_DIR}/cybermaps.php"
 )"
 
-RUNTIME_DIR="$(mktemp -d "${TMPDIR:-/tmp}/cybermaps-wporg.XXXXXX")"
+RUNTIME_DIR="$(mktemp -d "${TMPDIR}/cybermaps-wporg.XXXXXX")"
 RUNTIME_ID="cybermaps-wporg-${RANDOM}-$$"
 NETWORK_NAME="${RUNTIME_ID}-network"
 DATABASE_NAME="${RUNTIME_ID}-db"
+HTTP_NAME="${RUNTIME_ID}-http"
 WORDPRESS_IMAGE="docker.io/library/wordpress:cli-php8.2"
 DATABASE_IMAGE="docker.io/library/mariadb:10.11"
 
 cleanup() {
+	"${CONTAINER_CLI}" rm -f "${HTTP_NAME}" >/dev/null 2>&1 || true
 	"${CONTAINER_CLI}" rm -f "${DATABASE_NAME}" >/dev/null 2>&1 || true
 	"${CONTAINER_CLI}" network rm "${NETWORK_NAME}" >/dev/null 2>&1 || true
-	if [[ "${RUNTIME_DIR}" == "${TMPDIR:-/tmp}/cybermaps-wporg."* ]]; then
+	if [[ "${RUNTIME_DIR}" == "${TMPDIR}/cybermaps-wporg."* ]]; then
 		rm -rf -- "${RUNTIME_DIR}"
 	fi
 }
@@ -97,6 +101,18 @@ installed_plugin_check="$(wp_cli plugin get plugin-check --field=version | tr -d
 [ "${installed_plugin_check}" = "${PLUGIN_CHECK_VERSION}" ] || fail "Plugin Check version is ${installed_plugin_check}, expected ${PLUGIN_CHECK_VERSION}"
 wp_cli plugin activate cybermaps --quiet
 wp_cli eval-file /validation/wporg-smoke.php > "${RUNTIME_DIR}/smoke.txt"
+
+# Serve the same installed ZIP over loopback for actual request/response checks.
+"${CONTAINER_CLI}" run -d --name "${HTTP_NAME}" --network "${NETWORK_NAME}" --user 0:0 \
+	-p 127.0.0.1::8080 \
+	-v "${RUNTIME_DIR}/wordpress:/var/www/html" \
+	-v "${PROJECT_DIR}/tests/integration:/validation:ro" \
+	-w /var/www/html "${WORDPRESS_IMAGE}" \
+	php -d memory_limit=512M -S 0.0.0.0:8080 /validation/wporg-http-router.php >/dev/null
+HTTP_ADDRESS="$("${CONTAINER_CLI}" port "${HTTP_NAME}" 8080/tcp)"
+wp_cli option update home "http://${HTTP_ADDRESS}" --quiet
+wp_cli option update siteurl "http://${HTTP_ADDRESS}" --quiet
+python3 -B "${PROJECT_DIR}/tests/integration/wporg-http.py" "http://${HTTP_ADDRESS}" >> "${RUNTIME_DIR}/smoke.txt"
 
 run_plugin_check() {
 	local output_path="$1"

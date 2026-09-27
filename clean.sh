@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
+source "$(dirname "${BASH_SOURCE[0]}")/bin/workspace.sh"
 
 # clean.sh — Produce and validate the WordPress.org Cybermaps artifact.
 # Usage: ./clean.sh
-# Output: ./clean/cybermaps/, ./clean/cybermaps_<version>.zip, and its SHA-256.
+# Output: docs/generated/releases/<version>/ (tree, ZIP, checksum and reports).
 
 PLUGIN_DIR="$(cd "$(dirname "$0")" && pwd)"
-OUTPUT_PARENT="${PLUGIN_DIR}/clean"
-OUTPUT_DIR="${PLUGIN_DIR}/clean/cybermaps"
-LEGACY_ARCHIVE_PATH="${OUTPUT_PARENT}/cybermaps.zip"
+OUTPUT_PARENT="$(python3 -B "${PLUGIN_DIR}/bin/workspace.py" release-dir)"
+OUTPUT_DIR="${OUTPUT_PARENT}/cybermaps"
 
 for required_command in basename cmp cp cut diff du find grep mkdir php python3 rg rm sort wc zip; do
 	if ! command -v "${required_command}" >/dev/null 2>&1; then
@@ -81,14 +81,10 @@ echo "    Source: ${PLUGIN_DIR}"
 echo "    Output: ${OUTPUT_DIR}"
 
 # Wipe and recreate only the generated Core artifact paths.
-if [ -L "${OUTPUT_PARENT}" ]; then
-    echo "ERROR: Refusing to build through a symlinked clean/ directory." >&2
-    exit 1
-fi
+python3 -B "${PLUGIN_DIR}/bin/workspace.py" check-generated "${OUTPUT_PARENT}" "${OUTPUT_DIR}" "${ARCHIVE_PATH}" "${CHECKSUM_PATH}"
 rm -rf "${OUTPUT_DIR}"
 rm -f "${ARCHIVE_PATH}"
 rm -f "${CHECKSUM_PATH}"
-rm -f "${LEGACY_ARCHIVE_PATH}"
 mkdir -p "${OUTPUT_DIR}"
 
 # ── Root-level allowed files ──────────────────────────────────────

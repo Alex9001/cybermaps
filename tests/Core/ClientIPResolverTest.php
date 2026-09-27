@@ -7,6 +7,29 @@ use Cybermaps\Core\ClientIPResolver;
 use PHPUnit\Framework\TestCase;
 
 final class ClientIPResolverTest extends TestCase {
+	public function test_excessive_forwarding_chains_fail_closed(): void {
+		foreach ( array( 'x_forwarded_for' => 'HTTP_X_FORWARDED_FOR', 'forwarded' => 'HTTP_FORWARDED' ) as $kind => $header ) {
+			update_option( 'cybermaps_settings', array( 'trusted_proxy_cidrs' => '10.0.0.0/8', 'trusted_proxy_header' => $kind ) );
+			$entry = 'forwarded' === $kind ? 'for=198.51.100.7' : '198.51.100.7';
+			$server = array( 'REMOTE_ADDR' => '10.0.0.1', $header => implode( ', ', array_fill( 0, 33, $entry ) ) );
+			self::assertSame( array( 'ip' => '10.0.0.1', 'source' => 'direct' ), ClientIPResolver::resolve( $server ) );
+			$server[ $header ] = implode( ', ', array_fill( 0, 32, $entry ) );
+			self::assertSame( '198.51.100.7', ClientIPResolver::get_ip( $server ) );
+		}
+	}
+
+	public function test_actual_server_adapter_rejects_invalid_address_metadata(): void {
+		$previous = $_SERVER;
+		try {
+			$_SERVER = array( 'REMOTE_ADDR' => '173.245.48.1', 'HTTP_CF_CONNECTING_IP' => array( '198.51.100.7' ), 'HTTP_X_FORWARDED_FOR' => str_repeat( 'x', 4097 ), 'HTTP_COOKIE' => 'private' );
+			self::assertSame( '173.245.48.1', ClientIPResolver::get_ip() );
+			$_SERVER['HTTP_CF_CONNECTING_IP'] = "198.51.100.7\r\nInjected: value";
+			self::assertSame( '173.245.48.1', ClientIPResolver::get_ip() );
+		} finally {
+			$_SERVER = $previous;
+		}
+	}
+
 	protected function tearDown(): void {
 		$GLOBALS['cybermaps_mock_filter_callbacks'] = array();
 		parent::tearDown();

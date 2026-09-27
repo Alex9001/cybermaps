@@ -4,6 +4,10 @@ import argparse
 import json
 from pathlib import Path
 import subprocess
+import sys
+
+sys.dont_write_bytecode = True
+from workspace import clean_website, configure, website_destination
 
 
 def main():
@@ -13,7 +17,9 @@ def main():
     parser.add_argument('--channel', choices=['beta', 'stable'], required=True)
     parser.add_argument('--source-only', action='store_true', help='Recheck source and reviews after the full build has passed')
     args = parser.parse_args()
-    website = args.website.resolve()
+    configure()
+    website = website_destination(args.website)
+    clean_website(website)
     plugin = Path(__file__).resolve().parents[1]
     release = json.loads((website / 'product/release.json').read_text())
     if release.get('commit') != args.commit or release.get('channel') != args.channel:

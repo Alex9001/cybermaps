@@ -2,11 +2,16 @@
 import json
 import subprocess
 import tempfile
+import sys
 import unittest
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.dont_write_bytecode = True
+sys.path.insert(0, str(ROOT / "bin"))
+from workspace import configure
+configure()
 CHECKER = ROOT / "bin" / "check-runtime-baseline.php"
 FIXTURES = ROOT / "tests" / "fixtures" / "runtime-baseline"
 

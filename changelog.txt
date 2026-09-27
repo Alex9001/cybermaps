@@ -1,6 +1,15 @@
 Cybermaps release history
 =========================
 
+7.5.3
+-----
+
+* Sanitize Quick Setup fields at the request boundary and reject excessive proxy chains.
+* Escape admin HTML at output while preserving native accessible tooltip controls.
+* Separate HTML and JSON sinks from reviewed non-HTML protocol emission.
+* Publish editable asset source links and verify real WordPress input/output behavior.
+* Include clearer setup icons and the canonical local release/install workflow.
+
 7.5.2
 -----
 

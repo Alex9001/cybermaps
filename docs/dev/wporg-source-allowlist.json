@@ -44,19 +44,19 @@
     "src/Sitemap/Orchestrator.php"
   ],
   "high_risk_phpcs": {
-    "count": 318,
-    "sha256": "c07a238c24acbdc5122ac9b7ece88a2075f6d9376ba8aabafaf2611b0570a27d"
+    "count": 259,
+    "sha256": "dff4e6b80795af879bb572ce6ecebed523f8bad5b99f308ba18a37320efb80c2"
   },
   "annotation_blind_phpcs": {
-    "count": 195,
-    "sha256": "61c042923229e78c55bcaff29c6002d096b8f3cd9a92547034884fc482c57b51"
+    "count": 170,
+    "sha256": "941ae30b175fa4539e1580feb3734098d51a24d802614b5f10f1ea472503f046"
   },
   "protocol_output_exceptions": [
     {
       "path": "src/Core/ProtocolOutput.php",
       "source": "WordPress.Security.EscapeOutput.OutputNotEscaped",
-      "line": 110,
-      "sha256": "d52b9659b52522d1b9db5d16c507961bb6e34ee9816dfa96322d268a478901e8"
+      "line": 114,
+      "sha256": "afb4b416c97e48e102266fadbc023985b471a469e0160035a39bad5c58586314"
     }
   ]
 }

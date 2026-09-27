@@ -3,7 +3,7 @@ Contributors: oreshkin
 Tags: sitemap, llms-txt, technical-seo, content-audit, indexnow
 Requires at least: 7.1
 Tested up to: 7.1
-Stable tag: 7.5.2
+Stable tag: 7.5.3
 Requires PHP: 8.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -12,94 +12,81 @@ Publish WordPress sitemaps and machine-readable maps.
 
 == Description ==
 
-= A complete sitemap engine =
-
-* XML indexes for content, taxonomies, authors, dates, News, and multisite
-* RSS, media XML/JSON-LD, slugs, XSL, validation, caching, and redirects
-* Bounded `[cybermap]` HTML output, external URLs, and headless rewriting
-
-= An AI-readable publication layer =
-
-* `llms.txt`, briefings, manifests, AI sitemap, JSON Feed, knowledge graph,
-  policies, actions, Site Guide, chunks, catalogs, and crawler controls
-* Optional MCP 2026-07-28 Streamable HTTP with authorized operations
-* Agent Skills, literal Markdown alternates, and opt-in negotiation
-* API Catalog/Linksets, RFC 8288 headers, OpenAPI, REST search/health,
-  OAuth/Auth.md, and enabled capability catalogs
-* Draft MCP Server Card, ARD AI Catalog, and read-only WebMCP tools
-
-= Standards and controlled agent access =
-
-MCP operations require OAuth 2.1 PKCE, consent, capabilities, and logged-in
-review; discovery never fabricates OIDC/JWKS metadata.
+XML/News/RSS/HTML sitemaps, llms.txt, Markdown, JSON discovery, static delivery,
+local analytics, and reports. MCP requires authorization and consent.
+Publication guarantees neither ranking nor AI citations.
 
 == Installation ==
 
-1. Install and activate Cybermaps.
-2. Run the three-step **Quick Setup** from **Cybermaps → Overview**.
-3. Fine-tune sitemaps, schema, and AI publishing; check publication status.
+Install and activate Cybermaps, then open **Cybermaps → Overview → Quick Setup**.
 
-== Frequently Asked Questions ==
+== Source Code ==
 
-= Can I use another SEO plugin? =
-
-Choose one XML sitemap owner; supported noindex/canonical signals are honored.
-
-= Does this guarantee AI citations? =
-
-No. Publication guarantees neither crawling, indexing, ranking, citation, nor use.
+Public source and build tools: https://github.com/Alex9001/cybermaps
+Release source: https://github.com/Alex9001/cybermaps/tree/v7.5.3
+The files in assets/js/ and assets/css/ are editable, unminified source,
+including setup-wizard.js, which uses WordPress's wp.element directly.
+There is no JavaScript/CSS compilation step. Packaging copies these files
+unchanged. Run composer install, composer test, and composer release:build
+from the source checkout; build prerequisites and validation are documented in
+https://github.com/Alex9001/cybermaps/blob/v7.5.3/docs/dev/RELEASE-WORKFLOW.md
 
 == External Services ==
 
-= Cybermaps Cloudflare OAuth Relay =
+= Cloudflare and the Cybermaps OAuth relay =
 
-Connect Cloudflare & optimize contacts https://connect.cybermaps.dev for a
-five-minute, one-time OAuth transaction. The relay receives the PKCE challenge,
-random state, and short-lived authorization code, never the verifier, access
-token, WordPress identity, site URL, or rules. WordPress exchanges and revokes
-tokens directly with Cloudflare. Publication, crawling, status checks, manual
-tokens, and self-managed OAuth do not contact the relay. Self-managed OAuth
-uses the site's exact callback as a secretless PKCE client and saves only the
-public client ID.
+Only **Connect Cloudflare & optimize** contacts https://connect.cybermaps.dev
+for a one-time, five-minute transaction. The relay receives a PKCE challenge,
+random state, and authorization code, not the verifier, access token,
+WordPress identity, site URL, or rules. Its hosting provider processes network
+metadata; rate limits use salted IP hashes. WordPress sends authorization
+credentials directly to Cloudflare to exchange/revoke tokens and sends zone,
+hostname, and rule configuration for the requested optimization.
+Manual tokens and self-managed OAuth bypass the relay.
 
-Service information and privacy: https://cybermaps.dev/privacy/
+Relay service and privacy: https://cybermaps.dev/privacy/#cloudflare-oauth-relay
 Cloudflare terms: https://www.cloudflare.com/website-terms/
 Cloudflare privacy: https://www.cloudflare.com/privacypolicy/
 
 = IndexNow =
 
-When enabled, Cybermaps submits eligible changed publication URLs, host, key, and key location to `https://api.indexnow.org/indexnow` through the queue above.
+When enabled, eligible publication changes queue URLs, host, verification key,
+and key location for https://api.indexnow.org/indexnow. Headless frontends
+must proxy or publish Cybermaps' generated `/{key}.txt` verification path.
+Terms and privacy: https://www.indexnow.org/terms
 
-Headless frontends must proxy or publish Cybermaps' generated `/{key}.txt` verification path.
+= WebSub =
 
-* Docs: https://www.indexnow.org/
-* Terms and privacy: https://www.indexnow.org/terms
-
-= WebSub hubs =
-
-When enabled, Cybermaps publishes `/feed.json` to configured HTTPS hubs.
-Defaults: Google PubSubHubbub (`https://pubsubhubbub.appspot.com/`; terms:
-https://policies.google.com/terms) and Superfeedr
-(`https://pubsubhubbub.superfeedr.com/`; terms: https://superfeedr.com/terms).
+When WebSub and AI publishing are enabled, content reconciliation sends the
+public /feed.json URL and a publish notification to configured HTTPS hubs.
+The default hubs are Google PubSubHubbub (https://pubsubhubbub.appspot.com/)
+and Superfeedr (https://pubsubhubbub.superfeedr.com/).
+Google terms: https://policies.google.com/terms
+Google privacy: https://policies.google.com/privacy
+Superfeedr terms: https://superfeedr.com/terms
+Superfeedr privacy: https://superfeedr.com/privacy
+Custom hubs receive the same data under their own service policies.
 
 = Public delivery checks =
 
-Sitemap and AI Discovery Status may GET/HEAD the site or Frontend Base URL.
-Probes use `X-Cybermaps-Diagnostic: 1`, are excluded from analytics,
-and verify status, media type, parseability, and headers.
+Status checks GET/HEAD the site or configured Frontend Base URL to verify
+responses and headers. Probes use `X-Cybermaps-Diagnostic: 1` and are excluded
+from analytics.
 
 == Privacy ==
 
-Opt-in Discovery Analytics stores bounded request metadata and unverified
-User-Agent evidence. IPs default to IPv4 `/24` or IPv6 `/64` anonymization;
-logged-in and diagnostic requests omit identifying request data. Public routes
-use local 60-second rate limits; REST search stores neither raw IPs nor queries.
-Retention is 1–365 days with export and clearing controls.
-
-Persistent settings, tables, and post metadata remain after uninstall unless
-**Uninstall Cleanup** was enabled beforehand.
+Opt-in crawler analytics stays in WordPress. IPs default to IPv4 /24 or IPv6
+/64 anonymization. Retention is 1–365 days with export and clearing controls.
+Public routes use local 60-second rate limits; REST search stores neither raw IPs nor queries.
+Logged-in and diagnostic requests omit identifying data.
+Data remains after uninstall unless Uninstall Cleanup was enabled beforehand.
 
 == Changelog ==
+
+= 7.5.3 =
+* Sanitized Quick Setup at the request boundary and bounded client-IP headers.
+* Escaped admin markup at output and separated HTML/JSON from other protocols.
+* Documented editable asset sources and expanded real-WordPress security checks.
 
 = 7.5.2 =
 * Hardened request authorization, exact setup input schemas, contextual protocol output, SQL lists, and client-IP hook data.
@@ -193,6 +180,9 @@ Persistent settings, tables, and post metadata remain after uninstall unless
 Earlier release history is included in `changelog.txt`.
 
 == Upgrade Notice ==
+
+= 7.5.3 =
+WordPress.org review fixes for input validation, output escaping, and source access.
 
 = 7.5.2 =
 Security and WordPress.org hardening with the WordPress 7.1 Abilities API baseline.

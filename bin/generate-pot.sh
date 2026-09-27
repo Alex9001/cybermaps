@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+source "$(dirname "${BASH_SOURCE[0]}")/workspace.sh"
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WP_CLI_COMMAND="${WP_CLI_BIN:-wp}"
@@ -92,7 +93,7 @@ for required_command in diff mktemp sed; do
     fi
 done
 
-TEMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/cybermaps-pot.XXXXXX")"
+TEMP_DIR="$(mktemp -d "${TMPDIR}/cybermaps-pot.XXXXXX")"
 GENERATED_PATH="${TEMP_DIR}/cybermaps.pot"
 EXPECTED_NORMALIZED="${TEMP_DIR}/expected.pot"
 GENERATED_NORMALIZED="${TEMP_DIR}/generated.pot"

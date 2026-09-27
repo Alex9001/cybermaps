@@ -7,9 +7,14 @@ import subprocess
 import tarfile
 import io
 import tempfile
+import sys
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.dont_write_bytecode = True
+sys.path.insert(0, str(ROOT / "bin"))
+from workspace import configure
+configure()
 
 
 class WebsiteContractTest(unittest.TestCase):

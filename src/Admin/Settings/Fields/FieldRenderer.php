@@ -9,38 +9,41 @@ if ( ! defined( 'ABSPATH' ) ) {
 class FieldRenderer {
 
 	public static function render_textarea_field( $args ) {
-		$options             = \Cybermaps\Core\ConfigurationStore::settings();
-		$id                  = $args['label_for'];
-		$value               = self::scalar_setting( $options, $id );
-		$placeholder         = isset( $args['placeholder'] ) ? $args['placeholder'] : '';
-		$maxlength           = isset( $args['maxlength'] ) ? max( 0, absint( $args['maxlength'] ) ) : 0;
-		$maxlength_attribute = $maxlength > 0 ? ' maxlength="' . esc_attr( (string) $maxlength ) . '"' : '';
-		echo '<textarea id="' . esc_attr( $id ) . '" name="cybermaps_settings[' . esc_attr( $id ) . ']" rows="5" cols="50" class="large-text code cybermaps-settings-input" placeholder="' . esc_attr( $placeholder ) . '"' . $maxlength_attribute . '>' . esc_textarea( $value ) . '</textarea>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Attribute name is fixed and value escaped.
+		$options     = \Cybermaps\Core\ConfigurationStore::settings();
+		$id          = $args['label_for'];
+		$value       = self::scalar_setting( $options, $id );
+		$placeholder = isset( $args['placeholder'] ) ? $args['placeholder'] : '';
+		$maxlength   = isset( $args['maxlength'] ) ? max( 0, absint( $args['maxlength'] ) ) : 0;
+		echo '<textarea id="' . esc_attr( $id ) . '" name="cybermaps_settings[' . esc_attr( $id ) . ']" rows="5" cols="50" class="large-text code cybermaps-settings-input" placeholder="' . esc_attr( $placeholder ) . '"';
+		if ( $maxlength > 0 ) {
+			echo ' maxlength="' . esc_attr( (string) $maxlength ) . '"';
+		}
+		echo '>' . esc_textarea( $value ) . '</textarea>';
 		if ( isset( $args['description'] ) ) {
 			echo '<p class="cybermaps-desc">' . wp_kses_post( $args['description'] ) . '</p>';
 		}
 	}
 	public static function render_text_field( $args ) {
-		$options               = \Cybermaps\Core\ConfigurationStore::settings();
-		$id                    = $args['label_for'];
-		$value                 = self::scalar_setting( $options, $id, $args['default'] ?? '' );
-		$placeholder           = isset( $args['placeholder'] ) ? $args['placeholder'] : '';
-		$type                  = isset( $args['type'] ) && in_array( $args['type'], array( 'number', 'url' ), true )
+		$options     = \Cybermaps\Core\ConfigurationStore::settings();
+		$id          = $args['label_for'];
+		$value       = self::scalar_setting( $options, $id, $args['default'] ?? '' );
+		$placeholder = isset( $args['placeholder'] ) ? $args['placeholder'] : '';
+		$type        = isset( $args['type'] ) && in_array( $args['type'], array( 'number', 'url' ), true )
 			? $args['type']
 			: 'text';
-		$class                 = 'number' === $type ? 'small-text' : 'regular-text';
-		$constraint_attributes = '';
+		$class       = 'number' === $type ? 'small-text' : 'regular-text';
+		echo '<input type="' . esc_attr( $type ) . '" id="' . esc_attr( $id ) . '" name="cybermaps_settings[' . esc_attr( $id ) . ']" value="' . esc_attr( $value ) . '" class="' . esc_attr( $class ) . ' cybermaps-settings-input" placeholder="' . esc_attr( $placeholder ) . '"';
 		if ( 'number' === $type ) {
 			foreach ( array( 'min', 'max', 'step' ) as $attribute ) {
 				if ( isset( $args[ $attribute ] ) && is_numeric( $args[ $attribute ] ) ) {
-					$constraint_attributes .= ' ' . $attribute . '="' . esc_attr( (string) $args[ $attribute ] ) . '"';
+					echo ' ' . esc_attr( $attribute ) . '="' . esc_attr( (string) $args[ $attribute ] ) . '"';
 				}
 			}
 		}
 		if ( isset( $args['maxlength'] ) && absint( $args['maxlength'] ) > 0 ) {
-			$constraint_attributes .= ' maxlength="' . esc_attr( (string) absint( $args['maxlength'] ) ) . '"';
+			echo ' maxlength="' . esc_attr( (string) absint( $args['maxlength'] ) ) . '"';
 		}
-		echo '<input type="' . esc_attr( $type ) . '" id="' . esc_attr( $id ) . '" name="cybermaps_settings[' . esc_attr( $id ) . ']" value="' . esc_attr( $value ) . '" class="' . esc_attr( $class ) . ' cybermaps-settings-input" placeholder="' . esc_attr( $placeholder ) . '"' . $constraint_attributes . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Constraint names are allowlisted and values are escaped.
+		echo '>';
 		if ( isset( $args['description'] ) ) {
 			echo '<p class="cybermaps-desc">' . wp_kses_post( $args['description'] ) . '</p>';
 		}
@@ -95,7 +98,9 @@ class FieldRenderer {
 		$checked_attr = $checked ? 'checked' : '';
 
 		echo '<label class="cm-toggle-wrapper">';
-		echo '<input type="checkbox" id="' . esc_attr( $id ) . '" name="cybermaps_settings[' . esc_attr( $id ) . ']" value="1" class="cm-toggle-input" ' . checked( $checked_attr, 'checked', false ) . self::maturity_attribute( $args ) . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<input type="checkbox" id="' . esc_attr( $id ) . '" name="cybermaps_settings[' . esc_attr( $id ) . ']" value="1" class="cm-toggle-input" ' . checked( $checked_attr, 'checked', false );
+		self::render_maturity_attribute( $args );
+		echo '>';
 		echo '<span class="cm-toggle-switch"></span>';
 		echo '<span class="cm-toggle-label">' . ( isset( $args['label'] ) ? esc_html( $args['label'] ) : '' ) . '</span>';
 		echo '</label>';
@@ -109,7 +114,9 @@ class FieldRenderer {
 		$id      = $args['label_for'];
 		$checked = '1' === self::scalar_setting( $options, $id ) ? 'checked' : '';
 		echo '<label class="cm-toggle-wrapper">';
-		echo '<input type="checkbox" id="' . esc_attr( $id ) . '" name="cybermaps_settings[' . esc_attr( $id ) . ']" value="1" class="cm-toggle-input" ' . checked( $checked, 'checked', false ) . self::maturity_attribute( $args ) . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<input type="checkbox" id="' . esc_attr( $id ) . '" name="cybermaps_settings[' . esc_attr( $id ) . ']" value="1" class="cm-toggle-input" ' . checked( $checked, 'checked', false );
+		self::render_maturity_attribute( $args );
+		echo '>';
 		echo '<span class="cm-toggle-switch"></span>';
 		echo '<span class="cm-toggle-label">' . ( isset( $args['label'] ) ? esc_html( $args['label'] ) : '' ) . '</span>';
 		echo '</label>';
@@ -130,7 +137,7 @@ class FieldRenderer {
 		foreach ( $checkbox_options as $key => $label ) {
 			$checked = in_array( $key, $selected, true ) ? 'checked' : '';
 			echo '<label class="cm-checkbox-wrapper">';
-			echo '<input type="checkbox" name="cybermaps_settings[' . esc_attr( $id ) . '][]" value="' . esc_attr( $key ) . '" ' . checked( $checked, 'checked', false ) . '> ' . esc_html( $label ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo '<input type="checkbox" name="cybermaps_settings[' . esc_attr( $id ) . '][]" value="' . esc_attr( $key ) . '" ' . checked( $checked, 'checked', false ) . '> ' . esc_html( $label );
 			echo '</label>';
 		}
 		echo '</div>';
@@ -150,7 +157,7 @@ class FieldRenderer {
 		$options = \Cybermaps\Core\ConfigurationStore::settings();
 		$checked = '1' === self::scalar_setting( $options, 'enable_video_schema', '1' ) ? 'checked' : '';
 		echo '<label class="cm-toggle-wrapper">';
-		echo '<input type="checkbox" name="cybermaps_settings[enable_video_schema]" value="1" class="cm-toggle-input" ' . checked( $checked, 'checked', false ) . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<input type="checkbox" name="cybermaps_settings[enable_video_schema]" value="1" class="cm-toggle-input" ' . checked( $checked, 'checked', false ) . '>';
 		echo '<span class="cm-toggle-switch"></span>';
 		echo '<span class="cm-toggle-label">' . esc_html__( 'Enable On-page Video Schema', 'cybermaps' ) . '</span>';
 		echo '</label>';
@@ -186,7 +193,9 @@ class FieldRenderer {
 		$id      = $args['label_for'];
 		$value   = self::scalar_setting( $options, $id, $args['default'] ?? '' );
 		$choices = $args['options'] ?? array();
-		echo '<select id="' . esc_attr( $id ) . '" name="cybermaps_settings[' . esc_attr( $id ) . ']" style="min-width:180px;"' . self::maturity_attribute( $args ) . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<select id="' . esc_attr( $id ) . '" name="cybermaps_settings[' . esc_attr( $id ) . ']" style="min-width:180px;"';
+		self::render_maturity_attribute( $args );
+		echo '>';
 		foreach ( $choices as $opt_val => $opt_label ) {
 			echo '<option value="' . esc_attr( $opt_val ) . '" ' . selected( $value, $opt_val, false ) . '>' . esc_html( $opt_label ) . '</option>';
 		}
@@ -197,13 +206,13 @@ class FieldRenderer {
 		self::render_maturity( $args );
 	}
 
-	/** Return an aria-describedby attribute for maturity guidance. */
-	private static function maturity_attribute( array $args ): string {
+	/** Render an aria-describedby attribute for maturity guidance. */
+	private static function render_maturity_attribute( array $args ): void {
 		if ( empty( $args['maturity'] ) || empty( $args['label_for'] ) ) {
-			return '';
+			return;
 		}
 
-		return ' aria-describedby="' . esc_attr( \Cybermaps\Admin\MaturityGuidance::description_id( (string) $args['label_for'] ) ) . '"';
+		echo ' aria-describedby="' . esc_attr( \Cybermaps\Admin\MaturityGuidance::description_id( (string) $args['label_for'] ) ) . '"';
 	}
 
 	/** Render optional visible maturity guidance. */

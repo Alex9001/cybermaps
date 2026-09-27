@@ -101,26 +101,26 @@ final class SetupWizardRegistry {
 	public static function choices(): array {
 		return array(
 			'website_type'  => array(
-				'blog'            => self::choice( __( 'Blog', 'cybermaps' ), __( 'Articles, essays, and regular posts.', 'cybermaps' ), '✎' ),
-				'newspaper'       => self::choice( __( 'News or magazine', 'cybermaps' ), __( 'Timely stories from multiple sections or authors.', 'cybermaps' ), '▤' ),
-				'ecommerce'       => self::choice( __( 'Online store', 'cybermaps' ), __( 'Products, collections, and shopping pages.', 'cybermaps' ), '◇' ),
-				'knowledgebase'   => self::choice( __( 'Guides or documentation', 'cybermaps' ), __( 'Help content, reference material, or a knowledge base.', 'cybermaps' ), '☷' ),
-				'corporate'       => self::choice( __( 'Portfolio or agency', 'cybermaps' ), __( 'Projects, services, and work samples.', 'cybermaps' ), '◫' ),
-				'small-business'  => self::choice( __( 'Local business', 'cybermaps' ), __( 'A business serving customers in a place or region.', 'cybermaps' ), '⌖' ),
-				'medium-business' => self::choice( __( 'Company', 'cybermaps' ), __( 'A mix of company, service, and editorial content.', 'cybermaps' ), '◎' ),
+				'blog'            => self::choice( __( 'Blog', 'cybermaps' ), __( 'Articles, essays, and regular posts.', 'cybermaps' ), 'pencil' ),
+				'newspaper'       => self::choice( __( 'News or magazine', 'cybermaps' ), __( 'Timely stories from multiple sections or authors.', 'cybermaps' ), 'newspaper' ),
+				'ecommerce'       => self::choice( __( 'Online store', 'cybermaps' ), __( 'Products, collections, and shopping pages.', 'cybermaps' ), 'shopping-bag' ),
+				'knowledgebase'   => self::choice( __( 'Guides or documentation', 'cybermaps' ), __( 'Help content, reference material, or a knowledge base.', 'cybermaps' ), 'document' ),
+				'corporate'       => self::choice( __( 'Portfolio or agency', 'cybermaps' ), __( 'Projects, services, and work samples.', 'cybermaps' ), 'portfolio' ),
+				'small-business'  => self::choice( __( 'Local business', 'cybermaps' ), __( 'A business serving customers in a place or region.', 'cybermaps' ), 'building' ),
+				'medium-business' => self::choice( __( 'Company', 'cybermaps' ), __( 'A mix of company, service, and editorial content.', 'cybermaps' ), 'briefcase' ),
 			),
 			'ai_visibility' => array(
-				'on'  => self::choice( __( 'Yes, help them find me', 'cybermaps' ), __( 'Publish a clear, machine-readable guide to your content.', 'cybermaps' ), '✦' ),
-				'off' => self::choice( __( 'Not right now', 'cybermaps' ), __( 'Leave AI discovery switched off for now.', 'cybermaps' ), '○' ),
+				'on'  => self::choice( __( 'Yes, help them find me', 'cybermaps' ), __( 'Publish a clear, machine-readable guide to your content.', 'cybermaps' ), 'sparkles' ),
+				'off' => self::choice( __( 'Not right now', 'cybermaps' ), __( 'Leave AI discovery switched off for now.', 'cybermaps' ), 'eye-off' ),
 			),
 			'operations'    => array(
-				'insights'    => self::choice( __( 'Show me crawler activity', 'cybermaps' ), __( 'Keep a private, anonymized 30-day activity history.', 'cybermaps' ), '◔' ),
-				'performance' => self::choice( __( 'Keep things lightweight', 'cybermaps' ), __( 'Skip activity logging and favor static delivery.', 'cybermaps' ), 'ϟ' ),
+				'insights'    => self::choice( __( 'Show me crawler activity', 'cybermaps' ), __( 'Keep a private, anonymized 30-day activity history.', 'cybermaps' ), 'activity' ),
+				'performance' => self::choice( __( 'Keep things lightweight', 'cybermaps' ), __( 'Skip activity logging and favor static delivery.', 'cybermaps' ), 'feather' ),
 			),
 			'identity_type' => array(
-				'Person'        => self::choice( __( 'A person', 'cybermaps' ), __( 'A personal site, creator, or independent expert.', 'cybermaps' ), '◉' ),
-				'Organization'  => self::choice( __( 'A business or organization', 'cybermaps' ), __( 'A company, nonprofit, team, or brand.', 'cybermaps' ), '▦' ),
-				'LocalBusiness' => self::choice( __( 'A local business', 'cybermaps' ), __( 'A customer-facing business tied to a location.', 'cybermaps' ), '⌂' ),
+				'Person'        => self::choice( __( 'A person', 'cybermaps' ), __( 'A personal site, creator, or independent expert.', 'cybermaps' ), 'person' ),
+				'Organization'  => self::choice( __( 'A business or organization', 'cybermaps' ), __( 'A company, nonprofit, team, or brand.', 'cybermaps' ), 'briefcase' ),
+				'LocalBusiness' => self::choice( __( 'A local business', 'cybermaps' ), __( 'A customer-facing business tied to a location.', 'cybermaps' ), 'building' ),
 			),
 		);
 	}

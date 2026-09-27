@@ -4,54 +4,59 @@ The plugin owns runtime facts. The Astro repository owns explanatory guides.
 The local release workflow validates both against one immutable Git commit.
 GitHub Actions remain disabled.
 
-## Prepare a release
+## Automated handoff
 
-1. Update and validate the plugin, regenerate its manifest and configuration
-   contracts, and commit the release candidate. Public routes and publication
-   limits are included in `docs/dev/manifest.json`; `--website` also exports
-   deterministic runtime source hashes for editorial review dependencies.
-2. In the Astro checkout, import the committed candidate:
+Use the only plugin source checkout, `/home/user/Documents/CODE/cybermaps/`.
+The canonical website remains `/home/user/Documents/CODE/cybermaps-astro/`.
+Never create a release-specific clone or worktree. Configure both website and
+Local Sites installation destinations in `.cybermaps-workspace.json` using the
+tracked example, then run `composer release` (or `composer release -- --stable`).
+See [RELEASE-WORKFLOW.md](RELEASE-WORKFLOW.md) for gates and recovery.
 
-   ```sh
-   npm run docs:sync -- /path/to/cybermaps --commit FULL_COMMIT_SHA --channel beta
-   ```
+The preflight rejects staged, unstaged and untracked website changes before
+running any website command. It never stashes, resets or commits existing work.
+After checking committed, pushed plugin source, it runs:
 
-   For an existing published version, use `--tag v7.4.2` instead. `--channel
-   stable` selects a stable release explicitly. Imports use a Git archive and
-   ignore uncommitted plugin work. An unpublished candidate may be revised and
-   reimported at a new commit with the same version. Importing a tag freezes its
-   snapshot, after which the version cannot be repointed. Normal website builds
-   are offline.
-3. Read the sync report, review each affected guide against changed source and
-   facts, update its explanation, and record what was checked:
+```sh
+npm run docs:sync -- /home/user/Documents/CODE/cybermaps --commit FULL_COMMIT_SHA --channel beta
+```
 
-   ```sh
-   npm run docs:review -- --page docs--machine-publications.md --note "Reviewed candidate bounds, output limits and retry behavior."
-   npm run build
-   ```
+The importer reads an immutable Git archive under the plugin's
+`docs/generated/tmp/`. An unpublished candidate can be revised and reimported;
+a tagged version cannot be repointed. Imports do not approve prose. If the
+importer flags explanations, the workflow saves its output and stops with the
+page list. The current agent or a human reviews the changed source/facts,
+updates the explanation and records what was checked:
 
-   Sync never approves prose. A review binds the guide's bytes and declared
-   source dependencies to a source fingerprint, commit, version and date.
-   New source files matching a dependency also invalidate the review. New
-   documentation pages require a dependency mapping or an explicit website-only
-   classification. Keep historical guides and contracts in their original form.
-4. Commit the reviewed website changes. From the plugin checkout publish using:
+```sh
+npm run docs:review -- --page docs--machine-publications.md --note "Reviewed bounds, output limits and retry behavior."
+```
 
-   ```sh
-   composer run release:github -- --website /path/to/cybermaps-astro
-   ```
+Commit those website changes yourself, then rerun `composer release`. Review
+records bind guide bytes and declared source dependencies to a fingerprint,
+commit, version and date. New docs need a dependency mapping or an explicit
+website-only classification. Version bumps alone never advance review records.
+When no prose review is needed, the workflow commits only the importer's known
+generated files. It then validates source, reviews, website output and the plugin
+package before publication.
 
-   `CYBERMAPS_WEBSITE_DIR` may supply the checkout path. Use `--stable` with a
-   stable website import. The publisher requires the same source commit and
-   channel, verifies imported bytes against Git, checks reviews, and builds and
-   verifies the website before creating a release tag or publishing assets.
-5. Import the published tag with `docs:sync -- /path/to/cybermaps --tag vX.Y.Z`
-   (and the same channel), then commit the frozen website snapshot. Deploy
-   through the existing `npm run deploy` command. It requires that frozen state and verifies
-   that the imported version is the newest published GitHub release, including
-   open betas, and its tag still resolves to the imported commit. This check runs
-   before the build and again before uploading. If deployment fails, the existing site remains on its
-   honestly labeled snapshot; retry the website deployment with the same release.
+After publication, the workflow imports the exact `--tag vX.Y.Z` with the same
+channel, commits generated frozen-snapshot changes and runs `npm run deploy`.
+That existing command verifies the newest published release (including betas),
+channel and tag commit before building and again before uploading.
+
+If the handoff or deployment is interrupted, run from the plugin source:
+
+```sh
+composer release:resume -- --tag vX.Y.Z
+```
+
+This downloads and checks the published ZIP/checksum, compares package files to
+the tagged source, and resumes only the website handoff. It never publishes or
+replaces assets. A frozen matching snapshot skips reimport on a deployment retry.
+Normal website builds remain offline; the deployment publication guards are
+online. The lower-level `composer release:github` remains available for a
+prepared clean website, using the same local configuration.
 
 ## Contract and compatibility
 

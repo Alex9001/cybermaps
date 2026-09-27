@@ -149,7 +149,7 @@ posting it. Use **Download support bundle** if copying is unavailable.
 - `/ai.json` implements Cybermaps AI Discovery Manifest 1.0, a vendor extension.
 - The AI Discovery Protocol 3.0 Level 3 surface includes the manifest, bounded
   seven-day updates, and four `/news/*` context, speakable, changelog, and JSONL
-  archive publications. Cybermaps does not expose an MCP server.
+  archive publications. Optional MCP operations use authorized, consented access.
 - The Agent Skills guide includes a digest-bound 0.2.0 draft discovery index
   and the retained `/skill.md` compatibility URL.
 - Dynamic publications include CORS, ETag, and Content-Digest headers. For
@@ -176,7 +176,7 @@ composer run release:build
 ```
 
 `composer run release:build` produces the exact standalone WordPress.org
-artifact under `clean/`; development dependencies, tests, and internal docs are
+artifact under `docs/generated/releases/<version>/`; development dependencies, tests, and internal docs are
 not copied into that package.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) before changing code. The public surface
@@ -192,41 +192,44 @@ from a clean `main` checkout whose HEAD matches pushed `main` in
 repository. Python 3 and the existing local packaging tools are required.
 
 ```bash
-composer run release:github             # Publish an open beta prerelease
-composer run release:github -- --stable # Publish a stable release
+cp .cybermaps-workspace.example.json .cybermaps-workspace.json
+composer release                        # Validate, install, publish beta, deploy docs
+composer release -- --stable            # Same workflow for a stable release
+composer dev:install                    # Build and install locally; no website or publication
+composer release:resume -- --tag vX.Y.Z  # Verify published assets, finish website handoff only
 ```
 
-Running either command authorizes immediate publication after verification.
-The command runs PHPUnit, release standards/generated-input checks, the complexity
-gate, and the local builder. It reads the plugin version automatically to create
-the `v<version>` tag, `clean/cybermaps_<version>.zip`, and its `.sha256` file.
-Release notes use the matching `changelog.txt` section, requirements, installation
-instructions, and the diagnostic support bundle reporting instructions.
+Review the two destination paths in the ignored local configuration first.
+`composer release` requires committed, pushed plugin source and a clean
+canonical website. It imports the exact candidate, pauses with affected pages
+when explanations need review, validates and installs the package with a rollback
+copy, publishes through the existing draft/checksum/download-verification
+safeguards, then freezes the published website snapshot and runs its guarded
+`npm run deploy`. Only workflow-generated website files are committed.
 
-The command pushes the version tag at the verified commit, creates a temporary
-draft, uploads both local assets, downloads and compares them byte for byte,
-then publishes. Beta releases are marked prerelease and do not become Latest;
-stable releases become Latest. GitHub hosts the downloads and notes; Actions
-remains disabled.
+Packages, checksums, reports, logs and release state live in
+`docs/generated/releases/<version>/`. Temporary work stays in
+`docs/generated/tmp/`; rollback and repair evidence stays in
+`docs/generated/backups/`. No automatic clones, worktrees, hooks or GitHub
+Actions are involved. The Local Sites copy contains installation files only.
 
-Uncommitted or unpushed changes stop the command; it never commits or pushes
-`main` for you. Review, commit, and push pending work before publication. Keep release metadata synchronized before committing a new
-version, as described in [CONTRIBUTING.md](CONTRIBUTING.md#release-metadata).
+The workflow never commits or pushes plugin source for you, never stashes or
+resets website work, and never replaces published assets or moves conflicting
+tags. Review and commit affected website guides before retrying a review pause.
+Rerun `composer release` for a matching interrupted draft; after publication,
+use the explicit downstream-only resume command. `composer release:github`
+remains available as the lower-level publisher for a prepared, clean website.
 
-After an interruption, rerun the same command to resume a matching draft. Tags
-and drafts are retained on failure. Conflicting tags, metadata, unexpected assets,
-and mismatched downloads stop publication and require inspection. Existing assets
-and published releases are never overwritten. Every changed published package
-needs a new version/tag; `--stable` does not promote an already published beta
-using the same tag.
-
-To test publication without contacting GitHub:
+See [the complete workflow and recovery instructions](docs/dev/RELEASE-WORKFLOW.md)
+and [the documentation review contract](docs/dev/WEBSITE-SYNC.md).
+To test the tooling without publishing or deploying:
 
 ```bash
 composer run test:release-github
+composer run test:release-workflow
 ```
 
-These tests use temporary Git repositories and mocked GitHub/build commands.
+Tests use disposable fixtures inside the repository and mocked remote commands.
 
 
 </details>

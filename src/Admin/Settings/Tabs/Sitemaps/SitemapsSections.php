@@ -87,23 +87,23 @@ class SitemapsSections {
 
 		$include_homepage = isset( $options['include_homepage'] ) && '1' === (string) $options['include_homepage'];
 		echo '<label class="cm-toggle-wrapper">';
-		echo '<input type="checkbox" name="cybermaps_settings[include_homepage]" value="1" class="cm-toggle-input" ' . checked( $include_homepage, true, false ) . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<input type="checkbox" name="cybermaps_settings[include_homepage]" value="1" class="cm-toggle-input" ' . checked( $include_homepage, true, false ) . '>';
 		echo '<span class="cm-toggle-switch"></span><span class="cm-toggle-label">' . esc_html__( 'Include Homepage in the Misc Sitemap', 'cybermaps' ) . '</span></label>';
 
 		$include_authors = isset( $options['include_authors'] ) && '1' === (string) $options['include_authors'];
 		echo '<label class="cm-toggle-wrapper">';
-		echo '<input type="checkbox" name="cybermaps_settings[include_authors]" value="1" class="cm-toggle-input" ' . checked( $include_authors, true, false ) . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<input type="checkbox" name="cybermaps_settings[include_authors]" value="1" class="cm-toggle-input" ' . checked( $include_authors, true, false ) . '>';
 		echo '<span class="cm-toggle-switch"></span><span class="cm-toggle-label">' . esc_html__( 'Include Author Archives', 'cybermaps' ) . '</span></label>';
 
 		$include_archives = isset( $options['include_archives'] ) && '1' === (string) $options['include_archives'];
 		echo '<label class="cm-toggle-wrapper">';
-		echo '<input type="checkbox" name="cybermaps_settings[include_archives]" value="1" class="cm-toggle-input" ' . checked( $include_archives, true, false ) . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<input type="checkbox" name="cybermaps_settings[include_archives]" value="1" class="cm-toggle-input" ' . checked( $include_archives, true, false ) . '>';
 		echo '<span class="cm-toggle-switch"></span><span class="cm-toggle-label">' . esc_html__( 'Include Date Archives', 'cybermaps' ) . '</span></label>';
 		echo '<p class="cybermaps-desc">' . esc_html__( 'Date archives follow WordPress Core post-archive behavior.', 'cybermaps' ) . '</p>';
 
 		$include_empty_terms = isset( $options['include_empty_terms'] ) && '1' === (string) $options['include_empty_terms'];
 		echo '<label class="cm-toggle-wrapper">';
-		echo '<input type="checkbox" name="cybermaps_settings[include_empty_terms]" value="1" class="cm-toggle-input" ' . checked( $include_empty_terms, true, false ) . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<input type="checkbox" name="cybermaps_settings[include_empty_terms]" value="1" class="cm-toggle-input" ' . checked( $include_empty_terms, true, false ) . '>';
 		echo '<span class="cm-toggle-switch"></span><span class="cm-toggle-label">' . esc_html__( 'Include Empty Term Archives', 'cybermaps' ) . '</span></label>';
 		echo '</div>';
 
@@ -177,7 +177,7 @@ class SitemapsSections {
 	private static function render_wordpress_core_redirect( array $options ): void {
 		$redirect_wp_sitemap = ! array_key_exists( 'redirect_wp_sitemap', $options ) || '1' === (string) $options['redirect_wp_sitemap'];
 		echo '<label class="cm-toggle-wrapper">';
-		echo '<input type="checkbox" name="cybermaps_settings[redirect_wp_sitemap]" value="1" class="cm-toggle-input" ' . checked( $redirect_wp_sitemap, true, false ) . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<input type="checkbox" name="cybermaps_settings[redirect_wp_sitemap]" value="1" class="cm-toggle-input" ' . checked( $redirect_wp_sitemap, true, false ) . '>';
 		echo '<span class="cm-toggle-switch"></span><span class="cm-toggle-label">' . esc_html__( 'Redirect WordPress Core Sitemaps', 'cybermaps' ) . '</span></label>';
 		echo '<p class="cybermaps-desc">' . wp_kses_post( __( 'Redirects <code>/wp-sitemap.xml</code> and its child routes to the Cybermaps sitemap.', 'cybermaps' ) ) . '</p>';
 	}
@@ -189,7 +189,7 @@ class SitemapsSections {
 		$redirect_default  = isset( $options['redirect_default_sitemap'] ) && '1' === (string) $options['redirect_default_sitemap'];
 		$default_redundant = in_array( $sitemap_base, array( 'sitemap.xml', 'sitemap' ), true );
 		echo '<label class="cm-toggle-wrapper' . ( $default_redundant ? ' is-disabled' : '' ) . '">';
-		echo '<input type="checkbox" name="cybermaps_settings[redirect_default_sitemap]" value="1" class="cm-toggle-input" ' . checked( $redirect_default, true, false ) . ( $default_redundant ? ' disabled' : '' ) . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<input type="checkbox" name="cybermaps_settings[redirect_default_sitemap]" value="1" class="cm-toggle-input" ' . checked( $redirect_default, true, false ) . ( $default_redundant ? ' disabled' : '' ) . '>';
 		echo '<span class="cm-toggle-switch"></span><span class="cm-toggle-label">' . wp_kses_post( __( 'Redirect <code>/sitemap.xml</code>', 'cybermaps' ) ) . '</span></label>';
 		if ( $default_redundant ) {
 			echo '<input type="hidden" name="cybermaps_settings[redirect_default_sitemap]" value="' . esc_attr( $redirect_default ? '1' : '0' ) . '">';
@@ -204,7 +204,7 @@ class SitemapsSections {
 		$redirect_news  = isset( $options['redirect_news_sitemap'] ) && '1' === (string) $options['redirect_news_sitemap'];
 		$news_redundant = 'sitemap-news' === $news_base;
 		echo '<label class="cm-toggle-wrapper' . ( $news_redundant ? ' is-disabled' : '' ) . '">';
-		echo '<input type="checkbox" name="cybermaps_settings[redirect_news_sitemap]" value="1" class="cm-toggle-input" ' . checked( $redirect_news, true, false ) . ( $news_redundant ? ' disabled' : '' ) . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<input type="checkbox" name="cybermaps_settings[redirect_news_sitemap]" value="1" class="cm-toggle-input" ' . checked( $redirect_news, true, false ) . ( $news_redundant ? ' disabled' : '' ) . '>';
 		echo '<span class="cm-toggle-switch"></span><span class="cm-toggle-label">' . wp_kses_post( __( 'Redirect <code>/sitemap-news.xml</code>', 'cybermaps' ) ) . '</span></label>';
 		if ( $news_redundant ) {
 				echo '<input type="hidden" name="cybermaps_settings[redirect_news_sitemap]" value="' . esc_attr( $redirect_news ? '1' : '0' ) . '">';
@@ -220,12 +220,12 @@ class SitemapsSections {
 		echo '<h3 class="cybermaps-settings-subheading"><span class="dashicons dashicons-performance" aria-hidden="true"></span> ' . esc_html__( 'Dynamic Delivery', 'cybermaps' ) . '</h3>';
 		$inject_robots = isset( $options['inject_robots'] ) && '1' === (string) $options['inject_robots'];
 		echo '<label class="cm-toggle-wrapper">';
-		echo '<input type="checkbox" name="cybermaps_settings[inject_robots]" value="1" class="cm-toggle-input" ' . checked( $inject_robots, true, false ) . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<input type="checkbox" name="cybermaps_settings[inject_robots]" value="1" class="cm-toggle-input" ' . checked( $inject_robots, true, false ) . '>';
 		echo '<span class="cm-toggle-switch"></span><span class="cm-toggle-label">' . esc_html__( 'Advertise the Sitemap in Virtual robots.txt', 'cybermaps' ) . '</span></label>';
 
 		$enable_caching = isset( $options['enable_caching'] ) && '1' === (string) $options['enable_caching'];
 		echo '<label class="cm-toggle-wrapper">';
-		echo '<input type="checkbox" name="cybermaps_settings[enable_caching]" value="1" class="cm-toggle-input" ' . checked( $enable_caching, true, false ) . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<input type="checkbox" name="cybermaps_settings[enable_caching]" value="1" class="cm-toggle-input" ' . checked( $enable_caching, true, false ) . '>';
 		echo '<span class="cm-toggle-switch"></span><span class="cm-toggle-label">' . esc_html__( 'Cache Dynamically Generated Sitemap Responses', 'cybermaps' ) . '</span></label>';
 		echo '<p class="cybermaps-desc">' . esc_html__( 'Reuses generated responses until relevant content or settings invalidate them.', 'cybermaps' ) . '</p>';
 		echo '<p class="cybermaps-desc cm-sitemap-analytics-link">';
@@ -258,12 +258,12 @@ class SitemapsSections {
 		echo '<h3 class="cybermaps-settings-subheading"><span class="dashicons dashicons-update" aria-hidden="true"></span> ' . esc_html__( 'Last-Modified Signals', 'cybermaps' ) . '</h3>';
 		$update_comment_post = isset( $options['update_comment_post'] ) && '1' === (string) $options['update_comment_post'];
 		echo '<label class="cm-toggle-wrapper">';
-		echo '<input type="checkbox" name="cybermaps_settings[update_comment_post]" value="1" class="cm-toggle-input" ' . checked( $update_comment_post, true, false ) . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<input type="checkbox" name="cybermaps_settings[update_comment_post]" value="1" class="cm-toggle-input" ' . checked( $update_comment_post, true, false ) . '>';
 		echo '<span class="cm-toggle-switch"></span><span class="cm-toggle-label">' . esc_html__( 'Update Post Modified Time for New Comments', 'cybermaps' ) . '</span></label>';
 
 		$update_comment_page = isset( $options['update_comment_page'] ) && '1' === (string) $options['update_comment_page'];
 		echo '<label class="cm-toggle-wrapper">';
-		echo '<input type="checkbox" name="cybermaps_settings[update_comment_page]" value="1" class="cm-toggle-input" ' . checked( $update_comment_page, true, false ) . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<input type="checkbox" name="cybermaps_settings[update_comment_page]" value="1" class="cm-toggle-input" ' . checked( $update_comment_page, true, false ) . '>';
 		echo '<span class="cm-toggle-switch"></span><span class="cm-toggle-label">' . esc_html__( 'Update Page Modified Time for New Comments', 'cybermaps' ) . '</span></label>';
 		echo '</div>';
 	}
@@ -279,15 +279,15 @@ class SitemapsSections {
 		echo '<div class="cm-sitemap-settings-stack"><div class="cm-sitemap-settings-group">';
 		echo '<label class="cm-sitemap-control" for="media_discovery_intensity"><strong>' . esc_html__( 'Media Discovery Depth', 'cybermaps' ) . '</strong> ' . wp_kses( self::help_tip( __( 'Standard uses featured images and attached media. Advanced also parses stored post content for embedded images and videos.', 'cybermaps' ) ), self::help_tip_allowed_html() ) . '</label>';
 		echo '<select id="media_discovery_intensity" name="cybermaps_settings[media_discovery_intensity]" class="regular-text">';
-		echo '<option value="none" ' . selected( $intensity, 'none', false ) . '>' . esc_html__( 'Off — no media sitemaps', 'cybermaps' ) . '</option>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo '<option value="standard" ' . selected( $intensity, 'standard', false ) . '>' . esc_html__( 'Standard — featured and attached media', 'cybermaps' ) . '</option>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo '<option value="advanced" ' . selected( $intensity, 'advanced', false ) . '>' . esc_html__( 'Advanced — include embedded media', 'cybermaps' ) . '</option>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<option value="none" ' . selected( $intensity, 'none', false ) . '>' . esc_html__( 'Off — no media sitemaps', 'cybermaps' ) . '</option>';
+		echo '<option value="standard" ' . selected( $intensity, 'standard', false ) . '>' . esc_html__( 'Standard — featured and attached media', 'cybermaps' ) . '</option>';
+		echo '<option value="advanced" ' . selected( $intensity, 'advanced', false ) . '>' . esc_html__( 'Advanced — include embedded media', 'cybermaps' ) . '</option>';
 		echo '</select>';
 		echo '<p class="cybermaps-desc">' . esc_html__( 'Advanced discovery runs when an eligible item is saved. Use the rescan below to refresh existing content.', 'cybermaps' ) . '</p>';
 
 		$enable_multimodal = ! isset( $options['enable_multimodal_discovery'] ) || '1' === (string) $options['enable_multimodal_discovery'];
 		echo '<label class="cm-toggle-wrapper">';
-		echo '<input type="checkbox" name="cybermaps_settings[enable_multimodal_discovery]" value="1" class="cm-toggle-input" ' . checked( $enable_multimodal, true, false ) . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<input type="checkbox" name="cybermaps_settings[enable_multimodal_discovery]" value="1" class="cm-toggle-input" ' . checked( $enable_multimodal, true, false ) . '>';
 		echo '<span class="cm-toggle-switch"></span><span class="cm-toggle-label">' . esc_html__( 'Publish Cybermaps Media Hints in the AI Sitemap', 'cybermaps' ) . '</span></label>';
 		echo '<p class="cybermaps-desc">' . wp_kses_post( __( 'Adds Cybermaps-defined <code>ai:visual_weight</code> and <code>ai:multimodal_desc</code> metadata. These are vendor fields, not a third-party protocol guarantee.', 'cybermaps' ) ) . '</p>';
 		echo '</div>';
@@ -328,7 +328,7 @@ class SitemapsSections {
 			<div class="cm-discovery-profile-control">
 				<label class="cm-discovery-toolbar-label" for="cybermaps-archetype-selector">
 					<?php esc_html_e( 'Starting profile', 'cybermaps' ); ?>
-					<?php echo self::help_tip( __( 'Choose the publishing model closest to this site. A profile supplies baseline Publish, intent, and weight values. Changing it preserves rows you customized.', 'cybermaps' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<?php echo wp_kses( self::help_tip( __( 'Choose the publishing model closest to this site. A profile supplies baseline Publish, intent, and weight values. Changing it preserves rows you customized.', 'cybermaps' ) ), \Cybermaps\Admin\AccessibleTooltip::allowed_html() ); ?>
 				</label>
 				<select id="cybermaps-archetype-selector" class="cybermaps-archetype-select">
 					<?php foreach ( $auditor->get_all_archetypes() as $key => $lbl ) : ?>
@@ -339,7 +339,7 @@ class SitemapsSections {
 			<button type="button" id="cybermaps-reset-blueprint" class="button button-secondary"><?php esc_html_e( 'Reset row overrides', 'cybermaps' ); ?></button>
 			<span class="cm-discovery-toolbar-action">
 				<button type="button" id="cybermaps-resync-blueprint" class="button button-secondary" data-scanning-label="<?php esc_attr_e( 'Analyzing…', 'cybermaps' ); ?>" data-error-label="<?php esc_attr_e( 'Cybermaps could not analyze the site. Your current settings were not changed.', 'cybermaps' ); ?>"><?php esc_html_e( 'Suggest from site structure', 'cybermaps' ); ?></button>
-				<?php echo self::help_tip( __( 'Uses public content types and published-item counts to suggest a profile. It does not read page content, classify the business, or change anything until you apply the suggestion.', 'cybermaps' ), 'tip-left' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php echo wp_kses( self::help_tip( __( 'Uses public content types and published-item counts to suggest a profile. It does not read page content, classify the business, or change anything until you apply the suggestion.', 'cybermaps' ), 'tip-left' ), \Cybermaps\Admin\AccessibleTooltip::allowed_html() ); ?>
 			</span>
 		</div>
 		<p id="cybermaps-blueprint-status" class="cm-discovery-profile-status" role="status" aria-live="polite">
@@ -369,11 +369,11 @@ class SitemapsSections {
 
 		<div class="cm-matrix-table" role="table" aria-label="<?php esc_attr_e( 'Content discovery publication defaults', 'cybermaps' ); ?>">
 			<div class="cm-matrix-head" role="row">
-				<span class="cm-matrix-col-status" role="columnheader"><?php esc_html_e( 'Publish', 'cybermaps' ); ?> <?php echo self::help_tip( __( 'Makes this group eligible for Cybermaps XML, RSS, HTML, and AI discovery outputs. Turning it off does not add noindex or hide the content.', 'cybermaps' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
-				<span class="cm-matrix-col-label" role="columnheader"><?php esc_html_e( 'Content group', 'cybermaps' ); ?> <?php echo self::help_tip( __( 'Post types contain individual entries. Taxonomies—including Post Formats—represent archive pages that group entries.', 'cybermaps' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
-				<span class="cm-matrix-col-intent" role="columnheader"><?php esc_html_e( 'Discovery intent', 'cybermaps' ); ?> <?php echo self::help_tip( __( 'Informational content primarily explains or answers. Commercial content supports a purchase, booking, contact, registration, download, or another conversion.', 'cybermaps' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
-				<span class="cm-matrix-col-priority" role="columnheader"><?php esc_html_e( 'Publication weight', 'cybermaps' ); ?> <?php echo self::help_tip( __( 'A relative 0.1–1.0 hint published in XML and AI output. Higher-weight groups appear earlier in the sitemap index; this is not a search ranking score or crawl guarantee.', 'cybermaps' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
-				<span class="cm-matrix-col-source" role="columnheader"><?php esc_html_e( 'Source', 'cybermaps' ); ?> <?php echo self::help_tip( __( 'Baseline means the selected profile supplies the row. Custom means at least one value differs and can be reset independently.', 'cybermaps' ), 'tip-left' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+				<span class="cm-matrix-col-status" role="columnheader"><?php esc_html_e( 'Publish', 'cybermaps' ); ?> <?php echo wp_kses( self::help_tip( __( 'Makes this group eligible for Cybermaps XML, RSS, HTML, and AI discovery outputs. Turning it off does not add noindex or hide the content.', 'cybermaps' ) ), \Cybermaps\Admin\AccessibleTooltip::allowed_html() ); ?></span>
+				<span class="cm-matrix-col-label" role="columnheader"><?php esc_html_e( 'Content group', 'cybermaps' ); ?> <?php echo wp_kses( self::help_tip( __( 'Post types contain individual entries. Taxonomies—including Post Formats—represent archive pages that group entries.', 'cybermaps' ) ), \Cybermaps\Admin\AccessibleTooltip::allowed_html() ); ?></span>
+				<span class="cm-matrix-col-intent" role="columnheader"><?php esc_html_e( 'Discovery intent', 'cybermaps' ); ?> <?php echo wp_kses( self::help_tip( __( 'Informational content primarily explains or answers. Commercial content supports a purchase, booking, contact, registration, download, or another conversion.', 'cybermaps' ) ), \Cybermaps\Admin\AccessibleTooltip::allowed_html() ); ?></span>
+				<span class="cm-matrix-col-priority" role="columnheader"><?php esc_html_e( 'Publication weight', 'cybermaps' ); ?> <?php echo wp_kses( self::help_tip( __( 'A relative 0.1–1.0 hint published in XML and AI output. Higher-weight groups appear earlier in the sitemap index; this is not a search ranking score or crawl guarantee.', 'cybermaps' ) ), \Cybermaps\Admin\AccessibleTooltip::allowed_html() ); ?></span>
+				<span class="cm-matrix-col-source" role="columnheader"><?php esc_html_e( 'Source', 'cybermaps' ); ?> <?php echo wp_kses( self::help_tip( __( 'Baseline means the selected profile supplies the row. Custom means at least one value differs and can be reset independently.', 'cybermaps' ), 'tip-left' ), \Cybermaps\Admin\AccessibleTooltip::allowed_html() ); ?></span>
 			</div>
 			<?php
 			self::render_discovery_matrix_rows(
@@ -729,7 +729,7 @@ class SitemapsSections {
 		echo '<h3 class="cybermaps-settings-subheading"><span class="dashicons dashicons-media-document" aria-hidden="true"></span> ' . esc_html__( 'Google News Sitemap', 'cybermaps' ) . '</h3>';
 		$enable_news = isset( $options['enable_google_news'] ) && '1' === (string) $options['enable_google_news'];
 		echo '<label class="cm-toggle-wrapper">';
-		echo '<input type="checkbox" name="cybermaps_settings[enable_google_news]" value="1" class="cm-toggle-input" ' . checked( $enable_news, true, false ) . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<input type="checkbox" name="cybermaps_settings[enable_google_news]" value="1" class="cm-toggle-input" ' . checked( $enable_news, true, false ) . '>';
 		echo '<span class="cm-toggle-switch"></span><span class="cm-toggle-label">' . esc_html__( 'Publish the Google News Sitemap', 'cybermaps' ) . '</span></label>';
 		echo '<p class="cybermaps-desc">' . esc_html__( 'Lists eligible articles from the last 48 hours using the Google News XML extension.', 'cybermaps' ) . '</p>';
 
@@ -751,7 +751,7 @@ class SitemapsSections {
 		echo '<h3 class="cybermaps-settings-subheading"><span class="dashicons dashicons-rss" aria-hidden="true"></span> ' . esc_html__( 'RSS 2.0 Sitemap', 'cybermaps' ) . '</h3>';
 		$enable_rss = ! empty( $options['enable_rss_sitemap'] );
 		echo '<label class="cm-toggle-wrapper">';
-		echo '<input type="checkbox" name="cybermaps_settings[enable_rss_sitemap]" value="1" class="cm-toggle-input" ' . checked( $enable_rss, true, false ) . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<input type="checkbox" name="cybermaps_settings[enable_rss_sitemap]" value="1" class="cm-toggle-input" ' . checked( $enable_rss, true, false ) . '>';
 		echo '<span class="cm-toggle-switch"></span><span class="cm-toggle-label">' . esc_html__( 'Publish the RSS Sitemap', 'cybermaps' ) . '</span></label>';
 		echo '<p class="cybermaps-desc">' . esc_html__( 'Publishes a bounded recent-content RSS feed for crawler and feed-based discovery.', 'cybermaps' ) . '</p>';
 
@@ -768,7 +768,7 @@ class SitemapsSections {
 		echo '<fieldset class="cm-sitemap-checkboxes"><legend><strong>' . esc_html__( 'Included Post Types', 'cybermaps' ) . '</strong> ' . wp_kses( self::help_tip( __( 'This RSS-only selection narrows the post types allowed by the global Content Discovery Strategy.', 'cybermaps' ) ), self::help_tip_allowed_html() ) . '</legend>';
 		foreach ( \Cybermaps\Core\PublicationPostTypes::objects() as $post_type ) {
 			echo '<label class="cm-checkbox-wrapper">';
-			echo '<input type="checkbox" name="cybermaps_settings[rss_sitemap_types][]" value="' . esc_attr( $post_type->name ) . '" ' . checked( in_array( $post_type->name, $rss_types, true ), true, false ) . '> ' . esc_html( $post_type->label ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo '<input type="checkbox" name="cybermaps_settings[rss_sitemap_types][]" value="' . esc_attr( $post_type->name ) . '" ' . checked( in_array( $post_type->name, $rss_types, true ), true, false ) . '> ' . esc_html( $post_type->label );
 			echo '</label>';
 		}
 		echo '</fieldset></div></div>';
@@ -782,7 +782,7 @@ class SitemapsSections {
 		echo '<h3 class="cybermaps-settings-subheading"><span class="dashicons dashicons-megaphone" aria-hidden="true"></span> ' . esc_html__( 'Update Notifications', 'cybermaps' ) . '</h3>';
 		$enable_indexnow = isset( $options['enable_indexnow'] ) && '1' === (string) $options['enable_indexnow'];
 		echo '<label class="cm-toggle-wrapper">';
-		echo '<input type="checkbox" name="cybermaps_settings[enable_indexnow]" value="1" class="cm-toggle-input" ' . checked( $enable_indexnow, true, false ) . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<input type="checkbox" name="cybermaps_settings[enable_indexnow]" value="1" class="cm-toggle-input" ' . checked( $enable_indexnow, true, false ) . '>';
 		echo '<span class="cm-toggle-switch"></span><span class="cm-toggle-label">' . esc_html__( 'Send IndexNow URL Updates', 'cybermaps' ) . '</span></label>';
 		echo '<p class="cybermaps-desc">' . wp_kses_post( __( 'Submits changed public URLs and a site-specific key to the IndexNow API. Headless sites must expose the generated <code>/{key}.txt</code> path on the configured frontend host.', 'cybermaps' ) ) . '</p>';
 
@@ -802,7 +802,7 @@ class SitemapsSections {
 
 		$enable_websub = isset( $options['enable_websub'] ) && '1' === (string) $options['enable_websub'];
 		echo '<label class="cm-toggle-wrapper">';
-		echo '<input type="checkbox" name="cybermaps_settings[enable_websub]" value="1" class="cm-toggle-input" ' . checked( $enable_websub, true, false ) . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<input type="checkbox" name="cybermaps_settings[enable_websub]" value="1" class="cm-toggle-input" ' . checked( $enable_websub, true, false ) . '>';
 		echo '<span class="cm-toggle-switch"></span><span class="cm-toggle-label">' . esc_html__( 'Send WebSub Feed Updates', 'cybermaps' ) . '</span></label>';
 		echo '<p class="cybermaps-desc">' . wp_kses_post( __( 'Uses <code>/feed.json</code> as the canonical topic and notifies configured hubs when eligible content changes. AI Publishing must also be enabled.', 'cybermaps' ) ) . '</p>';
 
@@ -825,7 +825,7 @@ class SitemapsSections {
 
 		$translation_enabled = isset( $options['enable_translation_integrations'] ) && '1' === (string) $options['enable_translation_integrations'];
 		echo '<label class="cm-toggle-wrapper">';
-		echo '<input type="checkbox" name="cybermaps_settings[enable_translation_integrations]" value="1" class="cm-toggle-input" ' . checked( $translation_enabled, true, false ) . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<input type="checkbox" name="cybermaps_settings[enable_translation_integrations]" value="1" class="cm-toggle-input" ' . checked( $translation_enabled, true, false ) . '>';
 		echo '<span class="cm-toggle-switch"></span><span class="cm-toggle-label">' . esc_html__( 'Use WPML or Polylang Translation Relationships', 'cybermaps' ) . '</span></label>';
 
 		if ( \Cybermaps\Core\Plugin::is_translation_environment() ) {

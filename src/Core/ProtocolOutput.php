@@ -42,7 +42,12 @@ final class ProtocolOutput {
 	public static function report_html( string $document ): string {
 		$document = self::valid_utf8( $document );
 		$document = \preg_replace( '/\A<!doctype html>/i', '', $document ) ?? '';
-		$allowed  = array(
+		return '<!doctype html>' . \wp_kses( $document, self::report_allowed_html(), array( 'http', 'https' ) );
+	}
+
+	/** Exact standalone-report element and attribute contract. */
+	private static function report_allowed_html(): array {
+		return array(
 			'html'    => array( 'lang' => true ),
 			'head'    => array(),
 			'meta'    => array(
@@ -90,34 +95,47 @@ final class ProtocolOutput {
 				'alt' => true,
 			),
 		);
-
-		return '<!doctype html>' . \wp_kses( $document, $allowed, array( 'http', 'https' ) );
 	}
 
 	/**
 	 * Emit only content that has passed the matching contextual validator.
 	 */
 	public static function emit( string $document, string $protocol ): void {
-		$output = match ( $protocol ) {
-			'json' => self::json_document( $document ),
-			'html' => self::report_html( $document ),
+		if ( 'html' === $protocol ) {
+			echo '<!doctype html>';
+			echo \wp_kses( self::report_body( $document ), self::report_allowed_html(), array( 'http', 'https' ) );
+			return;
+		}
+		if ( 'json' === $protocol ) {
+			echo \wp_json_encode( self::json_value( $document ) );
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Non-HTML protocol sink only; final contextual validation and producer escaping are reviewed in docs/dev/protocol-output-review.md and wporg-source-allowlist.json.
+		echo self::non_html_document( $document, $protocol );
+	}
+
+	/** HTML and JSON cannot enter this byte-preserving protocol boundary. */
+	private static function non_html_document( string $document, string $protocol ): string {
+		return match ( $protocol ) {
 			'xml'  => self::xml( $document ),
 			'csv'  => self::csv( $document ),
 			'text' => self::text( $document ),
 			default => throw new \InvalidArgumentException( 'Unknown output protocol.' ),
 		};
-
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Fixed protocol boundary; output is contextually validated above and tracked by wporg-source-allowlist.json.
-		echo $output;
 	}
 
-	private static function json_document( string $document ): string {
-		$document = self::valid_utf8( $document );
-		json_decode( $document, true, 512 );
-		if ( JSON_ERROR_NONE !== json_last_error() ) {
+	private static function report_body( string $document ): string {
+		return \preg_replace( '/\A<!doctype html>/i', '', self::valid_utf8( $document ) ) ?? '';
+	}
+
+	/** Decode without converting JSON objects into arrays; encoding occurs at the sink. */
+	private static function json_value( string $document ): mixed {
+		try {
+			return json_decode( self::valid_utf8( $document ), false, 512, JSON_THROW_ON_ERROR );
+		} catch ( \JsonException $error ) {
 			throw new \UnexpectedValueException( 'Protocol output is not valid JSON.' );
 		}
-		return $document;
 	}
 
 	private static function valid_utf8( string $document ): string {

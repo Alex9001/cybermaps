@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: CYBERMAPS: XML Sitemaps & llms.txt 7.5.2\n"
+"Project-Id-Version: CYBERMAPS: XML Sitemaps & llms.txt 7.5.3\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/cybermaps\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-18T05:54:37+00:00\n"
+"POT-Creation-Date: 2026-09-27T00:16:02+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: cybermaps\n"
@@ -39,13 +39,13 @@ msgstr ""
 msgid "https://profiles.wordpress.org/oreshkin/"
 msgstr ""
 
-#: src/Admin/AccessibleTooltip.php:27
-#: src/Admin/AccessibleTooltip.php:45
+#: src/Admin/AccessibleTooltip.php:49
+#: src/Admin/AccessibleTooltip.php:67
 msgid "Help"
 msgstr ""
 
-#: src/Admin/AccessibleTooltip.php:28
-#: src/Admin/AccessibleTooltip.php:46
+#: src/Admin/AccessibleTooltip.php:50
+#: src/Admin/AccessibleTooltip.php:68
 msgid "Close"
 msgstr ""
 
@@ -860,7 +860,7 @@ msgstr ""
 #: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:696
 #: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:697
 #: src/Admin/SystemStatus.php:70
-#: assets/js/setup-wizard.js:135
+#: assets/js/setup-wizard.js:346
 msgid "Off"
 msgstr ""
 
@@ -1574,7 +1574,7 @@ msgstr ""
 
 #: src/Admin/DiscoveryAnalytics.php:1020
 #: src/Admin/ShortcodeBuilder.php:219
-#: assets/js/setup-wizard.js:136
+#: assets/js/setup-wizard.js:349
 msgid "None"
 msgstr ""
 
@@ -2319,7 +2319,7 @@ msgstr ""
 #: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:141
 #: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:243
 #: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:280
-#: assets/js/setup-wizard.js:126
+#: assets/js/setup-wizard.js:331
 msgid "Remove"
 msgstr ""
 
@@ -3378,39 +3378,39 @@ msgstr ""
 msgid "Page status"
 msgstr ""
 
-#: src/Admin/Settings/Fields/FieldRenderer.php:147
+#: src/Admin/Settings/Fields/FieldRenderer.php:154
 msgid "Secret key for authenticating restricted REST API routes. Pass this in the <code>X-Cybermaps-Secret</code> header."
 msgstr ""
 
-#: src/Admin/Settings/Fields/FieldRenderer.php:155
+#: src/Admin/Settings/Fields/FieldRenderer.php:162
 msgid "Enable On-page Video Schema"
 msgstr ""
 
-#: src/Admin/Settings/Fields/FieldRenderer.php:160
+#: src/Admin/Settings/Fields/FieldRenderer.php:167
 msgid "Stored-video markup:"
 msgstr ""
 
-#: src/Admin/Settings/Fields/FieldRenderer.php:160
+#: src/Admin/Settings/Fields/FieldRenderer.php:167
 msgid "Cybermaps detects supported video markup in stored content and emits VideoObject JSON-LD on qualifying singular pages. Output should be validated; a search feature is never guaranteed."
 msgstr ""
 
-#: src/Admin/Settings/Fields/FieldRenderer.php:167
+#: src/Admin/Settings/Fields/FieldRenderer.php:174
 msgid "Core compatibility files (recommended)"
 msgstr ""
 
-#: src/Admin/Settings/Fields/FieldRenderer.php:168
+#: src/Admin/Settings/Fields/FieldRenderer.php:175
 msgid "Full publication cache (advanced)"
 msgstr ""
 
-#: src/Admin/Settings/Fields/FieldRenderer.php:169
+#: src/Admin/Settings/Fields/FieldRenderer.php:176
 msgid "Dynamic only — publish no files"
 msgstr ""
 
-#: src/Admin/Settings/Fields/FieldRenderer.php:178
+#: src/Admin/Settings/Fields/FieldRenderer.php:185
 msgid "Multisite safety:"
 msgstr ""
 
-#: src/Admin/Settings/Fields/FieldRenderer.php:178
+#: src/Admin/Settings/Fields/FieldRenderer.php:185
 msgid "Physical origin-root files are disabled because sites share a web root. WordPress native routing remains active for the network origin."
 msgstr ""
 
@@ -6529,7 +6529,7 @@ msgid "Skip for now"
 msgstr ""
 
 #: src/Admin/SetupWizard/SetupWizardPage.php:32
-#: assets/js/setup-wizard.js:285
+#: assets/js/setup-wizard.js:625
 msgid "Getting your site ready…"
 msgstr ""
 
@@ -6537,183 +6537,163 @@ msgstr ""
 msgid "Quick Setup requires JavaScript. You can configure every Cybermaps setting from its normal workspace."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:49
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:38
 msgid "This Quick Setup session is out of date. Reload it before continuing."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:61
-msgid "The Quick Setup request has an invalid schema."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:65
-msgid "Quick Setup answers must be an object."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:70
-msgid "Quick Setup answers do not match the documented schema."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:74
-msgid "Quick Setup answer types are invalid."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:83
-msgid "Quick Setup answer values exceed their documented bounds."
-msgstr ""
-
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:109
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:67
 msgid "Cybermaps could not prepare the Quick Setup preset."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:122
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:80
 msgid "Matches the kind of website you selected."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:129
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:87
 msgid "Makes the homepage part of the sitemap."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:130
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:131
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:138
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:139
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:88
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:89
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:96
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:97
 msgid "Matches the publishing style you selected."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:132
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:90
 msgid "Keeps empty archive pages out of the sitemap."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:133
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:91
 msgid "Helps crawlers find your public maps."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:134
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:92
 msgid "Keeps dynamic sitemap delivery responsive."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:135
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:93
 msgid "Uses Cybermaps as the main sitemap."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:136
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:94
 msgid "Makes the visual sitemap available when you need it."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:137
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:95
 msgid "Uses a balanced level of media discovery."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:141
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:99
 msgid "Publishes recent articles in the RSS sitemap."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:144
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:102
 msgid "Includes the languages already active on this site."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:153
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:111
 msgid "Publishes a machine-readable guide to your content."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:154
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:112
 msgid "Keeps AI discovery switched off for now."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:158
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:116
 msgid "Turns off the notification feature that depends on AI discovery."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:163
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:121
 msgid "Points compatible tools to your discovery publications."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:164
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:122
 msgid "Adds useful context to AI sitemap entries."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:165
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:123
 msgid "Connects the AI guide to your sitemap."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:167
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:125
 msgid "Publishes discovery guides for active site languages."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:173
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:131
 msgid "Uses the public content types available on this site."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:176
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:134
 msgid "Uses the same public content in the AI sitemap."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:187
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:145
 msgid "Lists the basic discovery publications while preserving existing choices."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:190
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:148
 msgid "Uses your public introduction as the initial site summary."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:193
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:151
 msgid "Uses your public introduction as the initial discovery summary."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:199
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:157
 msgid "Matches who this website represents."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:200
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:158
 msgid "Keeps a compatible detailed identity type when one is already set."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:201
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:159
 msgid "Sets the public name for this website."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:202
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:160
 msgid "Sets the public introduction for this website."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:203
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:161
 msgid "Sets the public logo or profile image."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:205
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:163
 msgid "Connects the public identity to AI discovery output."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:215
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:173
 msgid "Shows crawler activity observed by WordPress."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:216
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:174
 msgid "Skips crawler activity logging."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:219
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:177
 msgid "Masks IP addresses before activity is stored."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:220
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:178
 msgid "Keeps activity for 30 days."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:226
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:184
 msgid "Lets WordPress observe eligible discovery requests."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:227
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:185
 msgid "Favors static delivery for lower runtime work."
 msgstr ""
 
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:239
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:197
 msgid "Add the public name for this website."
 msgstr ""
 
 #. translators: %s: Quick Setup question identifier.
-#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:316
+#: src/Admin/SetupWizard/SetupWizardPlanFactory.php:274
 #, php-format
 msgid "Choose an answer for %s."
 msgstr ""
@@ -6852,6 +6832,30 @@ msgstr ""
 
 #: src/Admin/SetupWizard/SetupWizardRegistry.php:123
 msgid "A customer-facing business tied to a location."
+msgstr ""
+
+#: src/Admin/SetupWizard/SetupWizardRequestSanitizer.php:31
+msgid "Quick Setup contains an unsupported choice."
+msgstr ""
+
+#: src/Admin/SetupWizard/SetupWizardRequestSanitizer.php:53
+msgid "The Quick Setup request has an invalid schema."
+msgstr ""
+
+#: src/Admin/SetupWizard/SetupWizardRequestSanitizer.php:57
+msgid "Quick Setup answers must be an object."
+msgstr ""
+
+#: src/Admin/SetupWizard/SetupWizardRequestSanitizer.php:62
+msgid "Quick Setup answers do not match the documented schema."
+msgstr ""
+
+#: src/Admin/SetupWizard/SetupWizardRequestSanitizer.php:66
+msgid "Quick Setup answer types are invalid."
+msgstr ""
+
+#: src/Admin/SetupWizard/SetupWizardRequestSanitizer.php:75
+msgid "Quick Setup answer values exceed their documented bounds."
 msgstr ""
 
 #: src/Admin/ShortcodeBuilder.php:28
@@ -7747,7 +7751,7 @@ msgid "Run public delivery checks to verify the observed edge response."
 msgstr ""
 
 #: src/Admin/SystemStatusCollector.php:205
-#: assets/js/setup-wizard.js:122
+#: assets/js/setup-wizard.js:304
 msgid "Optional"
 msgstr ""
 
@@ -9854,7 +9858,7 @@ msgstr ""
 
 #: src/MCP/OAuth/DeviceAuthorizationPage.php:89
 #: assets/js/admin-command-center.js:790
-#: assets/js/setup-wizard.js:313
+#: assets/js/setup-wizard.js:730
 msgid "Continue"
 msgstr ""
 
@@ -10278,131 +10282,131 @@ msgstr ""
 msgid "Confirm Action"
 msgstr ""
 
-#: assets/js/setup-wizard.js:63
+#: assets/js/setup-wizard.js:181
 msgid "What kind of website is this?"
 msgstr ""
 
-#: assets/js/setup-wizard.js:64
+#: assets/js/setup-wizard.js:182
 msgid "Pick the closest match. You can fine-tune everything later."
 msgstr ""
 
-#: assets/js/setup-wizard.js:78
+#: assets/js/setup-wizard.js:202
 msgid "Would you like AI tools to discover your content?"
 msgstr ""
 
-#: assets/js/setup-wizard.js:87
+#: assets/js/setup-wizard.js:217
 msgid "What matters more to you?"
 msgstr ""
 
-#: assets/js/setup-wizard.js:94
+#: assets/js/setup-wizard.js:232
 msgid "This is a multisite network, so Cybermaps will use its safe dynamic delivery mode."
 msgstr ""
 
-#: assets/js/setup-wizard.js:102
+#: assets/js/setup-wizard.js:247
 msgid "This website represents…"
 msgstr ""
 
-#: assets/js/setup-wizard.js:112
+#: assets/js/setup-wizard.js:261
 msgid "Public name"
 msgstr ""
 
-#: assets/js/setup-wizard.js:116
+#: assets/js/setup-wizard.js:274
 msgid "A short introduction"
 msgstr ""
 
-#: assets/js/setup-wizard.js:117
+#: assets/js/setup-wizard.js:283
 msgid "What do you do, make, write, or help people with?"
 msgstr ""
 
-#: assets/js/setup-wizard.js:121
+#: assets/js/setup-wizard.js:297
 msgid "Logo or profile photo"
 msgstr ""
 
-#: assets/js/setup-wizard.js:122
+#: assets/js/setup-wizard.js:303
 msgid "Image selected"
 msgstr ""
 
-#: assets/js/setup-wizard.js:125
+#: assets/js/setup-wizard.js:317
 msgid "Change image"
 msgstr ""
 
-#: assets/js/setup-wizard.js:125
+#: assets/js/setup-wizard.js:318
 msgid "Choose image"
 msgstr ""
 
-#: assets/js/setup-wizard.js:134
+#: assets/js/setup-wizard.js:343
 msgid "On"
 msgstr ""
 
-#: assets/js/setup-wizard.js:137
+#: assets/js/setup-wizard.js:352
 msgid "Not set"
 msgstr ""
 
-#: assets/js/setup-wizard.js:148
+#: assets/js/setup-wizard.js:374
 msgid "Website profile"
 msgstr ""
 
-#: assets/js/setup-wizard.js:149
+#: assets/js/setup-wizard.js:379
 msgid "AI discovery"
 msgstr ""
 
-#: assets/js/setup-wizard.js:150
+#: assets/js/setup-wizard.js:384
 msgid "Activity & delivery"
 msgstr ""
 
-#: assets/js/setup-wizard.js:151
+#: assets/js/setup-wizard.js:389
 msgid "Public identity"
 msgstr ""
 
-#: assets/js/setup-wizard.js:155
+#: assets/js/setup-wizard.js:402
 msgid "Quick Setup complete"
 msgstr ""
 
-#: assets/js/setup-wizard.js:156
+#: assets/js/setup-wizard.js:404
 msgid "You’re all set"
 msgstr ""
 
-#: assets/js/setup-wizard.js:157
+#: assets/js/setup-wizard.js:408
 msgid "Cybermaps has a solid starting point. The full workspaces are ready whenever you want to go deeper."
 msgstr ""
 
-#: assets/js/setup-wizard.js:165
+#: assets/js/setup-wizard.js:427
 msgid "See settings applied"
 msgstr ""
 
-#: assets/js/setup-wizard.js:177
+#: assets/js/setup-wizard.js:460
 msgid "Go to Overview"
 msgstr ""
 
-#: assets/js/setup-wizard.js:178
+#: assets/js/setup-wizard.js:469
 msgid "Explore AI Publishing"
 msgstr ""
 
-#: assets/js/setup-wizard.js:250
+#: assets/js/setup-wizard.js:576
 msgid "Choose a public image"
 msgstr ""
 
-#: assets/js/setup-wizard.js:288
+#: assets/js/setup-wizard.js:632
 msgid "Quick Setup could not be loaded."
 msgstr ""
 
-#: assets/js/setup-wizard.js:301
+#: assets/js/setup-wizard.js:663
 msgid "of"
 msgstr ""
 
-#: assets/js/setup-wizard.js:310
+#: assets/js/setup-wizard.js:699
 msgid "Exit setup"
 msgstr ""
 
-#: assets/js/setup-wizard.js:312
+#: assets/js/setup-wizard.js:714
 msgid "Back"
 msgstr ""
 
-#: assets/js/setup-wizard.js:313
+#: assets/js/setup-wizard.js:742
 msgid "Applying your setup…"
 msgstr ""
 
-#: assets/js/setup-wizard.js:313
+#: assets/js/setup-wizard.js:743
 msgid "Finish setup"
 msgstr ""
 

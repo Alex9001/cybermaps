@@ -9,8 +9,14 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import stat
+import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.dont_write_bytecode = True
+sys.path.insert(0, str(ROOT / "bin"))
+from workspace import configure
+configure()
 
 
 def mock():
@@ -18,11 +24,30 @@ def mock():
     state_path = Path(os.environ['MOCK_STATE'])
     state = json.loads(state_path.read_text()) if state_path.exists() else None
     failure = os.environ.get('MOCK_FAIL', '')
+    with Path(str(state_path) + '.commands').open('a') as log:
+        log.write(json.dumps([sys.argv[1], *args]) + '\n')
     def save():
         state_path.write_text(json.dumps(state))
     def option(name):
         return args[args.index(name) + 1]
     if sys.argv[1] in ('node', 'npm'):
+        if args[:2] == ['run', 'docs:sync']:
+            source = Path(args[3])
+            commit = option('--commit') if '--commit' in args else subprocess.check_output(
+                ['git', '-C', str(source), 'rev-parse', option('--tag') + '^{commit}'], text=True).strip()
+            Path('product/release.json').write_text(json.dumps(dict(commit=commit, channel=option('--channel'), tag='v7.4.0')))
+            Path('product/7.4.0').mkdir(exist_ok=True)
+            Path('product/7.4.0/source.json').write_text(json.dumps(dict(commit=commit, state='tagged' if '--tag' in args else 'candidate')))
+            if failure == 'unrelated-write':
+                Path('user-notes.md').write_text('User work must not enter a workflow commit.')
+            if failure == 'review':
+                print('Documentation review required for v7.4.0:\n- docs--machine-publications.md: plugin source or facts changed')
+                sys.exit(1)
+        if args[:2] == ['run', 'deploy']:
+            Path('verification').mkdir(exist_ok=True)
+            Path('verification/crawl.json').write_text('{"verified": true}')
+            if failure == 'deploy':
+                sys.exit(1)
         sys.exit(1 if failure == 'website-docs' else 0)
     if sys.argv[1] == 'composer':
         with open(str(state_path) + '.checks', 'a') as log:
@@ -34,9 +59,15 @@ def mock():
         if failure == 'checks':
             sys.exit(1)
         if args == ['run', 'release:build']:
-            Path('clean').mkdir(exist_ok=True)
-            p = Path('clean/cybermaps_7.4.0.zip')
-            p.write_bytes(b'deterministic ZIP fixture')
+            parent = Path('docs/generated/releases/7.4.0')
+            parent.mkdir(parents=True, exist_ok=True)
+            p = parent / 'cybermaps_7.4.0.zip'
+            with zipfile.ZipFile(p, 'w') as archive:
+                for name in ['cybermaps.php', 'uninstall.php', 'readme.txt', 'changelog.txt', 'LICENSE']:
+                    info = zipfile.ZipInfo('cybermaps/' + name)
+                    info.create_system = 3
+                    info.external_attr = (stat.S_IFREG | 0o644) << 16
+                    archive.writestr(info, Path(name).read_bytes())
             Path(str(p) + '.sha256').write_text(
                 ('bad' if failure == 'checksum' else hashlib.sha256(p.read_bytes()).hexdigest())
                 + '  ' + p.name + '\n')
@@ -46,6 +77,9 @@ def mock():
     if args[0] == 'api':
         if failure == 'api':
             sys.exit(1)
+        if '/commits/' in args[-1]:
+            print(json.dumps({'sha': subprocess.check_output(['git', 'rev-parse', args[-1].split('/')[-1] + '^{commit}'], text=True).strip()}))
+            return
         print(json.dumps([[state] if state else []]))
         return
     operation = args[1]
@@ -65,10 +99,13 @@ def mock():
         a = next(a for a in state['assets'] if a['name'] == option('--pattern'))
         content = bytes.fromhex(a['content'])
         Path(option('--dir'), a['name']).write_bytes(b'corrupt' if failure == 'download' else content)
+        if failure == 'download-count':
+            a['download_count'] = a.get('download_count', 0) + 1
     elif operation == 'edit':
         assert state['draft'] and len(state['assets']) == 2 and '--draft=false' in args
         assert ('--latest=true' in args) == (not state['prerelease'])
         state['draft'] = False
+        state['published_at'] = '2026-09-18T00:00:00Z'
     else:
         raise AssertionError(args)
     save()
@@ -84,7 +121,7 @@ class PublisherTest(unittest.TestCase):
         self.remote = self.base / 'remote.git'
         self.env = os.environ.copy()
         for key in list(self.env):
-            if key.startswith(('GIT_', 'GH_', 'MOCK_')):
+            if key.startswith(('GIT_', 'GH_', 'MOCK_', 'CYBERMAPS_')):
                 del self.env[key]
         self.env.update(GIT_CONFIG_NOSYSTEM='1', GIT_CONFIG_GLOBAL='/dev/null',
                         MOCK_STATE=str(self.base / 'state.json'))
@@ -95,12 +132,15 @@ class PublisherTest(unittest.TestCase):
         self.git('config', 'url.' + str(self.remote) + '.insteadOf',
                  'https://github.com/Alex9001/cybermaps.git')
         (self.repo / 'bin').mkdir()
-        for name in ['release-github.sh', 'release-github.py', 'check-website.py']:
+        for name in ['release-github.sh', 'release-github.py', 'check-website.py', 'workspace.py',
+                     'workspace.sh', 'release-workflow.py']:
             shutil.copy(ROOT / 'bin' / name, self.repo / 'bin' / name)
         (self.repo / 'cybermaps.php').write_text(' * Version: 7.4.0\n')
+        for name in ('uninstall.php', 'LICENSE'):
+            (self.repo / name).write_text('fixture\n')
         (self.repo / 'readme.txt').write_text('Requires at least: 7.0\nRequires PHP: 8.2\n')
         (self.repo / 'changelog.txt').write_text('7.4.0\n-----\n\n* Release test.\n\n7.3.0\n-----\n* Older.\n')
-        (self.repo / '.gitignore').write_text('clean/\n')
+        (self.repo / '.gitignore').write_text('docs/generated/\n.cybermaps-workspace.json\n')
         self.git('add', '.')
         self.git('commit', '-m', 'fixture')
         self.git('push', str(self.remote), 'main')
@@ -108,6 +148,17 @@ class PublisherTest(unittest.TestCase):
         executables.mkdir()
         self.website = self.base / 'website'
         (self.website / 'product').mkdir(parents=True)
+        (self.website / 'package.json').write_text('{}')
+        self.install = self.base / 'wordpress/wp-content/plugins/cybermaps'
+        self.install.mkdir(parents=True)
+        (self.base / 'wordpress/wp-settings.php').touch()
+        (self.install / 'cybermaps.php').write_text('previous install')
+        (self.repo / '.cybermaps-workspace.json').write_text(json.dumps(dict(
+            website=str(self.website), install=str(self.install))))
+        for args in [('init', '-b', 'main'), ('config', 'user.name', 'Website Test'),
+                     ('config', 'user.email', 'test@example.invalid'), ('add', '.'),
+                     ('commit', '-m', 'website fixture')]:
+            self.website_git(*args)
         self.env['CYBERMAPS_WEBSITE_DIR'] = str(self.website)
         for name in ['gh', 'composer', 'node', 'npm']:
             p = executables / name
@@ -121,6 +172,10 @@ class PublisherTest(unittest.TestCase):
         return subprocess.check_output(['git', *args], cwd=self.repo, env=self.env,
                                        stderr=subprocess.DEVNULL, text=True).strip()
 
+    def website_git(self, *args):
+        return subprocess.check_output(['git', *args], cwd=self.website, env=self.env,
+                                       stderr=subprocess.DEVNULL, text=True).strip()
+
     def state(self):
         p = Path(self.env['MOCK_STATE'])
         return json.loads(p.read_text()) if p.exists() else None
@@ -130,6 +185,8 @@ class PublisherTest(unittest.TestCase):
             'commit': 'wrong' if failure == 'website-commit' else self.git('rev-parse', 'HEAD'),
             'channel': 'stable' if stable else 'beta',
         }))
+        self.website_git('add', '.')
+        self.website_git('commit', '--allow-empty', '-m', 'import candidate')
         result = subprocess.run(['bash', 'bin/release-github.sh'] + (['--stable'] if stable else []),
                                 cwd=self.repo, env=dict(self.env, MOCK_FAIL=failure),
                                 text=True, capture_output=True)
@@ -184,6 +241,10 @@ class PublisherTest(unittest.TestCase):
     def test_download_mismatch_then_resume(self):
         self.publish(False, failure='download')
         self.publish()
+
+    def test_download_counters_do_not_look_like_asset_replacement(self):
+        self.publish(failure='download-count')
+        self.assertTrue(all(a['download_count'] == 1 for a in self.state()['assets']))
 
     def test_interrupted_upload_then_resume(self):
         self.publish(False, failure='interrupt')

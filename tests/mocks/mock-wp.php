@@ -1487,7 +1487,7 @@ function sanitize_key( $key ) {
  * Mock sanitize_textarea_field
  */
 function sanitize_textarea_field( $value ) {
-	return trim( (string) $value );
+	return trim( strip_tags( (string) $value ) );
 }
 
 /**

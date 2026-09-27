@@ -12,7 +12,7 @@
 	<file>uninstall.php</file>
 	<file>src</file>
 
-	<exclude-pattern>*/clean/*</exclude-pattern>
+	<exclude-pattern>*/docs/generated/*</exclude-pattern>
 	<exclude-pattern>*/freemius/*</exclude-pattern>
 	<exclude-pattern>*/vendor/*</exclude-pattern>
 

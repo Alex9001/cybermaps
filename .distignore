@@ -1,9 +1,7 @@
 /.github
 /.wordpress-org
 /bin
-/clean
 /docs
-/freemius
 /tests
 /vendor
 /.distignore
@@ -25,3 +23,6 @@
 /*.log
 /*.zip
 /.env*
+/.cybermaps-workspace*
+/AGENTS.md
+/phpcs-compat.xml.dist

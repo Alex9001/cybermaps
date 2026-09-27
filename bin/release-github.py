@@ -8,15 +8,16 @@ from pathlib import Path
 import re
 import subprocess
 import tempfile
+import io
+import tarfile
+import sys
+
+sys.dont_write_bytecode = True
+from workspace import (ROOT, clean_website, configure, load_config, package_files,
+                       lock, release_dir, run, website_destination)
 
 REPO = "Alex9001/cybermaps"
 REMOTE = "https://github.com/" + REPO + ".git"
-
-
-def run(*args, capture=True):
-    result = subprocess.run(args, check=True, text=True,
-                            stdout=subprocess.PIPE if capture else None)
-    return result.stdout.strip() if capture else None
 
 
 def require(condition, message):
@@ -64,6 +65,12 @@ def matching_draft(state, tag, commit, beta, notes, title):
             "Draft metadata differs from this release; inspect the draft before retrying.")
 
 
+def asset_records(state):
+    # Downloads change counters, not asset identity or bytes. Keep every other field.
+    return [{key: value for key, value in asset.items() if key != 'download_count'}
+            for asset in state['assets']]
+
+
 def release_notes(version, beta, commit):
     history = Path("changelog.txt").read_text()
     match = re.search(r"^" + re.escape(version) + r"\n-+\n(.*?)(?=^\d+\.\d+\.\d+\n-+\n|\Z)",
@@ -88,16 +95,12 @@ def release_notes(version, beta, commit):
             f"Source commit: `{commit}`")
 
 
-def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--stable", action="store_true", help="publish a stable release instead of open beta")
-    parser.add_argument("--website", default=os.environ.get("CYBERMAPS_WEBSITE_DIR"),
-                        help="Astro website checkout (or set CYBERMAPS_WEBSITE_DIR)")
-    args = parser.parse_args()
-    if not args.website:
-        parser.error("--website is required so the release documentation can be validated")
-    website = Path(args.website).resolve()
-    os.chdir(Path(__file__).resolve().parent.parent)
+def publish(website, stable=False, on_validated=None, on_website_validated=None):
+    """Validate exactly once, optionally install, then publish a matching draft."""
+    os.chdir(ROOT)
+    configure()
+    website = website_destination(website)
+    clean_website(website)
     os.environ["GH_HOST"] = "github.com"
     os.environ["GH_PROMPT_DISABLED"] = "1"
     run("gh", "auth", "status", "--hostname", "github.com", capture=False)
@@ -106,7 +109,7 @@ def main():
                               Path("cybermaps.php").read_text(), re.M)
     require(version_match is not None, "Cannot read plugin version.")
     version = version_match[1]
-    tag, beta = "v" + version, not args.stable
+    tag, beta = "v" + version, not stable
     title = "Cybermaps " + version + (" — Open beta" if beta else "")
     notes = release_notes(version, beta, commit)
     verify_tag(tag, commit)
@@ -115,10 +118,13 @@ def main():
         matching_draft(state, tag, commit, beta, notes, title)
     run("python3", "bin/check-website.py", str(website), "--commit", commit,
         "--channel", "beta" if beta else "stable", capture=False)
+    if on_website_validated:
+        on_website_validated()
     for command in [("composer", "test"), ("composer", "run", "lint:complexity"),
-                    ("composer", "run", "release:build"), ("composer", "run", "release:validate")]:
+                    ("composer", "run", "release:check"), ("composer", "run", "release:build")]:
         run(*command, capture=False)
-    archive = Path("clean") / ("cybermaps_" + version + ".zip")
+    # release:build already validates directory/ZIP parity and runs Plugin Check.
+    archive = release_dir(version) / ("cybermaps_" + version + ".zip")
     checksum = Path(str(archive) + ".sha256")
     expected = hashlib.sha256(archive.read_bytes()).hexdigest() + "  " + archive.name + "\n"
     require(checksum.read_text() == expected, "Local checksum does not match the ZIP.")
@@ -126,6 +132,10 @@ def main():
     require(source_commit() == commit, "Source changed during validation.")
     run("python3", "bin/check-website.py", str(website), "--commit", commit,
         "--channel", "beta" if beta else "stable", "--source-only", capture=False)
+    clean_website(website)
+    if on_validated:
+        on_validated(archive, hashlib.sha256(artifacts[archive.name]).hexdigest())
+    require(source_commit() == commit, "Source changed during installation.")
     local, remote = verify_tag(tag, commit)
     if not local:
         run("git", "tag", tag, commit)
@@ -160,18 +170,76 @@ def main():
             require((download_dir / name).read_bytes() == content, "Downloaded asset mismatch: " + name)
         final = release_state(tag)
         matching_draft(final, tag, commit, beta, notes, title)
-        require(final["id"] == state["id"] and final["assets"] == verified["assets"]
+        require(final["id"] == state["id"] and asset_records(final) == asset_records(verified)
                 and sorted(a["name"] for a in final["assets"]) == sorted(artifacts),
                 "Draft assets changed during verification.")
         # Existing asset IDs must survive verification, including on resumed drafts.
-        require(all(a in final["assets"] for a in state["assets"]), "Draft assets were replaced.")
+        require(all(a in asset_records(final) for a in asset_records(state)), "Draft assets were replaced.")
         require(source_commit() == commit, "Source changed before publication.")
         require(verify_tag(tag, commit)[1], "Remote tag disappeared before publication.")
         run("python3", "bin/check-website.py", str(website), "--commit", commit,
             "--channel", "beta" if beta else "stable", "--source-only", capture=False)
+        clean_website(website)
         run("gh", "release", "edit", tag, "--repo", REPO, "--draft=false",
             "--prerelease=" + str(beta).lower(), "--latest=" + str(not beta).lower(), capture=False)
     print("Published https://github.com/" + REPO + "/releases/tag/" + tag)
+    return tag
+
+
+def verify_published(tag):
+    """Read-only remote verification for downstream retries; never upload/edit assets."""
+    require(re.fullmatch(r'v\d+\.\d+\.\d+', tag), 'Invalid published release tag.')
+    state = release_state(tag)
+    require(state and not state['draft'] and state.get('published_at'), 'Release is not published: ' + tag)
+    commit = json.loads(run('gh', 'api', '--hostname', 'github.com',
+                            'repos/' + REPO + '/commits/' + tag))['sha']
+    require(re.fullmatch(r'[0-9a-f]{40}', commit), 'Invalid published commit.')
+    local, remote = verify_tag(tag, commit)
+    require(remote, 'Published tag is missing from origin.')
+    if not local:
+        run('git', 'fetch', '--no-tags', REMOTE, 'refs/tags/' + tag + ':refs/tags/' + tag)
+    require(run('git', 'rev-parse', tag + '^{commit}') == commit, 'Published tag mismatch.')
+    name = 'cybermaps_' + tag[1:] + '.zip'
+    require(sorted(a['name'] for a in state['assets']) == sorted([name, name + '.sha256']),
+            'Published release must contain exactly the ZIP and checksum.')
+    with tempfile.TemporaryDirectory(prefix='published-verification-') as temporary:
+        for asset in (name, name + '.sha256'):
+            run('gh', 'release', 'download', tag, '--repo', REPO, '--pattern', asset,
+                '--dir', temporary)
+        contents, digest = package_files(Path(temporary) / name)
+        # Compare the downloaded package to its immutable Git source, not today's HEAD.
+        source = subprocess.check_output(['git', 'archive', '--format=tar', commit], cwd=ROOT)
+        expected = {}
+        with tarfile.open(fileobj=io.BytesIO(source)) as tree:
+            for entry in tree.getmembers():
+                path = Path(entry.name)
+                if not entry.isfile() or any(part.startswith('.') for part in path.parts):
+                    continue
+                if (entry.name in {'cybermaps.php', 'uninstall.php', 'readme.txt', 'changelog.txt', 'LICENSE'}
+                        or (path.parts[0] in {'src', 'assets', 'languages'} and path.suffix != '.map')):
+                    expected[entry.name] = tree.extractfile(entry).read()
+        require(contents == expected, 'Published ZIP does not match the tagged source.')
+        match = re.search(rb'Version:[ \t]*(\d+\.\d+\.\d+)', contents['cybermaps.php'])
+        require(match and match[1].decode() == tag[1:], 'Published package version differs from tag.')
+    final = release_state(tag)
+    require(final and not final['draft'] and final['id'] == state['id']
+            and asset_records(final) == asset_records(state) and final['prerelease'] == state['prerelease'],
+            'Published release changed during verification.')
+    require(verify_tag(tag, commit)[1], 'Published tag disappeared during verification.')
+    return dict(tag=tag, commit=commit, channel='beta' if state['prerelease'] else 'stable',
+                zip_sha256=digest, release_id=state['id'])
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--stable', action='store_true')
+    parser.add_argument('--website', default=os.environ.get('CYBERMAPS_WEBSITE_DIR'),
+                        help='Must match the configured canonical website')
+    args = parser.parse_args()
+    website, _ = load_config()
+    require(not args.website or Path(args.website) == website, '--website must match .cybermaps-workspace.json.')
+    with lock():
+        publish(website, args.stable)
 
 
 if __name__ == "__main__":

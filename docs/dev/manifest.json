@@ -1,9 +1,9 @@
 {
     "plugin": "CYBERMAPS: XML Sitemaps & llms.txt",
-    "version": "7.5.2",
+    "version": "7.5.3",
     "php_min": "8.2",
     "wp_min": "7.1",
-    "generated_at": "2026-09-18T05:54:36+00:00",
+    "generated_at": "2026-09-27T00:16:01+00:00",
     "discovery_endpoints": [
         {
             "id": "manifest",
@@ -1304,12 +1304,12 @@
             "api_secret",
             "delete_data_on_uninstall"
         ],
-        "catalog_hash": "de56c55ab979cfe7654f9ec8f43df168d1d56981662bd59201772ec5914b7ce8",
-        "schema_hash": "ab2ecc540be2da46eb5449ee91cf540d30df64f6778a7ab4ec88eb6ec2a14523",
+        "catalog_hash": "8ce081d28977e53e199cbd9ff008111916c6396fcd026f322a2581bd57baf16a",
+        "schema_hash": "9aa834c3bf576656efc3336afc76c8992407d82779561c7f7979abec00a4e574",
         "guide_path": "docs/ai-configuration.md",
         "guide_url": "https://cybermaps.dev/docs/ai-configuration/",
-        "schema_url": "https://cybermaps.dev/specs/ai-configuration/7.5.2/schema.json",
-        "catalog_url": "https://cybermaps.dev/specs/ai-configuration/7.5.2/catalog.json",
+        "schema_url": "https://cybermaps.dev/specs/ai-configuration/7.5.3/schema.json",
+        "catalog_url": "https://cybermaps.dev/specs/ai-configuration/7.5.3/catalog.json",
         "compatibility": {
             "format_version": "exact",
             "plugin_version": "warning_on_mismatch",
@@ -1769,6 +1769,13 @@
             "fqcn": "Cybermaps\\Admin\\SetupWizard\\SetupWizardRegistry",
             "file": "src/Admin/SetupWizard/SetupWizardRegistry.php",
             "summary": "Declarative contract for the three-step Quick Setup survey."
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\SetupWizard",
+            "class": "SetupWizardRequestSanitizer",
+            "fqcn": "Cybermaps\\Admin\\SetupWizard\\SetupWizardRequestSanitizer",
+            "file": "src/Admin/SetupWizard/SetupWizardRequestSanitizer.php",
+            "summary": "Exact, bounded input contract shared by AJAX and direct plan callers."
         },
         {
             "namespace": "Cybermaps\\Admin",
@@ -3073,7 +3080,7 @@
             "summary": "Small sitemap XML writer with a native XMLWriter fast path."
         }
     ],
-    "class_count": 250,
+    "class_count": 251,
     "publication_limits": {
         "llms_summary_bytes": 4194303,
         "llms_full_bytes": 33554431,

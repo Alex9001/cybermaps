@@ -36,10 +36,16 @@ endpoints for WordPress, with a static-file delivery engine.
 9. **Do not lower the WordPress 7.1 baseline because an older smoke test
    passes.** Core's native Abilities API contract requires 7.1. Compatibility
    backports need an explicit product decision, not an inferred support change.
-10. **Keep every task-created clone, backup, report, download, and temporary
-    work directory inside this plugin directory.** Never create task artifacts
-    elsewhere (including sibling repositories, `/home/user/Documents/CODE`, or
-    another checkout) unless the user explicitly names that destination.
+10. **Use one plugin source checkout:** `/home/user/Documents/CODE/cybermaps/`.
+    Never create automatic clones or worktrees. Keep generated packages and
+    reports in `docs/generated/releases/<version>/`, disposable files in
+    `docs/generated/tmp/`, and repair/install rollback evidence in
+    `docs/generated/backups/`. Pass that temporary directory to subprocesses.
+    The Local Sites plugin directory is an installation only; never edit it.
+    Install through `composer dev:install` or `composer release`. The canonical
+    website and installation destinations live in the ignored
+    `.cybermaps-workspace.json`; see its tracked example. Never stash, reset,
+    or commit existing website work to unblock a release.
 
 ---
 
@@ -64,8 +70,9 @@ docs/
   dev/ai-configuration/        Generated AI Brief JSON Schema and field catalog
 tests/                         PHPUnit tests (mocks/mock-wp.php stubs WP)
 vendor/                        Composer dependencies — do not hand-edit
-clean/                         Direct WordPress.org release artifact — generated, do NOT hand-edit
-freemius/                      Historical generated artifacts — ignored, never use for releases
+docs/generated/releases/      Versioned packages, checksums, reports and release state (ignored)
+docs/generated/tmp/           Disposable staging, test data and subprocess temporary files (ignored)
+docs/generated/backups/       Historical repair evidence and installation rollback (ignored)
 ```
 
 ---
@@ -113,16 +120,20 @@ When you bump the version, update **all** of these so they agree:
 3. `docs/documentation.md` — the `> Version X · PHP 8.2 · WordPress 7.1` stamp near the top.
 4. Regenerate `docs/dev/manifest.json` and both `docs/dev/ai-configuration/`
    artifacts (they read the version from the header automatically).
+5. Update current-version references in `docs/features.md`, `docs/comparison.md`,
+   and `docs/ai-configuration.md`, add the release to `changelog.txt`, and run
+   `composer i18n:generate` so the POT project version matches.
 
 Historical changelog/upgrade-notice entries stay as-is — only add new ones.
 
-The public Astro docs are part of the release handoff. Follow
-`docs/dev/WEBSITE-SYNC.md`: import the exact committed candidate into the website,
-review affected guides, and pass `--website /path/to/cybermaps-astro` (or set
-`CYBERMAPS_WEBSITE_DIR`) to `composer run release:github`. Do not advance prose
-review records merely because the plugin version changed. Runtime limits and
-the combined route inventory are generated; use `--website` for the website
-contract. The publisher validates the website before publishing the plugin.
+The public Astro docs are part of the automated release workflow. Follow
+`docs/dev/RELEASE-WORKFLOW.md` and `docs/dev/WEBSITE-SYNC.md`. `composer release`
+requires committed, pushed plugin source and a clean canonical website before
+importing the exact candidate. Review pauses list affected pages; review and
+commit them before retrying. Never advance prose review records just because
+the version changed. After publication use `composer release:resume -- --tag
+vX.Y.Z` for a verified downstream-only retry. No command clones a checkout or
+republishes an existing release.
 
 ---
 
@@ -143,7 +154,7 @@ Rules:
   uninstall only data that it owns.
 - Core may contain one sparse extensions/comparison link, but it must not install
   or update off-repository plugins.
-- Build and test the exact `clean/cybermaps/` artifact produced locally. There is
+- Build and test the exact `docs/generated/releases/<version>/cybermaps/` artifact produced locally. There is
   no external preprocessing step.
 
 ---
@@ -266,10 +277,9 @@ php docs/dev/generate-docs.php --ai-catalog > docs/dev/ai-configuration/catalog.
 - WordPress **Plugin Check** is the external compliance gate. Common catches:
   direct filesystem calls (use `WP_Filesystem`), unescaped output, missing nonces,
   `Stable tag` mismatch.
-- `vendor/` and `clean/` are dependencies or generated build copies — never
-  hand-edit them; they are produced by Composer / the packaging step.
-- `freemius/` contains ignored historical packages only. Never use it as release
-  input or output.
+- `vendor/` and `docs/generated/` contain dependencies or generated outputs;
+  never hand-edit package copies. Historical imports live under each release
+  directory’s `imported/`; repair evidence lives under `docs/generated/backups/`.
 
 ---
 

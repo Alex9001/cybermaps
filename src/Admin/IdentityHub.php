@@ -126,7 +126,7 @@ class IdentityHub {
 
 					<div style="max-width: 800px; margin-top: 20px;">
 						<div style="margin-bottom: 20px;">
-							<label for="cybermaps-identity-type" style="display: block; font-weight: 600; margin-bottom: 5px;"><?php esc_html_e( 'Primary Entity Type:', 'cybermaps' ); ?> <?php echo AccessibleTooltip::get( __( 'Determines the root @type for your JSON-LD Schema. Organization is for brands/groups; LocalBusiness is for physical stores/offices.', 'cybermaps' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- AccessibleTooltip returns escaped trusted markup. ?></label>
+							<label for="cybermaps-identity-type" style="display: block; font-weight: 600; margin-bottom: 5px;"><?php esc_html_e( 'Primary Entity Type:', 'cybermaps' ); ?> <?php echo wp_kses( AccessibleTooltip::get( __( 'Determines the root @type for your JSON-LD Schema. Organization is for brands/groups; LocalBusiness is for physical stores/offices.', 'cybermaps' ) ), \Cybermaps\Admin\AccessibleTooltip::allowed_html() ); ?></label>
 							<select id="cybermaps-identity-type" name="cybermaps_identity_data[type]" style="width: 100%;">
 								<option value="Organization" <?php selected( $type, 'Organization' ); ?>><?php esc_html_e( 'Organization (General Brand)', 'cybermaps' ); ?></option>
 								<option value="LocalBusiness" <?php selected( $type, 'LocalBusiness' ); ?>><?php esc_html_e( 'LocalBusiness (Physical Location)', 'cybermaps' ); ?></option>
@@ -135,7 +135,7 @@ class IdentityHub {
 						</div>
 
 						<div style="margin-bottom: 20px;">
-							<label for="cybermaps-identity-precise-type" style="display: block; font-weight: 600; margin-bottom: 5px;"><?php esc_html_e( 'Supported Schema Subtype:', 'cybermaps' ); ?> <?php echo AccessibleTooltip::get( __( 'Narrows the primary entity to one of the common Schema.org subtypes that Cybermaps explicitly supports.', 'cybermaps' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- AccessibleTooltip returns escaped trusted markup. ?></label>
+							<label for="cybermaps-identity-precise-type" style="display: block; font-weight: 600; margin-bottom: 5px;"><?php esc_html_e( 'Supported Schema Subtype:', 'cybermaps' ); ?> <?php echo wp_kses( AccessibleTooltip::get( __( 'Narrows the primary entity to one of the common Schema.org subtypes that Cybermaps explicitly supports.', 'cybermaps' ) ), \Cybermaps\Admin\AccessibleTooltip::allowed_html() ); ?></label>
 							<select id="cybermaps-identity-precise-type" name="cybermaps_identity_data[precise_type]" style="width: 100%;">
 								<option value=""><?php esc_html_e( 'Use the primary entity type', 'cybermaps' ); ?></option>
 								<?php foreach ( $schema_types as $t ) : ?>
@@ -151,7 +151,7 @@ class IdentityHub {
 						</div>
 
 						<div style="margin-bottom: 20px;">
-							<label for="cybermaps-identity-description" style="display: block; font-weight: 600; margin-bottom: 5px;"><?php esc_html_e( 'Published Entity Description:', 'cybermaps' ); ?> <?php echo AccessibleTooltip::get( __( 'This operator-authored description is included in configured JSON-LD identity and Knowledge Graph output.', 'cybermaps' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- AccessibleTooltip returns escaped trusted markup. ?></label>
+							<label for="cybermaps-identity-description" style="display: block; font-weight: 600; margin-bottom: 5px;"><?php esc_html_e( 'Published Entity Description:', 'cybermaps' ); ?> <?php echo wp_kses( AccessibleTooltip::get( __( 'This operator-authored description is included in configured JSON-LD identity and Knowledge Graph output.', 'cybermaps' ) ), \Cybermaps\Admin\AccessibleTooltip::allowed_html() ); ?></label>
 							<textarea id="cybermaps-identity-description" name="cybermaps_identity_data[description]" rows="5" maxlength="<?php echo esc_attr( (string) \Cybermaps\Core\IdentityEntityBuilder::MAX_DESCRIPTION_LENGTH ); ?>" style="width: 100%;" placeholder="<?php esc_attr_e( 'Describe the organization using factual language.', 'cybermaps' ); ?>"><?php echo esc_textarea( $desc ); ?></textarea>
 							<div class="cybermaps-desc"><?php esc_html_e( 'Cybermaps publishes this text but cannot guarantee that any crawler reads or uses it.', 'cybermaps' ); ?></div>
 						</div>

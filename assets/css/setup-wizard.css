@@ -193,8 +193,24 @@
     border-radius: 11px;
     background: #f1f5f9;
     color: #315f87;
-    font-size: 20px;
     place-items: center;
+}
+
+.cm-quick-choice__icon svg,
+.cm-quick-setup__summary article > span svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.75;
+    vector-effect: non-scaling-stroke;
+}
+
+.cm-quick-setup__summary article > span svg {
+    width: 19px;
+    height: 19px;
 }
 
 .cm-quick-choice.is-selected .cm-quick-choice__icon {
