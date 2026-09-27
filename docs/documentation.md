@@ -654,7 +654,7 @@ files.
 Dynamic WordPress handlers are always the routing baseline. The Static File
 Engine is an optional materialization layer:
 
-Dynamic responses include Cybermaps-managed CORS, ETag, Repr-Digest,
+Dynamic publication-file responses include Cybermaps-managed CORS, ETag, Repr-Digest,
 X-Robots-Tag, CSP, and RFC 9111-oriented cache-policy headers. Content-Digest
 is opt-in and requires a verified identity-encoded response.
 When a physical copy is served directly, PHP does not receive the request, so

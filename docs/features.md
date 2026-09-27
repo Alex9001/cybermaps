@@ -432,8 +432,8 @@ still instructed to review user-authored business details before sharing.
 - Sitemap Status, AI Discovery Status, Discovery Analytics, and Debugging submenus.
 - Local API secret for private read-only integrations.
 - Administrator-authenticated REST action for ownership-safe static-file purge.
-- ETag, Repr-Digest, and conditional `304` validators on successful public
-  Cybermaps REST discovery responses; Content-Digest requires verified identity encoding.
+- ETag, Content-Digest, and conditional `304` validators on successful public
+  Cybermaps REST discovery responses.
 - WP-CLI: `status`, `clear_cache`, `flush_rules`, and `regenerate`.
 - Versioned machine-readable public-surface manifest.
 - Extension API 2.0 for endpoint registration, read-only publication
