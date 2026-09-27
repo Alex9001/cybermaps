@@ -145,8 +145,9 @@ Additional publication features:
   REST routes with the same 25,000-row synchronous JSON snapshot guard as report
   exports.
 - Optional RFC 8288 discovery headers.
-- Public CORS read/preflight headers, ETags, and RFC 9530 Content-Digest on
-  dynamic Cybermaps machine publications. Direct static delivery depends on
+- Public CORS read/preflight headers, ETags, and RFC 9530 Repr-Digest on
+  dynamic Cybermaps machine publications. Content-Digest is opt-in for a
+  verified identity-encoded response. Direct static delivery depends on
   equivalent web-server or CDN header configuration.
 - Revision-pinned Cybermaps ADP 3.0 Level 3 profile with the four required
   `/news/*` publications when AI Publishing and those publications are enabled.
@@ -431,8 +432,8 @@ still instructed to review user-authored business details before sharing.
 - Sitemap Status, AI Discovery Status, Discovery Analytics, and Debugging submenus.
 - Local API secret for private read-only integrations.
 - Administrator-authenticated REST action for ownership-safe static-file purge.
-- ETag, Content-Digest, and conditional `304` validators on successful public
-  Cybermaps REST discovery responses.
+- ETag, Repr-Digest, and conditional `304` validators on successful public
+  Cybermaps REST discovery responses; Content-Digest requires verified identity encoding.
 - WP-CLI: `status`, `clear_cache`, `flush_rules`, and `regenerate`.
 - Versioned machine-readable public-surface manifest.
 - Extension API 2.0 for endpoint registration, read-only publication
