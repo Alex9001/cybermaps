@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: CYBERMAPS: XML Sitemaps & llms.txt 7.5.3\n"
+"Project-Id-Version: CYBERMAPS: XML Sitemaps & llms.txt 7.5.4\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/cybermaps\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-27T00:16:02+00:00\n"
+"POT-Creation-Date: 2026-09-28T09:15:06+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: cybermaps\n"
@@ -56,7 +56,7 @@ msgid "AI Discovery Status"
 msgstr ""
 
 #: src/Admin/AIDiscoveryStatus.php:62
-#: src/Admin/Settings.php:430
+#: src/Admin/Settings.php:440
 #: src/Admin/SitemapStatus.php:62
 #: src/Admin/SitemapStatus.php:620
 #: src/Admin/SystemStatus.php:80
@@ -789,7 +789,7 @@ msgstr ""
 #: src/Admin/Logs.php:335
 #: src/Admin/MediaAuditor.php:163
 #: src/Admin/NetworkSettings.php:78
-#: src/Admin/Settings.php:492
+#: src/Admin/Settings.php:502
 #: src/Sitemap/Orchestrator.php:429
 msgid "Unauthorized"
 msgstr ""
@@ -838,7 +838,7 @@ msgstr ""
 #: src/Admin/Logs.php:306
 #: src/Admin/MediaAuditor.php:156
 #: src/Admin/NetworkSettings.php:89
-#: src/Admin/Settings.php:485
+#: src/Admin/Settings.php:495
 #: src/Admin/Settings/SettingsAjax.php:338
 #: src/Admin/SetupWizard/SetupWizardController.php:141
 #: src/Sitemap/Orchestrator.php:440
@@ -856,9 +856,9 @@ msgstr ""
 #: src/Admin/DashboardRenderer.php:33
 #: src/Admin/Settings/Tabs/Discovery.php:74
 #: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:19
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:400
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:696
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:697
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:412
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:708
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:709
 #: src/Admin/SystemStatus.php:70
 #: assets/js/setup-wizard.js:346
 msgid "Off"
@@ -1604,7 +1604,7 @@ msgstr ""
 
 #: src/Admin/DiscoveryAuditor.php:51
 #: src/Admin/EdgeOptimizationController.php:77
-#: src/Admin/EdgeOptimizationController.php:404
+#: src/Admin/EdgeOptimizationController.php:407
 #: src/Admin/Settings/SettingsAjax.php:154
 #: src/Admin/Settings/SettingsAjax.php:190
 #: src/Admin/SetupWizard/SetupWizardController.php:104
@@ -1735,13 +1735,13 @@ msgid "Use content-group default"
 msgstr ""
 
 #: src/Admin/DiscoveryScope.php:54
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:691
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:703
 #: assets/js/sitemap-exclusion.js:86
 msgid "Informational"
 msgstr ""
 
 #: src/Admin/DiscoveryScope.php:55
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:692
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:704
 #: assets/js/sitemap-exclusion.js:87
 msgid "Commercial"
 msgstr ""
@@ -1927,130 +1927,134 @@ msgstr ""
 msgid "Cybermaps materializes enabled canonical discovery fallback bodies in compatibility mode. Dynamic delivery remains preferred, while Debugging and optional edge rules report or repair headers when a server serves physical files before WordPress."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:82
+#: src/Admin/EdgeOptimizationController.php:80
+msgid "Use GET for this action."
+msgstr ""
+
+#: src/Admin/EdgeOptimizationController.php:85
 msgid "Cloudflare was not detected for this hostname. Confirm that its DNS record is proxied through Cloudflare before continuing."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:82
+#: src/Admin/EdgeOptimizationController.php:85
 msgid "Cloudflare not detected"
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:95
+#: src/Admin/EdgeOptimizationController.php:98
 msgid "Cloudflare authorization could not be started."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:97
+#: src/Admin/EdgeOptimizationController.php:100
 msgid "Cloudflare authorization"
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:103
+#: src/Admin/EdgeOptimizationController.php:106
 msgid "Sign in as an administrator to finish Cloudflare authorization."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:109
+#: src/Admin/EdgeOptimizationController.php:112
 msgid "Cloudflare authorization state is invalid or expired. Return to Cybermaps and start again."
 msgstr ""
 
 #. translators: %s: Cloudflare OAuth error.
-#: src/Admin/EdgeOptimizationController.php:116
+#: src/Admin/EdgeOptimizationController.php:119
 #, php-format
 msgid "Cloudflare authorization was not completed: %s"
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:121
+#: src/Admin/EdgeOptimizationController.php:124
 msgid "Cloudflare did not return a usable authorization code. Return to Cybermaps and start again."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:151
+#: src/Admin/EdgeOptimizationController.php:154
 msgid "Cloudflare authorization did not start."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:164
+#: src/Admin/EdgeOptimizationController.php:167
 msgid "Another Cybermaps edge operation is finishing."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:171
+#: src/Admin/EdgeOptimizationController.php:174
 msgid "Cloudflare authorization did not complete."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:193
+#: src/Admin/EdgeOptimizationController.php:196
 msgid "Cloudflare finished without a recoverable result."
 msgstr ""
 
 #. translators: %d: removed compatibility cache entries.
-#: src/Admin/EdgeOptimizationController.php:214
+#: src/Admin/EdgeOptimizationController.php:217
 #, php-format
 msgid "Cybermaps advanced every cache family and removed %d compatibility entries."
 msgstr ""
 
 #. translators: %s: static reconciliation status.
-#: src/Admin/EdgeOptimizationController.php:225
+#: src/Admin/EdgeOptimizationController.php:228
 #, php-format
 msgid "Static publication reconciliation finished with status: %s."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:242
-#: src/Admin/EdgeOptimizationController.php:264
+#: src/Admin/EdgeOptimizationController.php:245
+#: src/Admin/EdgeOptimizationController.php:267
 msgid "Waiting for Cloudflare authorization."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:250
+#: src/Admin/EdgeOptimizationController.php:253
 msgid "Cloudflare authorization expired. Start again."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:250
+#: src/Admin/EdgeOptimizationController.php:253
 msgid "Cloudflare authorization was declined or unavailable."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:254
+#: src/Admin/EdgeOptimizationController.php:257
 msgid "Cloudflare authorization state did not match the initiating administrator."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:270
+#: src/Admin/EdgeOptimizationController.php:273
 msgid "Cloudflare authorization did not include a code."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:293
+#: src/Admin/EdgeOptimizationController.php:296
 msgid "Save a valid Cloudflare OAuth client ID before using custom OAuth."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:325
+#: src/Admin/EdgeOptimizationController.php:328
 msgid "The Cloudflare rule operation did not complete."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:355
+#: src/Admin/EdgeOptimizationController.php:358
 msgid "Cloudflare installed the discovery headers, but cache safety needs attention. Review Debugging for details."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:356
+#: src/Admin/EdgeOptimizationController.php:359
 msgid "Cloudflare authorization completed and Cybermaps rules were updated."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:358
+#: src/Admin/EdgeOptimizationController.php:361
 msgid "The credential was discarded, but Cloudflare revocation could not be confirmed."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:372
+#: src/Admin/EdgeOptimizationController.php:375
 msgid "Cloudflare was not detected. Confirm that this hostname is orange-cloud proxied before using Cloudflare rule tools."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:376
+#: src/Admin/EdgeOptimizationController.php:379
 msgid "Another Cybermaps edge operation is already running. Wait briefly and try again."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:384
+#: src/Admin/EdgeOptimizationController.php:387
 msgid "The Cloudflare operation did not complete."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:400
+#: src/Admin/EdgeOptimizationController.php:403
 msgid "POST is required."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:432
+#: src/Admin/EdgeOptimizationController.php:435
 msgid "The configured public hostname changed during Cloudflare authorization. Start the operation again."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:440
+#: src/Admin/EdgeOptimizationController.php:443
 msgid "Enter a valid scoped Cloudflare API token. The token is used once and is not stored."
 msgstr ""
 
@@ -2717,7 +2721,7 @@ msgstr ""
 #: src/Admin/Logs.php:55
 #: src/Admin/NetworkSettings.php:25
 #: src/Admin/PageHeader.php:26
-#: src/Admin/SettingsPage.php:80
+#: src/Admin/SettingsPage.php:79
 #: assets/js/sitemap-exclusion.js:60
 msgid "Cybermaps"
 msgstr ""
@@ -3562,7 +3566,7 @@ msgid "Save Changes after selecting a media discovery mode, then start the resca
 msgstr ""
 
 #: src/Admin/Settings/SettingsAssets.php:173
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:305
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:317
 msgid "Rescan Media Now"
 msgstr ""
 
@@ -3745,7 +3749,7 @@ msgid "Need attention"
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:23
-#: src/Admin/SettingsPage.php:561
+#: src/Admin/SettingsPage.php:579
 msgid "Open Debugging"
 msgstr ""
 
@@ -4331,8 +4335,8 @@ msgid "Comparison"
 msgstr ""
 
 #: src/Admin/Settings/Tabs/ContentReview.php:461
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:415
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:700
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:427
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:712
 #: src/Audit/AuditExporter.php:161
 msgid "Baseline"
 msgstr ""
@@ -4429,7 +4433,7 @@ msgid "Completed"
 msgstr ""
 
 #: src/Admin/Settings/Tabs/ContentReview.php:595
-#: src/Admin/SettingsPage.php:518
+#: src/Admin/SettingsPage.php:536
 msgid "Resources"
 msgstr ""
 
@@ -5227,14 +5231,14 @@ msgid "Freshness Feed"
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:551
-#: src/Admin/SettingsPage.php:474
+#: src/Admin/SettingsPage.php:492
 #: src/Admin/SVGMapper.php:116
 #: src/Core/EndpointRegistry.php:958
 msgid "Knowledge Graph"
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:552
-#: src/Admin/SettingsPage.php:469
+#: src/Admin/SettingsPage.php:487
 #: src/Admin/SVGMapper.php:121
 #: src/Core/EndpointRegistry.php:965
 msgid "AI Sitemap"
@@ -5727,763 +5731,771 @@ msgstr ""
 msgid "Configure the main XML path, redirects, response caching, and last-modified signals in one place."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:152
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:155
+msgid "Show the CYBER MAPS credit on public sitemaps"
+msgstr ""
+
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:156
+msgid "Optional and off by default. Allow visitors to see “generated by CYBER MAPS” in the browser view of your XML sitemaps."
+msgstr ""
+
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:164
 msgid "Paths & Sitemap Index"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:153
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:165
 msgid "Sitemap URL Base"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:153
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:165
 msgid "Path relative to the site root. Cybermaps accepts a clean slug or an .xml filename and normalizes the public route."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:157
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:169
 msgid "External Sitemap References"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:157
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:169
 msgid "Add structurally validated external references to the Cybermaps sitemap index. Enter one unique absolute HTTP or HTTPS .xml URL per line."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:167
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:179
 msgid "Traffic Routing"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:181
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:193
 msgid "Redirect WordPress Core Sitemaps"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:182
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:194
 msgid "Redirects <code>/wp-sitemap.xml</code> and its child routes to the Cybermaps sitemap."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:193
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:205
 msgid "Redirect <code>/sitemap.xml</code>"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:197
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:209
 msgid "Already active because the Sitemap URL Base uses this path."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:197
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:209
 msgid "Redirects the conventional <code>/sitemap.xml</code> path to your custom sitemap path."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:208
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:220
 msgid "Redirect <code>/sitemap-news.xml</code>"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:212
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:224
 msgid "Already active because the News Sitemap URL Base uses this path."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:212
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:224
 msgid "Redirects the conventional <code>/sitemap-news.xml</code> path to your custom News sitemap."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:220
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:232
 msgid "Dynamic Delivery"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:224
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:236
 msgid "Advertise the Sitemap in Virtual robots.txt"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:229
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:241
 msgid "Cache Dynamically Generated Sitemap Responses"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:230
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:242
 msgid "Reuses generated responses until relevant content or settings invalidate them."
 msgstr ""
 
 #. translators: %s: Discovery Analytics administration URL.
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:234
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:246
 #, php-format
 msgid "Crawler recording and retention are managed in <a href=\"%s\">Discovery Analytics</a>."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:242
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:254
 msgid "Static Publication"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:243
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:255
 #: src/Admin/SystemStatusCollector.php:164
 msgid "Static File Engine"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:247
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:259
 msgid "<strong>Core discovery files (default)</strong> writes small root and canonical <code>/.well-known/</code> resources so nginx and similar origins that bypass WordPress can still serve their bodies. Dynamic routing remains preferred because only PHP can guarantee protocol-specific headers; the status page reports body availability separately from header conformance. <strong>Full publication cache</strong> also writes eligible sitemap and discovery caches. Static-file requests bypass PHP and cannot appear in crawler analytics."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:258
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:270
 msgid "Last-Modified Signals"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:262
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:274
 msgid "Update Post Modified Time for New Comments"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:267
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:279
 msgid "Update Page Modified Time for New Comments"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:275
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:287
 msgid "Publish richer image and video discovery data."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:275
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:287
 msgid "Choose how media is found, whether Cybermaps AI hints are emitted, and when existing content should be rescanned."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:280
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:292
 msgid "Media Discovery Depth"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:280
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:292
 msgid "Standard uses featured images and attached media. Advanced also parses stored post content for embedded images and videos."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:282
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:294
 msgid "Off — no media sitemaps"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:283
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:295
 msgid "Standard — featured and attached media"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:284
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:296
 msgid "Advanced — include embedded media"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:286
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:298
 msgid "Advanced discovery runs when an eligible item is saved. Use the rescan below to refresh existing content."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:291
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:303
 msgid "Publish Cybermaps Media Hints in the AI Sitemap"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:292
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:304
 msgid "Adds Cybermaps-defined <code>ai:visual_weight</code> and <code>ai:multimodal_desc</code> metadata. These are vendor fields, not a third-party protocol guarantee."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:296
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:308
 msgid "On-Page Video Markup"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:301
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:313
 msgid "Existing Content"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:303
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:315
 msgid "Bulk Media Rescan"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:304
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:316
 msgid "Refresh saved media observations for every currently included published item using the selected discovery depth."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:307
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:319
 msgid "Media rescan progress"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:330
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:342
 msgid "Starting profile"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:331
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:343
 msgid "Choose the publishing model closest to this site. A profile supplies baseline Publish, intent, and weight values. Changing it preserves rows you customized."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:339
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:351
 msgid "Reset row overrides"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:341
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:353
 msgid "Analyzing…"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:341
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:353
 msgid "Cybermaps could not analyze the site. Your current settings were not changed."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:341
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:353
 msgid "Suggest from site structure"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:342
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:354
 msgid "Uses public content types and published-item counts to suggest a profile. It does not read page content, classify the business, or change anything until you apply the suggestion."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:348
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:360
 msgid "Every row currently uses the selected profile baseline."
 msgstr ""
 
 #. translators: %d: number of customized content-group rows.
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:352
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:364
 #, php-format
 msgid "%d custom row is active."
 msgid_plural "%d custom rows are active."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:364
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:376
 msgid "Apply suggestion and reset rows"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:365
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:377
 msgid "Dismiss"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:370
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:382
 msgid "Content discovery publication defaults"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:372
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:384
 msgid "Publish"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:372
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:384
 msgid "Makes this group eligible for Cybermaps XML, RSS, HTML, and AI discovery outputs. Turning it off does not add noindex or hide the content."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:373
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:385
 msgid "Content group"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:373
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:385
 msgid "Post types contain individual entries. Taxonomies—including Post Formats—represent archive pages that group entries."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:374
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:689
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:386
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:701
 #: assets/js/sitemap-exclusion.js:81
 msgid "Discovery intent"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:374
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:386
 msgid "Informational content primarily explains or answers. Commercial content supports a purchase, booking, contact, registration, download, or another conversion."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:375
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:695
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:387
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:707
 msgid "Publication weight"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:375
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:387
 msgid "A relative 0.1–1.0 hint published in XML and AI output. Higher-weight groups appear earlier in the sitemap index; this is not a search ranking score or crawl guarantee."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:376
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:699
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:388
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:711
 msgid "Source"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:376
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:388
 msgid "Baseline means the selected profile supplies the row. Custom means at least one value differs and can be reset independently."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:389
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:401
 msgid "Save content strategy"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:390
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:402
 msgid "Saves this strategy together with any other changes on the XML Sitemaps tab."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:401
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:413
 msgid "Every row uses the selected profile baseline. Choose Save content strategy to publish this change."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:402
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:414
 msgid "1 custom row is active. Choose Save content strategy to publish it."
 msgstr ""
 
 #. translators: %s: number of customized content-group rows.
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:403
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:415
 #, php-format
 msgid "%s custom rows are active. Choose Save content strategy to publish them."
 msgstr ""
 
 #. translators: %s: site profile label.
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:404
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:416
 #, php-format
 msgid "The %s baseline is loaded with no custom rows. Review it, then choose Save content strategy."
 msgstr ""
 
 #. translators: %s: site profile label.
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:405
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:417
 #, php-format
 msgid "The %s baseline is loaded and 1 custom row was preserved. Review it, then choose Save content strategy."
 msgstr ""
 
 #. translators: 1: site profile label, 2: number of preserved customized rows.
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:406
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:418
 #, php-format
 msgid "The %1$s baseline is loaded and %2$s custom rows were preserved. Review them, then choose Save content strategy."
 msgstr ""
 
 #. translators: %s: site profile label.
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:407
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:419
 #, php-format
 msgid "All rows now use the %s profile baseline. Choose Save content strategy to publish them."
 msgstr ""
 
 #. translators: %s: suggested site profile label.
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:408
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:420
 #, php-format
 msgid "Suggested profile: %s"
 msgstr ""
 
 #. translators: %s: suggested site profile label.
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:409
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:421
 msgid "No published items were found in the analyzed content groups."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:410
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:422
 msgid "Based on 1 published item and the available site-structure signals."
 msgstr ""
 
 #. translators: %s: number of published items found during site analysis.
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:411
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:423
 #, php-format
 msgid "Based on %s published items and the available site-structure signals."
 msgstr ""
 
 #. translators: %s: number of published items found during site analysis.
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:412
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:424
 msgid "Applying this suggestion will replace every custom row in this form."
 msgstr ""
 
 #. translators: %s: suggested site profile label.
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:413
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:425
 #, php-format
 msgid "The suggested %s profile is loaded and all prior row customizations were reset. Review the rows, then choose Save content strategy."
 msgstr ""
 
 #. translators: %s: suggested site profile label.
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:414
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:426
 msgid "Site analysis suggestion dismissed. Current settings were not changed."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:416
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:700
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:428
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:712
 msgid "Custom"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:419
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:431
 msgid "JavaScript is required to edit and serialize the Content Discovery Strategy controls."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:524
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:536
 msgid "Post types — individual content"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:525
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:537
 msgid "Taxonomies — archive groupings"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:642
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:654
 #: src/Admin/ShortcodeBuilder.php:275
 #: src/Sitemap/ShortcodeHandler.php:652
 msgid "Post Formats"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:645
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:657
 msgid "Post type"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:646
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:658
 msgid "Taxonomy"
 msgstr ""
 
 #. translators: %s: public post type label.
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:649
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:661
 #, php-format
 msgid "Individual %s entries"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:651
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:663
 msgid "Archive pages for image, video, quote, link, and other WordPress post formats"
 msgstr ""
 
 #. translators: %s: public taxonomy label.
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:654
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:666
 #, php-format
 msgid "%s archive pages"
 msgstr ""
 
 #. translators: 1: content label, 2: resource kind (post type or taxonomy).
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:662
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:674
 #, php-format
 msgid "Publish %1$s %2$s through eligible Cybermaps outputs"
 msgstr ""
 
 #. translators: 1: content label, 2: resource kind (post type or taxonomy).
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:664
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:676
 #, php-format
 msgid "%1$s %2$s publication weight"
 msgstr ""
 
 #. translators: 1: content label, 2: resource kind (post type or taxonomy).
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:666
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:678
 #, php-format
 msgid "%1$s %2$s discovery intent"
 msgstr ""
 
 #. translators: 1: content label, 2: resource kind (post type or taxonomy).
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:668
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:680
 #, php-format
 msgid "Reset custom settings for %1$s %2$s"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:701
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:713
 msgid "Reset"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:708
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:720
 msgid "Publish specialized discovery formats and notify compatible services."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:708
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:720
 msgid "Google News and RSS create additional sitemap feeds. IndexNow and WebSub send update notifications; they do not guarantee crawling or indexing."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:729
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:741
 #: src/Admin/SitemapStatus.php:229
 msgid "Google News Sitemap"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:733
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:745
 msgid "Publish the Google News Sitemap"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:734
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:746
 msgid "Lists eligible articles from the last 48 hours using the Google News XML extension."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:737
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:749
 msgid "News Sitemap URL Base"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:741
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:753
 msgid "Publication Name"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:741
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:753
 msgid "Use the exact publication name shown in Google News Publisher Center."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:751
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:763
 msgid "RSS 2.0 Sitemap"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:755
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:767
 msgid "Publish the RSS Sitemap"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:756
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:768
 msgid "Publishes a bounded recent-content RSS feed for crawler and feed-based discovery."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:760
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:772
 msgid "RSS Sitemap URL Base"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:764
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:776
 msgid "Maximum Items"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:768
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:780
 msgid "Included Post Types"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:768
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:780
 msgid "This RSS-only selection narrows the post types allowed by the global Content Discovery Strategy."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:782
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:794
 msgid "Update Notifications"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:786
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:798
 msgid "Send IndexNow URL Updates"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:787
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:799
 msgid "Submits changed public URLs and a site-specific key to the IndexNow API. Headless sites must expose the generated <code>/{key}.txt</code> path on the configured frontend host."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:799
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:811
 msgid "Verify public IndexNow key URL"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:806
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:818
 msgid "Send WebSub Feed Updates"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:807
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:819
 msgid "Uses <code>/feed.json</code> as the canonical topic and notifies configured hubs when eligible content changes. AI Publishing must also be enabled."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:811
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:823
 msgid "WebSub Hubs"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:813
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:825
 msgid "Enter one absolute HTTPS hub URL per line. Two established public hubs are supplied by default."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:818
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:830
 msgid "Keep language signals together."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:818
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:830
 msgid "Set the primary hreflang language and optionally publish relationships supplied by a supported translation plugin."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:823
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:835
 msgid "Primary Language (hreflang)"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:823
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:835
 msgid "Use a valid language code such as en, en-US, or fr-FR. Cybermaps uses it for sitemap hreflang output."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:824
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:836
 msgid "e.g. en-US"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:829
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:841
 msgid "Use WPML or Polylang Translation Relationships"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:832
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:844
 msgid "Compatible translation environment detected. Enable the option to add its language relationships to sitemap output."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:834
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:846
 msgid "No supported translation plugin was detected. The option can remain off on a single-language site."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:837
+#: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:849
 msgid "WordPress multisite sitemap indexing is configured separately by a network administrator in Network Admin."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:86
+#: src/Admin/SettingsPage.php:85
 msgid "Cybermaps settings sections"
 msgstr ""
 
 #. translators: 1: desired files, 2: written files, 3: unchanged files, 4: conflicted files, 5: failed files, 6: skipped files, 7: deleted files, 8: retained files.
-#: src/Admin/SettingsPage.php:223
+#: src/Admin/SettingsPage.php:241
 #, php-format
 msgid "Static-file counts — desired: %1$d; written: %2$d; unchanged: %3$d; conflicted: %4$d; failed: %5$d; skipped: %6$d; deleted: %7$d; retained: %8$d."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:241
+#: src/Admin/SettingsPage.php:259
 msgid "Sitemap cache and rewrite rules were refreshed, but static publication completed only partially. Review the Static File Engine status before relying on generated files."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:248
+#: src/Admin/SettingsPage.php:266
 msgid "Sitemap cache and rewrite rules were refreshed. Static publication is in progress, and the remaining work was queued for background continuation."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:255
+#: src/Admin/SettingsPage.php:273
 msgid "Sitemap cache and rewrite rules were refreshed, but static publication failed. Review the Static File Engine status for details."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:262
+#: src/Admin/SettingsPage.php:280
 msgid "Sitemap cache and rewrite rules were refreshed, but another generated-file operation is already running. Cybermaps requested a background retry; review the Static File Engine status to confirm scheduling."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:269
+#: src/Admin/SettingsPage.php:287
 msgid "Sitemap cache and rewrite rules were refreshed. Static publication was intentionally skipped; dynamic delivery remains active for this installation."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:276
+#: src/Admin/SettingsPage.php:294
 msgid "Sitemap cache and rewrite rules were refreshed, but static publication was skipped without a successful result. Review the Static File Engine status for details."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:282
+#: src/Admin/SettingsPage.php:300
 msgid "Sitemap cache and rewrite rules were refreshed, but no valid static publication result was returned. Review the Static File Engine status before relying on generated files."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:293
+#: src/Admin/SettingsPage.php:311
 msgid "Sitemap cache and rewrite rules were refreshed. Dynamic delivery is active and owned static files were reconciled."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:294
+#: src/Admin/SettingsPage.php:312
 msgid "Sitemap cache and rewrite rules were refreshed, and static publication completed."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:318
+#: src/Admin/SettingsPage.php:336
 msgid "The pending static operation was reconciled. Regenerate publications and review the Static File Engine status."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:323
+#: src/Admin/SettingsPage.php:341
 msgid "Static recovery was not authorized because the exact worker-quiescence confirmation was not supplied."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:324
+#: src/Admin/SettingsPage.php:342
 msgid "Static recovery stopped because the pending operation changed. Reload the page before trying again."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:325
+#: src/Admin/SettingsPage.php:343
 msgid "The pending static operation is malformed and was preserved for support review."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:326
+#: src/Admin/SettingsPage.php:344
 msgid "Static recovery could not acquire the operation fence. Confirm every worker is stopped, wait for the lease to expire, and try again."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:327
+#: src/Admin/SettingsPage.php:345
 msgid "Static recovery could not prove a safe terminal state. The journal and current file were preserved for review."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:332
+#: src/Admin/SettingsPage.php:350
 msgid "Static recovery did not complete. The journal was preserved for review."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:388
+#: src/Admin/SettingsPage.php:406
 msgid "Actions"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:395
+#: src/Admin/SettingsPage.php:413
 msgid "Regenerate Publications"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:404
+#: src/Admin/SettingsPage.php:422
 msgid "Sitemaps"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:408
+#: src/Admin/SettingsPage.php:426
 #: src/Admin/SitemapStatus.php:199
 #: src/Admin/SVGMapper.php:50
 msgid "Sitemap Index"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:414
+#: src/Admin/SettingsPage.php:432
 #: src/Admin/SVGMapper.php:55
 msgid "Google News"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:421
+#: src/Admin/SettingsPage.php:439
 #: src/Admin/SitemapStatus.php:295
 #: src/Admin/SVGMapper.php:67
 msgid "RSS Sitemap"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:430
+#: src/Admin/SettingsPage.php:448
 msgid "LLMS Endpoints"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:455
+#: src/Admin/SettingsPage.php:473
 msgid "AI Discovery"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:459
+#: src/Admin/SettingsPage.php:477
 #: src/Admin/SVGMapper.php:79
 msgid "ADP 3.0 Manifest"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:464
+#: src/Admin/SettingsPage.php:482
 #: src/Admin/SVGMapper.php:84
 msgid "Cybermaps Manifest"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:479
+#: src/Admin/SettingsPage.php:497
 #: src/Admin/SVGMapper.php:104
 msgid "JSON Feed"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:486
+#: src/Admin/SettingsPage.php:504
 msgid "Machine-readable interfaces"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:490
+#: src/Admin/SettingsPage.php:508
 #: src/Admin/SVGMapper.php:145
 msgid "Usage Policy"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:495
+#: src/Admin/SettingsPage.php:513
 #: src/Admin/SVGMapper.php:150
 #: src/Core/EndpointRegistry.php:967
 msgid "AI Actions"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:500
+#: src/Admin/SettingsPage.php:518
 #: src/Admin/SVGMapper.php:155
 msgid "Site Guide"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:505
+#: src/Admin/SettingsPage.php:523
 #: src/Admin/SVGMapper.php:133
 #: src/Core/EndpointRegistry.php:970
 msgid "API Catalog"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:510
+#: src/Admin/SettingsPage.php:528
 msgid "REST Search example"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:522
+#: src/Admin/SettingsPage.php:540
 msgid "Plugin Homepage"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:527
+#: src/Admin/SettingsPage.php:545
 msgid "Documentation"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:540
+#: src/Admin/SettingsPage.php:558
 msgid "Open beta feedback"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:542
+#: src/Admin/SettingsPage.php:560
 msgid "Help improve Cybermaps. Report a problem or suggest an improvement on GitHub."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:545
+#: src/Admin/SettingsPage.php:563
 msgid "Report an issue"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:550
+#: src/Admin/SettingsPage.php:568
 msgid "Suggest an improvement"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:555
+#: src/Admin/SettingsPage.php:573
 msgid "Browse existing issues"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:558
+#: src/Admin/SettingsPage.php:576
 msgid "Before reporting, open Cybermaps → Debugging and choose Copy GitHub support bundle. Include it in your report after reviewing it for private information."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:582
+#: src/Admin/SettingsPage.php:600
 msgid "Static Recovery Required"
 msgstr ""
 
 #. translators: 1: static operation type, 2: relative publication path.
-#: src/Admin/SettingsPage.php:591
+#: src/Admin/SettingsPage.php:609
 #, php-format
 msgid "Pending %1$s operation for %2$s."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:598
+#: src/Admin/SettingsPage.php:616
 msgid "Stop or quiesce every Cybermaps cron, web, and CLI worker first. This confirmation is manual because WordPress has no portable atomic transaction spanning the database and filesystem."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:605
+#: src/Admin/SettingsPage.php:623
 msgid "Type this exact confirmation:"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:608
+#: src/Admin/SettingsPage.php:626
 msgid "Resolve Pending Static Operation"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:611
+#: src/Admin/SettingsPage.php:629
 msgid "The stored recovery journal is malformed. Cybermaps will not delete it or mutate generated files automatically. Preserve a database backup and inspect the cybermaps_static_write_intent option before taking manual action."
 msgstr ""
 

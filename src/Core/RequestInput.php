@@ -40,6 +40,8 @@ final class RequestInput {
 	public static function header( string $name, int $max_bytes = 4096 ): string {
 		$key = match ( strtolower( $name ) ) {
 			'accept' => 'HTTP_ACCEPT',
+			'if-none-match' => 'HTTP_IF_NONE_MATCH',
+			'if-modified-since' => 'HTTP_IF_MODIFIED_SINCE',
 			default => '',
 		};
 		if ( '' === $key ) {

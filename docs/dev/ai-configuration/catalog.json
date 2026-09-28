@@ -1,7 +1,7 @@
 {
     "format": "cybermaps-ai-configuration-catalog",
     "format_version": 2,
-    "plugin_version": "7.5.3",
+    "plugin_version": "7.5.4",
     "sections": [
         {
             "id": "core_settings",
@@ -102,6 +102,26 @@
             "dependencies": [],
             "example": false,
             "risk": "low"
+        },
+        {
+            "id": "show_sitemap_attribution",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "show_sitemap_attribution",
+            "label": "Show the CYBER MAPS credit on public sitemaps",
+            "purpose": "Explicitly permits a visible CYBER MAPS credit on public XML sitemap browser views. Optional, off by default, and never enabled by Quick Setup.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": false,
+            "dependencies": [],
+            "example": false,
+            "risk": "high"
         },
         {
             "id": "include_authors",

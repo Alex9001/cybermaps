@@ -51,6 +51,11 @@ for path in ('/feed.json', '/ai-sitemap.xml'):
     assert conditional == 304 and conditional_body == b'', (path, conditional)
 
 request('/wp-login.php', {'log': 'admin', 'pwd': 'cybermaps-validation', 'wp-submit': 'Log In', 'testcookie': '1'})
+# Administrative operation selectors remain unread until method and nonce pass.
+status, _, _ = request('/wp-admin/admin-post.php?action=cybermaps_cloudflare_oauth_start&operation%5B%5D=remove')
+assert status == 403, ('Cloudflare start accepted a missing nonce', status)
+status, _, _ = request('/wp-admin/admin-post.php', {'action': 'cybermaps_cloudflare_oauth_start', 'operation': 'remove'})
+assert status == 405, ('Cloudflare start accepted POST', status)
 status, _, page = request('/wp-admin/admin.php?page=cybermaps-settings&view=setup')
 assert status == 200, status
 match = re.search(rb'var cybermapsSetupWizard = (\{.*?\});', page)

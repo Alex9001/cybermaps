@@ -1,6 +1,14 @@
 # Cybermaps — Technical Documentation
 
-> Version 7.5.3 · PHP 8.2 · WordPress 7.1
+> Version 7.5.4 · PHP 8.2 · WordPress 7.1
+
+Public sitemap credit is optional. In **Sitemaps**, enable **Show the CYBER MAPS
+credit on public sitemaps** to opt in. `show_sitemap_attribution` defaults to `0`
+for new and upgraded sites and is never enabled by Quick Setup. Revoking it
+invalidates sitemap caches and purges ownership-verified static XML publications,
+including child sitemaps, before scheduled regeneration. Modified files are
+retained and reported through the existing static-file conflict diagnostics.
+An independently managed CDN may need its cache cleared as well.
 
 Cybermaps is a fast sitemap and AI-discovery plugin for WordPress.
 It combines XML, RSS, and HTML sitemap publishing with compact machine-readable

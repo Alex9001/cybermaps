@@ -1432,6 +1432,11 @@ function wp_parse_url( $url, $component = -1 ) {
 /**
  * Mock wp_unslash
  */
+function wp_slash( $value ) {
+	// Pair with this fixture's identity wp_unslash; request fixtures are unslashed.
+	return $value;
+}
+
 function wp_unslash( $value ) {
 	return $value;
 }

@@ -133,7 +133,9 @@ importing the exact candidate. Review pauses list affected pages; review and
 commit them before retrying. Never advance prose review records just because
 the version changed. After publication use `composer release:resume -- --tag
 vX.Y.Z` for a verified downstream-only retry. No command clones a checkout or
-republishes an existing release.
+republishes an existing release. Candidate validation is not release completion:
+website preparation must pass before publication, and cybermaps.dev must serve
+the matching release contracts, downloads and changelog before completion.
 
 ---
 
@@ -291,3 +293,12 @@ php docs/dev/generate-docs.php --ai-catalog > docs/dev/ai-configuration/catalog.
 - `docs/dev/manifest.json` — the generated machine-readable surface map (good first read for orientation).
 - `.claude/skills/agent-skills/skills/` — bundled WordPress skill references (plugin dev,
   REST API, block dev, performance, PHPStan, WP-CLI, plugin-directory guidelines, etc.).
+
+## Mandatory WordPress.org release conditions
+
+Follow `docs/dev/WORDPRESS-RELEASE-CONDITIONS.md` and `docs/dev/release-policy.json`.
+All release entry points share `bin/release_gate.py`. A candidate is not a final
+artifact: promotion requires fresh exact-ZIP validation and an evidence-backed
+agent review. Never fabricate or mechanically advance review evidence. Read
+`docs/dev/SECURITY-REVIEW.md` before editing function-scoped security records.
+No routine owner sign-off is required for these checks.

@@ -163,12 +163,22 @@ class Settings {
 
 		$bridge = \Cybermaps\Discovery\StaticBridge::get_instance();
 		$bridge->invalidate();
+		if ( '1' === ( $old_settings['show_sitemap_attribution'] ?? '0' ) && '1' !== ( $new_settings['show_sitemap_attribution'] ?? '0' ) ) {
+			self::purge_credited_xml( $bridge );
+		}
 		\Cybermaps\Core\CacheManager::clear_family( 'sitemap' );
 		\Cybermaps\Core\CacheManager::clear_family( 'discovery' );
 		\Cybermaps\Core\CacheManager::clear_family( 'admin' );
 		( new \Cybermaps\Sitemap\Orchestrator() )->invalidate_occupancy();
 		self::reconcile_static_delivery( $bridge, $old_mode, $new_mode, $old_hub, $new_hub );
 		\Cybermaps\Discovery\WellKnownRoutingBridge::request_reconciliation();
+	}
+
+	/** Remove owned XML publications immediately when public credit is revoked. */
+	private static function purge_credited_xml( \Cybermaps\Discovery\StaticBridge $bridge ): void {
+		$hashes = ( new \Cybermaps\Discovery\StaticOwnershipStore() )->read_flat_hashes();
+		$paths  = array_values( array_filter( array_keys( $hashes ), static fn ( string $path ): bool => str_ends_with( $path, '.xml' ) ) );
+		$bridge->purge_all( '', '', 'failed_publication', $paths );
 	}
 
 	/**

@@ -50,7 +50,7 @@ final class EdgeOptimizationController {
 			),
 			admin_url( 'admin-post.php' )
 		);
-		return wp_nonce_url( $url, self::NONCE_ACTION . ':' . $operation );
+		return wp_nonce_url( $url, self::NONCE_ACTION );
 	}
 
 	public static function oauth_callback_url(): string {
@@ -76,8 +76,11 @@ final class EdgeOptimizationController {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'Insufficient permissions.', 'cybermaps' ), '', array( 'response' => 403 ) );
 		}
+		if ( 'GET' !== \Cybermaps\Core\ReadOnlyRequest::method() ) {
+			wp_die( esc_html__( 'Use GET for this action.', 'cybermaps' ), '', array( 'response' => 405 ) );
+		}
+		check_admin_referer( self::NONCE_ACTION );
 		$operation = $this->requested_operation();
-		check_admin_referer( self::NONCE_ACTION . ':' . $operation );
 		if ( ! $this->cloudflare_environment_confirmed() ) {
 			wp_die( esc_html__( 'Cloudflare was not detected for this hostname. Confirm that its DNS record is proxied through Cloudflare before continuing.', 'cybermaps' ), esc_html__( 'Cloudflare not detected', 'cybermaps' ), array( 'response' => 400 ) );
 		}
@@ -406,7 +409,7 @@ final class EdgeOptimizationController {
 	}
 
 	private function requested_operation(): string {
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The operation selects the nonce action checked immediately by the caller.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The caller verifies the action nonce before reading this bounded selector.
 		$operation = isset( $_GET['operation'] ) && is_scalar( $_GET['operation'] ) ? sanitize_key( wp_unslash( (string) $_GET['operation'] ) ) : '';
 		return in_array( $operation, array( 'install', 'remove' ), true ) ? $operation : 'install';
 	}

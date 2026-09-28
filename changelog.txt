@@ -1,6 +1,13 @@
 Cybermaps release history
 =========================
 
+7.5.4
+-----
+
+* Make public sitemap attribution optional and off by default, including upgrades.
+* Require frozen candidate validation and evidence-backed policy review before release.
+* Harden Plugin Check parsing and preserve failed-validation evidence.
+
 7.5.3
 -----
 

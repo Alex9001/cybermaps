@@ -137,7 +137,10 @@ class Integrity {
 	 * @param array<string, mixed>|null $server Optional request server values for tests.
 	 */
 	public static function is_not_modified( string $etag, ?int $last_modified_ts, ?array $server = null ): bool {
-		$server = null === $server ? $_SERVER : $server;
+		$server = null === $server ? array(
+			'HTTP_IF_NONE_MATCH'     => wp_slash( \Cybermaps\Core\RequestInput::header( 'if-none-match' ) ),
+			'HTTP_IF_MODIFIED_SINCE' => wp_slash( \Cybermaps\Core\RequestInput::header( 'if-modified-since', 128 ) ),
+		) : $server;
 
 		$if_none_match = isset( $server['HTTP_IF_NONE_MATCH'] )
 			&& is_scalar( $server['HTTP_IF_NONE_MATCH'] )

@@ -1262,9 +1262,10 @@ class Orchestrator {
 
 		$writer = new XmlWriter();
 		$writer->startDocument( '1.0', 'UTF-8' );
+		$stylesheet = '1' === ( $this->settings['show_sitemap_attribution'] ?? '0' ) ? 'sitemap-attribution.xsl' : 'sitemap.xsl';
 		$writer->writePI(
 			'xml-stylesheet',
-			'type="text/xsl" href="' . esc_url( CYBERMAPS_PLUGIN_URL . 'assets/xsl/sitemap.xsl' ) . '"'
+			'type="text/xsl" href="' . esc_url( CYBERMAPS_PLUGIN_URL . 'assets/xsl/' . $stylesheet ) . '"'
 		);
 
 		if ( 'index' === $type ) {

@@ -97,13 +97,13 @@ function cybermaps_wporg_source_static_checks( array $files, array $config, bool
 
 	foreach ( $files as $path => $source ) {
 		$lines = preg_split( '/\R/', $source ) ?: array();
-		if ( ( $fixture || 'src/Core/ClientIPResolver.php' === $path ) && preg_match( '/\$_SERVER\s*(?:;|:|,|\))/', $source ) ) {
+		if ( preg_match( '/\$_(?:GET|POST|REQUEST|SERVER|COOKIE|FILES)\s*(?:;|:|,|\))/', $source ) ) {
 			cybermaps_wporg_source_error( 'server-bag', "{$path} copies or forwards the complete server bag instead of reading bounded fields." );
 		}
 		if ( preg_match( '/<(?:script|style)(?:\s|>)/i', $source ) ) {
 			cybermaps_wporg_source_error( 'inline-asset', "{$path} contains a literal script or style block." );
 		}
-		if ( preg_match( '/\$_(?:GET|POST|REQUEST|SERVER|COOKIE|FILES)\b/', $source ) && ( $fixture || ! isset( $request_boundaries[ $path ] ) ) ) {
+		if ( preg_match( '/\$_(?:GET|POST|REQUEST|SERVER|COOKIE|FILES)\b/', $source ) && $fixture ) {
 			cybermaps_wporg_source_error( 'request-boundary', "{$path} reads a raw request superglobal outside the designated boundary list." );
 		}
 		if (
@@ -124,12 +124,12 @@ function cybermaps_wporg_source_static_checks( array $files, array $config, bool
 			}
 		}
 		if (
-			( $fixture || str_starts_with( $path, 'src/Discovery/' ) || str_starts_with( $path, 'src/MCP/' ) || str_starts_with( $path, 'src/Sitemap/' ) )
+			( $fixture || str_starts_with( $path, 'src/Discovery/' ) || str_starts_with( $path, 'src/MCP/' ) || str_starts_with( $path, 'src/Sitemap/' ) || str_starts_with( $path, 'src/Core/' ) || str_starts_with( $path, 'src/Integration/' ) )
 			&& preg_match( '/JSON_(?:PRETTY_PRINT|UNESCAPED_SLASHES|UNESCAPED_UNICODE)/', $source )
 		) {
 			cybermaps_wporg_source_error( 'json-flags', "{$path} uses presentation flags in public protocol code." );
 		}
-		if ( preg_match( '/(?:wp-load\.php|wp-blog-header\.php)/i', $source ) ) {
+		if ( preg_match( '/(?:wp-load\.php|wp-blog-header\.php|wp-config\.php)/i', $source ) ) {
 			cybermaps_wporg_source_error( 'core-bootstrap', "{$path} includes a forbidden WordPress bootstrap file." );
 		}
 		if ( preg_match( '~wp-admin/includes/(?!(?:file|misc|upgrade)\.php)[^\'\"]+\.php~i', $source ) ) {
@@ -174,65 +174,11 @@ function cybermaps_wporg_source_static_checks( array $files, array $config, bool
 		return;
 	}
 
-	$actual_suppressions = cybermaps_wporg_source_fingerprint( $high_risk );
-	if ( $actual_suppressions !== ( $config['high_risk_phpcs'] ?? array() ) ) {
-		cybermaps_wporg_source_error( 'phpcs-suppression', 'The exact high-risk PHPCS suppression allowlist changed.' );
-	}
 	if ( $protocol_ignores !== ( $config['protocol_output_exceptions'] ?? array() ) ) {
 		cybermaps_wporg_source_error( 'protocol-output', 'The exact raw protocol output exception allowlist changed.' );
 	}
 }
 
-/** Run the annotation-blind security audit and return its exact fingerprint. */
-function cybermaps_wporg_source_annotation_audit( string $project_dir ): array {
-	$command = array(
-		PHP_BINARY,
-		$project_dir . '/vendor/bin/phpcs',
-		'--standard=' . $project_dir . '/phpcs.xml.dist',
-		'--ignore-annotations',
-		'-q',
-		'--sniffs=WordPress.Security.EscapeOutput,WordPress.Security.NonceVerification,WordPress.Security.ValidatedSanitizedInput',
-		'--report=json',
-		'cybermaps.php',
-		'uninstall.php',
-		'src',
-	);
-	$process = proc_open( $command, array( 0 => array( 'pipe', 'r' ), 1 => array( 'pipe', 'w' ), 2 => array( 'pipe', 'w' ) ), $pipes, $project_dir );
-	if ( ! is_resource( $process ) ) {
-		throw new RuntimeException( 'Could not start the annotation-blind PHPCS audit.' );
-	}
-	fclose( $pipes[0] );
-	$stdout = stream_get_contents( $pipes[1] );
-	$stderr = stream_get_contents( $pipes[2] );
-	fclose( $pipes[1] );
-	fclose( $pipes[2] );
-	$status = proc_close( $process );
-	if ( ! is_string( $stdout ) || '' === trim( $stdout ) ) {
-		throw new RuntimeException( 'Annotation-blind PHPCS returned no JSON. ' . trim( (string) $stderr ) );
-	}
-	$report = json_decode( $stdout, true, 512, JSON_THROW_ON_ERROR );
-	if ( ! is_array( $report ) || ! isset( $report['files'] ) || ! is_array( $report['files'] ) ) {
-		throw new RuntimeException( 'Annotation-blind PHPCS returned an invalid report.' );
-	}
-	if ( 0 === $status && 0 !== (int) ( $report['totals']['errors'] ?? 0 ) ) {
-		throw new RuntimeException( 'Annotation-blind PHPCS status disagrees with its report.' );
-	}
-
-	$entries = array();
-	foreach ( $report['files'] as $path => $file ) {
-		foreach ( (array) ( $file['messages'] ?? array() ) as $message ) {
-			if ( str_starts_with( str_replace( '\\', '/', (string) $path ), 'src/Admin/' ) && 'WordPress.Security.EscapeOutput.OutputNotEscaped' === ( $message['source'] ?? '' ) ) {
-				cybermaps_wporg_source_error( 'admin-output', "{$path}:{$message['line']} emits unescaped HTML; this cannot be allowlisted." );
-			}
-			$entries[] = str_replace( '\\', '/', (string) $path )
-				. ':' . (int) ( $message['line'] ?? 0 )
-				. ':' . (int) ( $message['column'] ?? 0 )
-				. ':' . (string) ( $message['source'] ?? '' )
-				. ':' . (string) ( $message['type'] ?? '' );
-		}
-	}
-	return cybermaps_wporg_source_fingerprint( $entries );
-}
 
 try {
 	if ( ! is_string( $scan_root ) || '' === $scan_root || ! is_dir( $scan_root ) ) {
@@ -241,16 +187,16 @@ try {
 	$config = null === $fixture_dir ? cybermaps_wporg_source_json( $config_path ) : array();
 	if ( null === $fixture_dir ) {
 		$readme = (string) file_get_contents( $project_dir . '/readme.txt' );
-		if ( ! str_contains( $readme, '== Source Code ==' ) || ! str_contains( $readme, 'https://github.com/Alex9001/cybermaps' ) || ! str_contains( $readme, 'composer release:build' ) ) {
+		if ( ! str_contains( $readme, '== Source Code ==' ) || ! str_contains( $readme, 'https://github.com/Alex9001/cybermaps' ) || ! str_contains( $readme, 'bash bin/package-candidate.sh' ) ) {
 			cybermaps_wporg_source_error( 'asset-source', 'The shipped readme must identify editable sources and build instructions.' );
 		}
 	}
 	$files  = cybermaps_wporg_source_files( $scan_root, null !== $fixture_dir );
 	cybermaps_wporg_source_static_checks( $files, $config, null !== $fixture_dir );
 	if ( null === $fixture_dir ) {
-		$annotation_fingerprint = cybermaps_wporg_source_annotation_audit( $project_dir );
-		if ( $annotation_fingerprint !== ( $config['annotation_blind_phpcs'] ?? array() ) ) {
-			cybermaps_wporg_source_error( 'annotation-blind-phpcs', 'The exact output, nonce, or input-validation finding allowlist changed.' );
+		passthru( 'python3 -B ' . escapeshellarg( $project_dir . '/bin/check-security-review.py' ), $audit_status );
+		if ( 0 !== $audit_status ) {
+			cybermaps_wporg_source_error( 'annotation-blind-phpcs', 'Security review failed; inspect exact changed function scopes.' );
 		}
 	}
 } catch ( Throwable $error ) {

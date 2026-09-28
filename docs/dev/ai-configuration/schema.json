@@ -1,8 +1,8 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://cybermaps.dev/specs/ai-configuration/7.5.3/schema.json",
+    "$id": "https://cybermaps.dev/specs/ai-configuration/7.5.4/schema.json",
     "format_version": 2,
-    "plugin_version": "7.5.3",
+    "plugin_version": "7.5.4",
     "title": "Cybermaps AI configuration changes",
     "description": "A merge-only set of reviewed Cybermaps configuration changes. Null and omitted values preserve the destination.",
     "type": "object",
@@ -21,7 +21,7 @@
         },
         "plugin_version": {
             "type": "string",
-            "const": "7.5.3"
+            "const": "7.5.4"
         },
         "changes": {
             "type": "object",
@@ -101,6 +101,31 @@
                             "x-cybermaps-option": "cybermaps_settings",
                             "x-cybermaps-field": "include_homepage",
                             "x-cybermaps-risk": "low",
+                            "x-cybermaps-default": false,
+                            "x-cybermaps-depends": []
+                        },
+                        "show_sitemap_attribution": {
+                            "title": "Show the CYBER MAPS credit on public sitemaps",
+                            "description": "Explicitly permits a visible CYBER MAPS credit on public XML sitemap browser views. Optional, off by default, and never enabled by Quick Setup. Set null or omit the field to preserve the destination.",
+                            "anyOf": [
+                                {
+                                    "type": "boolean",
+                                    "enum": [
+                                        true,
+                                        false
+                                    ]
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "default": null,
+                            "examples": [
+                                false
+                            ],
+                            "x-cybermaps-option": "cybermaps_settings",
+                            "x-cybermaps-field": "show_sitemap_attribution",
+                            "x-cybermaps-risk": "high",
                             "x-cybermaps-default": false,
                             "x-cybermaps-depends": []
                         },

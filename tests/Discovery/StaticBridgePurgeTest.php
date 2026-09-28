@@ -44,6 +44,20 @@ class StaticBridgePurgeTest extends \WP_UnitTestCase {
 		parent::tearDown();
 	}
 
+	public function test_revoking_public_credit_purges_owned_sitemaps_only(): void {
+		$bridge = StaticBridge::get_instance();
+		$this->assertTrue( $bridge->write_file( 'sitemap.xml', '<credited-sitemap/>' ) );
+		$this->assertTrue( $bridge->write_file( 'sitemap-post-1.xml', '<credited-child/>' ) );
+		$this->assertTrue( $bridge->write_file( 'llms.txt', '# Site' ) );
+		$old = array( 'static_engine_mode' => 'all', 'show_sitemap_attribution' => '1' );
+		$new = array( 'static_engine_mode' => 'all', 'show_sitemap_attribution' => '0' );
+		$GLOBALS['cybermaps_mock_options']['cybermaps_settings'] = $new;
+		( new \Cybermaps\Admin\Settings() )->on_settings_updated( $old, $new );
+		$this->assertFileDoesNotExist( ABSPATH . 'sitemap.xml' );
+		$this->assertFileDoesNotExist( ABSPATH . 'sitemap-post-1.xml' );
+		$this->assertFileExists( ABSPATH . 'llms.txt' );
+	}
+
 	public function test_purge_all_deletes_root_ai_json(): void {
 		$bridge = StaticBridge::get_instance();
 		$base   = \Cybermaps\Sitemap\Orchestrator::get_sitemap_base();

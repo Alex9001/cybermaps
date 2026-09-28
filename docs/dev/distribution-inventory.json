@@ -1,0 +1,157 @@
+{
+  "schema_version": 1,
+  "assets": {
+    "assets/css/admin-command-center-rtl.css": {
+      "license": "GPL-2.0-or-later",
+      "source": "assets/css/admin-command-center-rtl.css",
+      "build": "Copied unchanged; no compilation."
+    },
+    "assets/css/admin-command-center.css": {
+      "license": "GPL-2.0-or-later",
+      "source": "assets/css/admin-command-center.css",
+      "build": "Copied unchanged; no compilation."
+    },
+    "assets/css/report.css": {
+      "license": "GPL-2.0-or-later",
+      "source": "assets/css/report.css",
+      "build": "Copied unchanged; no compilation."
+    },
+    "assets/css/setup-wizard.css": {
+      "license": "GPL-2.0-or-later",
+      "source": "assets/css/setup-wizard.css",
+      "build": "Copied unchanged; no compilation."
+    },
+    "assets/css/sitemaps/cybermap-shortcode.css": {
+      "license": "GPL-2.0-or-later",
+      "source": "assets/css/sitemaps/cybermap-shortcode.css",
+      "build": "Copied unchanged; no compilation."
+    },
+    "assets/css/system-status.css": {
+      "license": "GPL-2.0-or-later",
+      "source": "assets/css/system-status.css",
+      "build": "Copied unchanged; no compilation."
+    },
+    "assets/js/admin-command-center.js": {
+      "license": "GPL-2.0-or-later",
+      "source": "assets/js/admin-command-center.js",
+      "build": "Copied unchanged; no compilation."
+    },
+    "assets/js/discovery-analytics.js": {
+      "license": "GPL-2.0-or-later",
+      "source": "assets/js/discovery-analytics.js",
+      "build": "Copied unchanged; no compilation."
+    },
+    "assets/js/discovery-matrix-svg.js": {
+      "license": "GPL-2.0-or-later",
+      "source": "assets/js/discovery-matrix-svg.js",
+      "build": "Copied unchanged; no compilation."
+    },
+    "assets/js/edge-optimization.js": {
+      "license": "GPL-2.0-or-later",
+      "source": "assets/js/edge-optimization.js",
+      "build": "Copied unchanged; no compilation."
+    },
+    "assets/js/media-auditor.js": {
+      "license": "GPL-2.0-or-later",
+      "source": "assets/js/media-auditor.js",
+      "build": "Copied unchanged; no compilation."
+    },
+    "assets/js/setup-wizard.js": {
+      "license": "GPL-2.0-or-later",
+      "source": "assets/js/setup-wizard.js",
+      "build": "Copied unchanged; no compilation."
+    },
+    "assets/js/shortcode-builder.js": {
+      "license": "GPL-2.0-or-later",
+      "source": "assets/js/shortcode-builder.js",
+      "build": "Copied unchanged; no compilation."
+    },
+    "assets/js/sitemap-exclusion.js": {
+      "license": "GPL-2.0-or-later",
+      "source": "assets/js/sitemap-exclusion.js",
+      "build": "Copied unchanged; no compilation."
+    },
+    "assets/js/system-status.js": {
+      "license": "GPL-2.0-or-later",
+      "source": "assets/js/system-status.js",
+      "build": "Copied unchanged; no compilation."
+    },
+    "assets/js/webmcp.js": {
+      "license": "GPL-2.0-or-later",
+      "source": "assets/js/webmcp.js",
+      "build": "Copied unchanged; no compilation."
+    },
+    "assets/xsl/sitemap-attribution.xsl": {
+      "license": "GPL-2.0-or-later",
+      "source": "assets/xsl/sitemap-attribution.xsl",
+      "build": "Copied unchanged; no compilation."
+    },
+    "assets/xsl/sitemap.xsl": {
+      "license": "GPL-2.0-or-later",
+      "source": "assets/xsl/sitemap.xsl",
+      "build": "Copied unchanged; no compilation."
+    }
+  },
+  "network_callers": {
+    "src/Admin/SitemapStatus.php": {
+      "service": "Public delivery diagnostics",
+      "purpose_and_trigger": "GET/HEAD to configured public site or frontend; bounded verification and diagnostic headers.",
+      "disclosure": "readme.txt"
+    },
+    "src/Admin/DiscoveryStatus.php": {
+      "service": "Public delivery diagnostics",
+      "purpose_and_trigger": "GET/HEAD to configured public site or frontend; bounded verification and diagnostic headers.",
+      "disclosure": "readme.txt"
+    },
+    "src/Admin/MarkdownNegotiationStatus.php": {
+      "service": "Public delivery diagnostics",
+      "purpose_and_trigger": "GET/HEAD to configured public site or frontend; bounded verification and diagnostic headers.",
+      "disclosure": "readme.txt"
+    },
+    "src/Admin/CloudflareRulesClient.php": {
+      "service": "Cloudflare",
+      "purpose_and_trigger": "Explicit optimization: scoped credentials, zone, hostname and rule configuration.",
+      "disclosure": "readme.txt"
+    },
+    "src/Admin/CloudflareRuleManager.php": {
+      "service": "Public delivery diagnostics",
+      "purpose_and_trigger": "GET/HEAD to configured public site or frontend; bounded verification and diagnostic headers.",
+      "disclosure": "readme.txt"
+    },
+    "src/Admin/CloudflareOAuthClient.php": {
+      "service": "Cloudflare and OAuth relay",
+      "purpose_and_trigger": "Explicit connection: PKCE transaction; credentials exchanged directly with Cloudflare.",
+      "disclosure": "readme.txt"
+    },
+    "src/Admin/LocalDeliveryController.php": {
+      "service": "Public delivery diagnostics",
+      "purpose_and_trigger": "GET/HEAD to configured public site or frontend; bounded verification and diagnostic headers.",
+      "disclosure": "readme.txt"
+    },
+    "src/Discovery/IndexNow.php": {
+      "service": "IndexNow",
+      "purpose_and_trigger": "Enabled publication notifications: URLs, host, verification key and key location.",
+      "disclosure": "readme.txt"
+    },
+    "src/Discovery/WebSub.php": {
+      "service": "WebSub",
+      "purpose_and_trigger": "Enabled hub notifications: public feed URL and publish intent.",
+      "disclosure": "readme.txt"
+    },
+    "src/Discovery/WellKnownRoutingBridge.php": {
+      "service": "Public delivery diagnostics",
+      "purpose_and_trigger": "GET/HEAD to configured public site or frontend; bounded verification and diagnostic headers.",
+      "disclosure": "readme.txt"
+    },
+    "src/MCP/OAuth/ClientRegistrationValidator.php": {
+      "service": "Client metadata",
+      "purpose_and_trigger": "HTTPS metadata supplied by an OAuth client during registration; no automatic third-party registration.",
+      "disclosure": "readme.txt"
+    },
+    "src/Integration/EdgeCache/VarnishAdapter.php": {
+      "service": "Configured Varnish",
+      "purpose_and_trigger": "Administrator-configured purge endpoint and site cache tags; explicit integration configuration.",
+      "disclosure": "readme.txt"
+    }
+  }
+}

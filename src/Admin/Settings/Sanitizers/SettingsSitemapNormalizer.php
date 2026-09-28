@@ -14,6 +14,9 @@ class SettingsSitemapNormalizer {
 	 */
 	public static function normalize( array $input, array $sanitized, array $old_options, string $active_tab ): array {
 		$sanitized = self::normalize_sitemap_flags( $input, $sanitized, $active_tab );
+		if ( SettingsSanitizer::should_process_checkbox( $input, 'show_sitemap_attribution', 'sitemaps', $active_tab ) ) {
+			$sanitized['show_sitemap_attribution'] = in_array( $input['show_sitemap_attribution'] ?? '0', array( '1', 1, true ), true ) ? '1' : '0';
+		}
 		$sanitized = self::normalize_news_settings( $input, $sanitized );
 		$sanitized = self::normalize_rss_settings( $input, $sanitized, $old_options, $active_tab );
 		$sanitized = self::normalize_sitemap_routes( $input, $sanitized );

@@ -1,36 +1,30 @@
-# WordPress.org reviewer response — Cybermaps 7.5.2
+# WordPress.org reviewer response — Cybermaps 7.5.4
 
-Thank you for the detailed review. Cybermaps 7.5.2 addresses every reported
-item and includes a repository-wide audit for the same patterns.
+Draft for the existing review thread. The filename is retained to preserve the
+existing draft's location. Nothing has been sent.
 
-- Report CSS now ships as an enqueued stylesheet; report markup is filtered
-  through a narrow allowlist and the five existing themes use body classes.
-- Administrative handlers verify the request method, capability, and nonce
-  before reading action data. Decoded setup data now has an exact bounded
-  schema, and the applied configuration is regenerated and hash-verified on
-  the server.
-- Public OpenAPI negotiation remains nonce-free and read-only through a bounded
-  request adapter. The client-IP filter now receives only its documented,
-  sanitized IP-header context, and its result is revalidated as a canonical IP.
-- Public JSON, XML, RSS, Markdown, text, CSV, and report HTML now pass through
-  audited contextual protocol emitters. The one unavoidable final protocol
-  write is fixed in a machine-checked allowlist.
-- Dynamic SQL lists use one prepared placeholder per value. Direct access to
-  WordPress `_transient_` option names was removed in favor of the Transients
-  API fallback. Permitted WordPress includes are loaded immediately before the
-  API that requires them.
-- The `Cybermaps\` namespace and `cybermaps_` prefix remain unchanged because
-  they are plugin-specific. The reserved WordPress transient-option prefix was
-  the defect, and that use has been removed.
+Before sending: complete release promotion, verify that the versioned public
+source links in `readme.txt` resolve, and upload the qualified 7.5.4 ZIP through
+the existing WordPress.org submission. The validation statement below refers to
+the tested 7.5.4 candidate; retain it only if it also describes the submitted ZIP.
 
-The release adds fail-closed source and annotation-blind PHPCS gates for inline
-assets, request boundaries, exact decoded schemas, output escaping, nonce
-verification, unsafe SQL, transient option names, include ordering, and
-high-risk suppressions. These gates are part of both local release validation
-and the GitHub publisher; no GitHub Actions were added.
+---
 
-The exact `cybermaps_7.5.2.zip` was installed and activated in a disposable
-WordPress 7.1 / PHP 8.2 environment with `WP_DEBUG` enabled. Official Plugin
-Check 2.0.0 completed both new-plugin and experimental checks with no findings,
-the endpoint/report smoke tests and native Cybermaps ability-registration checks
-passed, and the debug log remained clean.
+Hello Plugins Team,
+
+Thank you for reviewing Cybermaps. I have addressed the reported issues in
+version 7.5.4 and reviewed the rest of the plugin for the same patterns,
+including input validation and escaping at the point of output.
+
+One clarification about the setup wizard: `assets/js/setup-wizard.js` is the
+editable, unminified source itself. It uses WordPress's `wp.element` API directly
+and requires no compilation. The readme's “Source Code” section now identifies
+the source and packaging instructions; JavaScript and CSS are copied unchanged
+into the ZIP.
+
+I tested the exact 7.5.4 ZIP on clean WordPress installations with `WP_DEBUG`
+enabled. Plugin Check 2.1.0 passed both the new-plugin and experimental checks
+with no findings, and the debug logs remained clean. Runtime checks covered
+WordPress 7.1 and 7.1.2, PHP 8.2–8.5, and separate multisite lifecycle tests.
+
+Thank you for your time and the opportunity to have the updated plugin reviewed.

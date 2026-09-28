@@ -11,10 +11,11 @@ import tempfile
 import io
 import tarfile
 import sys
+import time
 
 sys.dont_write_bytecode = True
 from workspace import (ROOT, clean_website, configure, load_config, package_files,
-                       lock, release_dir, run, website_destination)
+                       lock, release_dir, run, save_json, website_destination)
 
 REPO = "Alex9001/cybermaps"
 REMOTE = "https://github.com/" + REPO + ".git"
@@ -50,7 +51,22 @@ def verify_tag(tag, commit):
 
 
 def release_state(tag):
-    # Listing through the authenticated API distinguishes absence from API failures.
+    saved = release_dir(tag.removeprefix('v')) / 'draft.json'
+    if saved.exists():
+        record = json.loads(saved.read_text())
+        require(record['tag'] == tag and isinstance(record['id'], int), 'Invalid saved draft identity')
+        for delay in (0, 1, 2, 4):
+            if delay:
+                time.sleep(delay)
+            try:
+                state = json.loads(run('gh', 'api', '--hostname', 'github.com',
+                                       'repos/' + REPO + '/releases/' + str(record['id'])))
+                require(state['id'] == record['id'] and state['tag_name'] == tag, 'Remote draft identity changed')
+                return state
+            except subprocess.CalledProcessError as error:
+                if 'HTTP 404' not in (error.output or ''):
+                    raise
+        raise RuntimeError('Created draft is not yet visible; retry the same candidate. No assets were replaced.')
     pages = json.loads(run("gh", "api", "--hostname", "github.com", "--paginate", "--slurp",
                            "repos/" + REPO + "/releases?per_page=100"))
     matches = [r for page in pages for r in page if r["tag_name"] == tag]
@@ -59,7 +75,8 @@ def release_state(tag):
 
 
 def matching_draft(state, tag, commit, beta, notes, title):
-    require(state is not None and state["draft"], "Published releases are never overwritten: " + tag)
+    require(state is not None, "Draft is not visible; retry the same candidate: " + tag)
+    require(state["draft"], "Published releases are never overwritten: " + tag)
     require(state["target_commitish"] == commit and state["prerelease"] == beta
             and state["body"] == notes and state["name"] == title,
             "Draft metadata differs from this release; inspect the draft before retrying.")
@@ -120,8 +137,7 @@ def publish(website, stable=False, on_validated=None, on_website_validated=None)
         "--channel", "beta" if beta else "stable", capture=False)
     if on_website_validated:
         on_website_validated()
-    for command in [("composer", "test"), ("composer", "run", "lint:complexity"),
-                    ("composer", "run", "release:check"), ("composer", "run", "release:build")]:
+    for command in [("composer", "run", "release:build"), ("composer", "run", "release:ready")]:
         run(*command, capture=False)
     # release:build already validates directory/ZIP parity and runs Plugin Check.
     archive = release_dir(version) / ("cybermaps_" + version + ".zip")
@@ -129,6 +145,10 @@ def publish(website, stable=False, on_validated=None, on_website_validated=None)
     expected = hashlib.sha256(archive.read_bytes()).hexdigest() + "  " + archive.name + "\n"
     require(checksum.read_text() == expected, "Local checksum does not match the ZIP.")
     artifacts = {p.name: p.read_bytes() for p in (archive, checksum)}
+    receipt = json.loads((release_dir(version) / 'release-readiness.json').read_text())
+    require(receipt.get('state') == 'release-ready' and receipt['identity']['commit'] == commit
+            and receipt['zip_sha256'] == hashlib.sha256(artifacts[archive.name]).hexdigest(),
+            'Readiness evidence does not match the frozen publication bytes.')
     require(source_commit() == commit, "Source changed during validation.")
     run("python3", "bin/check-website.py", str(website), "--commit", commit,
         "--channel", "beta" if beta else "stable", "--source-only", capture=False)
@@ -146,9 +166,14 @@ def publish(website, stable=False, on_validated=None, on_website_validated=None)
         notes_file = temporary / "notes.md"
         notes_file.write_text(notes)
         if state is None:
-            run("gh", "release", "create", tag, "--repo", REPO, "--verify-tag", "--target", commit,
-                "--draft", "--prerelease=" + str(beta).lower(), "--title", title,
-                "--notes-file", str(notes_file), capture=False)
+            require(verify_tag(tag, commit)[1], 'Remote tag disappeared before draft creation')
+            request = temporary / 'draft-request.json'
+            request.write_text(json.dumps(dict(tag_name=tag, target_commitish=commit, draft=True,
+                                               prerelease=beta, name=title, body=notes)))
+            created = json.loads(run('gh', 'api', '--hostname', 'github.com', '--method', 'POST',
+                                     'repos/' + REPO + '/releases', '--input', str(request)))
+            matching_draft(created, tag, commit, beta, notes, title)
+            save_json(release_dir(version) / 'draft.json', dict(id=created['id'], tag=tag, commit=commit))
         state = release_state(tag)
         matching_draft(state, tag, commit, beta, notes, title)
         names = [a["name"] for a in state["assets"]]

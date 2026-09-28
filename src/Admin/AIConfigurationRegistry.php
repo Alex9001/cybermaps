@@ -294,6 +294,7 @@ final class AIConfigurationRegistry {
 			),
 			'sitemap_url_base'                => self::field( $section, 'sitemap_url_base', 'Sitemap URL base', 'Sets the collision-safe public base slug for the primary XML sitemap.', 'string', $route, 'sitemap', 'sitemap', 'high' ),
 			'include_homepage'                => self::boolean_field( $section, 'include_homepage', 'Include homepage', 'Includes the homepage in the miscellaneous XML sitemap.', false ),
+			'show_sitemap_attribution'        => self::boolean_field( $section, 'show_sitemap_attribution', 'Show the CYBER MAPS credit on public sitemaps', 'Explicitly permits a visible CYBER MAPS credit on public XML sitemap browser views. Optional, off by default, and never enabled by Quick Setup.', false, 'high' ),
 			'include_authors'                 => self::boolean_field( $section, 'include_authors', 'Include author archives', 'Includes public author archives in the sitemap inventory.', false ),
 			'include_archives'                => self::boolean_field( $section, 'include_archives', 'Include date archives', 'Includes date archive pages in the sitemap inventory.', false ),
 			'include_empty_terms'             => self::boolean_field( $section, 'include_empty_terms', 'Include empty terms', 'Allows empty public taxonomy terms to appear in sitemap output.', false ),

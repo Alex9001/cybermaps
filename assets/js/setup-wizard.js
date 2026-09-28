@@ -1,7 +1,7 @@
 /**
  * Editable, uncompiled source using WordPress wp.element and wp.i18n.
  * No JSX, bundler, transpiler, or minification step is required.
- * Source: https://github.com/Alex9001/cybermaps/tree/v7.5.3/assets
+ * Source: https://github.com/Alex9001/cybermaps/tree/v7.5.4/assets
  * License: GPL-2.0-or-later
  */
 (function (wp, window) {

@@ -123,7 +123,20 @@ class Workflow:
             commit_generated(self.website, self.number, build=True)
             raise
         commit_generated(self.website, self.number, build=True)
-        self.phase('complete', website_commit=git(self.website, 'rev-parse', 'HEAD'))
+        self.phase('verifying-live-website')
+        try:
+            run('python3', str(ROOT / 'bin/check-website-live.py'), str(self.website),
+                '--tag', tag, '--commit', published['commit'], '--channel', published['channel'],
+                '--zip-sha256', published['zip_sha256'], capture=False)
+        except (RuntimeError, subprocess.CalledProcessError):
+            self.phase('website-verification-failed')
+            raise
+        live = self.directory / 'website-live.json'
+        proof = json.loads(live.read_text())
+        require(proof.get('state') == 'website-verified' and all(proof.get(k) == published[k]
+                for k in ('tag', 'commit', 'channel', 'zip_sha256')), 'Live website evidence differs from release')
+        self.phase('complete', website_commit=git(self.website, 'rev-parse', 'HEAD'),
+                   website_live_sha256=hashlib.sha256(live.read_bytes()).hexdigest())
 
 
 def main():
@@ -147,7 +160,7 @@ def main():
             print('Local build. Log: ' + str(log), flush=True)
             # The build performs input freshness checks, PHP lint, package parity and Plugin Check.
             run('composer', 'run', 'release:build', capture=False)
-            result = install(release_dir() / ('cybermaps_' + version() + '.zip'), destination)
+            result = install(release_dir() / 'candidate' / ('cybermaps_' + version() + '.zip'), destination)
             # Keep local builds separate from the publication/resume state.
             save_json(release_dir() / 'dev-install.json', result)
             return

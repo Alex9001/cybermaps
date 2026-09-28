@@ -43,7 +43,10 @@ package before publication.
 After publication, the workflow imports the exact `--tag vX.Y.Z` with the same
 channel, commits generated frozen-snapshot changes and runs `npm run deploy`.
 That existing command verifies the newest published release (including betas),
-channel and tag commit before building and again before uploading.
+channel and tag commit before building and again before uploading. After upload,
+the workflow verifies the actual cybermaps.dev domain against the built contracts,
+versioned schemas, release download links and changelog. A successful deployment
+command without matching live content cannot complete a release.
 
 If the handoff or deployment is interrupted, run from the plugin source:
 

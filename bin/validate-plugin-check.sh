@@ -7,7 +7,8 @@ RELEASE_DIR="$(python3 -B "${PROJECT_DIR}/bin/workspace.py" release-dir)"
 ARTIFACT_DIR="${1:-${RELEASE_DIR}/cybermaps}"
 ARCHIVE_PATH="${2:-}"
 REPORT_PATH="${3:-${RELEASE_DIR}/plugin-check-validation.json}"
-PLUGIN_CHECK_VERSION="2.0.0"
+PLUGIN_CHECK_VERSION="$(python3 -B -c 'import json,sys; print(json.load(open(sys.argv[1]))["plugin_check_version"])' "${PROJECT_DIR}/docs/dev/release-policy.json")"
+PHP_VERSION="${CYBERMAPS_TEST_PHP:-8.2}"
 
 fail() {
 	echo "Plugin Check validation failed: $1" >&2
@@ -28,7 +29,7 @@ fi
 ARTIFACT_DIR="$(realpath "${ARTIFACT_DIR}")"
 ARCHIVE_PATH="$(realpath "${ARCHIVE_PATH}")"
 python3 -B "${PROJECT_DIR}/bin/workspace.py" check-generated "${REPORT_PATH}"
-WORDPRESS_VERSION="$(
+WORDPRESS_VERSION="${CYBERMAPS_TEST_WP:-$(
 	php -r '
 		$main = file_get_contents($argv[1]);
 		if (
@@ -40,17 +41,26 @@ WORDPRESS_VERSION="$(
 		}
 		echo $match[1];
 	' "${ARTIFACT_DIR}/cybermaps.php"
-)"
+)}"
 
+FROZEN_COMMIT="$(git -C "${PROJECT_DIR}" rev-parse HEAD)"
+FROZEN_SHA256="$(sha256sum "${ARCHIVE_PATH}" | cut -d " " -f 1)"
+rm -f "${REPORT_PATH}"
+EVIDENCE_DIR="${REPORT_PATH%.json}.evidence"
+mkdir -p "${EVIDENCE_DIR}"
 RUNTIME_DIR="$(mktemp -d "${TMPDIR}/cybermaps-wporg.XXXXXX")"
 RUNTIME_ID="cybermaps-wporg-${RANDOM}-$$"
 NETWORK_NAME="${RUNTIME_ID}-network"
 DATABASE_NAME="${RUNTIME_ID}-db"
 HTTP_NAME="${RUNTIME_ID}-http"
-WORDPRESS_IMAGE="docker.io/library/wordpress:cli-php8.2"
+WORDPRESS_IMAGE="docker.io/library/wordpress:cli-php${PHP_VERSION}"
 DATABASE_IMAGE="docker.io/library/mariadb:10.11"
 
 cleanup() {
+	local exit_status="$?"
+	cp -f "${RUNTIME_DIR}"/*.txt "${RUNTIME_DIR}"/*.json "${RUNTIME_DIR}"/*.stderr "${EVIDENCE_DIR}/" 2>/dev/null || true
+	cp -f "${RUNTIME_DIR}/wordpress/wp-content/debug.log" "${EVIDENCE_DIR}/debug.log" 2>/dev/null || true
+	printf '%s\n' "${exit_status}" > "${EVIDENCE_DIR}/exit-status.txt"
 	"${CONTAINER_CLI}" rm -f "${HTTP_NAME}" >/dev/null 2>&1 || true
 	"${CONTAINER_CLI}" rm -f "${DATABASE_NAME}" >/dev/null 2>&1 || true
 	"${CONTAINER_CLI}" network rm "${NETWORK_NAME}" >/dev/null 2>&1 || true
@@ -85,6 +95,7 @@ wp_cli() {
 		-v "${RUNTIME_DIR}/wordpress:/var/www/html" \
 		-v "$(dirname "${ARCHIVE_PATH}"):/artifacts:ro" \
 		-v "${PROJECT_DIR}/tests/integration:/validation:ro" \
+		-v "${PROJECT_DIR}/docs/generated/releases:/history:ro" \
 		-w /var/www/html \
 		"${WORDPRESS_IMAGE}" php -d memory_limit=512M /usr/local/bin/wp "$@" --allow-root
 }
@@ -95,12 +106,21 @@ wp_cli config set WP_DEBUG true --raw --quiet
 wp_cli config set WP_DEBUG_DISPLAY false --raw --quiet
 wp_cli config set WP_DEBUG_LOG true --raw --quiet
 wp_cli core install --url=http://cybermaps.test --title=Cybermaps --admin_user=admin --admin_password=cybermaps-validation --admin_email=admin@example.com --skip-email --quiet
+if [ "${CYBERMAPS_TEST_UPGRADE:-0}" = "1" ]; then
+	[ -f "${PROJECT_DIR}/docs/generated/releases/7.5.3/cybermaps_7.5.3.zip" ] || fail "Upgrade fixture 7.5.3 is missing"
+	[ "$(sha256sum "${PROJECT_DIR}/docs/generated/releases/7.5.3/cybermaps_7.5.3.zip" | cut -d " " -f 1)" = "b63a959a22a5595891af9374f8481c4e8dfaefbe5b55c1d4bd5f2cce29ddc950" ] || fail "Upgrade fixture checksum changed"
+	wp_cli plugin install /history/7.5.3/cybermaps_7.5.3.zip --activate --force --quiet
+	wp_cli option update cybermaps_upgrade_fixture preserved --quiet
+fi
 wp_cli plugin install "/artifacts/$(basename "${ARCHIVE_PATH}")" --force --quiet
 wp_cli plugin install plugin-check --version="${PLUGIN_CHECK_VERSION}" --activate --force --quiet
 installed_plugin_check="$(wp_cli plugin get plugin-check --field=version | tr -d '\r')"
 [ "${installed_plugin_check}" = "${PLUGIN_CHECK_VERSION}" ] || fail "Plugin Check version is ${installed_plugin_check}, expected ${PLUGIN_CHECK_VERSION}"
 wp_cli plugin activate cybermaps --quiet
 wp_cli eval-file /validation/wporg-smoke.php > "${RUNTIME_DIR}/smoke.txt"
+if [ "${CYBERMAPS_TEST_UPGRADE:-0}" = "1" ]; then
+	[ "$(wp_cli option get cybermaps_upgrade_fixture)" = "preserved" ] || fail "Upgrade lost existing data"
+fi
 
 # Serve the same installed ZIP over loopback for actual request/response checks.
 "${CONTAINER_CLI}" run -d --name "${HTTP_NAME}" --network "${NETWORK_NAME}" --user 0:0 \
@@ -113,82 +133,46 @@ HTTP_ADDRESS="$("${CONTAINER_CLI}" port "${HTTP_NAME}" 8080/tcp)"
 wp_cli option update home "http://${HTTP_ADDRESS}" --quiet
 wp_cli option update siteurl "http://${HTTP_ADDRESS}" --quiet
 python3 -B "${PROJECT_DIR}/tests/integration/wporg-http.py" "http://${HTTP_ADDRESS}" >> "${RUNTIME_DIR}/smoke.txt"
+if [ -n "${CYBERMAPS_BROWSER_REPORT:-}" ]; then
+	node "${PROJECT_DIR}/tests/browser/release-smoke.mjs" "http://${HTTP_ADDRESS}" "${CYBERMAPS_BROWSER_REPORT}"
+fi
 
 run_plugin_check() {
 	local output_path="$1"
 	shift
 	set +e
-	wp_cli plugin check cybermaps --mode=new --format=json --require=/var/www/html/wp-content/plugins/plugin-check/cli.php "$@" > "${output_path}" 2> "${output_path}.stderr"
+	wp_cli plugin check cybermaps --mode=new --format=strict-json --include-low-severity-errors --include-low-severity-warnings --require=/var/www/html/wp-content/plugins/plugin-check/cli.php "$@" > "${output_path}" 2> "${output_path}.stderr"
 	local status="$?"
 	set -e
-	python3 - "${output_path}" "${output_path}.stderr" "${status}" <<'PY'
-import json
-import re
-import sys
-from pathlib import Path
-
-output_path = Path(sys.argv[1])
-stderr_path = Path(sys.argv[2])
-status = int(sys.argv[3])
-stdout = output_path.read_text()
-stderr = stderr_path.read_text().strip()
-if stdout.strip() == "Success: Checks complete. No errors found.":
-    report = []
-elif stdout.strip():
-    try:
-        report = json.loads(stdout)
-    except json.JSONDecodeError as error:
-        blocks = re.findall(r"^FILE: (.+)\n(\[.*?\])(?=\n\nFILE: |\s*\Z)", stdout, re.MULTILINE | re.DOTALL)
-        if not blocks:
-            raise SystemExit(
-                f"Plugin Check did not return parseable JSON: {error}; "
-                f"stdout={stdout[:12000]!r}; stderr={stderr!r}"
-            )
-        report = []
-        for filename, encoded_findings in blocks:
-            try:
-                file_findings = json.loads(encoded_findings)
-            except json.JSONDecodeError as block_error:
-                raise SystemExit(
-                    f"Plugin Check returned invalid JSON for {filename}: {block_error}"
-                )
-            for finding in file_findings:
-                if isinstance(finding, dict):
-                    finding = {"file": filename, **finding}
-                report.append(finding)
-else:
-    report = []
-
-if isinstance(report, list):
-    findings = report
-elif isinstance(report, dict):
-    findings = report.get("results", report.get("errors", []))
-    if not isinstance(findings, list):
-        findings = [report] if report else []
-else:
-    findings = [report]
-
-output_path.write_text(json.dumps(report, indent=2) + "\n")
-
-if status != 0 or findings or stderr:
-    raise SystemExit(
-        f"Plugin Check reported status={status}, findings={findings!r}, stderr={stderr!r}"
-    )
-PY
+	python3 -B "${PROJECT_DIR}/bin/plugin_check_result.py" "${output_path}" "${output_path}.stderr" "${status}"
 }
 
 run_plugin_check "${RUNTIME_DIR}/plugin-check-new.json"
 run_plugin_check "${RUNTIME_DIR}/plugin-check-experimental.json" --include-experimental
 
+# Plugin Check 2.1.0 bootstraps wp_install() before WP_Rewrite exists on multisite.
+# Keep both runtime scanner modes, then test the same installation as a network.
+if [ "${CYBERMAPS_TEST_MULTISITE:-0}" = "1" ]; then
+	wp_cli option update home http://cybermaps.test --quiet
+	wp_cli option update siteurl http://cybermaps.test --quiet
+	wp_cli core multisite-convert --quiet
+	wp_cli eval 'require "/validation/wporg-multisite.php";' >> "${RUNTIME_DIR}/smoke.txt"
+fi
+wp_cli eval 'require "/validation/wporg-lifecycle.php";'  >> "${RUNTIME_DIR}/smoke.txt"
+
+COMMIT="$(git -C "${PROJECT_DIR}" rev-parse HEAD)"
+[ "${COMMIT}" = "${FROZEN_COMMIT}" ] || fail "Source changed during validation"
+ZIP_SHA256="$(php -r '$hash=hash_file("sha256",$argv[1]); if(!is_string($hash)){exit(1);} echo $hash;' "${ARCHIVE_PATH}")"
+[ "${ZIP_SHA256}" = "${FROZEN_SHA256}" ] || fail "ZIP changed during validation"
+ACTUAL_PHP="$(wp_cli eval 'echo PHP_VERSION;')"
+ACTUAL_WP="$(wp_cli core version)"
 if [ -s "${RUNTIME_DIR}/wordpress/wp-content/debug.log" ]; then
 	cat "${RUNTIME_DIR}/wordpress/wp-content/debug.log" >&2
 	fail "WordPress emitted runtime warnings or notices"
 fi
 
-COMMIT="$(git -C "${PROJECT_DIR}" rev-parse HEAD)"
-ZIP_SHA256="$(php -r '$hash=hash_file("sha256",$argv[1]); if(!is_string($hash)){exit(1);} echo $hash;' "${ARCHIVE_PATH}")"
 python3 - "${REPORT_PATH}" "${COMMIT}" "${ZIP_SHA256}" "${WORDPRESS_VERSION}" "${PLUGIN_CHECK_VERSION}" \
-	"${RUNTIME_DIR}/plugin-check-new.json" "${RUNTIME_DIR}/plugin-check-experimental.json" "${RUNTIME_DIR}/smoke.txt" <<'PY'
+	"${RUNTIME_DIR}/plugin-check-new.json" "${RUNTIME_DIR}/plugin-check-experimental.json" "${RUNTIME_DIR}/smoke.txt" "${ACTUAL_PHP}" "${ACTUAL_WP}" "${CYBERMAPS_TEST_MULTISITE:-0}" <<'PY'
 import json
 import sys
 from datetime import datetime, timezone
@@ -199,14 +183,17 @@ report = {
     "validated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
     "commit": sys.argv[2],
     "zip_sha256": sys.argv[3],
-    "wordpress_version": sys.argv[4],
-    "php_version": "8.2",
+    "wordpress_version": sys.argv[10],
+    "php_version": sys.argv[9],
     "plugin_check_version": sys.argv[5],
+    "plugin_check_environment": "single-site",
     "mode": "new",
-    "stable_findings": json.loads(Path(sys.argv[6]).read_text()),
-    "experimental_findings": json.loads(Path(sys.argv[7]).read_text()),
+    "stable_findings": [],
+    "experimental_findings": [],
     "smoke": Path(sys.argv[8]).read_text().strip(),
     "wp_debug_clean": True,
+    "lifecycle_passed": True,
+    "multisite": sys.argv[11] == "1",
 }
 report_path.write_text(json.dumps(report, indent=2) + "\n")
 PY

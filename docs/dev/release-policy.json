@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "plugin_check_version": "2.1.0",
+  "minimum_wordpress": "7.1",
+  "php_versions": [
+    "8.2",
+    "8.3",
+    "8.4",
+    "8.5"
+  ],
+  "evidence_max_age_hours": 24,
+  "review_sections": [
+    "security",
+    "assets_licenses",
+    "services_consent",
+    "standalone",
+    "directory_metadata",
+    "reviewer_feedback"
+  ],
+  "brand_verification": {
+    "status": "resolved",
+    "basis": "Owner confirmed WordPress resolution on 2026-09-28"
+  },
+  "conditions": {
+    "source": "Frozen source identity; clean pushed main before publication",
+    "package": "Exact source/tree/ZIP parity and bounded permitted files",
+    "metadata": "Synchronized version, readme, generated contracts and translations",
+    "standards": "Syntax, WPCS, PHP compatibility, complexity and regression tests",
+    "requests": "Method, capability and nonce before administrative payloads",
+    "validation": "Bounded exact input schemas; no copied or forwarded superglobals",
+    "escaping": "Final-context escaping and reviewed non-HTML protocol emitters",
+    "wordpress_apis": "Prepared SQL, WP_Filesystem, Transients API and safe core includes",
+    "assets_licenses": "Readable public sources, build instructions and compatible licenses",
+    "standalone": "All Core functionality works without licensing or an external updater",
+    "services_consent": "Documented services, appropriate consent and optional public credits",
+    "plugin_check": "Current pinned checker, standard and experimental runtime checks, no findings",
+    "runtime": "Exact ZIP passes supported runtimes, browser, lifecycle and multisite checks",
+    "agent_review": "Specific current evidence closes all policy and reviewer obligations",
+    "website_prepared": "Exact source commit/channel imported; guides reviewed; website tests, build and verification passed",
+    "website_live": "Published tag deployed to cybermaps.dev; production contracts, downloads and changelog verified"
+  },
+  "references": [
+    "https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/",
+    "https://developer.wordpress.org/plugins/wordpress-org/common-issues/",
+    "https://developer.wordpress.org/apis/security/",
+    "https://wordpress.org/plugins/plugin-check/"
+  ]
+}

@@ -23,6 +23,25 @@ website deployment credentials. Packaging requires PHP, WP-CLI, Python 3.11+,
 zip, ripgrep and the existing Docker/Podman Plugin Check environment. Website
 commands retain their own Node/npm requirements.
 
+## Reproducing the package
+
+Assets are editable source and require no compilation. After `composer install`,
+`bash bin/package-candidate.sh` reproduces the candidate files from a source
+checkout, including a tagged release. This packaging step is not publication
+approval; use the complete release gate below before distributing changes.
+Full upgrade validation also needs the preserved 7.5.3 ZIP under its release
+directory; its checksum is verified by the runner. On a new workstation obtain
+that historical asset from the public GitHub v7.5.3 release, not a source archive.
+
+## Release conditions
+
+See [WordPress release conditions](WORDPRESS-RELEASE-CONDITIONS.md) for the
+mandatory candidate, runtime matrix, browser and agent-review gates. Install
+Python lxml and run `python3 -B bin/setup-validation.py` for pinned browser tooling.
+`composer release:build` creates a candidate; `composer release:ready` promotes
+it after review and clean pushed-source checks. `composer release:status` reports
+missing conditions; a release is complete only after production website verification.
+
 ## Commands
 
 | Command | Result |
@@ -63,7 +82,10 @@ Publication retains the existing matching-draft, no-overwrite, immutable-tag,
 checksum and download-verification rules. Existing assets are never clobbered.
 After publication, the workflow verifies downloaded assets against the tag,
 imports that published tag, commits its generated snapshot and runs the existing
-guarded `npm run deploy`. Only the known generated crawl report may additionally
+guarded `npm run deploy`. It then verifies the live cybermaps.dev contracts,
+download links and changelog before marking the release complete. Deployment or
+production-verification failures leave the published release awaiting its website
+handoff; resume retries the downstream steps without republishing. Only the known generated crawl report may additionally
 be committed from website validation/deployment. Branding or other unexpected
 changes require review. Website commits are local; the workflow does not push
 the website repository.

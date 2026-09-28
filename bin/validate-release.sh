@@ -435,7 +435,3 @@ PY
 
 echo "Release artifact valid: ${ARTIFACT_DIR}"
 echo "Release ZIP valid: ${ARCHIVE_PATH}"
-bash "${PROJECT_DIR}/bin/validate-plugin-check.sh" \
-	"${ARTIFACT_DIR}" \
-	"${ARCHIVE_PATH}" \
-	"${RELEASE_DIR}/plugin-check-validation.json"

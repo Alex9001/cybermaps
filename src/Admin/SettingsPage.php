@@ -71,10 +71,9 @@ class SettingsPage {
 		if ( ! isset( $this->tabs[ $active_tab ] ) ) {
 			$active_tab = 'dashboard';
 		}
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only result from a nonce-protected admin action.
-		$regeneration_notice = self::get_regeneration_notice( $_GET );
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only result from a nonce-protected admin action.
-		$intent_recovery_notice = self::get_intent_recovery_notice( $_GET );
+		$notice_query           = self::notice_query();
+		$regeneration_notice    = self::get_regeneration_notice( $notice_query );
+		$intent_recovery_notice = self::get_intent_recovery_notice( $notice_query );
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'Cybermaps', 'cybermaps' ); ?></h1>
@@ -191,6 +190,25 @@ class SettingsPage {
 			<div class="notice notice-<?php echo esc_attr( $notice['type'] ); ?> is-dismissible"><p><?php echo esc_html( $notice['message'] ); ?></p></div>
 			<?php
 		}
+	}
+
+	/** Read only the bounded fields used by administrative result notices.
+	 *
+	 * @return array<string,string>
+	 */
+	private static function notice_query(): array {
+		$keys = array( 'cybermaps_regenerated', 'cybermaps_regeneration_status', 'cybermaps_regeneration_mode', 'cybermaps_regeneration_success', 'cybermaps_intent_resolution', 'cybermaps_intent_resolution_success', 'cybermaps_intent_resolution_code' );
+		foreach ( array( 'desired', 'written', 'unchanged', 'conflicted', 'failed', 'skipped', 'deleted', 'retained' ) as $suffix ) {
+			$keys[] = 'cybermaps_regeneration_' . $suffix;
+		}
+		$query = array();
+		foreach ( $keys as $key ) {
+			$value = \Cybermaps\Core\RequestInput::query_text( $key, 64 );
+			if ( '' !== $value ) {
+				$query[ $key ] = $value;
+			}
+		}
+		return $query;
 	}
 
 	/**

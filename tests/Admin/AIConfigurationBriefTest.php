@@ -748,7 +748,7 @@ final class AIConfigurationBriefTest extends TestCase {
 		$preview = MigrationHub::get_instance()->preview( $this->changes_json( $changes ), 'merge' );
 
 		$this->assertSame( array(), $preview['errors'] );
-		$this->assertCount( 121, $preview['changes'] );
+		$this->assertCount( 122, $preview['changes'] );
 		$this->assertSame(
 			'x_forwarded_for',
 			$this->preview_change( $preview, 'trusted_proxy_header' )['final']

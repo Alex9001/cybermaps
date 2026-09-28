@@ -3,7 +3,7 @@ Contributors: oreshkin
 Tags: sitemap, llms-txt, technical-seo, content-audit, indexnow
 Requires at least: 7.1
 Tested up to: 7.1
-Stable tag: 7.5.3
+Stable tag: 7.5.4
 Requires PHP: 8.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -14,28 +14,24 @@ Publish WordPress sitemaps and machine-readable maps.
 
 XML/News/RSS/HTML sitemaps, llms.txt, Markdown, JSON discovery, static delivery,
 local analytics, and reports. MCP requires authorization and consent.
-Publication guarantees neither ranking nor AI citations.
+No ranking guarantees.
 
 == Installation ==
 
-Install and activate Cybermaps, then open **Cybermaps → Overview → Quick Setup**.
+Activate, then open **Cybermaps → Overview → Quick Setup**.
 
 == Source Code ==
 
-Public source and build tools: https://github.com/Alex9001/cybermaps
-Release source: https://github.com/Alex9001/cybermaps/tree/v7.5.3
-The files in assets/js/ and assets/css/ are editable, unminified source,
-including setup-wizard.js, which uses WordPress's wp.element directly.
-There is no JavaScript/CSS compilation step. Packaging copies these files
-unchanged. Run composer install, composer test, and composer release:build
-from the source checkout; build prerequisites and validation are documented in
-https://github.com/Alex9001/cybermaps/blob/v7.5.3/docs/dev/RELEASE-WORKFLOW.md
+Release source: https://github.com/Alex9001/cybermaps/tree/v7.5.4
+Editable, unminified JS/CSS lives in assets/; setup-wizard.js uses wp.element.
+No compilation: packaging copies assets unchanged. Build: composer install; bash bin/package-candidate.sh. Details:
+https://github.com/Alex9001/cybermaps/blob/v7.5.4/docs/dev/RELEASE-WORKFLOW.md
 
 == External Services ==
 
 = Cloudflare and the Cybermaps OAuth relay =
 
-Only **Connect Cloudflare & optimize** contacts https://connect.cybermaps.dev
+**Connect Cloudflare & optimize** contacts https://connect.cybermaps.dev
 for a one-time, five-minute transaction. The relay receives a PKCE challenge,
 random state, and authorization code, not the verifier, access token,
 WordPress identity, site URL, or rules. Its hosting provider processes network
@@ -70,8 +66,9 @@ Custom hubs receive the same data under their own service policies.
 = Public delivery checks =
 
 Status checks GET/HEAD the site or configured Frontend Base URL to verify
-responses and headers. Probes use `X-Cybermaps-Diagnostic: 1` and are excluded
-from analytics.
+responses. `X-Cybermaps-Diagnostic: 1` excludes probes from analytics.
+OAuth registration fetches client-supplied HTTPS metadata. Configured Varnish
+integration sends purge requests to your cache server.
 
 == Privacy ==
 
@@ -82,6 +79,10 @@ Logged-in and diagnostic requests omit identifying data.
 Data remains after uninstall unless Uninstall Cleanup was enabled beforehand.
 
 == Changelog ==
+
+= 7.5.4 =
+* Made public sitemap attribution an explicit, default-off choice.
+* Added evidence-bound release gates and stricter WordPress.org validation.
 
 = 7.5.3 =
 * Sanitized Quick Setup at the request boundary and bounded client-IP headers.
@@ -180,6 +181,9 @@ Data remains after uninstall unless Uninstall Cleanup was enabled beforehand.
 Earlier release history is included in `changelog.txt`.
 
 == Upgrade Notice ==
+
+= 7.5.4 =
+Public sitemap credits are now off by default. Enable them explicitly in XML Sitemaps if desired.
 
 = 7.5.3 =
 WordPress.org review fixes for input validation, output escaping, and source access.

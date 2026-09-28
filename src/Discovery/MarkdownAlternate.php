@@ -69,7 +69,7 @@ final class MarkdownAlternate {
 	 * @param array<string, mixed>|null $query Query values; defaults to $_GET.
 	 */
 	public static function is_candidate_request( string $path, ?array $query = null ): bool {
-		$query  = null === $query ? $_GET : $query; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only public route classification.
+		$query  = null === $query ? self::request_query() : $query;
 		$marker = $query[ self::QUERY_MARKER ] ?? null;
 		if ( \is_scalar( $marker ) && '1' === (string) $marker ) {
 			return true;
@@ -253,12 +253,15 @@ final class MarkdownAlternate {
 	 *
 	 * @return array<string, mixed>
 	 */
-	private function request_query(): array {
+	private static function request_query(): array {
 		$query = array();
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only public route resolution.
 		foreach ( array( self::QUERY_MARKER, 'p', 'page_id' ) as $key ) {
 			if ( isset( $_GET[ $key ] ) && \is_scalar( $_GET[ $key ] ) ) {
-				$query[ $key ] = \sanitize_text_field( \wp_unslash( (string) $_GET[ $key ] ) );
+				$value = \sanitize_text_field( \wp_unslash( (string) $_GET[ $key ] ) );
+				if ( \strlen( $value ) <= 128 ) {
+					$query[ $key ] = $value;
+				}
 			}
 		}
 		// phpcs:enable

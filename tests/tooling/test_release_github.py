@@ -35,7 +35,7 @@ def mock():
             source = Path(args[3])
             commit = option('--commit') if '--commit' in args else subprocess.check_output(
                 ['git', '-C', str(source), 'rev-parse', option('--tag') + '^{commit}'], text=True).strip()
-            Path('product/release.json').write_text(json.dumps(dict(commit=commit, channel=option('--channel'), tag='v7.4.0')))
+            Path('product/release.json').write_text(json.dumps(dict(version='7.4.0', commit=commit, channel=option('--channel'), tag='v7.4.0')))
             Path('product/7.4.0').mkdir(exist_ok=True)
             Path('product/7.4.0/source.json').write_text(json.dumps(dict(commit=commit, state='tagged' if '--tag' in args else 'candidate')))
             if failure == 'unrelated-write':
@@ -59,7 +59,7 @@ def mock():
         if failure == 'checks':
             sys.exit(1)
         if args == ['run', 'release:build']:
-            parent = Path('docs/generated/releases/7.4.0')
+            parent = Path('docs/generated/releases/7.4.0/candidate')
             parent.mkdir(parents=True, exist_ok=True)
             p = parent / 'cybermaps_7.4.0.zip'
             with zipfile.ZipFile(p, 'w') as archive:
@@ -71,12 +71,29 @@ def mock():
             Path(str(p) + '.sha256').write_text(
                 ('bad' if failure == 'checksum' else hashlib.sha256(p.read_bytes()).hexdigest())
                 + '  ' + p.name + '\n')
+        if args == ['run', 'release:ready']:
+            if failure == 'review-evidence':
+                sys.exit(1)
+            parent = Path('docs/generated/releases/7.4.0')
+            for item in (parent / 'candidate').iterdir():
+                shutil.copyfile(item, parent / item.name)
+            (parent / 'release-readiness.json').write_text(json.dumps(dict(state='release-ready', identity=dict(commit=subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()), zip_sha256=hashlib.sha256((parent / 'cybermaps_7.4.0.zip').read_bytes()).hexdigest())))
         return
     if args[0] == 'auth':
         sys.exit(1 if failure == 'auth' else 0)
     if args[0] == 'api':
         if failure == 'api':
             sys.exit(1)
+        endpoint = next(a for a in args if a.startswith('repos/'))
+        if '--method' in args:
+            assert option('--method') == 'POST' and state is None
+            state = dict(id=1, assets=[], **json.loads(Path(option('--input')).read_text()))
+            save()
+            print(json.dumps(state))
+            return
+        if '/releases/' in endpoint:
+            print(json.dumps(state))
+            return
         if '/commits/' in args[-1]:
             print(json.dumps({'sha': subprocess.check_output(['git', 'rev-parse', args[-1].split('/')[-1] + '^{commit}'], text=True).strip()}))
             return
@@ -133,8 +150,17 @@ class PublisherTest(unittest.TestCase):
                  'https://github.com/Alex9001/cybermaps.git')
         (self.repo / 'bin').mkdir()
         for name in ['release-github.sh', 'release-github.py', 'check-website.py', 'workspace.py',
-                     'workspace.sh', 'release-workflow.py']:
+                     'workspace.sh', 'release-workflow.py', 'website_evidence.py']:
             shutil.copy(ROOT / 'bin' / name, self.repo / 'bin' / name)
+        (self.repo / 'bin/check-website-live.py').write_text('''import json,os,sys,hashlib
+from pathlib import Path
+from workspace import git,save_json,release_dir
+args=sys.argv[1:]
+def option(name): return args[args.index(name)+1]
+if os.environ.get('MOCK_FAIL') == 'live': raise SystemExit('Injected stale live website')
+value=dict(state='website-verified', tag=option('--tag'), commit=option('--commit'), channel=option('--channel'), zip_sha256=option('--zip-sha256'), website_commit=git(Path(args[0]),'rev-parse','HEAD'))
+save_json(release_dir(option('--tag')[1:])/'website-live.json',value)
+''')
         (self.repo / 'cybermaps.php').write_text(' * Version: 7.4.0\n')
         for name in ('uninstall.php', 'LICENSE'):
             (self.repo / name).write_text('fixture\n')
@@ -183,7 +209,7 @@ class PublisherTest(unittest.TestCase):
     def publish(self, success=True, stable=False, failure=''):
         (self.website / 'product/release.json').write_text(json.dumps({
             'commit': 'wrong' if failure == 'website-commit' else self.git('rev-parse', 'HEAD'),
-            'channel': 'stable' if stable else 'beta',
+            'channel': 'stable' if stable else 'beta', 'version': '7.4.0',
         }))
         self.website_git('add', '.')
         self.website_git('commit', '--allow-empty', '-m', 'import candidate')

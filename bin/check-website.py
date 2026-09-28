@@ -5,9 +5,11 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+import uuid
 
 sys.dont_write_bytecode = True
-from workspace import clean_website, configure, website_destination
+from workspace import clean_website, configure, website_destination, release_dir, save_json, version
+from website_evidence import digest, fingerprint, now, prepared
 
 
 def main():
@@ -22,7 +24,8 @@ def main():
     clean_website(website)
     plugin = Path(__file__).resolve().parents[1]
     release = json.loads((website / 'product/release.json').read_text())
-    if release.get('commit') != args.commit or release.get('channel') != args.channel:
+    if (release.get('commit') != args.commit or release.get('channel') != args.channel
+            or release.get('version') != version()):
         raise ValueError('Website docs must be imported from the exact release commit and channel. Run docs:sync and review affected guides.')
     commands = [
         ['node', 'scripts/check-source.mjs', str(plugin), '--commit', args.commit, '--channel', args.channel],
@@ -35,8 +38,23 @@ def main():
             # Match the website's existing exception for unavailable historical contracts.
             ['node', 'scripts/verify.mjs', '--allow-missing-legacy-contracts'],
         ]
-    for command in commands:
-        subprocess.run(command, cwd=website, check=True)
+    if args.source_only:
+        prepared(website, args.commit, args.channel, version())
+        for command in commands:
+            subprocess.run(command, cwd=website, check=True)
+    else:
+        directory = release_dir() / 'website-checks'
+        directory.mkdir(parents=True, exist_ok=True)
+        log = directory / (uuid.uuid4().hex + '.log')
+        print('Website validation log: ' + str(log), flush=True)
+        with log.open('w') as output:
+            for command in commands:
+                print('Website check: ' + ' '.join(command), flush=True)
+                subprocess.run(command, cwd=website, check=True, stdout=output, stderr=subprocess.STDOUT)
+        save_json(release_dir() / 'website-prepared.json', dict(schema_version=1,
+                  state='website-prepared', commit=args.commit, channel=args.channel,
+                  version=version(), website=str(website), source_sha256=fingerprint(website),
+                  checked_at=now(), log=str(log), log_sha256=digest(log)))
     print(f'Website documentation validated against {args.commit}.')
 
 

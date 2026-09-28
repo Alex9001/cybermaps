@@ -1,6 +1,6 @@
 # AI-Assisted Configuration
 
-> Cybermaps 7.5.3 · AI Configuration Brief format 2
+> Cybermaps 7.5.4 · AI Configuration Brief format 2
 
 Cybermaps can prepare a site-aware configuration handoff for an AI assistant
 without exposing the private values required for an exact site restoration.
@@ -12,8 +12,8 @@ This guide is the human-readable companion to the versioned machine contracts
 referenced at the end of every Brief:
 
 - Guide: `https://cybermaps.dev/docs/ai-configuration/`
-- JSON Schema: `https://cybermaps.dev/specs/ai-configuration/7.5.3/schema.json`
-- Field catalog: `https://cybermaps.dev/specs/ai-configuration/7.5.3/catalog.json`
+- JSON Schema: `https://cybermaps.dev/specs/ai-configuration/7.5.4/schema.json`
+- Field catalog: `https://cybermaps.dev/specs/ai-configuration/7.5.4/catalog.json`
 
 The same schema and catalog are committed in this repository at
 [`docs/dev/ai-configuration/schema.json`](./dev/ai-configuration/schema.json)
@@ -153,7 +153,7 @@ sections and fields being changed:
 }
 ```
 
-The complete Brief starts with all supported sections and all 121 editable
+The complete Brief starts with all supported sections and all 122 editable
 fields set to `null`. It is valid to retain that complete shape or return the
 smaller envelope shown above.
 
@@ -232,10 +232,10 @@ value**, not only the value the AI supplied.
 
 ## Versioned schema and field catalog
 
-For Cybermaps 7.5.3, the public machine contracts are:
+For Cybermaps 7.5.4, the public machine contracts are:
 
-- `https://cybermaps.dev/specs/ai-configuration/7.5.3/schema.json`
-- `https://cybermaps.dev/specs/ai-configuration/7.5.3/catalog.json`
+- `https://cybermaps.dev/specs/ai-configuration/7.5.4/schema.json`
+- `https://cybermaps.dev/specs/ai-configuration/7.5.4/catalog.json`
 
 The JSON Schema is Draft 2020-12 and describes the strict JSON changes envelope,
 not the surrounding Markdown wrapper. The catalog contains the same field
@@ -277,7 +277,7 @@ contracts:
 
 For the 6.3.0 optimization release, the expected contract assumes exactly two
 new general settings, `trusted_proxy_header` and `trusted_proxy_cidrs`: 94
-general settings in the generated manifest and 121 editable AI Brief fields.
+general settings in the generated manifest and 122 editable AI Brief fields.
 
 ```bash
 php docs/dev/generate-docs.php --ai-schema > docs/dev/ai-configuration/schema.json

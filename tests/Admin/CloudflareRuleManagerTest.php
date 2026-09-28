@@ -16,7 +16,6 @@ final class CloudflareRuleManagerTest extends TestCase {
 	public function test_origin_bypass_rule_isolates_the_canonical_index_by_host_and_version(): void {
 		$host   = 'www.example.com';
 		$method = new \ReflectionMethod( CloudflareRuleManager::class, 'origin_bypass_rule' );
-		$method->setAccessible( true );
 		$rule = $method->invoke( null, $host );
 
 		self::assertIsArray( $rule );

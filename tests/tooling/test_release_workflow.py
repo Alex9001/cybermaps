@@ -130,13 +130,25 @@ class WorkflowTest(unittest.TestCase):
         self.workflow()
         commands = self.commands()
         self.assertEqual(commands.count(['composer', 'run', 'release:build']), 1)
-        self.assertEqual(commands.count(['composer', 'run', 'release:check']), 1)
+        self.assertEqual(commands.count(['composer', 'run', 'release:ready']), 1)
         self.assertNotIn(['composer', 'run', 'release:validate'], commands)
         self.assertFalse(self.state()['draft'])
         record = json.loads((self.repo / 'docs/generated/releases/7.4.0/workflow.json').read_text())
         self.assertEqual(record['phase'], 'complete')
         self.assertEqual(self.website_git('status', '--porcelain'), '')
         self.assertTrue(Path(record['rollback']).is_dir())
+
+    def test_live_mismatch_blocks_completion_and_resume_never_republishes(self):
+        self.workflow(failure='live', success=False)
+        record = json.loads((self.repo / 'docs/generated/releases/7.4.0/workflow.json').read_text())
+        self.assertEqual(record['phase'], 'website-verification-failed')
+        published = self.state()
+        before = len(self.commands())
+        self.workflow('resume', '', True, '--tag', 'v7.4.0')
+        self.assertEqual(published, self.state())
+        after = self.commands()[before:]
+        self.assertFalse(any(c[0] == 'composer' for c in after))
+        self.assertFalse(any(c[:2] == ['gh', 'release'] and c[2] in ('create', 'upload', 'edit') for c in after))
 
     def test_interrupted_publication_resumes_draft_without_replacing_assets(self):
         self.workflow(failure='interrupt', success=False)
@@ -176,7 +188,7 @@ class WorkflowTest(unittest.TestCase):
     def test_changed_package_cannot_be_installed_after_validation(self):
         self.workflow('dev-install')
         before = snapshot(self.install)
-        archive = self.repo / 'docs/generated/releases/7.4.0/cybermaps_7.4.0.zip'
+        archive = self.repo / 'docs/generated/releases/7.4.0/candidate/cybermaps_7.4.0.zip'
         with patch.object(workspace, 'ROOT', self.repo):
             with self.assertRaisesRegex(RuntimeError, 'changed after validation'):
                 workspace.install(archive, self.install, expected_sha256='0' * 64)
@@ -197,7 +209,7 @@ class WorkflowTest(unittest.TestCase):
     def test_failed_install_restores_previous_files(self):
         self.workflow('dev-install')
         before = snapshot(self.install)
-        archive = self.repo / 'docs/generated/releases/7.4.0/cybermaps_7.4.0.zip'
+        archive = self.repo / 'docs/generated/releases/7.4.0/candidate/cybermaps_7.4.0.zip'
         original = workspace.verify_files
         def fail_after_swap(path, contents):
             if path == self.install:

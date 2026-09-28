@@ -10,9 +10,9 @@ use PHPUnit\Framework\TestCase;
 final class AIConfigurationRegistryTest extends TestCase {
 	public function test_registry_covers_every_existing_editable_mapping_exactly_once(): void {
 		$fields = AIConfigurationRegistry::get_fields();
-		self::assertCount( 121, $fields );
+		self::assertCount( 122, $fields );
 		self::assertCount(
-			121,
+			122,
 			array_unique(
 				array_map(
 					static fn( array $field ): string => $field['option'] . '.' . $field['field'],
@@ -23,7 +23,7 @@ final class AIConfigurationRegistryTest extends TestCase {
 
 		self::assertSame(
 			array(
-				'cybermaps_settings'          => 95,
+				'cybermaps_settings'          => 96,
 				'cybermaps_discovery_center'  => 4,
 				'cybermaps_identity_data'     => 18,
 				'cybermaps_robots_manager'    => 4,
@@ -115,7 +115,7 @@ final class AIConfigurationRegistryTest extends TestCase {
 				self::assertSame( array( 'type' => 'null' ), $property['anyOf'][1] );
 			}
 		}
-		self::assertSame( 121, $schema_field_count );
+		self::assertSame( 122, $schema_field_count );
 		self::assertSame(
 			array( true, false ),
 			$schema['properties']['changes']['properties']['core_settings']['properties']['include_homepage']['anyOf'][0]['enum']
