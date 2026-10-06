@@ -128,7 +128,7 @@ installed_plugin_check="$(wp_cli plugin get plugin-check --field=version | tr -d
 wp_cli plugin activate cybermaps --quiet
 wp_cli eval-file /validation/wporg-smoke.php > "${RUNTIME_DIR}/smoke.txt"
 if [ "${CYBERMAPS_TEST_UPGRADE:-0}" = "1" ]; then
-	wp_cli eval-file /validation/wporg-mcp-upgrade-check.php >> "${RUNTIME_DIR}/smoke.txt"
+	wp_cli eval 'require "/validation/wporg-mcp-upgrade-check.php";' >> "${RUNTIME_DIR}/smoke.txt"
 fi
 
 # Serve the same installed ZIP over loopback for actual request/response checks.
@@ -157,14 +157,14 @@ run_plugin_check() {
 }
 
 
-wp_cli eval-file /validation/wporg-mcp-preferences.php >> "${RUNTIME_DIR}/smoke.txt"
+wp_cli eval 'require "/validation/wporg-mcp-preferences.php";' >> "${RUNTIME_DIR}/smoke.txt"
 
 # Optional MCP integration is tested using the official plugin, never a protocol mock.
 MCP_ADAPTER_VERSION="$(python3 -B -c 'import json,sys; print(json.load(open(sys.argv[1]))["mcp_adapter_version"])' "${PROJECT_DIR}/docs/dev/release-policy.json")"
 mkdir -p "${RUNTIME_DIR}/wordpress/wp-content/mu-plugins"
 cp "${PROJECT_DIR}/tests/integration/wporg-mcp-fixture.php" "${RUNTIME_DIR}/wordpress/wp-content/mu-plugins/cybermaps-mcp-test.php"
 wp_cli plugin install mcp-adapter --version="${MCP_ADAPTER_VERSION}" --activate --quiet
-wp_cli eval-file /validation/wporg-mcp-setup.php > "${RUNTIME_DIR}/mcp-credentials.tmp"
+wp_cli eval 'require "/validation/wporg-mcp-setup.php";' > "${RUNTIME_DIR}/mcp-credentials.tmp"
 python3 -B "${PROJECT_DIR}/tests/integration/wporg-mcp.py" "http://${HTTP_ADDRESS}" "${RUNTIME_DIR}/mcp-credentials.tmp" >> "${RUNTIME_DIR}/smoke.txt"
 wp_cli mcp-adapter serve --server=cybermaps --user=mcp-reader < "${PROJECT_DIR}/tests/integration/wporg-mcp-stdio.jsonl" > "${RUNTIME_DIR}/mcp-stdio.jsonl" 2> "${RUNTIME_DIR}/mcp-stdio.stderr"
 python3 -B "${PROJECT_DIR}/tests/integration/wporg-mcp-stdio.py" "${RUNTIME_DIR}/mcp-stdio.jsonl" >> "${RUNTIME_DIR}/smoke.txt"
