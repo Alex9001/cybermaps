@@ -10,7 +10,7 @@ final class AdapterFixture {
         if ( ! defined( 'WP_MCP_VERSION' ) ) define( 'WP_MCP_VERSION', '0.7.0' );
         $this->before = $GLOBALS['cybermaps_mock_options'];
         $GLOBALS['cybermaps_mock_options']['active_plugins'] = array( 'mcp-adapter/mcp-adapter.php' );
-        $GLOBALS['cybermaps_mock_options']['cybermaps_mcp_retired'] = '1';
+        $GLOBALS['cybermaps_mock_options']['cybermaps_mcp_retired'] = '2';
         ( new \ReflectionProperty( \Cybermaps\MCP\WordPressIntegration::class, 'registration_failed' ) )->setValue( null, false );
     }
     public function __destruct() { $GLOBALS['cybermaps_mock_options'] = $this->before; }

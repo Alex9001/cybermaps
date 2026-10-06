@@ -1,11 +1,11 @@
-# WordPress.org reviewer response — Cybermaps 8.0.0
+# WordPress.org reviewer response — Cybermaps 8.0.1
 
 Draft for the existing review thread; filename retained so the saved reply stays
 in the same place. Nothing has been sent.
 
 Before sending: finish the exact-ZIP release gates, review the matching website,
 promote the candidate, verify the public source links, and upload the qualified
-8.0.0 ZIP to the existing WordPress.org submission. Do not send this draft while
+8.0.1 ZIP to the existing WordPress.org submission. Do not send this draft while
 those checks are pending. This draft makes no claim of an independent audit.
 
 ---
@@ -13,7 +13,7 @@ those checks are pending. This draft makes no claim of an independent audit.
 Hello Plugins Team,
 
 Thank you for explaining the remote-administration concern in your October 5
-review. I have taken the removal option you described for Cybermaps 8.0.0.
+review. I have taken the removal option you described for Cybermaps 8.0.1.
 
 I removed Cybermaps' custom MCP transport, OAuth/device authorization code,
 arbitrary WordPress ability dispatcher, and user-identity switching. The remote
@@ -28,8 +28,10 @@ It does not discover or execute third-party abilities. Transport and
 WordPress authentication are handled by the adapter; a user with the `read`
 capability is sufficient for Cybermaps' read-only server.
 
-The upgrade disables existing MCP configurations, removes the old credentials
-and pending MCP tasks, and requires users to opt in and reconnect. Cybermaps'
+The old implementation is deleted from the plugin. Upgrade cleanup deletes
+retired configuration keys, credential tables and queued jobs. The new adapter
+integration uses a separate boolean setting, with no legacy operational modes.
+Deletion-only cleanup remains for users upgrading directly from 7.x. Cybermaps'
 sitemaps, public AI publications, reports and dashboard controls continue to
 work without MCP Adapter.
 
@@ -43,5 +45,6 @@ is editable, unminified source using WordPress's `wp.element` API. The readme
 identifies the public source and build instructions; the release copies
 JavaScript and CSS unchanged.
 
-Please review the replacement ZIP attached to the existing submission. Thank
+The release ZIP and readable source are available at
+https://github.com/Alex9001/cybermaps/releases/tag/v8.0.1. Thank
 you for your time and guidance.

@@ -148,11 +148,8 @@ final class AIConfigurationRegistryTest extends TestCase {
 		self::assertTrue( AIConfigurationRegistry::get_field( 'enable_multimodal_discovery' )['effective_default'] );
 		self::assertTrue( AIConfigurationRegistry::get_field( 'enable_content_hints' )['effective_default'] );
 		self::assertSame( 'well_known', AIConfigurationRegistry::get_field( 'static_engine_mode' )['effective_default'] );
-		self::assertSame( 'off', AIConfigurationRegistry::get_field( 'mcp_mode' )['effective_default'] );
-		self::assertSame(
-			array( 'off', 'read_only' ),
-			AIConfigurationRegistry::get_field( 'mcp_mode' )['allowed']['enum']
-		);
+		self::assertFalse( AIConfigurationRegistry::get_field( 'enable_mcp_adapter' )['effective_default'] );
+		self::assertNull( AIConfigurationRegistry::get_field( 'mcp_mode' ) );
 		self::assertSame( 'off', AIConfigurationRegistry::get_field( 'trusted_proxy_header' )['effective_default'] );
 		self::assertSame(
 			array( 'off', 'forwarded', 'x_forwarded_for', 'x_real_ip' ),

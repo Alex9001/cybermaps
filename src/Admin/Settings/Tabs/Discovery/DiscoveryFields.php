@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class DiscoveryFields {
 
 	/** Render optional adapter setup in the existing settings form. */
-	public static function render_mcp_mode( $args ): void {
+	public static function render_mcp_setup( $args ): void {
 		unset( $args );
 		\Cybermaps\Admin\MCPSetup::render();
 	}

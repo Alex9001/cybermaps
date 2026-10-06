@@ -66,7 +66,7 @@ owner sign-off is required. A changed package requires renewed agent review.
 14. An agent closes every policy and reviewer obligation with current evidence.
 15. Website content matches the exact candidate commit/channel; editorial reviews, tests, build and verification pass before promotion/publication.
 16. The published tag is deployed to cybermaps.dev and its live contracts, download links and changelog are verified before release completion.
-17. The exact artifact exposes only the reviewed read-only Cybermaps MCP surface. `composer mcp:check`, negative ability fixtures, dependency states, legacy migration and real adapter HTTP/CLI checks must pass. The `remote_capabilities` review must assess actual administrative authority, native REST and browser channels; read-only annotations and clean scanners are insufficient. Any expansion requires a new explicit product/policy decision and reviewer assessment.
+17. The exact artifact exposes only the reviewed read-only Cybermaps MCP surface. `composer mcp:check`, negative ability fixtures, dependency states, legacy migration and real adapter HTTP/CLI checks must pass. The `remote_capabilities` review must assess actual administrative authority, native REST and browser channels; read-only annotations and clean scanners are insufficient. Retired MCP configuration keys are permitted only in deletion/conversion cleanup, never in active runtime paths; empty OAuth upgrade placeholders are forbidden. Any expansion requires a new explicit product/policy decision and reviewer assessment.
 
 Website preparation records bind the canonical website content, validation log,
 plugin commit, version and channel; promotion additionally binds its Git commit

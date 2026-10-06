@@ -344,7 +344,7 @@ class SettingsSanitizerTest extends TestCase {
         global $cybermaps_mock_options;
         $cybermaps_mock_options['cybermaps_settings'] = array(
             'enable_llms_full'       => '1',
-            'mcp_mode'               => 'read_only',
+            'enable_mcp_adapter'               => '1',
             'llms_link_limit'        => 42,
             'llms_custom_instructions' => 'Keep this text',
         );
@@ -353,7 +353,7 @@ class SettingsSanitizerTest extends TestCase {
         $result = SettingsSanitizer::sanitize( array( 'enable_caching' => '1' ) );
 
         $this->assertSame( '1', $result['enable_llms_full'] );
-        $this->assertSame( 'read_only', $result['mcp_mode'] );
+        $this->assertSame( '1', $result['enable_mcp_adapter'] );
         $this->assertSame( 42, $result['llms_link_limit'] );
         $this->assertSame( 'Keep this text', $result['llms_custom_instructions'] );
     }
@@ -371,7 +371,25 @@ class SettingsSanitizerTest extends TestCase {
 
         $this->assertSame( '0', $result['enable_llms_full'] );
         $this->assertSame( '0', $result['enable_rag_chunks'] );
-        $this->assertSame( 'off', $result['mcp_mode'] );
+        $this->assertArrayNotHasKey( 'mcp_mode', $result );
+        $this->assertArrayNotHasKey( 'enable_mcp_adapter', $result );
+    }
+
+    public function test_hidden_adapter_control_preserves_consent_but_explicit_zero_clears_it(): void {
+        $GLOBALS['cybermaps_mock_options']['cybermaps_settings'] = array( 'enable_mcp_adapter' => '1' );
+        $_POST['cybermaps_active_tab'] = 'ai';
+        $this->assertSame( '1', SettingsSanitizer::sanitize( array() )['enable_mcp_adapter'] );
+        $this->assertSame( '0', SettingsSanitizer::sanitize( array( 'enable_mcp_adapter' => '0' ) )['enable_mcp_adapter'] );
+    }
+
+    public function test_adapter_opt_in_requires_the_checkbox_value(): void {
+        $_POST['cybermaps_active_tab'] = 'ai';
+        foreach ( array( 'operations', array( '1' ), 'true', 2 ) as $invalid ) {
+            $result = SettingsSanitizer::sanitize( array( 'enable_mcp_adapter' => $invalid ) );
+            $this->assertSame( '0', $result['enable_mcp_adapter'] );
+        }
+        $result = SettingsSanitizer::sanitize( array( 'enable_mcp_adapter' => '1' ) );
+        $this->assertSame( '1', $result['enable_mcp_adapter'] );
     }
 
     public function test_discovery_normalizer_treats_rag_size_and_overlap_as_one_bounded_pair(): void {

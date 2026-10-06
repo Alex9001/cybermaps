@@ -74,21 +74,36 @@ final class UninstallerTest extends TestCase {
 		$GLOBALS['cybermaps_mock_options']['cybermaps_settings'] = array( 'mcp_mode' => 'operations', 'agent_registration_mode' => 'open', 'enable_discovery_hub' => '1', 'sitemap_posts_per_page' => 123 );
 		$GLOBALS['cybermaps_mock_scheduled']['cybermaps_mcp_run_task'] = 123;
 		\Cybermaps\Core\MCPMigration::run();
-		self::assertFalse( get_option( \Cybermaps\Core\MCPMigration::DONE_OPTION, false ) );
-		self::assertSame( 'off', get_option( 'cybermaps_settings' )['mcp_mode'] );
+		self::assertFalse( \Cybermaps\Core\MCPMigration::is_complete() );
+		self::assertArrayNotHasKey( 'mcp_mode', get_option( 'cybermaps_settings' ) );
 		self::assertArrayNotHasKey( 'agent_registration_mode', get_option( 'cybermaps_settings' ) );
 		self::assertArrayNotHasKey( 'cybermaps_mcp_run_task', $GLOBALS['cybermaps_mock_scheduled'] );
 		$db->fail_drop_table = '';
 		\Cybermaps\Core\MCPMigration::run();
-		self::assertSame( '1', get_option( \Cybermaps\Core\MCPMigration::DONE_OPTION ) );
+		self::assertTrue( \Cybermaps\Core\MCPMigration::is_complete() );
 		self::assertSame( 123, get_option( 'cybermaps_settings' )['sitemap_posts_per_page'] );
 		self::assertContains( 'wp_cybermaps_audit_runs', $db->existing_tables );
 		self::assertNotContains( 'wp_cybermaps_mcp_tasks', $db->existing_tables );
-		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['mcp_mode'] = 'read_only';
+		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['enable_mcp_adapter'] = '1';
 		$db->queries = array();
 		\Cybermaps\Core\MCPMigration::run();
-		self::assertSame( 'read_only', get_option( 'cybermaps_settings' )['mcp_mode'] );
+		self::assertSame( '1', get_option( 'cybermaps_settings' )['enable_mcp_adapter'] );
 		self::assertSame( array(), $db->queries );
+	}
+
+	public function test_cleanup_converts_80_adapter_opt_in_and_deletes_retired_preferences(): void {
+		$GLOBALS['cybermaps_mock_options']['cybermaps_mcp_retired'] = '1';
+		$GLOBALS['cybermaps_mock_options']['cybermaps_mcp_migration_notice'] = '1';
+		$GLOBALS['cybermaps_mock_options']['cybermaps_settings'] = array( 'mcp_mode' => 'read_only', 'agent_registration_mode' => 'off' );
+		self::assertTrue( \Cybermaps\Core\MCPMigration::run() );
+		self::assertSame( array( 'enable_mcp_adapter' => '1' ), get_option( 'cybermaps_settings' ) );
+		self::assertFalse( get_option( 'cybermaps_mcp_migration_notice', false ) );
+	}
+
+	public function test_old_read_only_mode_never_grants_new_adapter_consent(): void {
+		$GLOBALS['cybermaps_mock_options']['cybermaps_settings'] = array( 'mcp_mode' => 'read_only' );
+		self::assertTrue( \Cybermaps\Core\MCPMigration::run() );
+		self::assertSame( array(), get_option( 'cybermaps_settings' ) );
 	}
 
 	public function test_uninstall_bootstrap_does_not_load_the_plugin_runtime(): void {

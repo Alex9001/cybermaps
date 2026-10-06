@@ -25,6 +25,8 @@ foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root . '/
     if (preg_match('/\b(?:wp_set_current_user|wp_get_abilities|execute_tool)\s*\(/', $source)) $errors[] = 'Generic remote authority or identity switching is prohibited: ' . $path;
     if (preg_match('/\bwp_register_ability\s*\(/', $source) && !in_array($path, $owners, true)) $errors[] = 'Unreviewed ability registration owner: ' . $path;
     if (str_starts_with($path, 'src/MCP/') && !in_array(basename($path), $allowed, true)) $errors[] = 'Unreviewed MCP implementation: ' . $path;
+    if (preg_match('/\b(?:mcp_mode|agent_registration_mode)\b/', $source) && !in_array($path, array('src/Core/MCPMigration.php', 'src/Admin/Settings/Sanitizers/SettingsDiscoveryNormalizer.php'), true)) $errors[] = 'Retired MCP configuration may only be deleted or converted by cleanup: ' . $path;
+    if (str_contains($source, 'upgrade_oauth_schema')) $errors[] = 'Retired OAuth upgrade placeholder is prohibited: ' . $path;
     if (str_contains($source, 'Cybermaps\\MCP\\OAuth\\')) $errors[] = 'Retired MCP OAuth implementation referenced: ' . $path;
 }
 foreach ($errors as $error) fwrite(STDERR, $error . PHP_EOL);

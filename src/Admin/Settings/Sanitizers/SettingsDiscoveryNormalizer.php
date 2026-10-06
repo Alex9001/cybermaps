@@ -56,14 +56,10 @@ class SettingsDiscoveryNormalizer {
 				$sanitized[ $key ] = ! empty( $input[ $key ] ) ? '1' : '0';
 			}
 		}
-		if ( array_key_exists( 'mcp_mode', $input ) && is_scalar( $input['mcp_mode'] ) ) {
-			$mode                  = sanitize_key( (string) $input['mcp_mode'] );
-			$sanitized['mcp_mode'] = in_array( $mode, array( 'off', 'read_only' ), true ) ? $mode : 'off';
+		if ( array_key_exists( 'enable_mcp_adapter', $input ) ) {
+			$sanitized['enable_mcp_adapter'] = '1' === SettingsSanitizer::scalar_string( $input['enable_mcp_adapter'] ?? '' ) ? '1' : '0';
 		}
-		unset( $sanitized['agent_registration_mode'] );
-		if ( ! in_array( $sanitized['mcp_mode'] ?? 'off', array( 'off', 'read_only' ), true ) ) {
-			$sanitized['mcp_mode'] = 'off';
-		}
+		unset( $sanitized['mcp_mode'], $sanitized['agent_registration_mode'] );
 
 		unset( $sanitized['enable_semantic_snippets'], $sanitized['ai_custom_skill_prompt'] );
 		return $sanitized;

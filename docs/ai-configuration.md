@@ -1,6 +1,6 @@
 # AI-Assisted Configuration
 
-> Cybermaps 8.0.0 · AI Configuration Brief format 2
+> Cybermaps 8.0.1 · AI Configuration Brief format 2
 
 Cybermaps can prepare a site-aware configuration handoff for an AI assistant
 without exposing the private values required for an exact site restoration.
@@ -12,8 +12,8 @@ This guide is the human-readable companion to the versioned machine contracts
 referenced at the end of every Brief:
 
 - Guide: `https://cybermaps.dev/docs/ai-configuration/`
-- JSON Schema: `https://cybermaps.dev/specs/ai-configuration/8.0.0/schema.json`
-- Field catalog: `https://cybermaps.dev/specs/ai-configuration/8.0.0/catalog.json`
+- JSON Schema: `https://cybermaps.dev/specs/ai-configuration/8.0.1/schema.json`
+- Field catalog: `https://cybermaps.dev/specs/ai-configuration/8.0.1/catalog.json`
 
 The same schema and catalog are committed in this repository at
 [`docs/dev/ai-configuration/schema.json`](./dev/ai-configuration/schema.json)
@@ -52,10 +52,11 @@ Each Brief is generated from the current site and contains:
   defaults, examples, dependencies, and review-risk levels; and
 - a JSON changes envelope in which every field initially has the value `null`.
 
-The AI publishing section includes `mcp_mode`, which explicitly selects the
-optional read-only Model Context Protocol integration (`off` or `read_only`).
-Its default is `off`; MCP requires MCP Adapter 0.7.0 or newer, completed legacy
-cleanup, explicit opt-in and an enabled AI Publication Hub.
+The AI publishing section includes the boolean `enable_mcp_adapter`, defaulting
+to `false`. It enables only the read-only WordPress MCP Adapter integration and
+requires MCP Adapter 0.7.0+, completed legacy-data cleanup and the AI Publication
+Hub. Retired `mcp_mode` and `agent_registration_mode` fields are not accepted.
+Download a fresh Brief after upgrading.
 
 The Brief does not include:
 
@@ -233,10 +234,10 @@ value**, not only the value the AI supplied.
 
 ## Versioned schema and field catalog
 
-For Cybermaps 8.0.0, the public machine contracts are:
+For Cybermaps 8.0.1, the public machine contracts are:
 
-- `https://cybermaps.dev/specs/ai-configuration/8.0.0/schema.json`
-- `https://cybermaps.dev/specs/ai-configuration/8.0.0/catalog.json`
+- `https://cybermaps.dev/specs/ai-configuration/8.0.1/schema.json`
+- `https://cybermaps.dev/specs/ai-configuration/8.0.1/catalog.json`
 
 The JSON Schema is Draft 2020-12 and describes the strict JSON changes envelope,
 not the surrounding Markdown wrapper. The catalog contains the same field

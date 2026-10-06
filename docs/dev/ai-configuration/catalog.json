@@ -1,7 +1,7 @@
 {
     "format": "cybermaps-ai-configuration-catalog",
     "format_version": 2,
-    "plugin_version": "8.0.0",
+    "plugin_version": "8.0.1",
     "sections": [
         {
             "id": "core_settings",
@@ -832,29 +832,23 @@
             "risk": "high"
         },
         {
-            "id": "mcp_mode",
+            "id": "enable_mcp_adapter",
             "section_id": "ai_publishing",
             "section_label": "AI Publishing",
             "option": "cybermaps_settings",
-            "field": "mcp_mode",
-            "label": "Model Context Protocol",
+            "field": "enable_mcp_adapter",
+            "label": "Cybermaps MCP (read-only)",
             "purpose": "Optional read-only MCP connections require WordPress MCP Adapter 0.7.0 or newer and the AI Publication Hub.",
-            "json_type": "string",
+            "json_type": "boolean",
             "allowed": {
                 "enum": [
-                    "off",
-                    "read_only"
+                    true,
+                    false
                 ]
             },
-            "effective_default": "off",
-            "dependencies": [
-                {
-                    "field": "enable_discovery_hub",
-                    "condition": "equals",
-                    "value": true
-                }
-            ],
-            "example": "off",
+            "effective_default": false,
+            "dependencies": [],
+            "example": false,
             "risk": "high"
         },
         {

@@ -9,7 +9,7 @@ use Cybermaps\Tests\AdapterFixture;
 use PHPUnit\Framework\TestCase;
 final class AdapterIntegrationTest extends TestCase {
     protected function setUp(): void {
-        $GLOBALS['cybermaps_mock_options'] = array( 'cybermaps_settings' => array( 'enable_discovery_hub' => '1', 'mcp_mode' => 'read_only' ) );
+        $GLOBALS['cybermaps_mock_options'] = array( 'cybermaps_settings' => array( 'enable_discovery_hub' => '1', 'enable_mcp_adapter' => '1' ) );
         $GLOBALS['cybermaps_mock_abilities'] = array();
         $GLOBALS['cybermaps_mock_current_user_capabilities'] = array( 'read' );
         $GLOBALS['cybermaps_mock_user_id'] = 1;
@@ -20,20 +20,21 @@ final class AdapterIntegrationTest extends TestCase {
         unset( $GLOBALS['cybermaps_mock_user_id'] );
     }
     public function test_missing_dependency_never_advertises_or_registers_mcp(): void {
-        self::assertSame( 'off', WordPressIntegration::mode() );
+        self::assertFalse( WordPressIntegration::is_enabled() );
         self::assertFalse( WordPressIntegration::can_read() );
         self::assertFalse( \Cybermaps\Discovery\MCPServerCard::is_available() );
         ResourceAbilities::register(); self::assertSame( array(), $GLOBALS['cybermaps_mock_abilities'] );
     }
     public function test_adapter_alone_and_legacy_modes_never_enable_integration(): void {
         $fixture = AdapterFixture::enable();
-        foreach ( array( 'off', 'discovery', 'operations', 'invalid' ) as $mode ) {
+        unset( $GLOBALS['cybermaps_mock_options']['cybermaps_settings']['enable_mcp_adapter'] );
+        foreach ( array( 'off', 'discovery', 'read_only', 'operations', 'invalid' ) as $mode ) {
             $GLOBALS['cybermaps_mock_options']['cybermaps_settings']['mcp_mode'] = $mode;
-            self::assertSame( 'off', WordPressIntegration::mode() );
+            self::assertFalse( WordPressIntegration::is_enabled() );
         }
-        $GLOBALS['cybermaps_mock_options']['cybermaps_settings']['mcp_mode'] = 'read_only';
+        $GLOBALS['cybermaps_mock_options']['cybermaps_settings']['enable_mcp_adapter'] = '1';
         unset( $GLOBALS['cybermaps_mock_options']['cybermaps_mcp_retired'] );
-        self::assertSame( 'off', WordPressIntegration::mode() );
+        self::assertFalse( WordPressIntegration::is_enabled() );
     }
     public function test_explicit_server_has_only_owned_read_only_components_even_with_hostile_abilities(): void {
         $fixture = AdapterFixture::enable(); $called = false;
@@ -59,11 +60,11 @@ final class AdapterIntegrationTest extends TestCase {
         $GLOBALS['cybermaps_mock_user_id'] = 1;
         $GLOBALS['cybermaps_mock_current_user_capabilities'] = array(); self::assertFalse( WordPressIntegration::can_read() );
         $GLOBALS['cybermaps_mock_current_user_capabilities'] = array( 'read' );
-        $GLOBALS['cybermaps_mock_options']['active_plugins'] = array(); self::assertSame( 'off', WordPressIntegration::mode() );
+        $GLOBALS['cybermaps_mock_options']['active_plugins'] = array(); self::assertFalse( WordPressIntegration::is_enabled() );
         self::assertFalse( \Cybermaps\Discovery\MCPServerCard::is_available() );
         $GLOBALS['cybermaps_mock_options']['active_plugins'] = array( AdapterDependency::PLUGIN );
-        self::assertSame( 'read_only', WordPressIntegration::mode() );
-        $GLOBALS['cybermaps_mock_options']['cybermaps_settings']['enable_discovery_hub'] = '0'; self::assertSame( 'off', WordPressIntegration::mode() );
+        self::assertTrue( WordPressIntegration::is_enabled() );
+        $GLOBALS['cybermaps_mock_options']['cybermaps_settings']['enable_discovery_hub'] = '0'; self::assertFalse( WordPressIntegration::is_enabled() );
     }
     public function test_resource_reads_reject_arbitrary_ids_and_disabled_publications(): void {
         $fixture = AdapterFixture::enable();

@@ -34,6 +34,13 @@ class MCPContractTest(unittest.TestCase):
                 path.write_text("<?php // readonly: true\n" + code)
                 self.assertNotEqual(self.check().returncode, 0)
 
+    def test_retired_modes_and_empty_upgrade_placeholder_fail(self):
+        path = self.root / 'src/Injected.php'
+        for code in ("$settings['mcp_mode'];", "$settings['agent_registration_mode'];", 'function upgrade_oauth_schema() { return true; }'):
+            with self.subTest(code=code):
+                path.write_text('<?php ' + code)
+                self.assertNotEqual(self.check().returncode, 0)
+
     def test_unreviewed_transport_and_contract_change_fail(self):
         path = self.root / 'src/MCP/Transport.php'
         path.write_text('<?php // new transport')

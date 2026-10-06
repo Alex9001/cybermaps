@@ -12,7 +12,7 @@ class MCPServerCardTest extends TestCase {
 		$GLOBALS['cybermaps_mock_options'] = array(
 			'cybermaps_settings' => array(
 				'enable_discovery_hub' => '1',
-				'mcp_mode'             => 'read_only',
+				'enable_mcp_adapter'             => '1',
 			),
 		);
 		$registry                          = new \ReflectionProperty( \Cybermaps\Core\EndpointRegistry::class, 'instance' );
@@ -52,7 +52,7 @@ class MCPServerCardTest extends TestCase {
 		$adapter = \Cybermaps\Tests\AdapterFixture::enable();
 		$this->assertTrue( MCPServerCard::is_available() );
 
-		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['mcp_mode'] = 'off';
+		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['enable_mcp_adapter'] = '0';
 		$this->assertFalse( MCPServerCard::is_available() );
 	}
 }

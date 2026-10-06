@@ -1,8 +1,8 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://cybermaps.dev/specs/ai-configuration/8.0.0/schema.json",
+    "$id": "https://cybermaps.dev/specs/ai-configuration/8.0.1/schema.json",
     "format_version": 2,
-    "plugin_version": "8.0.0",
+    "plugin_version": "8.0.1",
     "title": "Cybermaps AI configuration changes",
     "description": "A merge-only set of reviewed Cybermaps configuration changes. Null and omitted values preserve the destination.",
     "type": "object",
@@ -21,7 +21,7 @@
         },
         "plugin_version": {
             "type": "string",
-            "const": "8.0.0"
+            "const": "8.0.1"
         },
         "changes": {
             "type": "object",
@@ -995,15 +995,15 @@
                             "x-cybermaps-default": false,
                             "x-cybermaps-depends": []
                         },
-                        "mcp_mode": {
-                            "title": "Model Context Protocol",
+                        "enable_mcp_adapter": {
+                            "title": "Cybermaps MCP (read-only)",
                             "description": "Optional read-only MCP connections require WordPress MCP Adapter 0.7.0 or newer and the AI Publication Hub. Set null or omit the field to preserve the destination.",
                             "anyOf": [
                                 {
-                                    "type": "string",
+                                    "type": "boolean",
                                     "enum": [
-                                        "off",
-                                        "read_only"
+                                        true,
+                                        false
                                     ]
                                 },
                                 {
@@ -1012,19 +1012,13 @@
                             ],
                             "default": null,
                             "examples": [
-                                "off"
+                                false
                             ],
                             "x-cybermaps-option": "cybermaps_settings",
-                            "x-cybermaps-field": "mcp_mode",
+                            "x-cybermaps-field": "enable_mcp_adapter",
                             "x-cybermaps-risk": "high",
-                            "x-cybermaps-default": "off",
-                            "x-cybermaps-depends": [
-                                {
-                                    "field": "enable_discovery_hub",
-                                    "condition": "equals",
-                                    "value": true
-                                }
-                            ]
+                            "x-cybermaps-default": false,
+                            "x-cybermaps-depends": []
                         },
                         "enable_webmcp": {
                             "title": "Browser WebMCP",

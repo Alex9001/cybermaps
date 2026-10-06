@@ -12,7 +12,7 @@ class AICatalogTest extends TestCase {
 		$GLOBALS['cybermaps_mock_options'] = array(
 			'cybermaps_settings' => array(
 				'enable_discovery_hub' => '1',
-				'mcp_mode'             => 'off',
+				'enable_mcp_adapter'             => '0',
 			),
 		);
 		$registry                          = new \ReflectionProperty( \Cybermaps\Core\EndpointRegistry::class, 'instance' );
@@ -35,7 +35,7 @@ class AICatalogTest extends TestCase {
 
 	public function test_mcp_entry_is_present_only_while_mcp_is_active(): void {
 		$adapter = \Cybermaps\Tests\AdapterFixture::enable();
-		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['mcp_mode'] = 'read_only';
+		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['enable_mcp_adapter'] = '1';
 		$entries = ( new AICatalog() )->get_catalog_data()['entries'];
 
 		$this->assertCount( 2, $entries );
@@ -47,7 +47,7 @@ class AICatalogTest extends TestCase {
 		);
 		$this->assertArrayNotHasKey( 'data', $entries[1] );
 
-		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['mcp_mode'] = 'off';
+		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['enable_mcp_adapter'] = '0';
 		$this->assertCount( 1, ( new AICatalog() )->get_catalog_data()['entries'] );
 	}
 

@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: CYBERMAPS: XML Sitemaps & llms.txt 8.0.0\n"
+"Project-Id-Version: CYBERMAPS: XML Sitemaps & llms.txt 8.0.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/cybermaps\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-06T07:10:21+00:00\n"
+"POT-Creation-Date: 2026-10-06T09:06:31+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: cybermaps\n"
@@ -854,7 +854,6 @@ msgid "Published"
 msgstr ""
 
 #: src/Admin/DashboardRenderer.php:33
-#: src/Admin/MCPSetup.php:82
 #: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:412
 #: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:708
 #: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:709
@@ -2934,67 +2933,63 @@ msgstr ""
 msgid "Install and activate WordPress MCP Adapter to enable MCP connections. Cybermaps’ sitemaps, AI publications and reports work independently."
 msgstr ""
 
-#: src/Admin/MCPSetup.php:33
+#: src/Admin/MCPSetup.php:32
 msgid "MCP connection and migration guide"
 msgstr ""
 
-#: src/Admin/MCPSetup.php:41
-msgid "Cybermaps 8.0 retires the old MCP endpoint and OAuth credentials. Install MCP Adapter, enable the read-only integration below, and reconnect your clients. Remote audit, publishing, purge and IndexNow tools have been removed; their dashboard controls remain available."
-msgstr ""
-
-#: src/Admin/MCPSetup.php:52
+#: src/Admin/MCPSetup.php:43
 msgid "Ask your site or network administrator to install and activate MCP Adapter 0.7.0 or newer."
 msgstr ""
 
-#: src/Admin/MCPSetup.php:52
+#: src/Admin/MCPSetup.php:43
 msgid "View MCP Adapter by WordPress.org"
 msgstr ""
 
-#: src/Admin/MCPSetup.php:56
+#: src/Admin/MCPSetup.php:47
 msgid "Install MCP Adapter"
 msgstr ""
 
-#: src/Admin/MCPSetup.php:57
+#: src/Admin/MCPSetup.php:48
 msgid "Activate MCP Adapter"
 msgstr ""
 
-#: src/Admin/MCPSetup.php:58
+#: src/Admin/MCPSetup.php:49
 msgid "Update or repair MCP Adapter"
 msgstr ""
 
-#: src/Admin/MCPSetup.php:70
+#: src/Admin/MCPSetup.php:61
 msgid "Legacy MCP cleanup is pending. The integration remains unavailable until cleanup succeeds."
 msgstr ""
 
-#: src/Admin/MCPSetup.php:74
+#: src/Admin/MCPSetup.php:65
 msgid "Enable and save the AI Publication Hub first, then enable Cybermaps MCP."
 msgstr ""
 
-#: src/Admin/MCPSetup.php:83
+#: src/Admin/MCPSetup.php:72
 msgid "Enable Cybermaps MCP (read-only)"
 msgstr ""
 
-#: src/Admin/MCPSetup.php:85
+#: src/Admin/MCPSetup.php:73
 msgid "Exposes only public discovery resources and search. Save settings to apply your choice."
 msgstr ""
 
-#: src/Admin/MCPSetup.php:89
+#: src/Admin/MCPSetup.php:77
 msgid "MCP endpoint:"
 msgstr ""
 
-#: src/Admin/MCPSetup.php:90
+#: src/Admin/MCPSetup.php:78
 msgid "Connect over HTTPS using a WordPress Application Password for a dedicated Subscriber account. Configure credentials in your client; Cybermaps does not collect them. Clients must support this authentication method or the adapter’s WP-CLI transport."
 msgstr ""
 
-#: src/Admin/MCPSetup.php:97
+#: src/Admin/MCPSetup.php:85
 msgid "Read-only MCP enabled"
 msgstr ""
 
-#: src/Admin/MCPSetup.php:100
+#: src/Admin/MCPSetup.php:88
 msgid "MCP available; enable in AI Publishing"
 msgstr ""
 
-#: src/Admin/MCPSetup.php:101
+#: src/Admin/MCPSetup.php:89
 msgid "Optional MCP requires MCP Adapter"
 msgstr ""
 
@@ -8979,23 +8974,23 @@ msgstr ""
 msgid "Cybermaps removed its opted-in database data, but ownership-safe static cleanup did not finish (%s). Some generated public files may remain."
 msgstr ""
 
-#: src/Core/Upgrade.php:156
+#: src/Core/Upgrade.php:158
 msgid "The migration step did not verify its changes."
 msgstr ""
 
-#: src/Core/Upgrade.php:200
+#: src/Core/Upgrade.php:202
 msgid "WordPress did not retain the upgraded data version."
 msgstr ""
 
-#: src/Core/Upgrade.php:356
+#: src/Core/Upgrade.php:357
 msgid "Static ownership migration was deferred because this wpdb implementation cannot guarantee one connection-bound database fence. Dynamic publication remains available."
 msgstr ""
 
-#: src/Core/Upgrade.php:362
+#: src/Core/Upgrade.php:363
 msgid "Static ownership migration is waiting for the static-operation lease or its database fence."
 msgstr ""
 
-#: src/Core/Upgrade.php:375
+#: src/Core/Upgrade.php:376
 msgid "Static ownership migration did not verify its ownership schema and was deferred."
 msgstr ""
 

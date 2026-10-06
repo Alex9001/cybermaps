@@ -30,8 +30,8 @@ final class Upgrade {
 		'remove_retired_state',
 		'migrate_static_ownership',
 		'upgrade_audit_schema',
-		'upgrade_oauth_schema',
-		'reconcile_publications',
+		// Persisted checkpoints use stable positions even when a retired step is removed.
+		9 => 'reconcile_publications',
 	);
 	private static ?OptionLeaseLock $upgrade_lock = null;
 
@@ -121,12 +121,14 @@ final class Upgrade {
 
 	/** @param array<string,int|string> $state @param mixed $state_stored */
 	private static function run_migration_steps( array &$state, mixed &$state_stored, bool &$state_exists ): bool {
-		$step_count = count( self::MIGRATION_STEPS );
-		while ( (int) $state['step'] < $step_count ) {
+		foreach ( self::MIGRATION_STEPS as $position => $step ) {
+			if ( $position < (int) $state['step'] ) {
+				continue;
+			}
+			$state['step'] = $position;
 			if ( ! self::maintain_lock() ) {
 				return false;
 			}
-			$step = self::MIGRATION_STEPS[ (int) $state['step'] ];
 			if ( ! self::run_migration_step( $step, $state, $state_stored, $state_exists ) ) {
 				return false;
 			}
@@ -221,7 +223,7 @@ final class Upgrade {
 			}
 			return;
 		}
-		$state['step']       = count( self::MIGRATION_STEPS );
+		$state['step']       = ( array_key_last( self::MIGRATION_STEPS ) + 1 );
 		$state['attempts']   = 0;
 		$state['next_retry'] = 0;
 		$state['last_step']  = '';
@@ -315,7 +317,6 @@ final class Upgrade {
 			'normalize_config_autoload' => array( self::class, 'normalize_config_autoload' ),
 			'remove_retired_state'      => array( self::class, 'remove_retired_state' ),
 			'upgrade_audit_schema'      => array( self::class, 'upgrade_audit_schema' ),
-			'upgrade_oauth_schema'      => array( self::class, 'upgrade_oauth_schema' ),
 			'reconcile_publications'    => array( self::class, 'reconcile_publications' ),
 		);
 		return isset( $steps[ $step ] ) && (bool) call_user_func( $steps[ $step ] );
@@ -555,11 +556,6 @@ final class Upgrade {
 			=== (string) get_option( 'cybermaps_audit_schema_version', '' );
 	}
 
-	private static function upgrade_oauth_schema(): bool {
-		// Retain the historical step ID for interrupted upgrades; never recreate retired tables.
-		return true;
-	}
-
 	private static function reconcile_publications(): bool {
 		CacheManager::clear_family( 'translations' );
 		CacheManager::clear_family( 'sitemap' );
@@ -599,7 +595,7 @@ final class Upgrade {
 
 		$state = array(
 			'target'            => self::TARGET_DATA_VERSION,
-			'step'              => self::state_integer( $stored, 'step', count( self::MIGRATION_STEPS ) ),
+			'step'              => self::state_integer( $stored, 'step', ( array_key_last( self::MIGRATION_STEPS ) + 1 ) ),
 			'attempts'          => self::state_integer( $stored, 'attempts' ),
 			'next_retry'        => self::state_integer( $stored, 'next_retry' ),
 			'last_step'         => self::state_key( $stored, 'last_step' ),

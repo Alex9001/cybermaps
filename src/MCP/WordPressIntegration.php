@@ -37,7 +37,7 @@ final class WordPressIntegration {
 	 * @param object $adapter WordPress MCP Adapter instance.
 	 */
 	public function register_server( object $adapter ): void {
-		if ( 'off' === self::mode() ) {
+		if ( ! self::is_enabled() ) {
 			return;
 		}
 		$result                    = $adapter->create_server(
@@ -59,24 +59,24 @@ final class WordPressIntegration {
 	}
 
 	/**
-	 * Resolve availability without interpreting retired modes as consent.
+	 * Resolve the explicit adapter switch, cleanup state and dependency availability.
 	 *
 	 * @param array<string,mixed>|null $settings General settings.
 	 */
-	public static function mode( ?array $settings = null ): string {
+	public static function is_enabled( ?array $settings = null ): bool {
 		$settings = $settings ?? ConfigurationStore::settings();
-		if ( '1' !== (string) get_option( \Cybermaps\Core\MCPMigration::DONE_OPTION, '' ) ) {
-			return 'off';
+		if ( ! \Cybermaps\Core\MCPMigration::is_complete() ) {
+			return false;
 		}
-		if ( empty( $settings['enable_discovery_hub'] ) || 'read_only' !== ( $settings['mcp_mode'] ?? 'off' ) ) {
-			return 'off';
+		if ( empty( $settings['enable_discovery_hub'] ) || '1' !== (string) ( $settings['enable_mcp_adapter'] ?? '0' ) ) {
+			return false;
 		}
-		return ! self::$registration_failed && 'ready' === AdapterDependency::state() ? 'read_only' : 'off';
+		return ! self::$registration_failed && 'ready' === AdapterDependency::state();
 	}
 
 	/** Evaluate the current WordPress identity on every MCP request and resource read. */
 	public static function can_read(): bool {
-		return 'read_only' === self::mode() && is_user_logged_in() && current_user_can( 'read' );
+		return self::is_enabled() && is_user_logged_in() && current_user_can( 'read' );
 	}
 
 	/** Reconcile a network activation change using the same dependency boundary. */

@@ -23,7 +23,6 @@ final class MCPSetup {
 	/** Render setup inside the existing protected Settings API form. */
 	public static function render(): void {
 		echo '<p>' . esc_html__( 'Install and activate WordPress MCP Adapter to enable MCP connections. Cybermaps’ sitemaps, AI publications and reports work independently.', 'cybermaps' ) . '</p>';
-		self::migration_notice();
 		$state = AdapterDependency::state();
 		if ( 'ready' !== $state ) {
 			self::dependency_action( $state );
@@ -31,14 +30,6 @@ final class MCPSetup {
 			self::render_opt_in();
 		}
 		echo '<p><a href="https://cybermaps.dev/docs/mcp/">' . esc_html__( 'MCP connection and migration guide', 'cybermaps' ) . '</a></p>';
-	}
-
-	/** Migration information is dismissible using WordPress's standard notice UI. */
-	public static function migration_notice(): void {
-		if ( '1' !== (string) get_option( MCPMigration::NOTICE_OPTION, '' ) || 'read_only' === WordPressIntegration::mode() ) {
-			return;
-		}
-		echo '<div class="notice notice-info inline is-dismissible"><p>' . esc_html__( 'Cybermaps 8.0 retires the old MCP endpoint and OAuth credentials. Install MCP Adapter, enable the read-only integration below, and reconnect your clients. Remote audit, publishing, purge and IndexNow tools have been removed; their dashboard controls remain available.', 'cybermaps' ) . '</p></div>';
 	}
 
 	/** Link to native WordPress actions; no automatic installation or activation. */
@@ -66,7 +57,7 @@ final class MCPSetup {
 	/** Render only meaningful controls when the required integration is ready. */
 	private static function render_opt_in(): void {
 		$settings = ConfigurationStore::settings();
-		if ( '1' !== (string) get_option( MCPMigration::DONE_OPTION, '' ) ) {
+		if ( ! MCPMigration::is_complete() ) {
 			echo '<p>' . esc_html__( 'Legacy MCP cleanup is pending. The integration remains unavailable until cleanup succeeds.', 'cybermaps' ) . '</p>';
 			return;
 		}
@@ -74,18 +65,15 @@ final class MCPSetup {
 			echo '<p>' . esc_html__( 'Enable and save the AI Publication Hub first, then enable Cybermaps MCP.', 'cybermaps' ) . '</p>';
 			return;
 		}
-		\Cybermaps\Admin\Settings\Fields\FieldRenderer::render_select_field(
+		echo '<input type="hidden" name="cybermaps_settings[enable_mcp_adapter]" value="0">';
+		\Cybermaps\Admin\Settings\Fields\FieldRenderer::render_checkbox_field(
 			array(
-				'label_for'   => 'mcp_mode',
-				'default'     => 'off',
-				'options'     => array(
-					'off'       => __( 'Off', 'cybermaps' ),
-					'read_only' => __( 'Enable Cybermaps MCP (read-only)', 'cybermaps' ),
-				),
+				'label_for'   => 'enable_mcp_adapter',
+				'label'       => __( 'Enable Cybermaps MCP (read-only)', 'cybermaps' ),
 				'description' => __( 'Exposes only public discovery resources and search. Save settings to apply your choice.', 'cybermaps' ),
 			)
 		);
-		if ( 'read_only' === WordPressIntegration::mode() ) {
+		if ( WordPressIntegration::is_enabled() ) {
 			echo '<p>' . esc_html__( 'MCP endpoint:', 'cybermaps' ) . ' <code>' . esc_html( rest_url( WordPressIntegration::REST_NAMESPACE . WordPressIntegration::REST_ROUTE ) ) . '</code></p>';
 			echo '<p>' . esc_html__( 'Connect over HTTPS using a WordPress Application Password for a dedicated Subscriber account. Configure credentials in your client; Cybermaps does not collect them. Clients must support this authentication method or the adapter’s WP-CLI transport.', 'cybermaps' ) . '</p>';
 		}
@@ -93,7 +81,7 @@ final class MCPSetup {
 
 	/** Human-readable status for the Overview and setup completion screen. */
 	public static function status(): string {
-		if ( 'read_only' === WordPressIntegration::mode() ) {
+		if ( WordPressIntegration::is_enabled() ) {
 			return __( 'Read-only MCP enabled', 'cybermaps' );
 		}
 		return 'ready' === AdapterDependency::state()

@@ -206,6 +206,16 @@ final class UpgradeTest extends \WP_UnitTestCase {
 		}
 	}
 
+	public function test_interrupted_checkpoints_resume_after_removed_step(): void {
+		foreach ( array( 8, 9 ) as $position ) {
+			$GLOBALS['cybermaps_mock_options']['cybermaps_data_version'] = '6.5.0';
+			$GLOBALS['cybermaps_mock_options']['cybermaps_upgrade_state'] = array( 'target' => '6.6.0', 'step' => $position );
+			Upgrade::run();
+			$this->assertSame( '6.6.0', get_option( 'cybermaps_data_version' ) );
+			$this->assertFalse( get_option( 'cybermaps_upgrade_state', false ) );
+		}
+	}
+
 	public function test_missing_data_version_runs_the_full_upgrade(): void {
 		unset( $GLOBALS['cybermaps_mock_options']['cybermaps_data_version'] );
 		unset( $GLOBALS['cybermaps_mock_options']['cybermaps_settings']['static_engine_mode'] );

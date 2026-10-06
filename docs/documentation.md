@@ -1,6 +1,6 @@
 # Cybermaps — Technical Documentation
 
-> Version 8.0.0 · PHP 8.2 · WordPress 7.1
+> Version 8.0.1 · PHP 8.2 · WordPress 7.1
 
 Public sitemap credit is optional. In **Sitemaps**, enable **Show the CYBER MAPS
 credit on public sitemaps** to opt in. `show_sitemap_attribution` defaults to `0`
@@ -100,13 +100,20 @@ MCP Adapter 0.7.0 supports revisions 2025-11-25 and 2026-07-28.
 Connect to the dedicated Cybermaps server. The adapter’s separate default server
 may expose abilities supplied by other plugins; Cybermaps does not control it.
 
-**Upgrading from 7.x:** the migration disables MCP, retires the old
-`/wp-json/cybermaps/v1/mcp` endpoint and OAuth/device routes, removes old credentials
-and pending MCP tasks, and withdraws OAuth metadata and Auth.md. Install the
+**Upgrading from 7.x:** the custom MCP implementation is deleted, including the
+`/wp-json/cybermaps/v1/mcp` endpoint, OAuth/device routes, remote operations and generic ability dispatcher.
+Upgrade cleanup deletes old configuration keys, credential tables and pending
+MCP jobs; it does not retain a dormant server. OAuth metadata and Auth.md are removed. Install the
 adapter, enable the new integration and reconnect clients. Remote audit, static
 purge/reconciliation and IndexNow tools are retired; use their dashboard controls.
 Deactivating the adapter makes MCP unavailable and withdraws its advertisements.
 The saved Cybermaps opt-in is preserved for a later reactivation.
+
+The new integration has one boolean setting, `enable_mcp_adapter`, with no
+operational modes. An explicit adapter opt-in made on 8.0.0 is converted to this
+setting; legacy 7.x preferences never grant adapter consent. The obsolete OAuth
+upgrade placeholder and migration notice have been removed. Deletion-only
+cleanup remains for direct upgrades from older installations.
 
 The default-off WebMCP bridge registers only three read-only browser tools:
 `cybermaps.search_site`, `cybermaps.get_page_markdown`, and

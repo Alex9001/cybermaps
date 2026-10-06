@@ -53,12 +53,12 @@ class Discovery implements SettingsTab {
 		);
 
 		add_settings_field(
-			'mcp_mode',
+			'enable_mcp_adapter',
 			__( 'Model Context Protocol', 'cybermaps' ),
-			array( \Cybermaps\Admin\Settings\Tabs\Discovery\DiscoveryFields::class, 'render_mcp_mode' ),
+			array( \Cybermaps\Admin\Settings\Tabs\Discovery\DiscoveryFields::class, 'render_mcp_setup' ),
 			'cybermaps-ai',
 			'cybermaps_discovery_hub_section',
-			array( 'label_for' => 'mcp_mode' )
+			array( 'label_for' => 'enable_mcp_adapter' )
 		);
 
 		add_settings_field(

@@ -1,6 +1,13 @@
 Cybermaps release history
 =========================
 
+8.0.1
+-----
+* Replace retired MCP mode configuration with an explicit read-only adapter switch.
+* Delete obsolete settings, migration notices and the unused OAuth upgrade placeholder.
+* Preserve 8.0 adapter consent and retain deletion-only cleanup for direct 7.x upgrades.
+* Guard against reintroducing legacy runtime configuration; update setup and migration docs.
+
 8.0.0
 -----
 * Optional WordPress MCP Adapter replaces the custom transport and OAuth stack.

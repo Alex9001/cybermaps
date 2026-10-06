@@ -448,7 +448,7 @@ final class AIConfigurationRegistry {
 
 		return array(
 			'enable_discovery_hub'        => self::boolean_field( $section, 'enable_discovery_hub', 'AI Publication Hub', 'Master switch for Cybermaps public AI discovery publications and routes.', false, 'high' ),
-			'mcp_mode'                    => self::field( $section, 'mcp_mode', 'Model Context Protocol', 'Optional read-only MCP connections require WordPress MCP Adapter 0.7.0 or newer and the AI Publication Hub.', 'string', array( 'enum' => array( 'off', 'read_only' ) ), 'off', 'off', 'high', array( self::dependency( 'enable_discovery_hub', true ) ) ),
+			'enable_mcp_adapter'          => self::boolean_field( $section, 'enable_mcp_adapter', 'Cybermaps MCP (read-only)', 'Optional read-only MCP connections require WordPress MCP Adapter 0.7.0 or newer and the AI Publication Hub.', false, 'high' ),
 			'enable_webmcp'               => self::boolean_field( $section, 'enable_webmcp', 'Browser WebMCP', 'Registers read-only site tools in participating preview browsers.', false, 'medium', array( self::dependency( 'enable_discovery_hub', true ) ) ),
 			'enable_header_discovery'     => self::boolean_field( $section, 'enable_header_discovery', 'Header-based discovery', 'Adds RFC 8288 Link headers for selected Cybermaps publications to eligible front-end responses.', false, 'medium', array( self::dependency( 'enable_discovery_hub', true ) ) ),
 			'enable_markdown_negotiation' => self::boolean_field( $section, 'enable_markdown_negotiation', 'Markdown for Agents negotiation', 'Serves bounded stored-content Markdown at eligible canonical URLs when text/markdown is explicitly preferred.', false, 'high', array( self::dependency( 'enable_discovery_hub', true ) ) ),

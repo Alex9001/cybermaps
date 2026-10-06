@@ -2709,11 +2709,11 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Verify the schema immediately after dbDelta; a cached result could mark a failed installation ready."
         ],
-        "file_code_sha256": "51417a8f1e6c38a41f269509f7bd642f70b58791f28a4add937641494e3a18da",
+        "file_code_sha256": "04e1f3b1a260b46b9b770f8054e8d348cb7498351310ad4067bfe2c776e416fb",
         "code_sha256": "beabdd7c85988752da39a2ebd454234be9e5c029023444eb3ed61f496f944431",
         "findings": {}
       },
-      "rationale": "Verify the schema immediately after dbDelta; a cached result could mark a failed installation ready. 8.0 review: retained the historical OAuth step ID as a no-op to prevent recreation of retired tables; existing lease-fenced SQL and historical migrations are unchanged.",
+      "rationale": "Verify the schema immediately after dbDelta; a cached result could mark a failed installation ready. 8.0 review: retained the historical OAuth step ID as a no-op to prevent recreation of retired tables; existing lease-fenced SQL and historical migrations are unchanged. 8.0.1 review: removed the empty OAuth step and retained stable numeric checkpoints with ordered iteration. Inspected run_locked_upgrade, run_migration_steps, completion, normalization and lease-guarded callers; prepared SQL bodies and findings are unchanged. Interrupted positions 8/9 resume reconciliation, and successor/future-version lease tests still pass.",
       "tests": [
         "tests/Core/UpgradeTest.php"
       ]
@@ -2726,11 +2726,11 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- INSERT SELECT is authorized by the exact outer lease row in the same statement."
         ],
-        "file_code_sha256": "51417a8f1e6c38a41f269509f7bd642f70b58791f28a4add937641494e3a18da",
+        "file_code_sha256": "04e1f3b1a260b46b9b770f8054e8d348cb7498351310ad4067bfe2c776e416fb",
         "code_sha256": "cb436b5708281b271bd811a83251d08e2c9e4bc73738469ae1b71ab6573a6f1f",
         "findings": {}
       },
-      "rationale": "INSERT SELECT is authorized by the exact outer lease row in the same statement. 8.0 review: retained the historical OAuth step ID as a no-op to prevent recreation of retired tables; existing lease-fenced SQL and historical migrations are unchanged.",
+      "rationale": "INSERT SELECT is authorized by the exact outer lease row in the same statement. 8.0 review: retained the historical OAuth step ID as a no-op to prevent recreation of retired tables; existing lease-fenced SQL and historical migrations are unchanged. 8.0.1 review: removed the empty OAuth step and retained stable numeric checkpoints with ordered iteration. Inspected run_locked_upgrade, run_migration_steps, completion, normalization and lease-guarded callers; prepared SQL bodies and findings are unchanged. Interrupted positions 8/9 resume reconciliation, and successor/future-version lease tests still pass.",
       "tests": [
         "tests/Core/UpgradeTest.php"
       ]
@@ -2743,11 +2743,11 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- One statement binds cleanup CAS to the exact outer lease row."
         ],
-        "file_code_sha256": "51417a8f1e6c38a41f269509f7bd642f70b58791f28a4add937641494e3a18da",
+        "file_code_sha256": "04e1f3b1a260b46b9b770f8054e8d348cb7498351310ad4067bfe2c776e416fb",
         "code_sha256": "9287150a015e6f177bebd61968088ffcbb3813811016b82d7ed93197b57dd6c8",
         "findings": {}
       },
-      "rationale": "One statement binds cleanup CAS to the exact outer lease row. 8.0 review: retained the historical OAuth step ID as a no-op to prevent recreation of retired tables; existing lease-fenced SQL and historical migrations are unchanged.",
+      "rationale": "One statement binds cleanup CAS to the exact outer lease row. 8.0 review: retained the historical OAuth step ID as a no-op to prevent recreation of retired tables; existing lease-fenced SQL and historical migrations are unchanged. 8.0.1 review: removed the empty OAuth step and retained stable numeric checkpoints with ordered iteration. Inspected run_locked_upgrade, run_migration_steps, completion, normalization and lease-guarded callers; prepared SQL bodies and findings are unchanged. Interrupted positions 8/9 resume reconciliation, and successor/future-version lease tests still pass.",
       "tests": [
         "tests/Core/UpgradeTest.php"
       ]
@@ -2760,11 +2760,11 @@
         "suppressions": [
           "// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- This one-time migration copies and removes exact rows in WordPress's postmeta table."
         ],
-        "file_code_sha256": "51417a8f1e6c38a41f269509f7bd642f70b58791f28a4add937641494e3a18da",
+        "file_code_sha256": "04e1f3b1a260b46b9b770f8054e8d348cb7498351310ad4067bfe2c776e416fb",
         "code_sha256": "eb0c297e5ea977a836e682b36bd6d11585d4d80c88f226685e9d825a4fa90155",
         "findings": {}
       },
-      "rationale": "This one-time migration copies and removes exact rows in WordPress's postmeta table. 8.0 review: retained the historical OAuth step ID as a no-op to prevent recreation of retired tables; existing lease-fenced SQL and historical migrations are unchanged.",
+      "rationale": "This one-time migration copies and removes exact rows in WordPress's postmeta table. 8.0 review: retained the historical OAuth step ID as a no-op to prevent recreation of retired tables; existing lease-fenced SQL and historical migrations are unchanged. 8.0.1 review: removed the empty OAuth step and retained stable numeric checkpoints with ordered iteration. Inspected run_locked_upgrade, run_migration_steps, completion, normalization and lease-guarded callers; prepared SQL bodies and findings are unchanged. Interrupted positions 8/9 resume reconciliation, and successor/future-version lease tests still pass.",
       "tests": [
         "tests/Core/UpgradeTest.php"
       ]
@@ -2777,11 +2777,11 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Raw bytes are required for the exact lease/state CAS."
         ],
-        "file_code_sha256": "51417a8f1e6c38a41f269509f7bd642f70b58791f28a4add937641494e3a18da",
+        "file_code_sha256": "04e1f3b1a260b46b9b770f8054e8d348cb7498351310ad4067bfe2c776e416fb",
         "code_sha256": "6f59ad4164380aaf1e82a91b5363454ddf96a141da01132645e8b80d297cbfc0",
         "findings": {}
       },
-      "rationale": "Raw bytes are required for the exact lease/state CAS. 8.0 review: retained the historical OAuth step ID as a no-op to prevent recreation of retired tables; existing lease-fenced SQL and historical migrations are unchanged.",
+      "rationale": "Raw bytes are required for the exact lease/state CAS. 8.0 review: retained the historical OAuth step ID as a no-op to prevent recreation of retired tables; existing lease-fenced SQL and historical migrations are unchanged. 8.0.1 review: removed the empty OAuth step and retained stable numeric checkpoints with ordered iteration. Inspected run_locked_upgrade, run_migration_steps, completion, normalization and lease-guarded callers; prepared SQL bodies and findings are unchanged. Interrupted positions 8/9 resume reconciliation, and successor/future-version lease tests still pass.",
       "tests": [
         "tests/Core/UpgradeTest.php"
       ]
@@ -2794,11 +2794,11 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- One statement binds the state/version CAS to the exact outer lease row."
         ],
-        "file_code_sha256": "51417a8f1e6c38a41f269509f7bd642f70b58791f28a4add937641494e3a18da",
+        "file_code_sha256": "04e1f3b1a260b46b9b770f8054e8d348cb7498351310ad4067bfe2c776e416fb",
         "code_sha256": "c0fd9b3622b2d46382be021f829f8803de9f94a64d722670c09620154d643d8b",
         "findings": {}
       },
-      "rationale": "One statement binds the state/version CAS to the exact outer lease row. 8.0 review: retained the historical OAuth step ID as a no-op to prevent recreation of retired tables; existing lease-fenced SQL and historical migrations are unchanged.",
+      "rationale": "One statement binds the state/version CAS to the exact outer lease row. 8.0 review: retained the historical OAuth step ID as a no-op to prevent recreation of retired tables; existing lease-fenced SQL and historical migrations are unchanged. 8.0.1 review: removed the empty OAuth step and retained stable numeric checkpoints with ordered iteration. Inspected run_locked_upgrade, run_migration_steps, completion, normalization and lease-guarded callers; prepared SQL bodies and findings are unchanged. Interrupted positions 8/9 resume reconciliation, and successor/future-version lease tests still pass.",
       "tests": [
         "tests/Core/UpgradeTest.php"
       ]

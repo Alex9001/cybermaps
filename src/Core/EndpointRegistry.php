@@ -166,7 +166,7 @@ final class EndpointRegistry {
 
 		$settings = $settings ?? ConfigurationStore::settings();
 		if ( in_array( $id, array( 'mcp', 'rest_mcp', 'mcp_server_card', 'rest_mcp_server_card' ), true ) ) {
-			return 'read_only' === \Cybermaps\MCP\WordPressIntegration::mode( $settings );
+			return \Cybermaps\MCP\WordPressIntegration::is_enabled( $settings );
 		}
 
 		$setting = isset( $endpoint['enabled_setting'] ) ? (string) $endpoint['enabled_setting'] : '';

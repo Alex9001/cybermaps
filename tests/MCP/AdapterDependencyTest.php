@@ -33,6 +33,6 @@ final class AdapterDependencyTest extends TestCase {
         $GLOBALS['cybermaps_mock_is_multisite'] = true;
         $GLOBALS['cybermaps_mock_site_options']['active_sitewide_plugins'] = array( AdapterDependency::PLUGIN => time() );
         self::assertSame( 'ready', AdapterDependency::state() );
-        self::assertSame( 'off', \Cybermaps\MCP\WordPressIntegration::mode() );
+        self::assertFalse( \Cybermaps\MCP\WordPressIntegration::is_enabled() );
     }
 }

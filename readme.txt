@@ -3,7 +3,7 @@ Contributors: oreshkin
 Tags: sitemap, llms-txt, technical-seo, content-audit, indexnow
 Requires at least: 7.1
 Tested up to: 7.1
-Stable tag: 8.0.0
+Stable tag: 8.0.1
 Requires PHP: 8.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -13,19 +13,18 @@ Publish WordPress sitemaps and machine-readable maps.
 == Description ==
 
 Sitemaps, AI discovery, static delivery and reports.
-Read-only MCP needs MCP Adapter 0.7.0+. No ranking guarantees.
+Optional MCP requires MCP Adapter 0.7.0+.
 
 == Installation ==
 
 Activate; open Cybermaps → Overview → Quick Setup.
 MCP: in AI Publishing, install/activate MCP Adapter, enable read-only MCP and save.
-Use /wp-json/mcp/cybermaps with HTTPS and a Subscriber's WordPress Application
-Password, or adapter WP-CLI transport. Other features need no adapter.
-Connection and 7.x migration guide: https://cybermaps.dev/docs/mcp/
+Use HTTPS and a Subscriber Application Password, or WP-CLI.
+Endpoint, setup and migration: https://cybermaps.dev/docs/mcp/
 
 == Source Code ==
 
-https://github.com/Alex9001/cybermaps/tree/v8.0.0
+https://github.com/Alex9001/cybermaps/tree/v8.0.1
 Editable JS/CSS: assets/; setup-wizard.js uses wp.element. No compilation.
 Build: composer install; bash bin/package-candidate.sh. Assets copied unchanged.
 
@@ -74,6 +73,9 @@ REST search stores neither raw IPs nor queries. Logged-in/diagnostic traffic omi
 identifying data. Uninstall retains data unless Uninstall Cleanup was enabled.
 
 == Changelog ==
+
+= 8.0.1 =
+* Delete obsolete MCP settings and upgrade code; use one adapter switch.
 
 = 8.0.0 =
 * Optional WordPress MCP Adapter replaces custom MCP/OAuth. Only public resources and search remain; remote operations and arbitrary abilities are removed.
@@ -180,6 +182,9 @@ identifying data. Uninstall retains data unless Uninstall Cleanup was enabled.
 Earlier release history is included in `changelog.txt`.
 
 == Upgrade Notice ==
+
+= 8.0.1 =
+Removes legacy MCP settings; preserves 8.0 adapter consent.
 
 = 8.0.0 =
 MCP users: install MCP Adapter 0.7.0+, enable read-only MCP in AI Publishing and reconnect. Old endpoints, credentials and tasks are retired.

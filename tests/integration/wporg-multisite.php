@@ -16,13 +16,13 @@ foreach ( array( get_current_blog_id(), (int) $site ) as $site_id ) {
 			throw new RuntimeException( 'Multisite attempted shared-root static publication.' );
 		}
 		\Cybermaps\Core\MCPMigration::run();
-		if ( 'off' !== \Cybermaps\MCP\WordPressIntegration::mode() ) throw new RuntimeException( 'Network adapter bypassed per-site opt-in.' );
+		if ( \Cybermaps\MCP\WordPressIntegration::is_enabled() ) throw new RuntimeException( 'Network adapter bypassed per-site opt-in.' );
 		$settings = get_option( 'cybermaps_settings' );
 		$settings['enable_discovery_hub'] = '1';
-		$settings['mcp_mode'] = 'read_only';
+		$settings['enable_mcp_adapter'] = '1';
 		update_option( 'cybermaps_settings', $settings );
 		\Cybermaps\Core\ConfigurationStore::reset_memo();
-		if ( 'read_only' !== \Cybermaps\MCP\WordPressIntegration::mode() ) throw new RuntimeException( 'Network adapter unavailable after site opt-in.' );
+		if ( ! \Cybermaps\MCP\WordPressIntegration::is_enabled() ) throw new RuntimeException( 'Network adapter unavailable after site opt-in.' );
 		$xml = ( new \Cybermaps\Sitemap\Orchestrator() )->generate_xml( 'index', 1 );
 		if ( str_contains( $xml, 'sitemap-attribution.xsl' ) ) {
 			throw new RuntimeException( 'Site received unconsented attribution.' );

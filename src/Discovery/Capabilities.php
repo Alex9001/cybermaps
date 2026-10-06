@@ -50,12 +50,10 @@ final class Capabilities {
 		$output   .= '# Site Guide: ' . $this->plain_line( $site_name ) . "\n\n";
 		$output   .= "This skill describes public, read-only site resources. Client discovery and support depend on the consuming agent.\n\n";
 		if ( $registry->is_enabled( 'mcp', $settings ) ) {
-			$mcp_mode = (string) ( $settings['mcp_mode'] ?? 'off' );
-			$mcp_url  = $registry->get_url( 'mcp' );
+			$mcp_url = $registry->get_url( 'mcp' );
 			if ( '' !== $mcp_url ) {
 				$output .= "## Optional MCP endpoint\n\n";
 				$output .= '- Endpoint: [' . $mcp_url . '](' . $mcp_url . ")\n";
-				$output .= '- Mode: `' . $this->plain_line( $mcp_mode ) . "`\n";
 				$output .= "This administrator-enabled endpoint uses WordPress MCP Adapter and exposes only public resources and read-only search. Clients require WordPress authentication and the read capability.\n\n";
 			}
 		} else {

@@ -71,7 +71,7 @@ final class OpenAPITest extends TestCase {
 	}
 
 	public function test_adapter_metadata_requires_dependency_and_opt_in(): void {
-		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['mcp_mode'] = 'read_only';
+		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['enable_mcp_adapter'] = '1';
 		$this->assertArrayNotHasKey( 'x-cybermaps-mcp', ( new OpenAPI() )->get_document() );
 		$adapter = \Cybermaps\Tests\AdapterFixture::enable();
 		$document = ( new OpenAPI() )->get_document();

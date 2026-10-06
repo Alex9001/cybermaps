@@ -157,6 +157,8 @@ run_plugin_check() {
 }
 
 
+wp_cli eval-file /validation/wporg-mcp-preferences.php >> "${RUNTIME_DIR}/smoke.txt"
+
 # Optional MCP integration is tested using the official plugin, never a protocol mock.
 MCP_ADAPTER_VERSION="$(python3 -B -c 'import json,sys; print(json.load(open(sys.argv[1]))["mcp_adapter_version"])' "${PROJECT_DIR}/docs/dev/release-policy.json")"
 mkdir -p "${RUNTIME_DIR}/wordpress/wp-content/mu-plugins"
@@ -168,7 +170,7 @@ wp_cli mcp-adapter serve --server=cybermaps --user=mcp-reader < "${PROJECT_DIR}/
 python3 -B "${PROJECT_DIR}/tests/integration/wporg-mcp-stdio.py" "${RUNTIME_DIR}/mcp-stdio.jsonl" >> "${RUNTIME_DIR}/smoke.txt"
 wp_cli eval 'if (get_option("cybermaps_test_hostile_called", false)) { throw new RuntimeException("Hostile ability ran."); }' >> "${RUNTIME_DIR}/smoke.txt"
 wp_cli plugin deactivate mcp-adapter --quiet
-wp_cli eval 'if ("off" !== \Cybermaps\MCP\WordPressIntegration::mode() || \Cybermaps\Discovery\MCPServerCard::is_available()) { throw new RuntimeException("Disabled adapter still advertised."); }' >> "${RUNTIME_DIR}/smoke.txt"
+wp_cli eval 'if (\Cybermaps\MCP\WordPressIntegration::is_enabled() || \Cybermaps\Discovery\MCPServerCard::is_available()) { throw new RuntimeException("Disabled adapter still advertised."); }' >> "${RUNTIME_DIR}/smoke.txt"
 rm "${RUNTIME_DIR}/wordpress/wp-content/mu-plugins/cybermaps-mcp-test.php" "${RUNTIME_DIR}/mcp-credentials.tmp"
 
 run_plugin_check "${RUNTIME_DIR}/plugin-check-new.json"

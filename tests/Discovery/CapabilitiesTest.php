@@ -30,7 +30,7 @@ class CapabilitiesTest extends TestCase {
 		$adapter = \Cybermaps\Tests\AdapterFixture::enable();
 		$GLOBALS['cybermaps_mock_options']['cybermaps_settings'] = array(
 			'enable_discovery_hub' => '1',
-			'mcp_mode'            => 'read_only',
+			'enable_mcp_adapter'            => '1',
 		);
 
 		$output = ( new Capabilities() )->get_skill_markdown();

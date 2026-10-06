@@ -71,7 +71,7 @@ final class ResourceAbilities {
 
 	/** Register wrappers only when the optional integration is configured and compatible. */
 	public static function register(): void {
-		if ( 'read_only' !== WordPressIntegration::mode() ) {
+		if ( ! WordPressIntegration::is_enabled() ) {
 			return;
 		}
 		foreach ( self::definitions() as $id => $definition ) {

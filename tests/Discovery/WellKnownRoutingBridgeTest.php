@@ -16,7 +16,7 @@ final class WellKnownRoutingBridgeTest extends TestCase {
 		$GLOBALS['cybermaps_mock_options'] = array(
 			'cybermaps_settings' => array(
 				'enable_discovery_hub' => '1',
-				'mcp_mode'             => 'off',
+				'enable_mcp_adapter'             => '0',
 				'static_engine_mode'   => 'well_known',
 			),
 		);

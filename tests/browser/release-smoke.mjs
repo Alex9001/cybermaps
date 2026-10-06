@@ -32,7 +32,7 @@ try {
   await page.keyboard.press('Escape');
   await page.goto(origin + '/wp-admin/admin.php?page=cybermaps-settings&tab=ai');
   if (await page.getByRole('link', {name: 'Install MCP Adapter', exact: true}).count() !== 1) throw new Error('Optional MCP install guidance missing');
-  if (await page.locator('select[name="cybermaps_settings[mcp_mode]"]').count()) throw new Error('MCP opt-in shown without dependency');
+  if (await page.locator('input[name="cybermaps_settings[enable_mcp_adapter]"]').count()) throw new Error('MCP opt-in shown without dependency');
   if (errors.length) throw new Error(errors.join('\n'));
   writeFileSync(output, JSON.stringify({schema_version: 1, passed: true, checks: ['wizard', 'icons', 'attribution-save', 'tooltip', 'mcp-setup'], browser: await browser.version(), errors}, null, 2));
 } catch (error) {
