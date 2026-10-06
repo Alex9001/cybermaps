@@ -264,8 +264,6 @@ final class Lifecycle {
 		\Cybermaps\Discovery\StaticBridge::get_instance()->resume();
 		\Cybermaps\Admin\Logs::create_table();
 		\Cybermaps\Audit\AuditRunRepository::create_tables();
-		\Cybermaps\MCP\OAuth\WpdbOAuthRepository::create_tables();
-		\Cybermaps\MCP\TaskRepository::create_tables();
 		\Cybermaps\Sitemap\Orchestrator::add_rewrite_rules();
 		NativeRoutingRegistrar::get_instance()->activate( $hard_flush );
 		\Cybermaps\Discovery\WellKnownRoutingBridge::request_reconciliation( true );
@@ -315,8 +313,8 @@ final class Lifecycle {
 				\Cybermaps\Discovery\WellKnownRoutingBridge::RECONCILE_HOOK,
 				\Cybermaps\Discovery\WellKnownRoutingBridge::VERIFY_HOOK,
 				\Cybermaps\Discovery\IndexNowQueue::CRON_HOOK,
-				\Cybermaps\MCP\WordPressTaskService::RUN_HOOK,
-				\Cybermaps\MCP\WordPressTaskService::CLEANUP_HOOK,
+				'cybermaps_mcp_run_task',
+				'cybermaps_mcp_cleanup_tasks',
 				\Cybermaps\Sitemap\PageOccupancyBuilder::HOOK,
 				Upgrade::RETRY_HOOK,
 				\Cybermaps\Admin\NetworkSetup::RETRY_HOOK,

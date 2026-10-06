@@ -52,14 +52,14 @@ final class MCPServerCard {
 			'$schema'     => self::SCHEMA_URI,
 			'name'        => 'dev.cybermaps/wordpress',
 			'version'     => CYBERMAPS_VERSION,
-			'description' => 'Public discovery and bounded site-content operations for this WordPress site.',
+			'description' => 'Read-only public discovery and search through WordPress MCP Adapter.',
 			'title'       => 'Cybermaps',
 			'websiteUrl'  => \Cybermaps\Core\URLManager::get_home_url( '/' ),
 			'remotes'     => array(
 				array(
 					'type'                      => 'streamable-http',
 					'url'                       => \Cybermaps\Core\EndpointRegistry::get_instance()->get_url( 'mcp' ),
-					'supportedProtocolVersions' => array( \Cybermaps\MCP\Protocol::VERSION ),
+					'supportedProtocolVersions' => array( '2025-11-25', '2026-07-28' ),
 				),
 			),
 		);

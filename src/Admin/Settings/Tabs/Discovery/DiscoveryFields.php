@@ -8,23 +8,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class DiscoveryFields {
 
-	/** Render the explicit optional MCP access tier. */
+	/** Render optional adapter setup in the existing settings form. */
 	public static function render_mcp_mode( $args ): void {
 		unset( $args );
-		\Cybermaps\Admin\Settings\Fields\FieldRenderer::render_select_field(
-			array(
-				'label_for'   => 'mcp_mode',
-				'default'     => 'off',
-				'options'     => array(
-					'off'        => __( 'Off', 'cybermaps' ),
-					'discovery'  => __( 'Discovery only', 'cybermaps' ),
-					'read_only'  => __( 'Read-only', 'cybermaps' ),
-					'operations' => __( 'Operations', 'cybermaps' ),
-				),
-				'description' => __( 'MCP is disabled by default and remains unavailable while the AI Publication Hub is disabled.', 'cybermaps' ),
-				'maturity'    => 'mcp',
-			)
-		);
+		\Cybermaps\Admin\MCPSetup::render();
 	}
 
 	public static function render_ai_sitemap_controls() {

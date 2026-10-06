@@ -34,7 +34,7 @@ final class WebMCPIntegrationTest extends TestCase {
 			'ai'
 		);
 		self::assertSame( '1', $enabled['enable_webmcp'] );
-		self::assertSame( 'user_claimed', $enabled['agent_registration_mode'] );
+		self::assertArrayNotHasKey( 'agent_registration_mode', $enabled );
 
 		$invalid = SettingsDiscoveryNormalizer::normalize(
 			array( 'agent_registration_mode' => 'automatic' ),
@@ -42,7 +42,7 @@ final class WebMCPIntegrationTest extends TestCase {
 			array(),
 			'ai'
 		);
-		self::assertSame( 'off', $invalid['agent_registration_mode'] );
+		self::assertArrayNotHasKey( 'agent_registration_mode', $invalid );
 
 		$preserved = SettingsDiscoveryNormalizer::normalize(
 			array(),
@@ -54,7 +54,7 @@ final class WebMCPIntegrationTest extends TestCase {
 			'advanced'
 		);
 		self::assertSame( '1', $preserved['enable_webmcp'] );
-		self::assertSame( 'user_claimed', $preserved['agent_registration_mode'] );
+		self::assertArrayNotHasKey( 'agent_registration_mode', $preserved );
 	}
 
 	public function test_ai_configuration_registry_exposes_safe_defaults_and_enum(): void {
@@ -62,8 +62,7 @@ final class WebMCPIntegrationTest extends TestCase {
 		$registration = AIConfigurationRegistry::get_field( 'agent_registration_mode' );
 
 		self::assertFalse( $webmcp['effective_default'] );
-		self::assertSame( 'off', $registration['effective_default'] );
-		self::assertSame( array( 'off', 'user_claimed' ), $registration['allowed']['enum'] );
+		self::assertNull( $registration );
 	}
 
 	public function test_browser_asset_prefers_document_api_and_registers_only_read_only_tools(): void {

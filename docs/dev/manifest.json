@@ -1,9 +1,9 @@
 {
     "plugin": "CYBERMAPS: XML Sitemaps & llms.txt",
-    "version": "7.5.4",
+    "version": "8.0.0",
     "php_min": "8.2",
     "wp_min": "7.1",
-    "generated_at": "2026-09-28T09:15:06+00:00",
+    "generated_at": "2026-10-06T07:26:25+00:00",
     "discovery_endpoints": [
         {
             "id": "manifest",
@@ -420,24 +420,6 @@
             "static_bucket": ""
         },
         {
-            "id": "auth_md",
-            "path": "/auth.md",
-            "canonical": true,
-            "parameterized": false,
-            "type": "text/markdown",
-            "label": "Agent Registration Guide",
-            "desc": "Opt-in Auth.md instructions for user-claimed OAuth device authorization.",
-            "spec": "Auth.md emerging protocol",
-            "delivery": "fixed-path",
-            "maturity": "community-convention",
-            "adoption": "reference-only",
-            "group": "essential",
-            "enabled_setting": "",
-            "advertised": true,
-            "throttle_tier": "cheap",
-            "static_bucket": ""
-        },
-        {
             "id": "mcp_server_card",
             "path": "/.well-known/mcp/server-card.json",
             "canonical": true,
@@ -452,42 +434,6 @@
             "group": "experimental",
             "enabled_setting": "",
             "advertised": false,
-            "throttle_tier": "cheap",
-            "static_bucket": "well_known"
-        },
-        {
-            "id": "oauth_authorization_server",
-            "path": "/.well-known/oauth-authorization-server",
-            "canonical": true,
-            "parameterized": false,
-            "type": "application/json",
-            "label": "OAuth Authorization Server Metadata",
-            "desc": "RFC 8414 metadata describing how an agent obtains and refreshes access tokens.",
-            "spec": "RFC 8414 OAuth 2.0 Authorization Server Metadata",
-            "delivery": "fixed-path",
-            "maturity": "formal-standard",
-            "adoption": "independent-producers",
-            "group": "essential",
-            "enabled_setting": "",
-            "advertised": true,
-            "throttle_tier": "cheap",
-            "static_bucket": "well_known"
-        },
-        {
-            "id": "oauth_protected_resource",
-            "path": "/.well-known/oauth-protected-resource",
-            "canonical": true,
-            "parameterized": false,
-            "type": "application/json",
-            "label": "OAuth Protected Resource Metadata",
-            "desc": "RFC 9728 metadata identifying the MCP resource, issuers, and supported scopes.",
-            "spec": "RFC 9728 OAuth 2.0 Protected Resource Metadata",
-            "delivery": "fixed-path",
-            "maturity": "formal-standard",
-            "adoption": "independent-producers",
-            "group": "essential",
-            "enabled_setting": "",
-            "advertised": true,
             "throttle_tier": "cheap",
             "static_bucket": "well_known"
         },
@@ -654,7 +600,7 @@
             "static_bucket": ""
         }
     ],
-    "discovery_endpoint_count": 36,
+    "discovery_endpoint_count": 33,
     "sitemap_features": [
         "XML sitemaps with configurable base URL slug",
         "Automatic 2,000 URL children with collision-safe post-type and taxonomy route namespaces",
@@ -718,9 +664,9 @@
             "full": "/wp-json/cybermaps/v1/health"
         },
         {
-            "namespace": "cybermaps/v1",
-            "route": "/mcp",
-            "full": "/wp-json/cybermaps/v1/mcp"
+            "namespace": "mcp",
+            "route": "/cybermaps",
+            "full": "/wp-json/mcp/cybermaps"
         },
         {
             "namespace": "cybermaps/v1",
@@ -810,11 +756,9 @@
         ".well-known/agent-skills/index.json",
         ".well-known/api-catalog",
         ".well-known/ai-catalog.json",
-        ".well-known/mcp/server-card.json",
-        ".well-known/oauth-authorization-server",
-        ".well-known/oauth-protected-resource"
+        ".well-known/mcp/server-card.json"
     ],
-    "static_file_count": 29,
+    "static_file_count": 27,
     "static_engine": {
         "default": "well_known",
         "modes": [
@@ -824,7 +768,7 @@
             },
             {
                 "mode": "well_known",
-                "label": "Publishes the 11 registered core compatibility files; all other supported routes remain dynamic. (Default)"
+                "label": "Publishes the 9 registered core compatibility files; all other supported routes remain dynamic. (Default)"
             },
             {
                 "mode": "all",
@@ -833,8 +777,8 @@
         ],
         "target_counts": {
             "off": 0,
-            "well_known": 11,
-            "all": 21
+            "well_known": 9,
+            "all": 19
         },
         "multisite": "Dynamic delivery only; physical root files are disabled because sites share a web root."
     },
@@ -842,7 +786,6 @@
         "agency_logo",
         "agency_name",
         "agency_url",
-        "agent_registration_mode",
         "ai_action_mappings",
         "ai_business_description",
         "ai_capabilities",
@@ -938,7 +881,7 @@
         "update_comment_post",
         "websub_hubs"
     ],
-    "settings_count": 98,
+    "settings_count": 97,
     "configuration_options": [
         {
             "option": "cybermaps_settings",
@@ -948,7 +891,6 @@
                 "agency_logo",
                 "agency_name",
                 "agency_url",
-                "agent_registration_mode",
                 "ai_action_mappings",
                 "ai_business_description",
                 "ai_capabilities",
@@ -1301,17 +1243,17 @@
         "format": "cybermaps-ai-configuration-changes",
         "format_version": 2,
         "section_count": 8,
-        "field_count": 122,
+        "field_count": 121,
         "forbidden_fields": [
             "api_secret",
             "delete_data_on_uninstall"
         ],
-        "catalog_hash": "8fe4461c7a89df1527b02fd8a080ad627290b732c67773a82058d2be8dc92e64",
-        "schema_hash": "504b7e847410170ae29deea7f9ea196d6a45285f9d4fc4f7282eb7ed5b775cca",
+        "catalog_hash": "08a74ec739394f738fa88058555132effda0dba36a4b3ebbfa2e1c289d6ec7f7",
+        "schema_hash": "42b8ed10d057983a78c83e8398f8040b7a93dff0db2253f80b0705aaf543363b",
         "guide_path": "docs/ai-configuration.md",
         "guide_url": "https://cybermaps.dev/docs/ai-configuration/",
-        "schema_url": "https://cybermaps.dev/specs/ai-configuration/7.5.4/schema.json",
-        "catalog_url": "https://cybermaps.dev/specs/ai-configuration/7.5.4/catalog.json",
+        "schema_url": "https://cybermaps.dev/specs/ai-configuration/8.0.0/schema.json",
+        "catalog_url": "https://cybermaps.dev/specs/ai-configuration/8.0.0/catalog.json",
         "compatibility": {
             "format_version": "exact",
             "plugin_version": "warning_on_mismatch",
@@ -1491,6 +1433,13 @@
             "fqcn": "Cybermaps\\Admin\\Logs",
             "file": "src/Admin/Logs.php",
             "summary": "Logs management for Cybermaps."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "MCPSetup",
+            "fqcn": "Cybermaps\\Admin\\MCPSetup",
+            "file": "src/Admin/MCPSetup.php",
+            "summary": "Native WordPress installation links and an explicit Cybermaps opt-in."
         },
         {
             "namespace": "Cybermaps\\Admin",
@@ -1910,7 +1859,7 @@
             "class": "AbilityKernel",
             "fqcn": "Cybermaps\\Core\\AbilityKernel",
             "file": "src/Core/AbilityKernel.php",
-            "summary": "Registers Cybermaps abilities and projects public WordPress abilities to clients."
+            "summary": "Registers public search without projecting other plugins’ abilities."
         },
         {
             "namespace": "Cybermaps\\Core",
@@ -2037,6 +1986,13 @@
             "fqcn": "Cybermaps\\Core\\Lifecycle",
             "file": "src/Core/Lifecycle.php",
             "summary": "Owns activation, deactivation, and multisite provisioning."
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "MCPMigration",
+            "fqcn": "Cybermaps\\Core\\MCPMigration",
+            "file": "src/Core/MCPMigration.php",
+            "summary": "Independent per-site migration, including sites whose main upgrade is already settled."
         },
         {
             "namespace": "Cybermaps\\Core",
@@ -2642,206 +2598,24 @@
         },
         {
             "namespace": "Cybermaps\\MCP",
-            "class": "CallbackCallerContextResolver",
-            "fqcn": "Cybermaps\\MCP\\CallbackCallerContextResolver",
-            "file": "src/MCP/CallbackCallerContextResolver.php",
-            "summary": "Callable adapter for the owning OAuth service."
+            "class": "AdapterDependency",
+            "fqcn": "Cybermaps\\MCP\\AdapterDependency",
+            "file": "src/MCP/AdapterDependency.php",
+            "summary": "Shared dependency resolver; never loads or activates another plugin."
         },
         {
             "namespace": "Cybermaps\\MCP",
-            "class": "CallbackResourceReader",
-            "fqcn": "Cybermaps\\MCP\\CallbackResourceReader",
-            "file": "src/MCP/CallbackResourceReader.php",
-            "summary": "Callable adapter for registry-backed publication generators."
-        },
-        {
-            "namespace": "Cybermaps\\MCP",
-            "class": "CallbackTaskService",
-            "fqcn": "Cybermaps\\MCP\\CallbackTaskService",
-            "file": "src/MCP/CallbackTaskService.php",
-            "summary": "Callable task adapter owned by the existing audit/static services."
-        },
-        {
-            "namespace": "Cybermaps\\MCP",
-            "class": "CallerContext",
-            "fqcn": "Cybermaps\\MCP\\CallerContext",
-            "file": "src/MCP/CallerContext.php",
-            "summary": "Authenticated identity and authorization facts for one MCP request."
-        },
-        {
-            "namespace": "Cybermaps\\MCP",
-            "class": "InMemoryConfirmationStateStore",
-            "fqcn": "Cybermaps\\MCP\\InMemoryConfirmationStateStore",
-            "file": "src/MCP/InMemoryConfirmationStateStore.php",
-            "summary": "Request-process store intended for tests and non-persistent adapters."
-        },
-        {
-            "namespace": "Cybermaps\\MCP\\OAuth",
-            "class": "AgentRegistrationMode",
-            "fqcn": "Cybermaps\\MCP\\OAuth\\AgentRegistrationMode",
-            "file": "src/MCP/OAuth/AgentRegistrationMode.php",
-            "summary": "Fail-closed resolver for the optional user-claimed OAuth registration mode."
-        },
-        {
-            "namespace": "Cybermaps\\MCP\\OAuth",
-            "class": "AuthMd",
-            "fqcn": "Cybermaps\\MCP\\OAuth\\AuthMd",
-            "file": "src/MCP/OAuth/AuthMd.php",
-            "summary": "Generates the mode-gated public OAuth agent-registration description."
-        },
-        {
-            "namespace": "Cybermaps\\MCP\\OAuth",
-            "class": "ClientRegistrationValidator",
-            "fqcn": "Cybermaps\\MCP\\OAuth\\ClientRegistrationValidator",
-            "file": "src/MCP/OAuth/ClientRegistrationValidator.php",
-            "summary": "Validates administrator-created public clients and their metadata documents."
-        },
-        {
-            "namespace": "Cybermaps\\MCP\\OAuth",
-            "class": "DeviceAuthorizationPage",
-            "fqcn": "Cybermaps\\MCP\\OAuth\\DeviceAuthorizationPage",
-            "file": "src/MCP/OAuth/DeviceAuthorizationPage.php",
-            "summary": "Logged-in WordPress approval page for RFC 8628 user codes."
-        },
-        {
-            "namespace": "Cybermaps\\MCP\\OAuth",
-            "class": "OAuthException",
-            "fqcn": "Cybermaps\\MCP\\OAuth\\OAuthException",
-            "file": "src/MCP/OAuth/OAuthException.php",
-            "summary": "A protocol-safe OAuth failure."
-        },
-        {
-            "namespace": "Cybermaps\\MCP\\OAuth",
-            "class": "OAuthMetadataPublication",
-            "fqcn": "Cybermaps\\MCP\\OAuth\\OAuthMetadataPublication",
-            "file": "src/MCP/OAuth/OAuthMetadataPublication.php",
-            "summary": "Canonical OAuth discovery bodies shared by HTTP and static publication."
-        },
-        {
-            "namespace": "Cybermaps\\MCP\\OAuth",
-            "class": "OAuthRouteController",
-            "fqcn": "Cybermaps\\MCP\\OAuth\\OAuthRouteController",
-            "file": "src/MCP/OAuth/OAuthRouteController.php",
-            "summary": "REST routes and browser-consent contract for the isolated OAuth server."
-        },
-        {
-            "namespace": "Cybermaps\\MCP\\OAuth",
-            "class": "OAuthService",
-            "fqcn": "Cybermaps\\MCP\\OAuth\\OAuthService",
-            "file": "src/MCP/OAuth/OAuthService.php",
-            "summary": "OAuth 2.1 authorization-code, PKCE, opaque-token, and metadata service."
-        },
-        {
-            "namespace": "Cybermaps\\MCP\\OAuth",
-            "class": "OAuthServiceFactory",
-            "fqcn": "Cybermaps\\MCP\\OAuth\\OAuthServiceFactory",
-            "file": "src/MCP/OAuth/OAuthServiceFactory.php",
-            "summary": "Constructs the one Core OAuth service used by routes and publications."
-        },
-        {
-            "namespace": "Cybermaps\\MCP\\OAuth",
-            "class": "WordPressUserAuthorizer",
-            "fqcn": "Cybermaps\\MCP\\OAuth\\WordPressUserAuthorizer",
-            "file": "src/MCP/OAuth/WordPressUserAuthorizer.php",
-            "summary": "Rechecks the WordPress capability required by each OAuth scope."
-        },
-        {
-            "namespace": "Cybermaps\\MCP\\OAuth",
-            "class": "WpdbOAuthRepository",
-            "fqcn": "Cybermaps\\MCP\\OAuth\\WpdbOAuthRepository",
-            "file": "src/MCP/OAuth/WpdbOAuthRepository.php",
-            "summary": "WordPress database implementation for OAuth client, grant, code, and token records."
-        },
-        {
-            "namespace": "Cybermaps\\MCP",
-            "class": "OneTimeConfirmationService",
-            "fqcn": "Cybermaps\\MCP\\OneTimeConfirmationService",
-            "file": "src/MCP/OneTimeConfirmationService.php",
-            "summary": "HMAC-signed, caller-bound, five-minute single-use confirmation service."
-        },
-        {
-            "namespace": "Cybermaps\\MCP",
-            "class": "Protocol",
-            "fqcn": "Cybermaps\\MCP\\Protocol",
-            "file": "src/MCP/Protocol.php",
-            "summary": "MCP protocol constants supported by Cybermaps."
-        },
-        {
-            "namespace": "Cybermaps\\MCP",
-            "class": "ProtocolException",
-            "fqcn": "Cybermaps\\MCP\\ProtocolException",
-            "file": "src/MCP/ProtocolException.php",
-            "summary": "JSON-RPC dispatch exception with a stable protocol error code."
-        },
-        {
-            "namespace": "Cybermaps\\MCP",
-            "class": "ResourceRegistry",
-            "fqcn": "Cybermaps\\MCP\\ResourceRegistry",
-            "file": "src/MCP/ResourceRegistry.php",
-            "summary": "Exact resource allowlist derived from public path publications."
-        },
-        {
-            "namespace": "Cybermaps\\MCP",
-            "class": "Runtime",
-            "fqcn": "Cybermaps\\MCP\\Runtime",
-            "file": "src/MCP/Runtime.php",
-            "summary": "Composition root for the optional MCP runtime."
-        },
-        {
-            "namespace": "Cybermaps\\MCP",
-            "class": "SchemaValidator",
-            "fqcn": "Cybermaps\\MCP\\SchemaValidator",
-            "file": "src/MCP/SchemaValidator.php",
-            "summary": "Small, fail-closed validator for the bounded schemas declared by Core tools."
-        },
-        {
-            "namespace": "Cybermaps\\MCP",
-            "class": "Server",
-            "fqcn": "Cybermaps\\MCP\\Server",
-            "file": "src/MCP/Server.php",
-            "summary": "Stateless MCP JSON-RPC dispatcher."
-        },
-        {
-            "namespace": "Cybermaps\\MCP",
-            "class": "TaskRepository",
-            "fqcn": "Cybermaps\\MCP\\TaskRepository",
-            "file": "src/MCP/TaskRepository.php",
-            "summary": "Bounded, site-local persistence for asynchronous MCP operation handles."
-        },
-        {
-            "namespace": "Cybermaps\\MCP",
-            "class": "ToolRegistry",
-            "fqcn": "Cybermaps\\MCP\\ToolRegistry",
-            "file": "src/MCP/ToolRegistry.php",
-            "summary": "Deterministic registry and dispatcher for the five allowlisted Core tools."
-        },
-        {
-            "namespace": "Cybermaps\\MCP",
-            "class": "Transport",
-            "fqcn": "Cybermaps\\MCP\\Transport",
-            "file": "src/MCP/Transport.php",
-            "summary": "Stateless one-request-per-POST Streamable HTTP transport."
-        },
-        {
-            "namespace": "Cybermaps\\MCP",
-            "class": "WordPressConfirmationStateStore",
-            "fqcn": "Cybermaps\\MCP\\WordPressConfirmationStateStore",
-            "file": "src/MCP/WordPressConfirmationStateStore.php",
-            "summary": "Atomic WordPress-backed confirmation state for normal WordPress requests."
+            "class": "ResourceAbilities",
+            "fqcn": "Cybermaps\\MCP\\ResourceAbilities",
+            "file": "src/MCP/ResourceAbilities.php",
+            "summary": "Each resource has an owned callback; client input never selects an arbitrary ability."
         },
         {
             "namespace": "Cybermaps\\MCP",
             "class": "WordPressIntegration",
             "fqcn": "Cybermaps\\MCP\\WordPressIntegration",
             "file": "src/MCP/WordPressIntegration.php",
-            "summary": "WordPress composition root for Cybermaps' optional MCP surface."
-        },
-        {
-            "namespace": "Cybermaps\\MCP",
-            "class": "WordPressTaskService",
-            "fqcn": "Cybermaps\\MCP\\WordPressTaskService",
-            "file": "src/MCP/WordPressTaskService.php",
-            "summary": "Bounded WordPress-backed executors for MCP asynchronous operations."
+            "summary": "Delegates transport and authentication to WordPress and exposes only owned reads."
         },
         {
             "namespace": "Cybermaps\\SEO",
@@ -3082,7 +2856,7 @@
             "summary": "Small sitemap XML writer with a native XMLWriter fast path."
         }
     ],
-    "class_count": 251,
+    "class_count": 227,
     "publication_limits": {
         "llms_summary_bytes": 4194303,
         "llms_full_bytes": 33554431,
@@ -3140,22 +2914,6 @@
             "category": "publication",
             "media_type": "application/mcp-server-card+json",
             "label": "MCP Server Card Compatibility URL",
-            "condition": "Publication Hub and publication configuration",
-            "static_mode": "well_known"
-        },
-        {
-            "path": "/.well-known/oauth-authorization-server",
-            "category": "publication",
-            "media_type": "application/json",
-            "label": "OAuth Authorization Server Metadata",
-            "condition": "Publication Hub and publication configuration",
-            "static_mode": "well_known"
-        },
-        {
-            "path": "/.well-known/oauth-protected-resource",
-            "category": "publication",
-            "media_type": "application/json",
-            "label": "OAuth Protected Resource Metadata",
             "condition": "Publication Hub and publication configuration",
             "static_mode": "well_known"
         },
@@ -3221,22 +2979,6 @@
             "media_type": "application/linkset+json",
             "label": "API Catalog (alternate)",
             "condition": "Publication Hub and publication configuration",
-            "static_mode": "dynamic"
-        },
-        {
-            "path": "/auth.md",
-            "category": "publication",
-            "media_type": "text/markdown",
-            "label": "Agent Registration Guide",
-            "condition": "Publication Hub and publication configuration",
-            "static_mode": "dynamic"
-        },
-        {
-            "path": "/cybermaps-agent-auth",
-            "category": "authorization",
-            "media_type": "text/html",
-            "label": "Agent authorization",
-            "condition": "MCP user-claimed registration and WordPress login",
             "static_mode": "dynamic"
         },
         {
@@ -3428,7 +3170,7 @@
             "category": "rest",
             "media_type": "application/json",
             "label": "/audit-latest",
-            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
+            "condition": "Route-specific enablement and permissions; see REST documentation",
             "static_mode": "dynamic"
         },
         {
@@ -3436,7 +3178,7 @@
             "category": "rest",
             "media_type": "application/json",
             "label": "/audit-run",
-            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
+            "condition": "Route-specific enablement and permissions; see REST documentation",
             "static_mode": "dynamic"
         },
         {
@@ -3444,7 +3186,7 @@
             "category": "rest",
             "media_type": "application/json",
             "label": "/discovery",
-            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
+            "condition": "Route-specific enablement and permissions; see REST documentation",
             "static_mode": "dynamic"
         },
         {
@@ -3452,7 +3194,7 @@
             "category": "rest",
             "media_type": "application/json",
             "label": "/editor/translation/(?P<post_id>[1-9][0-9]*)",
-            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
+            "condition": "Route-specific enablement and permissions; see REST documentation",
             "static_mode": "dynamic"
         },
         {
@@ -3460,7 +3202,7 @@
             "category": "rest",
             "media_type": "application/json",
             "label": "/health",
-            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
+            "condition": "Route-specific enablement and permissions; see REST documentation",
             "static_mode": "dynamic"
         },
         {
@@ -3468,15 +3210,7 @@
             "category": "rest",
             "media_type": "application/json",
             "label": "/llms-tldr",
-            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
-            "static_mode": "dynamic"
-        },
-        {
-            "path": "/wp-json/cybermaps/v1/mcp",
-            "category": "rest",
-            "media_type": "application/json",
-            "label": "/mcp",
-            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
+            "condition": "Route-specific enablement and permissions; see REST documentation",
             "static_mode": "dynamic"
         },
         {
@@ -3484,63 +3218,7 @@
             "category": "rest",
             "media_type": "application/json",
             "label": "/mcp/server-card",
-            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
-            "static_mode": "dynamic"
-        },
-        {
-            "path": "/wp-json/cybermaps/v1/oauth/authorization-server",
-            "category": "rest",
-            "media_type": "application/json",
-            "label": "/oauth/authorization-server",
-            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
-            "static_mode": "dynamic"
-        },
-        {
-            "path": "/wp-json/cybermaps/v1/oauth/authorize",
-            "category": "rest",
-            "media_type": "application/json",
-            "label": "/oauth/authorize",
-            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
-            "static_mode": "dynamic"
-        },
-        {
-            "path": "/wp-json/cybermaps/v1/oauth/clients",
-            "category": "rest",
-            "media_type": "application/json",
-            "label": "/oauth/clients",
-            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
-            "static_mode": "dynamic"
-        },
-        {
-            "path": "/wp-json/cybermaps/v1/oauth/device-authorization",
-            "category": "rest",
-            "media_type": "application/json",
-            "label": "/oauth/device-authorization",
-            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
-            "static_mode": "dynamic"
-        },
-        {
-            "path": "/wp-json/cybermaps/v1/oauth/protected-resource",
-            "category": "rest",
-            "media_type": "application/json",
-            "label": "/oauth/protected-resource",
-            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
-            "static_mode": "dynamic"
-        },
-        {
-            "path": "/wp-json/cybermaps/v1/oauth/revoke",
-            "category": "rest",
-            "media_type": "application/json",
-            "label": "/oauth/revoke",
-            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
-            "static_mode": "dynamic"
-        },
-        {
-            "path": "/wp-json/cybermaps/v1/oauth/token",
-            "category": "rest",
-            "media_type": "application/json",
-            "label": "/oauth/token",
-            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
+            "condition": "Route-specific enablement and permissions; see REST documentation",
             "static_mode": "dynamic"
         },
         {
@@ -3548,7 +3226,7 @@
             "category": "rest",
             "media_type": "application/json",
             "label": "/purge",
-            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
+            "condition": "Route-specific enablement and permissions; see REST documentation",
             "static_mode": "dynamic"
         },
         {
@@ -3556,7 +3234,7 @@
             "category": "rest",
             "media_type": "application/json",
             "label": "/search",
-            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
+            "condition": "Route-specific enablement and permissions; see REST documentation",
             "static_mode": "dynamic"
         },
         {
@@ -3564,7 +3242,7 @@
             "category": "rest",
             "media_type": "application/json",
             "label": "/status",
-            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
+            "condition": "Route-specific enablement and permissions; see REST documentation",
             "static_mode": "dynamic"
         },
         {
@@ -3572,7 +3250,15 @@
             "category": "rest",
             "media_type": "application/json",
             "label": "/urls",
-            "condition": "Route-specific enablement and permissions; see MCP/REST documentation",
+            "condition": "Route-specific enablement and permissions; see REST documentation",
+            "static_mode": "dynamic"
+        },
+        {
+            "path": "/wp-json/mcp/cybermaps",
+            "category": "rest",
+            "media_type": "application/json",
+            "label": "/cybermaps",
+            "condition": "Optional WordPress MCP Adapter 0.7.0+, explicit read-only opt-in, Publication Hub and WordPress authentication",
             "static_mode": "dynamic"
         },
         {
@@ -3616,5 +3302,5 @@
             "static_mode": "dynamic"
         }
     ],
-    "public_route_count": 64
+    "public_route_count": 53
 }

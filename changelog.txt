@@ -1,6 +1,12 @@
 Cybermaps release history
 =========================
 
+8.0.0
+-----
+* Optional WordPress MCP Adapter replaces the custom transport and OAuth stack.
+* Read-only public discovery/search; removed remote operations and generic ability execution.
+* Guided setup, explicit migration, remote-capability release gates and matching website guides.
+
 7.5.4
 -----
 

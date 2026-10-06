@@ -123,14 +123,14 @@ final class AICatalog {
 
 		return array(
 			'identifier'            => $this->identifier( 'abilities', 'wordpress-public' ),
-			'displayName'           => 'WordPress Public Abilities',
+			'displayName'           => 'Cybermaps Public Search',
 			'type'                  => 'application/json',
-			'url'                   => rest_url( 'wp-abilities/v1/abilities' ),
-			'description'           => 'Public WordPress 7.1 abilities available to authorized clients.',
-			'capabilities'          => array( 'ability-discovery', 'schema-described-execution' ),
+			'url'                   => rest_url( 'wp-abilities/v1/abilities/cybermaps/search' ),
+			'description'           => 'Read-only Cybermaps search over eligible public content.',
+			'capabilities'          => array( 'ability-discovery', 'public-search' ),
 			'representativeQueries' => array(
-				'Discover the public abilities exposed by this WordPress site.',
-				'Find schema-described actions this site allows an agent to invoke.',
+				'Discover public Cybermaps search.',
+				'Search the public content this site publishes.',
 			),
 			'version'               => CYBERMAPS_VERSION,
 		);

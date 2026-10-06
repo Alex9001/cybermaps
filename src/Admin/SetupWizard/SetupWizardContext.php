@@ -51,6 +51,7 @@ final class SetupWizardContext {
 
 		return array(
 			'wizard_version' => SetupWizardRegistry::VERSION,
+			'mcp_status'     => \Cybermaps\Admin\MCPSetup::status(),
 			'steps'          => SetupWizardRegistry::steps(),
 			'choices'        => SetupWizardRegistry::choices(),
 			'analysis'       => $analysis,

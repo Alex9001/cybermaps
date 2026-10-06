@@ -143,11 +143,6 @@
       "purpose_and_trigger": "GET/HEAD to configured public site or frontend; bounded verification and diagnostic headers.",
       "disclosure": "readme.txt"
     },
-    "src/MCP/OAuth/ClientRegistrationValidator.php": {
-      "service": "Client metadata",
-      "purpose_and_trigger": "HTTPS metadata supplied by an OAuth client during registration; no automatic third-party registration.",
-      "disclosure": "readme.txt"
-    },
     "src/Integration/EdgeCache/VarnishAdapter.php": {
       "service": "Configured Varnish",
       "purpose_and_trigger": "Administrator-configured purge endpoint and site cache tags; explicit integration configuration.",

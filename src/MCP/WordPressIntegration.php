@@ -1,147 +1,98 @@
 <?php
+/**
+ * Optional read-only integration with WordPress MCP Adapter.
+ *
+ * @package Cybermaps\MCP
+ */
+
 declare(strict_types=1);
 
 namespace Cybermaps\MCP;
 
 use Cybermaps\Core\ConfigurationStore;
-use Cybermaps\Core\EndpointRegistry;
-use Cybermaps\Discovery\DiscoveryPublicationGenerator;
-use Cybermaps\Discovery\IndexNow;
-use Cybermaps\Discovery\Search;
 use Cybermaps\Discovery\StaticBridge;
-use Cybermaps\MCP\OAuth\ClientRegistrationValidator;
-use Cybermaps\MCP\OAuth\OAuthService;
-use Cybermaps\MCP\OAuth\OAuthRouteController;
-use Cybermaps\MCP\OAuth\WordPressUserAuthorizer;
-use Cybermaps\MCP\OAuth\WpdbOAuthRepository;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** WordPress composition root for Cybermaps' optional MCP surface. */
+/** Delegates transport and authentication to WordPress and exposes only owned reads. */
 final class WordPressIntegration {
-	private ?Transport $transport                   = null;
-	private ?OAuthRouteController $oauth_controller = null;
+	public const SERVER_ID                   = 'cybermaps';
+	public const REST_NAMESPACE              = 'mcp';
+	public const REST_ROUTE                  = '/cybermaps';
+	public const TOOLS                       = array( 'cybermaps/search' );
+	private static bool $registration_failed = false;
 
+	/** Attach before the adapter initializes, independently of activation order. */
 	public function register_hooks(): void {
-		add_action( 'update_option_cybermaps_settings', array( $this, 'handle_settings_update' ), 10, 2 );
+		add_action( 'mcp_adapter_init', array( $this, 'register_server' ) );
+		add_action( 'update_option_active_plugins', array( $this, 'dependency_changed' ), 10, 2 );
+		add_action( 'update_site_option_active_sitewide_plugins', array( $this, 'network_dependency_changed' ), 10, 3 );
+	}
 
+	/**
+	 * Register the explicit server using the adapter's public API.
+	 *
+	 * @param object $adapter WordPress MCP Adapter instance.
+	 */
+	public function register_server( object $adapter ): void {
 		if ( 'off' === self::mode() ) {
-			WordPressTaskService::clear_scheduled_hooks();
 			return;
 		}
-		$tasks = new WordPressTaskService();
-		$tasks->register_hooks();
-
-		$oauth                  = $this->oauth_service();
-		$confirmations          = new OneTimeConfirmationService( new WordPressConfirmationStateStore(), wp_salt( 'auth' ) );
-		$this->oauth_controller = new OAuthRouteController( $oauth );
-		$this->transport        = new Transport(
-			new Server(
-				new ResourceRegistry(
-					EndpointRegistry::get_instance(),
-					new CallbackResourceReader( array( $this, 'read_publication' ) )
-				),
-				new ToolRegistry( $this->executors(), $tasks, $confirmations ),
-				$tasks,
-				$confirmations
-			),
-			new CallbackCallerContextResolver( array( $this, 'resolve_caller' ) ),
-			array( self::class, 'mode' )
+		$result                    = $adapter->create_server(
+			self::SERVER_ID,
+			self::REST_NAMESPACE,
+			ltrim( self::REST_ROUTE, '/' ),
+			'Cybermaps',
+			__( 'Read-only public Cybermaps discovery and search.', 'cybermaps' ),
+			CYBERMAPS_VERSION,
+			array( \WP\MCP\Transport\HttpTransport::class ),
+			null,
+			null,
+			self::TOOLS,
+			ResourceAbilities::names(),
+			array(),
+			array( self::class, 'can_read' )
 		);
-		$this->transport->register_hooks();
-		$this->oauth_controller->register_hooks();
+		self::$registration_failed = is_wp_error( $result );
 	}
 
-	/** Keep disabled MCP routes and jobs unavailable immediately after a settings change. */
-	public function handle_settings_update( mixed $old_value, mixed $new_value ): void {
-		$old_settings = is_array( $old_value ) ? $old_value : array();
-		$new_settings = is_array( $new_value ) ? $new_value : array();
-		if ( 'off' === self::mode( $old_settings ) && 'off' !== self::mode( $new_settings ) ) {
-			WpdbOAuthRepository::create_tables();
-			TaskRepository::create_tables();
-		}
-		if ( ! is_array( $new_value ) || 'off' === self::mode( $new_value ) ) {
-			WordPressTaskService::clear_scheduled_hooks();
-		}
-	}
-
+	/**
+	 * Resolve availability without interpreting retired modes as consent.
+	 *
+	 * @param array<string,mixed>|null $settings General settings.
+	 */
 	public static function mode( ?array $settings = null ): string {
 		$settings = $settings ?? ConfigurationStore::settings();
-		if ( empty( $settings['enable_discovery_hub'] ) ) {
+		if ( '1' !== (string) get_option( \Cybermaps\Core\MCPMigration::DONE_OPTION, '' ) ) {
 			return 'off';
 		}
-		$mode = is_string( $settings['mcp_mode'] ?? null ) ? $settings['mcp_mode'] : 'off';
-		return in_array( $mode, Protocol::MODES, true ) ? $mode : 'off';
-	}
-
-	/** @return array{body:string,mime_type:string}|null */
-	public function read_publication( string $id, array $definition ): ?array {
-		if ( 'path' !== (string) ( $definition['kind'] ?? '' ) ) {
-			return null;
+		if ( empty( $settings['enable_discovery_hub'] ) || 'read_only' !== ( $settings['mcp_mode'] ?? 'off' ) ) {
+			return 'off';
 		}
-		$body = ( new DiscoveryPublicationGenerator() )->generate(
-			$id,
-			array(
-				'id'   => $id,
-				'path' => (string) ( $definition['path'] ?? '' ),
-			),
-			ConfigurationStore::settings()
-		);
-		if ( '' === $body ) {
-			return null;
+		return ! self::$registration_failed && 'ready' === AdapterDependency::state() ? 'read_only' : 'off';
+	}
+
+	/** Evaluate the current WordPress identity on every MCP request and resource read. */
+	public static function can_read(): bool {
+		return 'read_only' === self::mode() && is_user_logged_in() && current_user_can( 'read' );
+	}
+
+	/** Reconcile a network activation change using the same dependency boundary. */
+	public function network_dependency_changed( string $option, array $new_plugins, array $old_plugins ): void {
+		unset( $option );
+		$this->dependency_changed( array_keys( $old_plugins ), array_keys( $new_plugins ) );
+	}
+
+	/** Reconcile owned discovery files when plugin availability changes. */
+	public function dependency_changed( array $old_plugins, array $new_plugins ): void {
+		if ( in_array( AdapterDependency::PLUGIN, $old_plugins, true ) === in_array( AdapterDependency::PLUGIN, $new_plugins, true ) ) {
+			return;
 		}
-		return array(
-			'body'      => $body,
-			'mime_type' => (string) ( $definition['type'] ?? 'text/plain' ),
-		);
-	}
-
-	public function resolve_caller( object $request ): CallerContext {
-		$authorization = method_exists( $request, 'get_header' ) ? (string) $request->get_header( 'authorization' ) : '';
-		if ( '' === $authorization ) {
-			return new CallerContext( '', '' );
-		}
-		$token = $this->oauth_service()->validate_bearer_header( $authorization, $this->mcp_url() );
-		$user  = (int) ( $token['user_id'] ?? 0 );
-		return new CallerContext(
-			(string) $user,
-			(string) ( $token['client_id'] ?? '' ),
-			is_array( $token['scopes'] ?? null ) ? $token['scopes'] : array(),
-			static fn( string $capability ): bool => $user > 0 && user_can( $user, $capability )
-		);
-	}
-
-	/** @return array<string,callable> */
-	private function executors(): array {
-		$executors = array(
-			'cybermaps.search'       => static function ( array $arguments ): array {
-				$request = new \WP_REST_Request( 'GET', '/cybermaps/v1/search' );
-				$request->set_param( 'q', (string) ( $arguments['q'] ?? '' ) );
-				$request->set_param( 'limit', (int) ( $arguments['limit'] ?? 10 ) );
-				$response = ( new Search() )->handle_search( $request );
-				if ( $response instanceof \WP_REST_Response ) {
-					$data = $response->get_data();
-					return is_array( $data ) ? $data : array();
-				}
-				if ( is_wp_error( $response ) ) {
-					throw new \RuntimeException( $response->get_error_message() ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- The response is JSON encoded by the MCP transport, not rendered as HTML.
-				}
-				return array();
-			},
-			'cybermaps.static.purge' => static fn(): array => StaticBridge::get_instance()->cancel_and_purge( 'all' ),
-		);
-
-		$executors['cybermaps.indexnow.submit'] = static fn( array $arguments ): array => ( new IndexNow() )->submit_urls( (array) ( $arguments['urls'] ?? array() ), true );
-		return $executors;
-	}
-
-	private function oauth_service(): OAuthService {
-		return \Cybermaps\MCP\OAuth\OAuthServiceFactory::create();
-	}
-
-	private function mcp_url(): string {
-		return rest_url( EndpointRegistry::REST_NAMESPACE . Protocol::ROUTE );
+		\Cybermaps\Core\CacheManager::clear_family( 'discovery' );
+		$bridge = StaticBridge::get_instance();
+		$bridge->cancel_and_purge( 'discovery' );
+		$bridge->request_sync();
 	}
 }

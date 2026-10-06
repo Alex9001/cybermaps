@@ -50,16 +50,16 @@ final class Capabilities {
 		$output   .= '# Site Guide: ' . $this->plain_line( $site_name ) . "\n\n";
 		$output   .= "This skill describes public, read-only site resources. Client discovery and support depend on the consuming agent.\n\n";
 		if ( $registry->is_enabled( 'mcp', $settings ) ) {
-			$mcp_mode = (string) ( $settings['mcp_mode'] ?? 'discovery' );
+			$mcp_mode = (string) ( $settings['mcp_mode'] ?? 'off' );
 			$mcp_url  = $registry->get_url( 'mcp' );
 			if ( '' !== $mcp_url ) {
 				$output .= "## Optional MCP endpoint\n\n";
 				$output .= '- Endpoint: [' . $mcp_url . '](' . $mcp_url . ")\n";
 				$output .= '- Mode: `' . $this->plain_line( $mcp_mode ) . "`\n";
-				$output .= "This endpoint is administrator-enabled. Public resources in this guide do not grant permission to invoke tools or perform operations; authorized clients still require the configured authentication and WordPress capability checks.\n\n";
+				$output .= "This administrator-enabled endpoint uses WordPress MCP Adapter and exposes only public resources and read-only search. Clients require WordPress authentication and the read capability.\n\n";
 			}
 		} else {
-			$output .= "This site does not expose an MCP server because MCP is disabled by default until an administrator enables it.\n\n";
+			$output .= "This site does not expose a Cybermaps MCP server. MCP is disabled by default and requires a compatible WordPress MCP Adapter plus explicit administrator opt-in.\n\n";
 		}
 		$output .= "## Content publications\n\n";
 		$output .= '- [LLMS site map](' . $registry->get_url( 'llms' ) . ")\n";

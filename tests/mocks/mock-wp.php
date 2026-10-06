@@ -549,6 +549,9 @@ function current_user_can( $capability, ...$args ) {
 	);
 }
 
+/** Mock WordPress authentication without changing identity. */
+function is_user_logged_in() { return get_current_user_id() > 0; }
+
 /** Mock current administrator identity. */
 function get_current_user_id() {
 	return (int) ( $GLOBALS['cybermaps_mock_user_id'] ?? $GLOBALS['cybermaps_mock_current_user_id'] ?? 1 );
@@ -2140,4 +2143,17 @@ function wp_convert_hr_to_bytes( $value ) {
 		}
 	}
 	return $bytes;
+}
+
+function self_admin_url( $path = '' ) {
+	return admin_url( $path );
+}
+
+function is_network_admin() {
+	return ! empty( $GLOBALS['cybermaps_mock_network_admin'] );
+}
+
+function wp_unschedule_hook( $hook ) {
+    unset( $GLOBALS['cybermaps_mock_scheduled'][ $hook ] );
+    return 1;
 }

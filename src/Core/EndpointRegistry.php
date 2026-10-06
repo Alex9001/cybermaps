@@ -164,14 +164,9 @@ final class EndpointRegistry {
 			return false;
 		}
 
-		$settings    = $settings ?? ConfigurationStore::settings();
-		$mcp_enabled = ! empty( $settings['enable_discovery_hub'] )
-			&& in_array( (string) ( $settings['mcp_mode'] ?? 'off' ), array( 'discovery', 'read_only', 'operations' ), true );
-		if ( in_array( $id, array( 'mcp', 'rest_mcp', 'mcp_server_card', 'rest_mcp_server_card', 'oauth_authorization_server', 'oauth_protected_resource' ), true ) ) {
-			return $mcp_enabled;
-		}
-		if ( 'auth_md' === $id ) {
-			return $mcp_enabled && 'user_claimed' === (string) ( $settings['agent_registration_mode'] ?? 'off' );
+		$settings = $settings ?? ConfigurationStore::settings();
+		if ( in_array( $id, array( 'mcp', 'rest_mcp', 'mcp_server_card', 'rest_mcp_server_card' ), true ) ) {
+			return 'read_only' === \Cybermaps\MCP\WordPressIntegration::mode( $settings );
 		}
 
 		$setting = isset( $endpoint['enabled_setting'] ) ? (string) $endpoint['enabled_setting'] : '';
@@ -674,15 +669,6 @@ final class EndpointRegistry {
 					),
 				),
 			),
-			'auth_md'         => array(
-				'path'          => \Cybermaps\MCP\OAuth\AuthMd::PATH,
-				'type'          => 'text/markdown',
-				'format'        => 'text',
-				'spec'          => 'Auth.md emerging protocol',
-				'handler_class' => \Cybermaps\MCP\OAuth\AuthMd::class,
-				'maturity'      => 'community-convention',
-				'adoption'      => 'reference-only',
-			),
 			'mcp_server_card' => array(
 				'path'                 => \Cybermaps\Discovery\MCPServerCard::WELL_KNOWN_PATH,
 				'type'                 => \Cybermaps\Discovery\MCPServerCard::MEDIA_TYPE,
@@ -697,38 +683,6 @@ final class EndpointRegistry {
 				'static_targets'       => array(
 					array(
 						'path'   => \Cybermaps\Discovery\MCPServerCard::WELL_KNOWN_PATH,
-						'bucket' => 'well_known',
-					),
-				),
-			),
-			'oauth_authorization_server' => array(
-				'path'                 => \Cybermaps\MCP\OAuth\OAuthMetadataPublication::AUTHORIZATION_SERVER_PATH,
-				'type'                 => 'application/json',
-				'format'               => 'json',
-				'spec'                 => 'RFC 8414 OAuth 2.0 Authorization Server Metadata',
-				'handler_class'        => \Cybermaps\MCP\OAuth\OAuthMetadataPublication::class,
-				'maturity'             => 'formal-standard',
-				'adoption'             => 'independent-producers',
-				'delivery_requirement' => 'runtime_headers_required',
-				'static_targets'       => array(
-					array(
-						'path'   => \Cybermaps\MCP\OAuth\OAuthMetadataPublication::AUTHORIZATION_SERVER_PATH,
-						'bucket' => 'well_known',
-					),
-				),
-			),
-			'oauth_protected_resource' => array(
-				'path'                 => \Cybermaps\MCP\OAuth\OAuthMetadataPublication::PROTECTED_RESOURCE_PATH,
-				'type'                 => 'application/json',
-				'format'               => 'json',
-				'spec'                 => 'RFC 9728 OAuth 2.0 Protected Resource Metadata',
-				'handler_class'        => \Cybermaps\MCP\OAuth\OAuthMetadataPublication::class,
-				'maturity'             => 'formal-standard',
-				'adoption'             => 'independent-producers',
-				'delivery_requirement' => 'runtime_headers_required',
-				'static_targets'       => array(
-					array(
-						'path'   => \Cybermaps\MCP\OAuth\OAuthMetadataPublication::PROTECTED_RESOURCE_PATH,
 						'bucket' => 'well_known',
 					),
 				),
@@ -768,10 +722,7 @@ final class EndpointRegistry {
 			'agent_skills'    => array( 'Agent Skills Index', 'Draft discovery index for the canonical Cybermaps site-guide skill.' ),
 			'api_catalog'     => array( 'API Catalog', 'Dynamic Linkset catalog using the RFC 9727 media-type profile and api-catalog relation.' ),
 			'ai_catalog'      => array( 'Agentic Resource Catalog', 'Draft ARD catalog of active Cybermaps discovery resources.' ),
-			'auth_md'         => array( 'Agent Registration Guide', 'Opt-in Auth.md instructions for user-claimed OAuth device authorization.' ),
 			'mcp_server_card' => array( 'MCP Server Card Compatibility URL', 'Experimental well-known compatibility route for the current MCP Server Card draft.' ),
-			'oauth_authorization_server' => array( 'OAuth Authorization Server Metadata', 'RFC 8414 metadata describing how an agent obtains and refreshes access tokens.' ),
-			'oauth_protected_resource' => array( 'OAuth Protected Resource Metadata', 'RFC 9728 metadata identifying the MCP resource, issuers, and supported scopes.' ),
 			'openapi'         => array( 'OpenAPI Description', 'Read-only public Cybermaps REST API contract.' ),
 		);
 		$throttle_tiers = array(
@@ -837,6 +788,8 @@ final class EndpointRegistry {
 
 		$rest_metadata = array(
 			'mcp'             => array(
+				'namespace'     => \Cybermaps\MCP\WordPressIntegration::REST_NAMESPACE,
+				'route'         => \Cybermaps\MCP\WordPressIntegration::REST_ROUTE,
 				'type'          => 'application/json',
 				'spec'          => 'Model Context Protocol 2026-07-28',
 				'label'         => 'Model Context Protocol',
@@ -969,10 +922,7 @@ final class EndpointRegistry {
 			'agent_skills'               => array( __( 'Agent Skills Index', 'cybermaps' ), __( 'Draft discovery index for the canonical Cybermaps site-guide skill.', 'cybermaps' ) ),
 			'api_catalog'                => array( __( 'API Catalog', 'cybermaps' ), __( 'Dynamic Linkset catalog using the RFC 9727 media-type profile and api-catalog relation.', 'cybermaps' ) ),
 			'ai_catalog'                 => array( __( 'Agentic Resource Catalog', 'cybermaps' ), __( 'Draft ARD catalog of active Cybermaps discovery resources.', 'cybermaps' ) ),
-			'auth_md'                    => array( __( 'Agent Registration Guide', 'cybermaps' ), __( 'Opt-in Auth.md instructions for user-claimed OAuth device authorization.', 'cybermaps' ) ),
 			'mcp_server_card'            => array( __( 'MCP Server Card Compatibility URL', 'cybermaps' ), __( 'Experimental well-known compatibility route for the current MCP Server Card draft.', 'cybermaps' ) ),
-			'oauth_authorization_server' => array( __( 'OAuth Authorization Server Metadata', 'cybermaps' ), __( 'RFC 8414 metadata describing how an agent obtains and refreshes access tokens.', 'cybermaps' ) ),
-			'oauth_protected_resource'   => array( __( 'OAuth Protected Resource Metadata', 'cybermaps' ), __( 'RFC 9728 metadata identifying the MCP resource, issuers, and supported scopes.', 'cybermaps' ) ),
 			'openapi'                    => array( __( 'OpenAPI Description', 'cybermaps' ), __( 'Read-only public Cybermaps REST API contract.', 'cybermaps' ) ),
 			'rest_root'                  => array( __( 'REST Discovery Index', 'cybermaps' ), __( 'REST API index of primary Cybermaps publications.', 'cybermaps' ) ),
 			'public_health'              => array( __( 'Public Discovery Health', 'cybermaps' ), __( 'Bounded, non-sensitive health status for public Cybermaps discovery APIs.', 'cybermaps' ) ),
@@ -1264,7 +1214,7 @@ final class EndpointRegistry {
 	 * Validate a WordPress REST namespace without silently normalizing it.
 	 */
 	private function is_valid_rest_namespace( string $rest_namespace ): bool {
-		return 1 === preg_match( '/^[a-z0-9][a-z0-9._-]*(?:\/[a-z0-9][a-z0-9._-]*)+$/i', $rest_namespace );
+		return 'mcp' === $rest_namespace || 1 === preg_match( '/^[a-z0-9][a-z0-9._-]*(?:\/[a-z0-9][a-z0-9._-]*)+$/i', $rest_namespace );
 	}
 
 	/**

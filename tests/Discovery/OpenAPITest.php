@@ -45,8 +45,7 @@ final class OpenAPITest extends TestCase {
 		$this->assertSame( 'https://spec.openapis.org/oas/3.2/dialect/base', $document['jsonSchemaDialect'] );
 		$this->assertSame( 'https://example.com/cybermaps-openapi.json', $document['$self'] );
 		$this->assertSame( OpenAPI::MEDIA_TYPE, OpenAPI::get_media_type() );
-		$this->assertArrayHasKey( 'oauth2', $document['components']['securitySchemes'] );
-		$this->assertArrayHasKey( 'bearerAuth', $document['components']['securitySchemes'] );
+		$this->assertArrayNotHasKey( 'securitySchemes', $document['components'] );
 	}
 
 	public function test_3_1_2_compatibility_representation_is_explicit(): void {
@@ -71,55 +70,23 @@ final class OpenAPITest extends TestCase {
 		$this->assertSame( '3.2.0', OpenAPI::negotiate_version( '', '' ) );
 	}
 
-	public function test_mcp_route_is_described_only_when_enabled(): void {
-		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['mcp_mode'] = 'operations';
+	public function test_adapter_metadata_requires_dependency_and_opt_in(): void {
+		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['mcp_mode'] = 'read_only';
+		$this->assertArrayNotHasKey( 'x-cybermaps-mcp', ( new OpenAPI() )->get_document() );
+		$adapter = \Cybermaps\Tests\AdapterFixture::enable();
 		$document = ( new OpenAPI() )->get_document();
-
-		$this->assertArrayHasKey( '/cybermaps/v1/mcp', $document['paths'] );
+		$this->assertSame( 'https://example.com/wp-json/mcp/cybermaps', $document['x-cybermaps-mcp']['url'] );
+		$this->assertTrue( $document['x-cybermaps-mcp']['readOnly'] );
 		$this->assertArrayHasKey( '/cybermaps/v1/mcp/server-card', $document['paths'] );
-		$this->assertSame( '#/components/schemas/McpJsonRpcRequest', $document['paths']['/cybermaps/v1/mcp']['post']['requestBody']['content']['application/json']['schema']['$ref'] );
-		$this->assertSame( '2026-07-28', $document['paths']['/cybermaps/v1/mcp']['post']['parameters'][0]['schema']['const'] );
-		$this->assertSame( array(), $document['paths']['/cybermaps/v1/mcp/server-card']['get']['security'] );
-		$this->assertSame(
-			'https://static.modelcontextprotocol.io/schemas/v1/server-card.schema.json',
-			$document['paths']['/cybermaps/v1/mcp/server-card']['get']['responses']['200']['content']['application/mcp-server-card+json']['schema']['$ref']
-		);
+		$this->assertArrayNotHasKey( '/cybermaps/v1/mcp', $document['paths'] );
 	}
 
-	public function test_device_authorization_contract_matches_user_claimed_rfc_8628_route(): void {
-		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['mcp_mode']                = 'discovery';
-		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['agent_registration_mode'] = 'user_claimed';
-		$document  = ( new OpenAPI() )->get_document();
-		$operation = $document['paths']['/cybermaps/v1/oauth/device-authorization']['post'];
-		$form      = $operation['requestBody']['content']['application/x-www-form-urlencoded']['schema'];
-		$success   = $operation['responses']['200']['content']['application/json']['schema'];
-
-		$this->assertSame( array(), $operation['security'] );
-		$this->assertSame( array( 'client_id' ), $form['required'] );
-		$this->assertSame( '^https://', $form['properties']['client_id']['pattern'] );
-		$this->assertSame( array( 'client_id', 'scope', 'resource' ), array_keys( $form['properties'] ) );
-		$this->assertSame(
-			array( 'device_code', 'user_code', 'verification_uri', 'verification_uri_complete', 'expires_in', 'interval' ),
-			$success['required']
-		);
-		$this->assertSame( '^[A-Z2-9]{4}-[A-Z2-9]{4}$', $success['properties']['user_code']['pattern'] );
-		$this->assertSame( array( 'invalid_request', 'invalid_scope', 'invalid_target' ), $operation['responses']['400']['content']['application/json']['schema']['properties']['error']['enum'] );
-		$this->assertSame( array( 'invalid_client', 'unauthorized_client' ), $operation['responses']['401']['content']['application/json']['schema']['properties']['error']['enum'] );
-		$this->assertSame( array( 'unauthorized_client' ), $operation['responses']['403']['content']['application/json']['schema']['properties']['error']['enum'] );
-		$this->assertStringNotContainsString( 'openid', strtolower( (string) wp_json_encode( $operation ) ) );
-		$this->assertStringNotContainsString( 'jwks', strtolower( (string) wp_json_encode( $operation ) ) );
-		$this->assertStringNotContainsString( 'registration_endpoint', strtolower( (string) wp_json_encode( $operation ) ) );
-	}
-
-	public function test_device_authorization_requires_both_user_claimed_mode_and_mcp(): void {
-		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['mcp_mode'] = 'discovery';
-		$this->assertArrayNotHasKey( '/cybermaps/v1/oauth/device-authorization', ( new OpenAPI() )->get_document()['paths'] );
-
-		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['agent_registration_mode'] = 'user_claimed';
-		$this->assertArrayHasKey( '/cybermaps/v1/oauth/device-authorization', ( new OpenAPI() )->get_document()['paths'] );
-
-		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['mcp_mode'] = 'off';
-		$this->assertArrayNotHasKey( '/cybermaps/v1/oauth/device-authorization', ( new OpenAPI() )->get_document()['paths'] );
+	public function test_legacy_settings_cannot_restore_oauth_or_mutating_ability_contracts(): void {
+		$GLOBALS['cybermaps_mock_options']['cybermaps_settings'] += array( 'mcp_mode' => 'operations', 'agent_registration_mode' => 'user_claimed' );
+		$document = ( new OpenAPI() )->get_document();
+		$this->assertArrayNotHasKey( '/cybermaps/v1/oauth/device-authorization', $document['paths'] );
+		$this->assertArrayNotHasKey( '/wp-abilities/v1/abilities/{namespace}/{ability}/run', $document['paths'] );
+		$this->assertArrayNotHasKey( 'securitySchemes', $document['components'] );
 	}
 
 	public function test_mcp_route_requires_the_discovery_hub_gate(): void {

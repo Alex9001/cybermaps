@@ -1018,11 +1018,11 @@
           "$_SERVER"
         ],
         "suppressions": [],
-        "file_code_sha256": "6aa44a9295733e91488806025211c2460cc77b0a84decce352d0b99cb34545b7",
+        "file_code_sha256": "545454794f5da11f9f8c188b0118e04011bbf8ce7261a30985daf7977c8c0c1c",
         "code_sha256": "fa313ade270e97294d551d5a0896d3acb1d4009953f9e1f464787cc8131a52bf",
         "findings": {}
       },
-      "rationale": "Request adapter or authenticated caller owns this boundary; scalar guards and contextual sanitization are frozen with the body. Review caller authorization again whenever this scope changes.",
+      "rationale": "Request adapter or authenticated caller owns this boundary; scalar guards and contextual sanitization are frozen with the body. Review caller authorization again whenever this scope changes. 8.0 review: removed the retired agent-registration setting from reconciliation exemptions; the protected static intent request boundary is unchanged.",
       "tests": [
         "tests/Admin/SettingsLifecycleTest.php",
         "tests/Admin/SettingsControlsAccessibilityTest.php",
@@ -1911,25 +1911,6 @@
         "tests/Audit/PublishedPostSourceTest.php"
       ]
     },
-    "src/Core/AbilityKernel.php::execute_as_caller": {
-      "inventory": {
-        "path": "src/Core/AbilityKernel.php",
-        "scope": "execute_as_caller",
-        "requests": [],
-        "suppressions": [
-          "// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- JSON-RPC transport encodes this message; it is never rendered as HTML."
-        ],
-        "file_code_sha256": "64c4f0973fa9a0e941c7b7a4cb2b4ed0e685ef8454379a105247d97c0f89dcc8",
-        "code_sha256": "d9c319632e0c39ebad2ea88efe8051ef2128c2576b8e822536c9f49e84893059",
-        "findings": {
-          "WordPress.Security.EscapeOutput.ExceptionNotEscaped:ERROR": 1
-        }
-      },
-      "rationale": "JSON-RPC transport encodes this message; it is never rendered as HTML. Exception messages remain data until the caller renders or JSON-encodes them; HTML escaping inside the exception would corrupt non-HTML consumers.",
-      "tests": [
-        "tests/Core/AbilityKernelTest.php"
-      ]
-    },
     "src/Core/AtomicOneTimeStateStore.php::delete": {
       "inventory": {
         "path": "src/Core/AtomicOneTimeStateStore.php",
@@ -2166,11 +2147,11 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
         ],
-        "file_code_sha256": "7c9c455163ffb7e060d28b499a5a2b1e91844bdc3e80c33d05d19c1e2e534b2f",
+        "file_code_sha256": "279045a4971f2fbb3891a37c74e96a9f6596b23993faec42288951aaa05d7b6c",
         "code_sha256": "03918615b742721d57bcddf7853207cf8ef1b82a58c003a84b305d4afa23d7b5",
         "findings": {}
       },
-      "rationale": "Inherited direct database operation uses WordPress-owned identifiers or typed prepared parameters; transactions, ownership and cache behavior are exercised by repository regression tests.",
+      "rationale": "Inherited direct database operation uses WordPress-owned identifiers or typed prepared parameters; transactions, ownership and cache behavior are exercised by repository regression tests. 8.0 review: removed legacy MCP table creation and retained cron cleanup using literal retired hook names; lifecycle request guards are unchanged.",
       "tests": [
         "tests/Admin/SettingsLifecycleTest.php",
         "tests/Core/LifecycleTest.php"
@@ -2272,11 +2253,11 @@
           "$_SERVER"
         ],
         "suppressions": [],
-        "file_code_sha256": "e1d8709718490e0745b1c6349fd2eb163670d67e6a04f87faeec8886787c0e0e",
+        "file_code_sha256": "64d317d4b044961cb02c4cb4a766a36c163a68f9ae0f9ef4a016545b4aba4726",
         "code_sha256": "e1590ee46369594a2330fe2dfbbdc8ea77be07e80463c6dca3dead26655e1a74",
         "findings": {}
       },
-      "rationale": "Request adapter or authenticated caller owns this boundary; scalar guards and contextual sanitization are frozen with the body. Review caller authorization again whenever this scope changes.",
+      "rationale": "Request adapter or authenticated caller owns this boundary; scalar guards and contextual sanitization are frozen with the body. Review caller authorization again whenever this scope changes. 8.0 review: init priority -2 runs the per-site MCP retirement before ordinary upgrades; it consumes no request data and cannot enable MCP. Existing admin query handling is unchanged.",
       "tests": [
         "tests/Core/PluginMetaTest.php",
         "tests/Core/PluginTest.php"
@@ -2292,13 +2273,13 @@
         "suppressions": [
           "// phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only routing check"
         ],
-        "file_code_sha256": "e1d8709718490e0745b1c6349fd2eb163670d67e6a04f87faeec8886787c0e0e",
-        "code_sha256": "d30a75e90f4eea941224f0de8db43d75a47245ddf1c94f638e89e5298c3b9ed8",
+        "file_code_sha256": "64d317d4b044961cb02c4cb4a766a36c163a68f9ae0f9ef4a016545b4aba4726",
+        "code_sha256": "56c19260fe6809dafbf5f583ff194759020bad177276d2426e94be1dcd81b354",
         "findings": {
           "WordPress.Security.NonceVerification.Recommended:WARNING": 3
         }
       },
-      "rationale": "read-only routing check Request adapter or authenticated caller owns this boundary; scalar guards and contextual sanitization are frozen with the body. Review caller authorization again whenever this scope changes.",
+      "rationale": "read-only routing check Request adapter or authenticated caller owns this boundary; scalar guards and contextual sanitization are frozen with the body. Review caller authorization again whenever this scope changes. 8.0 review: init priority -2 runs the per-site MCP retirement before ordinary upgrades; it consumes no request data and cannot enable MCP. Existing admin query handling is unchanged.",
       "tests": [
         "tests/Core/PluginMetaTest.php",
         "tests/Core/PluginTest.php"
@@ -2630,23 +2611,6 @@
         "tests/Core/URLManagerTest.php"
       ]
     },
-    "src/Core/Uninstaller.php::cleanup_owned_site_data": {
-      "inventory": {
-        "path": "src/Core/Uninstaller.php",
-        "scope": "cleanup_owned_site_data",
-        "requests": [],
-        "suppressions": [
-          "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
-        ],
-        "file_code_sha256": "475b304a0e18c286f19c07ea304a7fdf1f50021870b76aef15eacddeedf55908",
-        "code_sha256": "09e43ab3ea9cfc4583e8fb8d2c1f465048a9b93261dbe9ba40235f6464249ece",
-        "findings": {}
-      },
-      "rationale": "Inherited direct database operation uses WordPress-owned identifiers or typed prepared parameters; transactions, ownership and cache behavior are exercised by repository regression tests.",
-      "tests": [
-        "tests/Core/UninstallerTest.php"
-      ]
-    },
     "src/Core/Uninstaller.php::delete_translation_rows": {
       "inventory": {
         "path": "src/Core/Uninstaller.php",
@@ -2655,11 +2619,11 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
         ],
-        "file_code_sha256": "475b304a0e18c286f19c07ea304a7fdf1f50021870b76aef15eacddeedf55908",
+        "file_code_sha256": "f6bc6881440ba838d6d3aa39f56e9ee7b8acfb08453bb1a8508202e3042dd6bb",
         "code_sha256": "162ed2186e1cf9e0f018fdd54ed2d286c6da88d3d69f30d02cb62841a734fdb6",
         "findings": {}
       },
-      "rationale": "Inherited direct database operation uses WordPress-owned identifiers or typed prepared parameters; transactions, ownership and cache behavior are exercised by repository regression tests.",
+      "rationale": "Inherited direct database operation uses WordPress-owned identifiers or typed prepared parameters; transactions, ownership and cache behavior are exercised by repository regression tests. 8.0 review: fixed prepared identifier DROP inventory moved to remove_owned_tables; no caller supplies identifiers. Migration selects only exact current-site prefix plus cybermaps_mcp_. Failure verification and unrelated uninstall cleanup remain unchanged. Prefix collision, failed cleanup retry and preservation tests pass.",
       "tests": [
         "tests/Core/UninstallerTest.php"
       ]
@@ -2672,11 +2636,11 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
         ],
-        "file_code_sha256": "475b304a0e18c286f19c07ea304a7fdf1f50021870b76aef15eacddeedf55908",
+        "file_code_sha256": "f6bc6881440ba838d6d3aa39f56e9ee7b8acfb08453bb1a8508202e3042dd6bb",
         "code_sha256": "c5ea24699e23bef25790bddfd81b4dd02f9755143219c1196dc484eb06c20379",
         "findings": {}
       },
-      "rationale": "Inherited direct database operation uses WordPress-owned identifiers or typed prepared parameters; transactions, ownership and cache behavior are exercised by repository regression tests.",
+      "rationale": "Inherited direct database operation uses WordPress-owned identifiers or typed prepared parameters; transactions, ownership and cache behavior are exercised by repository regression tests. 8.0 review: fixed prepared identifier DROP inventory moved to remove_owned_tables; no caller supplies identifiers. Migration selects only exact current-site prefix plus cybermaps_mcp_. Failure verification and unrelated uninstall cleanup remain unchanged. Prefix collision, failed cleanup retry and preservation tests pass.",
       "tests": [
         "tests/Core/UninstallerTest.php"
       ]
@@ -2691,14 +2655,31 @@
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Uninstall must verify that no Core-owned post metadata remains.",
           "// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- The complete fixed-key query is prepared immediately above."
         ],
-        "file_code_sha256": "475b304a0e18c286f19c07ea304a7fdf1f50021870b76aef15eacddeedf55908",
+        "file_code_sha256": "f6bc6881440ba838d6d3aa39f56e9ee7b8acfb08453bb1a8508202e3042dd6bb",
         "code_sha256": "4f598b94d4ba64eaf005f5d44b08396fd3c5816c8d1127d6e63f0f71dd13ac40",
         "findings": {
           "WordPress.DB.PreparedSQL.InterpolatedNotPrepared:ERROR": 1,
           "WordPress.DB.PreparedSQL.NotPrepared:ERROR": 1
         }
       },
-      "rationale": "The fixed Core-owned key list supplies exactly one string value per generated placeholder in this single statement. Uninstall must verify that no Core-owned post metadata remains. The complete fixed-key query is prepared immediately above. PreparedSQL cannot follow this fixed statement/placeholder construction across variables. Values use typed placeholders and prepare before execution; no raw input becomes SQL syntax.",
+      "rationale": "The fixed Core-owned key list supplies exactly one string value per generated placeholder in this single statement. Uninstall must verify that no Core-owned post metadata remains. The complete fixed-key query is prepared immediately above. PreparedSQL cannot follow this fixed statement/placeholder construction across variables. Values use typed placeholders and prepare before execution; no raw input becomes SQL syntax. 8.0 review: fixed prepared identifier DROP inventory moved to remove_owned_tables; no caller supplies identifiers. Migration selects only exact current-site prefix plus cybermaps_mcp_. Failure verification and unrelated uninstall cleanup remain unchanged. Prefix collision, failed cleanup retry and preservation tests pass.",
+      "tests": [
+        "tests/Core/UninstallerTest.php"
+      ]
+    },
+    "src/Core/Uninstaller.php::remove_owned_tables": {
+      "inventory": {
+        "path": "src/Core/Uninstaller.php",
+        "scope": "remove_owned_tables",
+        "requests": [],
+        "suppressions": [
+          "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
+        ],
+        "file_code_sha256": "f6bc6881440ba838d6d3aa39f56e9ee7b8acfb08453bb1a8508202e3042dd6bb",
+        "code_sha256": "972f592a2728bc8993c912aaf4a819d68d2eb2346464eec1b83325dc31d34257",
+        "findings": {}
+      },
+      "rationale": "Inherited direct database operation uses WordPress-owned identifiers or typed prepared parameters; transactions, ownership and cache behavior are exercised by repository regression tests. 8.0 review: fixed prepared identifier DROP inventory moved to remove_owned_tables; no caller supplies identifiers. Migration selects only exact current-site prefix plus cybermaps_mcp_. Failure verification and unrelated uninstall cleanup remain unchanged. Prefix collision, failed cleanup retry and preservation tests pass.",
       "tests": [
         "tests/Core/UninstallerTest.php"
       ]
@@ -2711,11 +2692,11 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
         ],
-        "file_code_sha256": "475b304a0e18c286f19c07ea304a7fdf1f50021870b76aef15eacddeedf55908",
+        "file_code_sha256": "f6bc6881440ba838d6d3aa39f56e9ee7b8acfb08453bb1a8508202e3042dd6bb",
         "code_sha256": "818af7a100c1690c80faee5fc8cee1005aea7e9977ee1ed5d95c86e044dc3490",
         "findings": {}
       },
-      "rationale": "Inherited direct database operation uses WordPress-owned identifiers or typed prepared parameters; transactions, ownership and cache behavior are exercised by repository regression tests.",
+      "rationale": "Inherited direct database operation uses WordPress-owned identifiers or typed prepared parameters; transactions, ownership and cache behavior are exercised by repository regression tests. 8.0 review: fixed prepared identifier DROP inventory moved to remove_owned_tables; no caller supplies identifiers. Migration selects only exact current-site prefix plus cybermaps_mcp_. Failure verification and unrelated uninstall cleanup remain unchanged. Prefix collision, failed cleanup retry and preservation tests pass.",
       "tests": [
         "tests/Core/UninstallerTest.php"
       ]
@@ -2728,11 +2709,11 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Verify the schema immediately after dbDelta; a cached result could mark a failed installation ready."
         ],
-        "file_code_sha256": "d6d0eb6bbb5893aa0107a600e23f730ad23b2dc24faef6b54178d586f885097e",
+        "file_code_sha256": "51417a8f1e6c38a41f269509f7bd642f70b58791f28a4add937641494e3a18da",
         "code_sha256": "beabdd7c85988752da39a2ebd454234be9e5c029023444eb3ed61f496f944431",
         "findings": {}
       },
-      "rationale": "Verify the schema immediately after dbDelta; a cached result could mark a failed installation ready.",
+      "rationale": "Verify the schema immediately after dbDelta; a cached result could mark a failed installation ready. 8.0 review: retained the historical OAuth step ID as a no-op to prevent recreation of retired tables; existing lease-fenced SQL and historical migrations are unchanged.",
       "tests": [
         "tests/Core/UpgradeTest.php"
       ]
@@ -2745,11 +2726,11 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- INSERT SELECT is authorized by the exact outer lease row in the same statement."
         ],
-        "file_code_sha256": "d6d0eb6bbb5893aa0107a600e23f730ad23b2dc24faef6b54178d586f885097e",
+        "file_code_sha256": "51417a8f1e6c38a41f269509f7bd642f70b58791f28a4add937641494e3a18da",
         "code_sha256": "cb436b5708281b271bd811a83251d08e2c9e4bc73738469ae1b71ab6573a6f1f",
         "findings": {}
       },
-      "rationale": "INSERT SELECT is authorized by the exact outer lease row in the same statement.",
+      "rationale": "INSERT SELECT is authorized by the exact outer lease row in the same statement. 8.0 review: retained the historical OAuth step ID as a no-op to prevent recreation of retired tables; existing lease-fenced SQL and historical migrations are unchanged.",
       "tests": [
         "tests/Core/UpgradeTest.php"
       ]
@@ -2762,11 +2743,11 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- One statement binds cleanup CAS to the exact outer lease row."
         ],
-        "file_code_sha256": "d6d0eb6bbb5893aa0107a600e23f730ad23b2dc24faef6b54178d586f885097e",
+        "file_code_sha256": "51417a8f1e6c38a41f269509f7bd642f70b58791f28a4add937641494e3a18da",
         "code_sha256": "9287150a015e6f177bebd61968088ffcbb3813811016b82d7ed93197b57dd6c8",
         "findings": {}
       },
-      "rationale": "One statement binds cleanup CAS to the exact outer lease row.",
+      "rationale": "One statement binds cleanup CAS to the exact outer lease row. 8.0 review: retained the historical OAuth step ID as a no-op to prevent recreation of retired tables; existing lease-fenced SQL and historical migrations are unchanged.",
       "tests": [
         "tests/Core/UpgradeTest.php"
       ]
@@ -2779,11 +2760,11 @@
         "suppressions": [
           "// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- This one-time migration copies and removes exact rows in WordPress's postmeta table."
         ],
-        "file_code_sha256": "d6d0eb6bbb5893aa0107a600e23f730ad23b2dc24faef6b54178d586f885097e",
+        "file_code_sha256": "51417a8f1e6c38a41f269509f7bd642f70b58791f28a4add937641494e3a18da",
         "code_sha256": "eb0c297e5ea977a836e682b36bd6d11585d4d80c88f226685e9d825a4fa90155",
         "findings": {}
       },
-      "rationale": "This one-time migration copies and removes exact rows in WordPress's postmeta table.",
+      "rationale": "This one-time migration copies and removes exact rows in WordPress's postmeta table. 8.0 review: retained the historical OAuth step ID as a no-op to prevent recreation of retired tables; existing lease-fenced SQL and historical migrations are unchanged.",
       "tests": [
         "tests/Core/UpgradeTest.php"
       ]
@@ -2796,11 +2777,11 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Raw bytes are required for the exact lease/state CAS."
         ],
-        "file_code_sha256": "d6d0eb6bbb5893aa0107a600e23f730ad23b2dc24faef6b54178d586f885097e",
+        "file_code_sha256": "51417a8f1e6c38a41f269509f7bd642f70b58791f28a4add937641494e3a18da",
         "code_sha256": "6f59ad4164380aaf1e82a91b5363454ddf96a141da01132645e8b80d297cbfc0",
         "findings": {}
       },
-      "rationale": "Raw bytes are required for the exact lease/state CAS.",
+      "rationale": "Raw bytes are required for the exact lease/state CAS. 8.0 review: retained the historical OAuth step ID as a no-op to prevent recreation of retired tables; existing lease-fenced SQL and historical migrations are unchanged.",
       "tests": [
         "tests/Core/UpgradeTest.php"
       ]
@@ -2813,11 +2794,11 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- One statement binds the state/version CAS to the exact outer lease row."
         ],
-        "file_code_sha256": "d6d0eb6bbb5893aa0107a600e23f730ad23b2dc24faef6b54178d586f885097e",
+        "file_code_sha256": "51417a8f1e6c38a41f269509f7bd642f70b58791f28a4add937641494e3a18da",
         "code_sha256": "c0fd9b3622b2d46382be021f829f8803de9f94a64d722670c09620154d643d8b",
         "findings": {}
       },
-      "rationale": "One statement binds the state/version CAS to the exact outer lease row.",
+      "rationale": "One statement binds the state/version CAS to the exact outer lease row. 8.0 review: retained the historical OAuth step ID as a no-op to prevent recreation of retired tables; existing lease-fenced SQL and historical migrations are unchanged.",
       "tests": [
         "tests/Core/UpgradeTest.php"
       ]
@@ -2868,11 +2849,11 @@
           "$_SERVER"
         ],
         "suppressions": [],
-        "file_code_sha256": "cd852d661e47666b105ea461779fad1524f6603318aeacc1cf001a47b46adede",
+        "file_code_sha256": "d5b06a872c925090c0a06f65aedde963dda47a12d05166903dda9a2a160c76a1",
         "code_sha256": "e94a4e666f95b8c17c591f729a7565d67c54b8e3a4a116758b755c4f9d9aa44f",
         "findings": {}
       },
-      "rationale": "Request adapter or authenticated caller owns this boundary; scalar guards and contextual sanitization are frozen with the body. Review caller authorization again whenever this scope changes.",
+      "rationale": "Request adapter or authenticated caller owns this boundary; scalar guards and contextual sanitization are frozen with the body. Review caller authorization again whenever this scope changes. 8.0 review: the advertised native API URL is narrowed to the owned search ability; bounded request-body rejection is unchanged.",
       "tests": [
         "tests/Discovery/APICatalogTest.php"
       ]
@@ -2885,13 +2866,13 @@
         "suppressions": [
           "// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception-only diagnostic; JSON or escaped admin consumers own the eventual output boundary."
         ],
-        "file_code_sha256": "b8f10abb8b26ea26c49572ee92a59d7a435596383b817edf4e6b1090427d8be1",
+        "file_code_sha256": "c3b19c5881bab443d66bc6c4f49f7f0cce1c68752db05ef554743888ec4b4efc",
         "code_sha256": "d6e89db7b5eda318961aa3a7e4039d929a34c9dbc6fe27237ab3388ceff942e1",
         "findings": {
           "WordPress.Security.EscapeOutput.ExceptionNotEscaped:ERROR": 1
         }
       },
-      "rationale": "Exception-only diagnostic; JSON or escaped admin consumers own the eventual output boundary. Exception messages remain data until the caller renders or JSON-encodes them; HTML escaping inside the exception would corrupt non-HTML consumers.",
+      "rationale": "Exception-only diagnostic; JSON or escaped admin consumers own the eventual output boundary. Exception messages remain data until the caller renders or JSON-encodes them; HTML escaping inside the exception would corrupt non-HTML consumers. 8.0 review: removed both OAuth metadata generators; public output dispatch and JSON encoding sinks retain their existing boundaries.",
       "tests": [
         "tests/Discovery/DiscoveryPublicationGeneratorTest.php"
       ]
@@ -2907,13 +2888,13 @@
           "// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Static-sync exceptions become status data; the admin view escapes at its output boundary.",
           "// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Static-sync exceptions become status data; the admin view escapes at its output boundary."
         ],
-        "file_code_sha256": "b8f10abb8b26ea26c49572ee92a59d7a435596383b817edf4e6b1090427d8be1",
+        "file_code_sha256": "c3b19c5881bab443d66bc6c4f49f7f0cce1c68752db05ef554743888ec4b4efc",
         "code_sha256": "411d181dfa8a97e96cf4bde19e7eed08d6e656438b4230f4aec22879191ff71a",
         "findings": {
           "WordPress.Security.EscapeOutput.ExceptionNotEscaped:ERROR": 4
         }
       },
-      "rationale": "Registry IDs are diagnostic data, not direct HTML output. Static-sync exceptions become status data; the admin view escapes at its output boundary. Exception messages remain data until the caller renders or JSON-encodes them; HTML escaping inside the exception would corrupt non-HTML consumers.",
+      "rationale": "Registry IDs are diagnostic data, not direct HTML output. Static-sync exceptions become status data; the admin view escapes at its output boundary. Exception messages remain data until the caller renders or JSON-encodes them; HTML escaping inside the exception would corrupt non-HTML consumers. 8.0 review: removed both OAuth metadata generators; public output dispatch and JSON encoding sinks retain their existing boundaries.",
       "tests": [
         "tests/Discovery/DiscoveryPublicationGeneratorTest.php"
       ]
@@ -3785,563 +3766,6 @@
       "rationale": "Request adapter or authenticated caller owns this boundary; scalar guards and contextual sanitization are frozen with the body. Review caller authorization again whenever this scope changes.",
       "tests": [
         "tests/Integration/RestResponseGuardTest.php"
-      ]
-    },
-    "src/MCP/OAuth/DeviceAuthorizationPage.php::relative_request_path": {
-      "inventory": {
-        "path": "src/MCP/OAuth/DeviceAuthorizationPage.php",
-        "scope": "relative_request_path",
-        "requests": [
-          "$_SERVER"
-        ],
-        "suppressions": [],
-        "file_code_sha256": "f675cccf277caf1e0a4b20bfbfe88f014215365bdc8b37074efc318fd718c1c5",
-        "code_sha256": "00c20abc13907488015363ef7209ff3722cedfdcc81743a070a35c4728be4601",
-        "findings": {}
-      },
-      "rationale": "Request adapter or authenticated caller owns this boundary; scalar guards and contextual sanitization are frozen with the body. Review caller authorization again whenever this scope changes.",
-      "tests": [
-        "tests/Admin/RequestInputBoundaryTest.php"
-      ]
-    },
-    "src/MCP/OAuth/DeviceAuthorizationPage.php::request_method": {
-      "inventory": {
-        "path": "src/MCP/OAuth/DeviceAuthorizationPage.php",
-        "scope": "request_method",
-        "requests": [
-          "$_SERVER"
-        ],
-        "suppressions": [],
-        "file_code_sha256": "f675cccf277caf1e0a4b20bfbfe88f014215365bdc8b37074efc318fd718c1c5",
-        "code_sha256": "9523108791580c4b624259fe1bddc09cad1e94bb2ce7d1fd5e04e97b9ffeb54d",
-        "findings": {}
-      },
-      "rationale": "Request adapter or authenticated caller owns this boundary; scalar guards and contextual sanitization are frozen with the body. Review caller authorization again whenever this scope changes.",
-      "tests": [
-        "tests/Admin/RequestInputBoundaryTest.php"
-      ]
-    },
-    "src/MCP/OAuth/DeviceAuthorizationPage.php::request_value": {
-      "inventory": {
-        "path": "src/MCP/OAuth/DeviceAuthorizationPage.php",
-        "scope": "request_value",
-        "requests": [
-          "$_REQUEST"
-        ],
-        "suppressions": [
-          "// phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.NonceVerification.Recommended -- Decision nonce verified by the caller; GET only reads a public user code.",
-          "// phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.NonceVerification.Recommended -- POST nonce verification is performed before a decision; GET only looks up a short-lived public user code."
-        ],
-        "file_code_sha256": "f675cccf277caf1e0a4b20bfbfe88f014215365bdc8b37074efc318fd718c1c5",
-        "code_sha256": "deed8ded0399602dab0a17820b8b1ac945dd36c0b7a0089433f8222c2e65005b",
-        "findings": {
-          "WordPress.Security.NonceVerification.Recommended:WARNING": 3
-        }
-      },
-      "rationale": "Decision nonce verified by the caller; GET only reads a public user code. POST nonce verification is performed before a decision; GET only looks up a short-lived public user code. Request adapter or authenticated caller owns this boundary; scalar guards and contextual sanitization are frozen with the body. Review caller authorization again whenever this scope changes.",
-      "tests": [
-        "tests/Admin/RequestInputBoundaryTest.php"
-      ]
-    },
-    "src/MCP/OAuth/OAuthMetadataPublication.php::metadata_for_request": {
-      "inventory": {
-        "path": "src/MCP/OAuth/OAuthMetadataPublication.php",
-        "scope": "metadata_for_request",
-        "requests": [
-          "$_SERVER"
-        ],
-        "suppressions": [],
-        "file_code_sha256": "490b549d835fdac3ee81be749a90d95d62ae0cc37fa8379d38e6aa63a907db40",
-        "code_sha256": "5844ba6a0791dbdbb785a22b97535770d39c6c380379113ae44454efc0e01b2c",
-        "findings": {}
-      },
-      "rationale": "Request adapter or authenticated caller owns this boundary; scalar guards and contextual sanitization are frozen with the body. Review caller authorization again whenever this scope changes.",
-      "tests": [
-        "tests/Admin/RequestInputBoundaryTest.php"
-      ]
-    },
-    "src/MCP/OAuth/WpdbOAuthRepository.php::consume_authorization_code": {
-      "inventory": {
-        "path": "src/MCP/OAuth/WpdbOAuthRepository.php",
-        "scope": "consume_authorization_code",
-        "requests": [],
-        "suppressions": [
-          "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
-        ],
-        "file_code_sha256": "cc0812918071f5019692f6d13710795c06831fe51e0bf762c079cf9d4dd5dfa9",
-        "code_sha256": "b91a90122d2a4b18841703a7d59ad787133243f9871e3de967f4a43aa23b2463",
-        "findings": {}
-      },
-      "rationale": "Inherited direct database operation uses WordPress-owned identifiers or typed prepared parameters; transactions, ownership and cache behavior are exercised by repository regression tests.",
-      "tests": [
-        "tests/Architecture/CoreBoundaryTest.php"
-      ]
-    },
-    "src/MCP/OAuth/WpdbOAuthRepository.php::consume_device_authorization": {
-      "inventory": {
-        "path": "src/MCP/OAuth/WpdbOAuthRepository.php",
-        "scope": "consume_device_authorization",
-        "requests": [],
-        "suppressions": [
-          "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
-        ],
-        "file_code_sha256": "cc0812918071f5019692f6d13710795c06831fe51e0bf762c079cf9d4dd5dfa9",
-        "code_sha256": "9239801f4e400ef15247c05a7ea50ab130ebc72b5a16fd07dc29fe0eff20089c",
-        "findings": {}
-      },
-      "rationale": "Inherited direct database operation uses WordPress-owned identifiers or typed prepared parameters; transactions, ownership and cache behavior are exercised by repository regression tests.",
-      "tests": [
-        "tests/Architecture/CoreBoundaryTest.php"
-      ]
-    },
-    "src/MCP/OAuth/WpdbOAuthRepository.php::consume_refresh_token": {
-      "inventory": {
-        "path": "src/MCP/OAuth/WpdbOAuthRepository.php",
-        "scope": "consume_refresh_token",
-        "requests": [],
-        "suppressions": [
-          "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
-        ],
-        "file_code_sha256": "cc0812918071f5019692f6d13710795c06831fe51e0bf762c079cf9d4dd5dfa9",
-        "code_sha256": "1b943590dc6f310c288c38d076005db99cd41fcd5a16bbcd7fa7bd9f03f4e9d4",
-        "findings": {}
-      },
-      "rationale": "Inherited direct database operation uses WordPress-owned identifiers or typed prepared parameters; transactions, ownership and cache behavior are exercised by repository regression tests.",
-      "tests": [
-        "tests/Architecture/CoreBoundaryTest.php"
-      ]
-    },
-    "src/MCP/OAuth/WpdbOAuthRepository.php::decide_device_authorization": {
-      "inventory": {
-        "path": "src/MCP/OAuth/WpdbOAuthRepository.php",
-        "scope": "decide_device_authorization",
-        "requests": [],
-        "suppressions": [
-          "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
-        ],
-        "file_code_sha256": "cc0812918071f5019692f6d13710795c06831fe51e0bf762c079cf9d4dd5dfa9",
-        "code_sha256": "cf62d9004c6c7fd8ed852732ce66f12abf5bb47c15d9d24d4c0541f3e305755f",
-        "findings": {}
-      },
-      "rationale": "Inherited direct database operation uses WordPress-owned identifiers or typed prepared parameters; transactions, ownership and cache behavior are exercised by repository regression tests.",
-      "tests": [
-        "tests/Architecture/CoreBoundaryTest.php"
-      ]
-    },
-    "src/MCP/OAuth/WpdbOAuthRepository.php::delete_expired_device_authorizations": {
-      "inventory": {
-        "path": "src/MCP/OAuth/WpdbOAuthRepository.php",
-        "scope": "delete_expired_device_authorizations",
-        "requests": [],
-        "suppressions": [
-          "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
-        ],
-        "file_code_sha256": "cc0812918071f5019692f6d13710795c06831fe51e0bf762c079cf9d4dd5dfa9",
-        "code_sha256": "760683ee5c39e80215a7d981bc12e6eeb705e4c86297656f019e22917c698ce1",
-        "findings": {}
-      },
-      "rationale": "Inherited direct database operation uses WordPress-owned identifiers or typed prepared parameters; transactions, ownership and cache behavior are exercised by repository regression tests.",
-      "tests": [
-        "tests/Architecture/CoreBoundaryTest.php"
-      ]
-    },
-    "src/MCP/OAuth/WpdbOAuthRepository.php::drop_tables": {
-      "inventory": {
-        "path": "src/MCP/OAuth/WpdbOAuthRepository.php",
-        "scope": "drop_tables",
-        "requests": [],
-        "suppressions": [
-          "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
-        ],
-        "file_code_sha256": "cc0812918071f5019692f6d13710795c06831fe51e0bf762c079cf9d4dd5dfa9",
-        "code_sha256": "0e7f91451ba9578dc6a76c0b6523b060d5aae3b86727e6c868089880ceedee40",
-        "findings": {}
-      },
-      "rationale": "Inherited direct database operation uses WordPress-owned identifiers or typed prepared parameters; transactions, ownership and cache behavior are exercised by repository regression tests.",
-      "tests": [
-        "tests/Architecture/CoreBoundaryTest.php"
-      ]
-    },
-    "src/MCP/OAuth/WpdbOAuthRepository.php::find_authorization_code": {
-      "inventory": {
-        "path": "src/MCP/OAuth/WpdbOAuthRepository.php",
-        "scope": "find_authorization_code",
-        "requests": [],
-        "suppressions": [
-          "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
-        ],
-        "file_code_sha256": "cc0812918071f5019692f6d13710795c06831fe51e0bf762c079cf9d4dd5dfa9",
-        "code_sha256": "326d55fb44b0a66c2ede8d4f85f23bb5d58f1a7851831e671fd186255c665fba",
-        "findings": {}
-      },
-      "rationale": "Inherited direct database operation uses WordPress-owned identifiers or typed prepared parameters; transactions, ownership and cache behavior are exercised by repository regression tests.",
-      "tests": [
-        "tests/Architecture/CoreBoundaryTest.php"
-      ]
-    },
-    "src/MCP/OAuth/WpdbOAuthRepository.php::find_client": {
-      "inventory": {
-        "path": "src/MCP/OAuth/WpdbOAuthRepository.php",
-        "scope": "find_client",
-        "requests": [],
-        "suppressions": [
-          "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
-        ],
-        "file_code_sha256": "cc0812918071f5019692f6d13710795c06831fe51e0bf762c079cf9d4dd5dfa9",
-        "code_sha256": "53bc3d5b5c2a959ca84d5707f7227fdb70a4f3182966a9daf30a2bf6af6cb82e",
-        "findings": {}
-      },
-      "rationale": "Inherited direct database operation uses WordPress-owned identifiers or typed prepared parameters; transactions, ownership and cache behavior are exercised by repository regression tests.",
-      "tests": [
-        "tests/Architecture/CoreBoundaryTest.php"
-      ]
-    },
-    "src/MCP/OAuth/WpdbOAuthRepository.php::find_device_by_hash": {
-      "inventory": {
-        "path": "src/MCP/OAuth/WpdbOAuthRepository.php",
-        "scope": "find_device_by_hash",
-        "requests": [],
-        "suppressions": [
-          "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
-        ],
-        "file_code_sha256": "cc0812918071f5019692f6d13710795c06831fe51e0bf762c079cf9d4dd5dfa9",
-        "code_sha256": "f999868972a609d1b0d37f678a87143cbd94454d2235ef2875884b9a2cca475b",
-        "findings": {}
-      },
-      "rationale": "Inherited direct database operation uses WordPress-owned identifiers or typed prepared parameters; transactions, ownership and cache behavior are exercised by repository regression tests.",
-      "tests": [
-        "tests/Architecture/CoreBoundaryTest.php"
-      ]
-    },
-    "src/MCP/OAuth/WpdbOAuthRepository.php::find_token": {
-      "inventory": {
-        "path": "src/MCP/OAuth/WpdbOAuthRepository.php",
-        "scope": "find_token",
-        "requests": [],
-        "suppressions": [
-          "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
-        ],
-        "file_code_sha256": "cc0812918071f5019692f6d13710795c06831fe51e0bf762c079cf9d4dd5dfa9",
-        "code_sha256": "d0c199d0ba16175273e14963af4c68d0e350a9d59d36a0afd5d5f736bdf56cfb",
-        "findings": {}
-      },
-      "rationale": "Inherited direct database operation uses WordPress-owned identifiers or typed prepared parameters; transactions, ownership and cache behavior are exercised by repository regression tests.",
-      "tests": [
-        "tests/Architecture/CoreBoundaryTest.php"
-      ]
-    },
-    "src/MCP/OAuth/WpdbOAuthRepository.php::revoke_client_tokens": {
-      "inventory": {
-        "path": "src/MCP/OAuth/WpdbOAuthRepository.php",
-        "scope": "revoke_client_tokens",
-        "requests": [],
-        "suppressions": [
-          "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
-        ],
-        "file_code_sha256": "cc0812918071f5019692f6d13710795c06831fe51e0bf762c079cf9d4dd5dfa9",
-        "code_sha256": "8ddf78e33f76a28820e6b1b8031010ac312ffd81f48fac12d912dc6877503560",
-        "findings": {}
-      },
-      "rationale": "Inherited direct database operation uses WordPress-owned identifiers or typed prepared parameters; transactions, ownership and cache behavior are exercised by repository regression tests.",
-      "tests": [
-        "tests/Architecture/CoreBoundaryTest.php"
-      ]
-    },
-    "src/MCP/OAuth/WpdbOAuthRepository.php::revoke_family": {
-      "inventory": {
-        "path": "src/MCP/OAuth/WpdbOAuthRepository.php",
-        "scope": "revoke_family",
-        "requests": [],
-        "suppressions": [
-          "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
-        ],
-        "file_code_sha256": "cc0812918071f5019692f6d13710795c06831fe51e0bf762c079cf9d4dd5dfa9",
-        "code_sha256": "28202a3594aa24d13af03bdfaa4518bb91c4564b1e3f1ec1abce8556e8046682",
-        "findings": {}
-      },
-      "rationale": "Inherited direct database operation uses WordPress-owned identifiers or typed prepared parameters; transactions, ownership and cache behavior are exercised by repository regression tests.",
-      "tests": [
-        "tests/Architecture/CoreBoundaryTest.php"
-      ]
-    },
-    "src/MCP/OAuth/WpdbOAuthRepository.php::revoke_token": {
-      "inventory": {
-        "path": "src/MCP/OAuth/WpdbOAuthRepository.php",
-        "scope": "revoke_token",
-        "requests": [],
-        "suppressions": [
-          "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
-        ],
-        "file_code_sha256": "cc0812918071f5019692f6d13710795c06831fe51e0bf762c079cf9d4dd5dfa9",
-        "code_sha256": "2407ab0e2278470b3e6625da85571eaecab24ade08c0cdf710d2d3f313a242c4",
-        "findings": {}
-      },
-      "rationale": "Inherited direct database operation uses WordPress-owned identifiers or typed prepared parameters; transactions, ownership and cache behavior are exercised by repository regression tests.",
-      "tests": [
-        "tests/Architecture/CoreBoundaryTest.php"
-      ]
-    },
-    "src/MCP/OAuth/WpdbOAuthRepository.php::save_authorization_code": {
-      "inventory": {
-        "path": "src/MCP/OAuth/WpdbOAuthRepository.php",
-        "scope": "save_authorization_code",
-        "requests": [],
-        "suppressions": [
-          "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Authoritative custom-table write; wpdb escapes the data and reads must observe current task/OAuth state."
-        ],
-        "file_code_sha256": "cc0812918071f5019692f6d13710795c06831fe51e0bf762c079cf9d4dd5dfa9",
-        "code_sha256": "85328cc44dca48d3369cb1c5fc4efd1795fe9b7688add45ccd07f7e2be6d6dd5",
-        "findings": {}
-      },
-      "rationale": "Authoritative custom-table write; wpdb escapes the data and reads must observe current task/OAuth state.",
-      "tests": [
-        "tests/Architecture/CoreBoundaryTest.php"
-      ]
-    },
-    "src/MCP/OAuth/WpdbOAuthRepository.php::save_client": {
-      "inventory": {
-        "path": "src/MCP/OAuth/WpdbOAuthRepository.php",
-        "scope": "save_client",
-        "requests": [],
-        "suppressions": [
-          "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Authoritative custom-table write; wpdb escapes the data and reads must observe current task/OAuth state."
-        ],
-        "file_code_sha256": "cc0812918071f5019692f6d13710795c06831fe51e0bf762c079cf9d4dd5dfa9",
-        "code_sha256": "d717a3d9aa6c9322e8c783bd739c0a03d7072a103b17209691730a9a44fbded0",
-        "findings": {}
-      },
-      "rationale": "Authoritative custom-table write; wpdb escapes the data and reads must observe current task/OAuth state.",
-      "tests": [
-        "tests/Architecture/CoreBoundaryTest.php"
-      ]
-    },
-    "src/MCP/OAuth/WpdbOAuthRepository.php::save_device_authorization": {
-      "inventory": {
-        "path": "src/MCP/OAuth/WpdbOAuthRepository.php",
-        "scope": "save_device_authorization",
-        "requests": [],
-        "suppressions": [
-          "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Authoritative custom-table write; wpdb escapes the data and reads must observe current task/OAuth state."
-        ],
-        "file_code_sha256": "cc0812918071f5019692f6d13710795c06831fe51e0bf762c079cf9d4dd5dfa9",
-        "code_sha256": "acac037a6ec80c25ece98b285e6d542a673d92a68bb33712b29d22cbaea41ab0",
-        "findings": {}
-      },
-      "rationale": "Authoritative custom-table write; wpdb escapes the data and reads must observe current task/OAuth state.",
-      "tests": [
-        "tests/Architecture/CoreBoundaryTest.php"
-      ]
-    },
-    "src/MCP/OAuth/WpdbOAuthRepository.php::save_grant": {
-      "inventory": {
-        "path": "src/MCP/OAuth/WpdbOAuthRepository.php",
-        "scope": "save_grant",
-        "requests": [],
-        "suppressions": [
-          "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Authoritative custom-table write; wpdb escapes the data and reads must observe current task/OAuth state."
-        ],
-        "file_code_sha256": "cc0812918071f5019692f6d13710795c06831fe51e0bf762c079cf9d4dd5dfa9",
-        "code_sha256": "638f27b351037a655fcafad9733b308975fa01cf26377db36e656b0f4cc7976a",
-        "findings": {}
-      },
-      "rationale": "Authoritative custom-table write; wpdb escapes the data and reads must observe current task/OAuth state.",
-      "tests": [
-        "tests/Architecture/CoreBoundaryTest.php"
-      ]
-    },
-    "src/MCP/OAuth/WpdbOAuthRepository.php::save_token": {
-      "inventory": {
-        "path": "src/MCP/OAuth/WpdbOAuthRepository.php",
-        "scope": "save_token",
-        "requests": [],
-        "suppressions": [
-          "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Authoritative custom-table write; wpdb escapes the data and reads must observe current task/OAuth state."
-        ],
-        "file_code_sha256": "cc0812918071f5019692f6d13710795c06831fe51e0bf762c079cf9d4dd5dfa9",
-        "code_sha256": "b45f33178fdc1c95efbf9b92e7e684fefa87020fc2dba6a7fb6e06a0f8fa3a18",
-        "findings": {}
-      },
-      "rationale": "Authoritative custom-table write; wpdb escapes the data and reads must observe current task/OAuth state.",
-      "tests": [
-        "tests/Architecture/CoreBoundaryTest.php"
-      ]
-    },
-    "src/MCP/OAuth/WpdbOAuthRepository.php::update_device_poll": {
-      "inventory": {
-        "path": "src/MCP/OAuth/WpdbOAuthRepository.php",
-        "scope": "update_device_poll",
-        "requests": [],
-        "suppressions": [
-          "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
-        ],
-        "file_code_sha256": "cc0812918071f5019692f6d13710795c06831fe51e0bf762c079cf9d4dd5dfa9",
-        "code_sha256": "67097f1c2c04fec0b3092ae19e66cde7a4b43e8d5861ba71b619f971d4172c1e",
-        "findings": {}
-      },
-      "rationale": "Inherited direct database operation uses WordPress-owned identifiers or typed prepared parameters; transactions, ownership and cache behavior are exercised by repository regression tests.",
-      "tests": [
-        "tests/Architecture/CoreBoundaryTest.php"
-      ]
-    },
-    "src/MCP/Server.php::bounded_string": {
-      "inventory": {
-        "path": "src/MCP/Server.php",
-        "scope": "bounded_string",
-        "requests": [],
-        "suppressions": [
-          "// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message is returned through JSON encoding, not HTML output."
-        ],
-        "file_code_sha256": "dc1c3aaed9c089b1772fab67b99a57f77b2b87ee8049ec98ce771e78f18083d4",
-        "code_sha256": "14c42c1fce8fb393b4e7eebd9b990e444c33d7bd3e69342b7167d459761832a3",
-        "findings": {
-          "WordPress.Security.EscapeOutput.ExceptionNotEscaped:ERROR": 1
-        }
-      },
-      "rationale": "Exception message is returned through JSON encoding, not HTML output. Exception messages remain data until the caller renders or JSON-encodes them; HTML escaping inside the exception would corrupt non-HTML consumers.",
-      "tests": [
-        "tests/Discovery/MCPServerCardTest.php"
-      ]
-    },
-    "src/MCP/TaskRepository.php::cleanup": {
-      "inventory": {
-        "path": "src/MCP/TaskRepository.php",
-        "scope": "cleanup",
-        "requests": [],
-        "suppressions": [
-          "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared -- The complete bounded statement is prepared immediately above."
-        ],
-        "file_code_sha256": "7bf485881cdcdfbd105f09f3a032a700ba90001a7e9b8556e40f711131f62033",
-        "code_sha256": "21ea6756e0d687673787e17336f0c034c4be6b2e8b3addea720e365a12f7155c",
-        "findings": {
-          "WordPress.DB.PreparedSQL.NotPrepared:ERROR": 1
-        }
-      },
-      "rationale": "The complete bounded statement is prepared immediately above. PreparedSQL cannot follow this fixed statement/placeholder construction across variables. Values use typed placeholders and prepare before execution; no raw input becomes SQL syntax.",
-      "tests": [
-        "tests/Architecture/CoreBoundaryTest.php"
-      ]
-    },
-    "src/MCP/TaskRepository.php::create": {
-      "inventory": {
-        "path": "src/MCP/TaskRepository.php",
-        "scope": "create",
-        "requests": [],
-        "suppressions": [
-          "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Authoritative custom-table write; wpdb escapes the data and reads must observe current task/OAuth state."
-        ],
-        "file_code_sha256": "7bf485881cdcdfbd105f09f3a032a700ba90001a7e9b8556e40f711131f62033",
-        "code_sha256": "ecb9c9739657a4b7a3150717d2be9761cdc3a8f4f4d394b71db40cee5184c287",
-        "findings": {}
-      },
-      "rationale": "Authoritative custom-table write; wpdb escapes the data and reads must observe current task/OAuth state.",
-      "tests": [
-        "tests/Architecture/CoreBoundaryTest.php"
-      ]
-    },
-    "src/MCP/TaskRepository.php::drop_tables": {
-      "inventory": {
-        "path": "src/MCP/TaskRepository.php",
-        "scope": "drop_tables",
-        "requests": [],
-        "suppressions": [
-          "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
-        ],
-        "file_code_sha256": "7bf485881cdcdfbd105f09f3a032a700ba90001a7e9b8556e40f711131f62033",
-        "code_sha256": "426b8a05ec7cd086c0af5049db317aabe61f857dbc50daefbac683985d41cdaf",
-        "findings": {}
-      },
-      "rationale": "Inherited direct database operation uses WordPress-owned identifiers or typed prepared parameters; transactions, ownership and cache behavior are exercised by repository regression tests.",
-      "tests": [
-        "tests/Architecture/CoreBoundaryTest.php"
-      ]
-    },
-    "src/MCP/TaskRepository.php::find_active": {
-      "inventory": {
-        "path": "src/MCP/TaskRepository.php",
-        "scope": "find_active",
-        "requests": [],
-        "suppressions": [
-          "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
-        ],
-        "file_code_sha256": "7bf485881cdcdfbd105f09f3a032a700ba90001a7e9b8556e40f711131f62033",
-        "code_sha256": "abdb8c766a139e4453258190767b811a57499bb6503ea00213571cf25a8c5b54",
-        "findings": {}
-      },
-      "rationale": "Inherited direct database operation uses WordPress-owned identifiers or typed prepared parameters; transactions, ownership and cache behavior are exercised by repository regression tests.",
-      "tests": [
-        "tests/Architecture/CoreBoundaryTest.php"
-      ]
-    },
-    "src/MCP/TaskRepository.php::get": {
-      "inventory": {
-        "path": "src/MCP/TaskRepository.php",
-        "scope": "get",
-        "requests": [],
-        "suppressions": [
-          "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
-        ],
-        "file_code_sha256": "7bf485881cdcdfbd105f09f3a032a700ba90001a7e9b8556e40f711131f62033",
-        "code_sha256": "8a20fd4501acc3f7d3974ddff5ca28fcf8efd9e8915009146c07baf4640308e3",
-        "findings": {}
-      },
-      "rationale": "Inherited direct database operation uses WordPress-owned identifiers or typed prepared parameters; transactions, ownership and cache behavior are exercised by repository regression tests.",
-      "tests": [
-        "tests/Architecture/CoreBoundaryTest.php"
-      ]
-    },
-    "src/MCP/TaskRepository.php::update": {
-      "inventory": {
-        "path": "src/MCP/TaskRepository.php",
-        "scope": "update",
-        "requests": [],
-        "suppressions": [
-          "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Authoritative custom-table write; wpdb escapes the data and reads must observe current task/OAuth state."
-        ],
-        "file_code_sha256": "7bf485881cdcdfbd105f09f3a032a700ba90001a7e9b8556e40f711131f62033",
-        "code_sha256": "aabb3397da586b9162ed3ecf1fa5569049c5a58d55237d82f2d71b88cfc2805d",
-        "findings": {}
-      },
-      "rationale": "Authoritative custom-table write; wpdb escapes the data and reads must observe current task/OAuth state.",
-      "tests": [
-        "tests/Architecture/CoreBoundaryTest.php"
-      ]
-    },
-    "src/MCP/ToolRegistry.php::call": {
-      "inventory": {
-        "path": "src/MCP/ToolRegistry.php",
-        "scope": "call",
-        "requests": [],
-        "suppressions": [
-          "// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message is returned through JSON encoding, not HTML output."
-        ],
-        "file_code_sha256": "76952dbe71908a6d9e98e8fbcdb711bddaa4070f9ef3978d8a5d5ddbd0c45b53",
-        "code_sha256": "0718bbb3121fd3446c67efa16dc8cb508e312c6262ccc9b462aeaf195e39c760",
-        "findings": {
-          "WordPress.Security.EscapeOutput.ExceptionNotEscaped:ERROR": 1
-        }
-      },
-      "rationale": "Exception message is returned through JSON encoding, not HTML output. Exception messages remain data until the caller renders or JSON-encodes them; HTML escaping inside the exception would corrupt non-HTML consumers.",
-      "tests": [
-        "tests/MCP/ToolRegistryTest.php"
-      ]
-    },
-    "src/MCP/WordPressIntegration.php::executors": {
-      "inventory": {
-        "path": "src/MCP/WordPressIntegration.php",
-        "scope": "executors",
-        "requests": [],
-        "suppressions": [
-          "// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- The response is JSON encoded by the MCP transport, not rendered as HTML."
-        ],
-        "file_code_sha256": "4232b9770436b7e6112e4dcc17de2a929834b691eaf620988694018b1c25404f",
-        "code_sha256": "5de92fb8ed6a9d1d3249fe464c262ad47040637862bb61bdd1162843db819164",
-        "findings": {
-          "WordPress.Security.EscapeOutput.ExceptionNotEscaped:ERROR": 1
-        }
-      },
-      "rationale": "The response is JSON encoded by the MCP transport, not rendered as HTML. Exception messages remain data until the caller renders or JSON-encodes them; HTML escaping inside the exception would corrupt non-HTML consumers.",
-      "tests": [
-        "tests/Architecture/CoreBoundaryTest.php"
       ]
     },
     "src/Sitemap/EligibleContentRepository.php::get_archive_inventory": {

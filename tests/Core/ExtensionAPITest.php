@@ -113,7 +113,7 @@ class ExtensionAPITest extends TestCase {
 		$this->assertFalse( $catalog_alias['canonical'] ?? true );
 		$this->assertSame( 'ai_catalog', $ai_catalog['id'] ?? null );
 		$this->assertSame( 'mcp_server_card', $mcp_card['id'] ?? null );
-		$this->assertSame( 'auth_md', $auth_md['id'] ?? null );
+		$this->assertNull( $auth_md );
 		$this->assertNull( $registry->match_path( '/.well-known/ai-discovery.json' ) );
 		$this->assertNull( $registry->match_path( '/not-a-cybermaps-publication' ) );
 

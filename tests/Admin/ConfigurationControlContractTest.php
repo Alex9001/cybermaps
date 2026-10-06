@@ -28,8 +28,8 @@ final class ConfigurationControlContractTest extends TestCase {
 	public function test_every_current_control_is_visible_has_one_storage_owner_and_survives_its_own_sanitizer(): void {
 		$controls = $this->current_controls();
 
-		self::assertCount( 124, $controls );
-		self::assertCount( 124, array_unique( array_keys( $controls ) ) );
+		self::assertCount( 123, $controls );
+		self::assertCount( 123, array_unique( array_keys( $controls ) ) );
 
 		foreach ( $controls as $id => $control ) {
 			$field  = (string) $control['field'];

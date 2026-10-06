@@ -182,12 +182,6 @@ class DiscoveryPublicationGenerator {
 
 			case 'mcp_server_card':
 				return $this->encode_json( ( new MCPServerCard() )->get_card_data() );
-
-			case 'oauth_authorization_server':
-				return $this->encode_json( ( new \Cybermaps\MCP\OAuth\OAuthMetadataPublication() )->authorization_server_metadata() );
-
-			case 'oauth_protected_resource':
-				return $this->encode_json( ( new \Cybermaps\MCP\OAuth\OAuthMetadataPublication() )->protected_resource_metadata() );
 		}
 		return null;
 	}

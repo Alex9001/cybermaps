@@ -7,7 +7,6 @@ use Cybermaps\Admin\EdgeOptimizationController;
 use Cybermaps\Admin\Settings\Tabs\ContentReview;
 use Cybermaps\Core\RequestInput;
 use Cybermaps\Discovery\MarkdownNegotiation;
-use Cybermaps\MCP\OAuth\DeviceAuthorizationPage;
 use PHPUnit\Framework\TestCase;
 
 final class RequestInputBoundaryTest extends TestCase {
@@ -45,22 +44,6 @@ final class RequestInputBoundaryTest extends TestCase {
 			self::assertSame( 'abcdefgh', $method->invoke( $client, 'code', 8 ) );
 		} finally {
 			$_GET = $before;
-		}
-	}
-
-	public function test_device_codes_reject_arrays_and_overlong_values(): void {
-		$before = $_REQUEST;
-		try {
-			$page = ( new \ReflectionClass( DeviceAuthorizationPage::class ) )->newInstanceWithoutConstructor();
-			$method = new \ReflectionMethod( $page, 'request_value' );
-			foreach ( array( array( 'ABCD-EFGH' ), str_repeat( 'x', 21 ) ) as $invalid ) {
-				$_REQUEST['user_code'] = $invalid;
-				self::assertSame( '', $method->invoke( $page, 'user_code', 20 ) );
-			}
-			$_REQUEST['user_code'] = '<b>ABCD-EFGH</b>';
-			self::assertSame( 'ABCD-EFGH', $method->invoke( $page, 'user_code', 20 ) );
-		} finally {
-			$_REQUEST = $before;
 		}
 	}
 

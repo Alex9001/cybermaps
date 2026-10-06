@@ -34,7 +34,8 @@ class AICatalogTest extends TestCase {
 	}
 
 	public function test_mcp_entry_is_present_only_while_mcp_is_active(): void {
-		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['mcp_mode'] = 'discovery';
+		$adapter = \Cybermaps\Tests\AdapterFixture::enable();
+		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['mcp_mode'] = 'read_only';
 		$entries = ( new AICatalog() )->get_catalog_data()['entries'];
 
 		$this->assertCount( 2, $entries );

@@ -6,7 +6,6 @@ namespace Cybermaps\Tests\Core;
 use Cybermaps\Core\OptionLeaseLock;
 use Cybermaps\Core\Upgrade;
 use Cybermaps\Discovery\StaticOwnershipStore;
-use Cybermaps\MCP\OAuth\WpdbOAuthRepository;
 
 final class UpgradeTest extends \WP_UnitTestCase {
 	private $previous_wpdb;
@@ -177,7 +176,7 @@ final class UpgradeTest extends \WP_UnitTestCase {
 		);
 		$this->assertStringContainsString( 'cybermaps_runtime_counters', implode( "\n", $GLOBALS['cybermaps_mock_dbdelta_queries'] ) );
 		$this->assertStringContainsString( 'cybermaps_indexnow_queue', implode( "\n", $GLOBALS['cybermaps_mock_dbdelta_queries'] ) );
-		$this->assertStringContainsString( 'cybermaps_mcp_oauth_devices', implode( "\n", $GLOBALS['cybermaps_mock_dbdelta_queries'] ) );
+		$this->assertStringNotContainsString( 'cybermaps_mcp_oauth_devices', implode( "\n", $GLOBALS['cybermaps_mock_dbdelta_queries'] ) );
 	}
 
 	public function test_upgrade_from_5_0_applies_every_cumulative_retired_setting(): void {
@@ -222,7 +221,7 @@ final class UpgradeTest extends \WP_UnitTestCase {
 			\Cybermaps\Audit\AuditRunRepository::SCHEMA_VERSION,
 			get_option( 'cybermaps_audit_schema_version', '' )
 		);
-		$this->assertSame( WpdbOAuthRepository::SCHEMA_VERSION, get_option( WpdbOAuthRepository::SCHEMA_OPTION, '' ) );
+		$this->assertSame( '', get_option( 'cybermaps_mcp_oauth_schema_version', '' ) );
 	}
 
 	public function test_current_version_reprovisions_runtime_tables_and_cleanup_schedule(): void {
@@ -239,21 +238,21 @@ final class UpgradeTest extends \WP_UnitTestCase {
 		$this->assertStringContainsString( 'cybermaps_indexnow_queue', implode( "\n", $GLOBALS['cybermaps_mock_dbdelta_queries'] ) );
 	}
 
-	public function test_65_upgrade_creates_the_oauth_device_schema_once(): void {
+	public function test_65_upgrade_never_recreates_retired_oauth_tables(): void {
 		$GLOBALS['cybermaps_mock_options']['cybermaps_data_version'] = '6.5.0';
 
 		Upgrade::run();
 
 		$this->assertSame( '6.6.0', get_option( 'cybermaps_data_version' ) );
-		$this->assertSame( WpdbOAuthRepository::SCHEMA_VERSION, get_option( WpdbOAuthRepository::SCHEMA_OPTION, '' ) );
+		$this->assertSame( '', get_option( 'cybermaps_mcp_oauth_schema_version', '' ) );
 		$oauth_queries = array_values(
 			array_filter(
 				$GLOBALS['cybermaps_mock_dbdelta_queries'],
 				static fn( string $query ): bool => str_contains( $query, 'cybermaps_mcp_oauth_' )
 			)
 		);
-		$this->assertCount( 5, $oauth_queries );
-		$this->assertStringContainsString( 'cybermaps_mcp_oauth_devices', implode( "\n", $oauth_queries ) );
+		$this->assertCount( 0, $oauth_queries );
+		$this->assertStringNotContainsString( 'cybermaps_mcp_oauth_devices', implode( "\n", $oauth_queries ) );
 
 		Upgrade::run();
 		$this->assertSame( $oauth_queries, array_values( array_filter( $GLOBALS['cybermaps_mock_dbdelta_queries'], static fn( string $query ): bool => str_contains( $query, 'cybermaps_mcp_oauth_' ) ) ) );
@@ -397,34 +396,6 @@ final class UpgradeTest extends \WP_UnitTestCase {
 			get_option( 'cybermaps_audit_schema_version', '' )
 		);
 		$this->assertSame( '6.6.0', get_option( 'cybermaps_data_version' ) );
-	}
-
-	public function test_failed_oauth_schema_does_not_stamp_the_upgrade_and_can_retry(): void {
-		$GLOBALS['cybermaps_mock_dbdelta_callback'] = static function ( string $queries ): array {
-			if ( preg_match( '/CREATE TABLE\s+([^\s(]+)/i', $queries, $matches ) ) {
-				$table = $matches[1];
-				$GLOBALS['wpdb']->existing_tables[] = $table;
-				$GLOBALS['wpdb']->existing_tables   = array_values( array_unique( $GLOBALS['wpdb']->existing_tables ) );
-				$GLOBALS['wpdb']->last_error        = str_contains( $table, 'cybermaps_mcp_oauth_devices' )
-					? 'OAuth device table creation failed'
-					: '';
-			}
-			return array( $queries );
-		};
-
-		Upgrade::run();
-
-		$this->assertSame( '5.1.1', get_option( 'cybermaps_data_version' ) );
-		$this->assertSame( '', get_option( WpdbOAuthRepository::SCHEMA_OPTION, '' ) );
-		$this->assertGreaterThan( time(), Upgrade::get_status()['next_retry'] );
-
-		unset( $GLOBALS['cybermaps_mock_dbdelta_callback'] );
-		$GLOBALS['wpdb']->last_error = '';
-		$this->make_retry_due();
-		Upgrade::run();
-
-		$this->assertSame( '6.6.0', get_option( 'cybermaps_data_version' ) );
-		$this->assertSame( WpdbOAuthRepository::SCHEMA_VERSION, get_option( WpdbOAuthRepository::SCHEMA_OPTION, '' ) );
 	}
 
 	public function test_failed_meta_migration_does_not_stamp_the_upgrade_and_can_retry(): void {

@@ -9,13 +9,14 @@ ARCHIVE_PATH="${2:-}"
 REPORT_PATH="${3:-${RELEASE_DIR}/plugin-check-validation.json}"
 PLUGIN_CHECK_VERSION="$(python3 -B -c 'import json,sys; print(json.load(open(sys.argv[1]))["plugin_check_version"])' "${PROJECT_DIR}/docs/dev/release-policy.json")"
 PHP_VERSION="${CYBERMAPS_TEST_PHP:-8.2}"
+CLI_TOOLS="${PROJECT_DIR}/docs/generated/tmp/wp-cli-modern"
 
 fail() {
 	echo "Plugin Check validation failed: $1" >&2
 	exit 1
 }
 
-for required_command in docker git grep php python3 realpath seq sleep tr; do
+for required_command in cmp docker git grep php python3 realpath seq sleep tr; do
 	command -v "${required_command}" >/dev/null 2>&1 || fail "required command is unavailable: ${required_command}"
 done
 
@@ -23,6 +24,8 @@ CONTAINER_CLI="docker"
 if docker --version 2>&1 | grep -i podman >/dev/null && command -v podman >/dev/null 2>&1; then
 	CONTAINER_CLI="podman"
 fi
+[ -f "${CLI_TOOLS}/vendor/wp-cli/wp-cli/php/boot-fs.php" ] || fail "pinned WP-CLI tools missing; run composer validation:setup"
+cmp -s "${PROJECT_DIR}/tests/cli/composer.lock" "${CLI_TOOLS}/composer.lock" || fail "WP-CLI lock differs; run composer validation:setup"
 [ -d "${ARTIFACT_DIR}" ] || fail "artifact directory does not exist: ${ARTIFACT_DIR}"
 [ -f "${ARCHIVE_PATH}" ] || fail "release ZIP does not exist: ${ARCHIVE_PATH}"
 [ -f "${PROJECT_DIR}/tests/integration/wporg-smoke.php" ] || fail "smoke test is missing"
@@ -91,13 +94,14 @@ done
 [ "${database_ready}" -eq 1 ] || fail "disposable database did not become ready"
 
 wp_cli() {
-	"${CONTAINER_CLI}" run --rm --network "${NETWORK_NAME}" --user 0:0 \
+	"${CONTAINER_CLI}" run --rm -i --network "${NETWORK_NAME}" --user 0:0 \
+		-v "${CLI_TOOLS}:/cli-tools:ro" \
 		-v "${RUNTIME_DIR}/wordpress:/var/www/html" \
 		-v "$(dirname "${ARCHIVE_PATH}"):/artifacts:ro" \
 		-v "${PROJECT_DIR}/tests/integration:/validation:ro" \
 		-v "${PROJECT_DIR}/docs/generated/releases:/history:ro" \
 		-w /var/www/html \
-		"${WORDPRESS_IMAGE}" php -d memory_limit=512M /usr/local/bin/wp "$@" --allow-root
+		"${WORDPRESS_IMAGE}" php -d memory_limit=512M /cli-tools/vendor/wp-cli/wp-cli/php/boot-fs.php "$@" --allow-root
 }
 
 wp_cli core download --version="${WORDPRESS_VERSION}" --force --quiet
@@ -111,6 +115,11 @@ if [ "${CYBERMAPS_TEST_UPGRADE:-0}" = "1" ]; then
 	[ "$(sha256sum "${PROJECT_DIR}/docs/generated/releases/7.5.3/cybermaps_7.5.3.zip" | cut -d " " -f 1)" = "b63a959a22a5595891af9374f8481c4e8dfaefbe5b55c1d4bd5f2cce29ddc950" ] || fail "Upgrade fixture checksum changed"
 	wp_cli plugin install /history/7.5.3/cybermaps_7.5.3.zip --activate --force --quiet
 	wp_cli option update cybermaps_upgrade_fixture preserved --quiet
+	[ -f "${PROJECT_DIR}/docs/generated/releases/7.5.4/cybermaps_7.5.4.zip" ] || fail "Upgrade fixture 7.5.4 is missing"
+	[ "$(sha256sum "${PROJECT_DIR}/docs/generated/releases/7.5.4/cybermaps_7.5.4.zip" | cut -d " " -f 1)" = "c8bce5305a8b2613ee4f1b3b8506a778ec7165f03d4f153c92e34c1e73f1f5f0" ] || fail "Upgrade fixture 7.5.4 checksum changed"
+	wp_cli plugin install /history/7.5.4/cybermaps_7.5.4.zip --activate --force --quiet
+	wp_cli eval-file /validation/wporg-mcp-upgrade.php
+
 fi
 wp_cli plugin install "/artifacts/$(basename "${ARCHIVE_PATH}")" --force --quiet
 wp_cli plugin install plugin-check --version="${PLUGIN_CHECK_VERSION}" --activate --force --quiet
@@ -119,7 +128,7 @@ installed_plugin_check="$(wp_cli plugin get plugin-check --field=version | tr -d
 wp_cli plugin activate cybermaps --quiet
 wp_cli eval-file /validation/wporg-smoke.php > "${RUNTIME_DIR}/smoke.txt"
 if [ "${CYBERMAPS_TEST_UPGRADE:-0}" = "1" ]; then
-	[ "$(wp_cli option get cybermaps_upgrade_fixture)" = "preserved" ] || fail "Upgrade lost existing data"
+	wp_cli eval-file /validation/wporg-mcp-upgrade-check.php >> "${RUNTIME_DIR}/smoke.txt"
 fi
 
 # Serve the same installed ZIP over loopback for actual request/response checks.
@@ -147,6 +156,21 @@ run_plugin_check() {
 	python3 -B "${PROJECT_DIR}/bin/plugin_check_result.py" "${output_path}" "${output_path}.stderr" "${status}"
 }
 
+
+# Optional MCP integration is tested using the official plugin, never a protocol mock.
+MCP_ADAPTER_VERSION="$(python3 -B -c 'import json,sys; print(json.load(open(sys.argv[1]))["mcp_adapter_version"])' "${PROJECT_DIR}/docs/dev/release-policy.json")"
+mkdir -p "${RUNTIME_DIR}/wordpress/wp-content/mu-plugins"
+cp "${PROJECT_DIR}/tests/integration/wporg-mcp-fixture.php" "${RUNTIME_DIR}/wordpress/wp-content/mu-plugins/cybermaps-mcp-test.php"
+wp_cli plugin install mcp-adapter --version="${MCP_ADAPTER_VERSION}" --activate --quiet
+wp_cli eval-file /validation/wporg-mcp-setup.php > "${RUNTIME_DIR}/mcp-credentials.tmp"
+python3 -B "${PROJECT_DIR}/tests/integration/wporg-mcp.py" "http://${HTTP_ADDRESS}" "${RUNTIME_DIR}/mcp-credentials.tmp" >> "${RUNTIME_DIR}/smoke.txt"
+wp_cli mcp-adapter serve --server=cybermaps --user=mcp-reader < "${PROJECT_DIR}/tests/integration/wporg-mcp-stdio.jsonl" > "${RUNTIME_DIR}/mcp-stdio.jsonl" 2> "${RUNTIME_DIR}/mcp-stdio.stderr"
+python3 -B "${PROJECT_DIR}/tests/integration/wporg-mcp-stdio.py" "${RUNTIME_DIR}/mcp-stdio.jsonl" >> "${RUNTIME_DIR}/smoke.txt"
+wp_cli eval 'if (get_option("cybermaps_test_hostile_called", false)) { throw new RuntimeException("Hostile ability ran."); }' >> "${RUNTIME_DIR}/smoke.txt"
+wp_cli plugin deactivate mcp-adapter --quiet
+wp_cli eval 'if ("off" !== \Cybermaps\MCP\WordPressIntegration::mode() || \Cybermaps\Discovery\MCPServerCard::is_available()) { throw new RuntimeException("Disabled adapter still advertised."); }' >> "${RUNTIME_DIR}/smoke.txt"
+rm "${RUNTIME_DIR}/wordpress/wp-content/mu-plugins/cybermaps-mcp-test.php" "${RUNTIME_DIR}/mcp-credentials.tmp"
+
 run_plugin_check "${RUNTIME_DIR}/plugin-check-new.json"
 run_plugin_check "${RUNTIME_DIR}/plugin-check-experimental.json" --include-experimental
 
@@ -156,6 +180,7 @@ if [ "${CYBERMAPS_TEST_MULTISITE:-0}" = "1" ]; then
 	wp_cli option update home http://cybermaps.test --quiet
 	wp_cli option update siteurl http://cybermaps.test --quiet
 	wp_cli core multisite-convert --quiet
+	wp_cli plugin activate mcp-adapter --network --quiet
 	wp_cli eval 'require "/validation/wporg-multisite.php";' >> "${RUNTIME_DIR}/smoke.txt"
 fi
 wp_cli eval 'require "/validation/wporg-lifecycle.php";'  >> "${RUNTIME_DIR}/smoke.txt"
@@ -172,7 +197,7 @@ if [ -s "${RUNTIME_DIR}/wordpress/wp-content/debug.log" ]; then
 fi
 
 python3 - "${REPORT_PATH}" "${COMMIT}" "${ZIP_SHA256}" "${WORDPRESS_VERSION}" "${PLUGIN_CHECK_VERSION}" \
-	"${RUNTIME_DIR}/plugin-check-new.json" "${RUNTIME_DIR}/plugin-check-experimental.json" "${RUNTIME_DIR}/smoke.txt" "${ACTUAL_PHP}" "${ACTUAL_WP}" "${CYBERMAPS_TEST_MULTISITE:-0}" <<'PY'
+	"${RUNTIME_DIR}/plugin-check-new.json" "${RUNTIME_DIR}/plugin-check-experimental.json" "${RUNTIME_DIR}/smoke.txt" "${ACTUAL_PHP}" "${ACTUAL_WP}" "${CYBERMAPS_TEST_MULTISITE:-0}" "${MCP_ADAPTER_VERSION}" <<'PY'
 import json
 import sys
 from datetime import datetime, timezone
@@ -193,6 +218,8 @@ report = {
     "smoke": Path(sys.argv[8]).read_text().strip(),
     "wp_debug_clean": True,
     "lifecycle_passed": True,
+    "mcp_read_only_passed": True,
+    "mcp_adapter_version": sys.argv[12],
     "multisite": sys.argv[11] == "1",
 }
 report_path.write_text(json.dumps(report, indent=2) + "\n")

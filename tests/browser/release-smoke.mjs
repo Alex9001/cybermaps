@@ -30,8 +30,11 @@ try {
   await trigger.click();
   if (!await page.locator('#' + target).isVisible()) throw new Error('Tooltip did not open');
   await page.keyboard.press('Escape');
+  await page.goto(origin + '/wp-admin/admin.php?page=cybermaps-settings&tab=ai');
+  if (await page.getByRole('link', {name: 'Install MCP Adapter', exact: true}).count() !== 1) throw new Error('Optional MCP install guidance missing');
+  if (await page.locator('select[name="cybermaps_settings[mcp_mode]"]').count()) throw new Error('MCP opt-in shown without dependency');
   if (errors.length) throw new Error(errors.join('\n'));
-  writeFileSync(output, JSON.stringify({schema_version: 1, passed: true, checks: ['wizard', 'icons', 'attribution-save', 'tooltip'], browser: await browser.version(), errors}, null, 2));
+  writeFileSync(output, JSON.stringify({schema_version: 1, passed: true, checks: ['wizard', 'icons', 'attribution-save', 'tooltip', 'mcp-setup'], browser: await browser.version(), errors}, null, 2));
 } catch (error) {
   writeFileSync(output, JSON.stringify({schema_version: 1, passed: false, errors: [...errors, String(error)]}, null, 2));
   await page.screenshot({path: output + '.png', fullPage: true});

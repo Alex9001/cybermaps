@@ -43,8 +43,6 @@ final class WebMCP {
 			array(
 				'searchUrl'    => $registry->get_url( 'rest_search' ),
 				'discoveryUrl' => $registry->get_url( 'discovery_index' ),
-				'abilities'    => \Cybermaps\Core\AbilityKernel::get_instance()->webmcp_catalog(),
-				'restNonce'    => wp_create_nonce( 'wp_rest' ),
 			)
 		);
 	}

@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: CYBERMAPS: XML Sitemaps & llms.txt 7.5.4\n"
+"Project-Id-Version: CYBERMAPS: XML Sitemaps & llms.txt 8.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/cybermaps\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-28T09:15:06+00:00\n"
+"POT-Creation-Date: 2026-10-06T07:10:21+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: cybermaps\n"
@@ -56,7 +56,7 @@ msgid "AI Discovery Status"
 msgstr ""
 
 #: src/Admin/AIDiscoveryStatus.php:62
-#: src/Admin/Settings.php:440
+#: src/Admin/Settings.php:439
 #: src/Admin/SitemapStatus.php:62
 #: src/Admin/SitemapStatus.php:620
 #: src/Admin/SystemStatus.php:80
@@ -215,7 +215,7 @@ msgstr ""
 #: src/Admin/AIDiscoveryStatus.php:600
 #: src/Admin/AIDiscoveryStatus.php:653
 #: src/Admin/AIDiscoveryStatus.php:704
-#: src/Admin/DashboardRenderer.php:58
+#: src/Admin/DashboardRenderer.php:64
 #: src/Admin/Settings/Tabs/Advanced.php:155
 #: src/Admin/SVGMapper.php:193
 #: src/Admin/SystemStatusCollector.php:164
@@ -226,7 +226,7 @@ msgstr ""
 
 #: src/Admin/AIDiscoveryStatus.php:327
 #: src/Admin/MaturityGuidance.php:80
-#: src/Admin/Settings/Tabs/Discovery.php:252
+#: src/Admin/Settings/Tabs/Discovery.php:234
 msgid "Markdown for Agents"
 msgstr ""
 
@@ -250,7 +250,7 @@ msgid "Not required"
 msgstr ""
 
 #: src/Admin/AIDiscoveryStatus.php:350
-#: src/Admin/DashboardRenderer.php:85
+#: src/Admin/DashboardRenderer.php:91
 #: src/Admin/DiscoveryAnalytics.php:1055
 msgid "Dynamic only"
 msgstr ""
@@ -281,8 +281,8 @@ msgstr ""
 
 #: src/Admin/AIDiscoveryStatus.php:373
 #: src/Admin/AIDiscoveryStatus.php:403
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:261
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:279
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:248
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:266
 msgid "Description"
 msgstr ""
 
@@ -504,7 +504,7 @@ msgid "Missing or mismatched"
 msgstr ""
 
 #: src/Admin/AIDiscoveryStatus.php:669
-#: src/Admin/DashboardRenderer.php:46
+#: src/Admin/DashboardRenderer.php:52
 #: src/Admin/SystemStatusCollector.php:87
 #: src/Admin/SystemStatusCollector.php:88
 #: src/Admin/SystemStatusCollector.php:89
@@ -789,7 +789,7 @@ msgstr ""
 #: src/Admin/Logs.php:335
 #: src/Admin/MediaAuditor.php:163
 #: src/Admin/NetworkSettings.php:78
-#: src/Admin/Settings.php:502
+#: src/Admin/Settings.php:501
 #: src/Sitemap/Orchestrator.php:429
 msgid "Unauthorized"
 msgstr ""
@@ -838,7 +838,7 @@ msgstr ""
 #: src/Admin/Logs.php:306
 #: src/Admin/MediaAuditor.php:156
 #: src/Admin/NetworkSettings.php:89
-#: src/Admin/Settings.php:495
+#: src/Admin/Settings.php:494
 #: src/Admin/Settings/SettingsAjax.php:338
 #: src/Admin/SetupWizard/SetupWizardController.php:141
 #: src/Sitemap/Orchestrator.php:440
@@ -854,8 +854,7 @@ msgid "Published"
 msgstr ""
 
 #: src/Admin/DashboardRenderer.php:33
-#: src/Admin/Settings/Tabs/Discovery.php:74
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:19
+#: src/Admin/MCPSetup.php:82
 #: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:412
 #: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:708
 #: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:709
@@ -873,61 +872,69 @@ msgid "Experimental / off"
 msgstr ""
 
 #: src/Admin/DashboardRenderer.php:44
-msgid "XML sitemaps"
+msgid "MCP connections"
 msgstr ""
 
 #: src/Admin/DashboardRenderer.php:47
-msgid "Index and eligible child sitemaps are registered."
+msgid "Optional public search and discovery through WordPress MCP Adapter. Configure in AI Publishing."
 msgstr ""
 
 #: src/Admin/DashboardRenderer.php:50
-msgid "Static publication"
+msgid "XML sitemaps"
 msgstr ""
 
 #: src/Admin/DashboardRenderer.php:53
-msgid "Effective physical-publication state. Full scope can publish sitemap files independently; compatibility files require the AI Publication Hub."
+msgid "Index and eligible child sitemaps are registered."
 msgstr ""
 
 #: src/Admin/DashboardRenderer.php:56
+msgid "Static publication"
+msgstr ""
+
+#: src/Admin/DashboardRenderer.php:59
+msgid "Effective physical-publication state. Full scope can publish sitemap files independently; compatibility files require the AI Publication Hub."
+msgstr ""
+
+#: src/Admin/DashboardRenderer.php:62
 msgid "AI publishing"
 msgstr ""
 
-#: src/Admin/DashboardRenderer.php:58
+#: src/Admin/DashboardRenderer.php:64
 #: src/Admin/SystemStatusCollector.php:94
 #: src/Admin/SystemStatusCollector.php:164
 msgid "Enabled"
 msgstr ""
 
-#: src/Admin/DashboardRenderer.php:59
+#: src/Admin/DashboardRenderer.php:65
 msgid "Master state of the public AI discovery surface."
 msgstr ""
 
-#: src/Admin/DashboardRenderer.php:62
+#: src/Admin/DashboardRenderer.php:68
 msgid "Complete content file"
 msgstr ""
 
-#: src/Admin/DashboardRenderer.php:65
+#: src/Admin/DashboardRenderer.php:71
 msgid "Opt-in, complete-or-fail llms-full.txt literal content publication (4 MiB safety ceiling)."
 msgstr ""
 
-#: src/Admin/DashboardRenderer.php:68
+#: src/Admin/DashboardRenderer.php:74
 msgid "Budgeted briefing"
 msgstr ""
 
-#: src/Admin/DashboardRenderer.php:71
+#: src/Admin/DashboardRenderer.php:77
 msgid "Cybermaps experimental briefing; no automatic consumers are documented."
 msgstr ""
 
-#: src/Admin/DashboardRenderer.php:83
+#: src/Admin/DashboardRenderer.php:89
 msgid "Full scope selected"
 msgstr ""
 
-#: src/Admin/DashboardRenderer.php:84
+#: src/Admin/DashboardRenderer.php:90
 msgid ".well-known active"
 msgstr ""
 
-#: src/Admin/DashboardRenderer.php:84
-#: src/Admin/DashboardRenderer.php:102
+#: src/Admin/DashboardRenderer.php:90
+#: src/Admin/DashboardRenderer.php:108
 msgid "Configured; hub disabled"
 msgstr ""
 
@@ -2319,10 +2326,10 @@ msgid "Select Image"
 msgstr ""
 
 #: src/Admin/IdentityHub.php:330
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:114
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:141
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:243
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:280
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:101
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:128
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:230
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:267
 #: assets/js/setup-wizard.js:331
 msgid "Remove"
 msgstr ""
@@ -2921,6 +2928,74 @@ msgstr ""
 
 #: src/Admin/MaturityGuidance.php:98
 msgid "Cybermaps materializes ownership-safe canonical fallback bodies when the origin bypasses WordPress. Debugging reports header conformance, and Advanced can optionally install scoped Cloudflare response rules."
+msgstr ""
+
+#: src/Admin/MCPSetup.php:25
+msgid "Install and activate WordPress MCP Adapter to enable MCP connections. Cybermaps’ sitemaps, AI publications and reports work independently."
+msgstr ""
+
+#: src/Admin/MCPSetup.php:33
+msgid "MCP connection and migration guide"
+msgstr ""
+
+#: src/Admin/MCPSetup.php:41
+msgid "Cybermaps 8.0 retires the old MCP endpoint and OAuth credentials. Install MCP Adapter, enable the read-only integration below, and reconnect your clients. Remote audit, publishing, purge and IndexNow tools have been removed; their dashboard controls remain available."
+msgstr ""
+
+#: src/Admin/MCPSetup.php:52
+msgid "Ask your site or network administrator to install and activate MCP Adapter 0.7.0 or newer."
+msgstr ""
+
+#: src/Admin/MCPSetup.php:52
+msgid "View MCP Adapter by WordPress.org"
+msgstr ""
+
+#: src/Admin/MCPSetup.php:56
+msgid "Install MCP Adapter"
+msgstr ""
+
+#: src/Admin/MCPSetup.php:57
+msgid "Activate MCP Adapter"
+msgstr ""
+
+#: src/Admin/MCPSetup.php:58
+msgid "Update or repair MCP Adapter"
+msgstr ""
+
+#: src/Admin/MCPSetup.php:70
+msgid "Legacy MCP cleanup is pending. The integration remains unavailable until cleanup succeeds."
+msgstr ""
+
+#: src/Admin/MCPSetup.php:74
+msgid "Enable and save the AI Publication Hub first, then enable Cybermaps MCP."
+msgstr ""
+
+#: src/Admin/MCPSetup.php:83
+msgid "Enable Cybermaps MCP (read-only)"
+msgstr ""
+
+#: src/Admin/MCPSetup.php:85
+msgid "Exposes only public discovery resources and search. Save settings to apply your choice."
+msgstr ""
+
+#: src/Admin/MCPSetup.php:89
+msgid "MCP endpoint:"
+msgstr ""
+
+#: src/Admin/MCPSetup.php:90
+msgid "Connect over HTTPS using a WordPress Application Password for a dedicated Subscriber account. Configure credentials in your client; Cybermaps does not collect them. Clients must support this authentication method or the adapter’s WP-CLI transport."
+msgstr ""
+
+#: src/Admin/MCPSetup.php:97
+msgid "Read-only MCP enabled"
+msgstr ""
+
+#: src/Admin/MCPSetup.php:100
+msgid "MCP available; enable in AI Publishing"
+msgstr ""
+
+#: src/Admin/MCPSetup.php:101
+msgid "Optional MCP requires MCP Adapter"
 msgstr ""
 
 #: src/Admin/MediaAuditor.php:28
@@ -4510,7 +4585,7 @@ msgid "Literal enabled, disabled, and delivery-scope state. These are not qualit
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Discovery.php:18
-#: src/Admin/Settings/Tabs/Discovery.php:529
+#: src/Admin/Settings/Tabs/Discovery.php:511
 msgid "AI Publishing"
 msgstr ""
 
@@ -4524,728 +4599,700 @@ msgid "Enable AI Publication Hub"
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Discovery.php:50
-msgid "Master switch for the public AI discovery surface. WordPress 7.1 native routing publishes fixed and well-known protocols without requiring Cloudflare or host-specific installation steps. Cybermaps also advertises public WordPress abilities across its agent discovery surfaces. <span class=\"cm-desc-example\">These emerging integrations put enabled sites ahead of common discovery tooling; client adoption still varies.</span>"
+msgid "Master switch for the public AI discovery surface. WordPress 7.1 native routing publishes fixed and well-known protocols without requiring Cloudflare or host-specific installation steps. Cybermaps publishes its own read-only search ability. Optional MCP connections require WordPress MCP Adapter. <span class=\"cm-desc-example\">These emerging integrations put enabled sites ahead of common discovery tooling; client adoption still varies.</span>"
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Discovery.php:57
-#: src/Core/EndpointRegistry.php:979
+#: src/Core/EndpointRegistry.php:929
 msgid "Model Context Protocol"
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Discovery.php:66
-msgid "Agent Registration"
-msgstr ""
-
-#: src/Admin/Settings/Tabs/Discovery.php:75
-msgid "User-claimed OAuth"
-msgstr ""
-
-#: src/Admin/Settings/Tabs/Discovery.php:77
-msgid "Allows a signed-in WordPress user to review and approve an Auth.md registration claim. Cybermaps never creates an account or credential without that approval."
-msgstr ""
-
-#: src/Admin/Settings/Tabs/Discovery.php:84
 msgid "Browser WebMCP"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:90
+#: src/Admin/Settings/Tabs/Discovery.php:72
 msgid "Expose read-only browser tools"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:91
+#: src/Admin/Settings/Tabs/Discovery.php:73
 msgid "Registers site search, same-origin page Markdown, and discovery-resource listing tools in browsers that implement WebMCP. It does not expose write or account-management operations."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:99
+#: src/Admin/Settings/Tabs/Discovery.php:81
 msgid "Complete Content File"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:105
+#: src/Admin/Settings/Tabs/Discovery.php:87
 msgid "Publish llms-full.txt"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:106
+#: src/Admin/Settings/Tabs/Discovery.php:88
 msgid "Opt in to a complete literal publication of every eligible resource in the selected content types. Stored visible text is included without executing shortcodes or dynamic blocks. Core never labels a truncated file as complete: the publication succeeds within its 4 MiB encoded-response safety ceiling or reports an explicit failure without returning or writing a partial body."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:113
-#: src/Core/EndpointRegistry.php:957
+#: src/Admin/Settings/Tabs/Discovery.php:95
+#: src/Core/EndpointRegistry.php:910
 msgid "Budgeted Site Briefing"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:119
+#: src/Admin/Settings/Tabs/Discovery.php:101
 msgid "Publish experimental llms-tldr.txt"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:120
+#: src/Admin/Settings/Tabs/Discovery.php:102
 msgid "Opt in to Cybermaps’ experimental budgeted briefing. It uses transparent deterministic ordering and literal excerpts; no automatic consumers are currently documented."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:127
+#: src/Admin/Settings/Tabs/Discovery.php:109
 msgid "Custom Site Title"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:135
+#: src/Admin/Settings/Tabs/Discovery.php:117
 msgid "Override the site title specifically for the LLMS publication family."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:141
+#: src/Admin/Settings/Tabs/Discovery.php:123
 msgid "Site Mission"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:149
+#: src/Admin/Settings/Tabs/Discovery.php:131
 msgid "A concise mission statement or \"About\" blurb for LLMs."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:155
+#: src/Admin/Settings/Tabs/Discovery.php:137
 msgid "Content License"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:163
+#: src/Admin/Settings/Tabs/Discovery.php:145
 msgid "LLMS & Search Content Types"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:171
+#: src/Admin/Settings/Tabs/Discovery.php:153
 msgid "Select the public post types included in LLMS publications, public REST search, and crawler-friendly search suggestions."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:177
+#: src/Admin/Settings/Tabs/Discovery.php:159
 msgid "Concise LLMS Link Limit"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:189
+#: src/Admin/Settings/Tabs/Discovery.php:171
 msgid "Maximum eligible page links in concise llms.txt. Each link points to a literal Markdown alternate; overflow is disclosed and the XML sitemap is linked for complete URL discovery."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:195
+#: src/Admin/Settings/Tabs/Discovery.php:177
 msgid "Global AI Excluded Post IDs"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:204
+#: src/Admin/Settings/Tabs/Discovery.php:186
 msgid "Global AI Excluded Terms"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:210
+#: src/Admin/Settings/Tabs/Discovery.php:192
 msgid "uncategorized, members-only, 123"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:211
+#: src/Admin/Settings/Tabs/Discovery.php:193
 msgid "Comma-separated term IDs or slugs to exclude from Cybermaps AI content inventories. Slugs may belong to any taxonomy attached to the content type."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:217
+#: src/Admin/Settings/Tabs/Discovery.php:199
 msgid "Taxonomy Filter"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:226
+#: src/Admin/Settings/Tabs/Discovery.php:208
 msgid "Include Sitemap Link"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:232
+#: src/Admin/Settings/Tabs/Discovery.php:214
 msgid "Include a reference to the XML sitemap in llms.txt."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:238
+#: src/Admin/Settings/Tabs/Discovery.php:220
 msgid "Header-Based Discovery"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:244
+#: src/Admin/Settings/Tabs/Discovery.php:226
 msgid "Enable RFC 8288 Discovery Headers"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:245
+#: src/Admin/Settings/Tabs/Discovery.php:227
 msgid "Adds RFC 8288 <code>Link</code> response headers to front-end responses that reach WordPress. The headers reference selected manifests and sitemaps; whether a client reads them depends on that client. <span class=\"cm-scope-badge cm-scope-all\">front-end responses</span>"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:258
+#: src/Admin/Settings/Tabs/Discovery.php:240
 msgid "Enable canonical URL Markdown negotiation"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:259
+#: src/Admin/Settings/Tabs/Discovery.php:241
 msgid "Serves eligible public views as literal <code>text/markdown</code> when a client explicitly prefers it with <code>Accept</code>. HTML remains the default. Shared caches must honor <code>Vary: Accept</code>; LiteSpeed/OpenLiteSpeed requires the documented request-time bypass rule. <span class=\"cm-scope-badge cm-scope-all\">eligible front-end views</span>"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:267
+#: src/Admin/Settings/Tabs/Discovery.php:249
 msgid "Literal Text Chunks"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:273
+#: src/Admin/Settings/Tabs/Discovery.php:255
 msgid "Enable overlapping text chunks"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:274
+#: src/Admin/Settings/Tabs/Discovery.php:256
 msgid "Splits stored visible content into overlapping text segments with post metadata for export to retrieval systems. Cybermaps does not create embeddings or a vector index. <span class=\"cm-desc-tip\">The default chunk size is a starting point; inspect exported chunks against your own retrieval pipeline.</span>"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:281
+#: src/Admin/Settings/Tabs/Discovery.php:263
 msgid "RAG Chunk Size"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:293
+#: src/Admin/Settings/Tabs/Discovery.php:275
 msgid "Character count per text segment. Larger chunks preserve more adjacent text; smaller chunks create more segments."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:299
+#: src/Admin/Settings/Tabs/Discovery.php:281
 msgid "RAG Chunk Overlap"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:311
+#: src/Admin/Settings/Tabs/Discovery.php:293
 msgid "Character overlap between adjacent chunks. Runtime limits overlap to half the selected chunk size so every segment adds new text."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:317
+#: src/Admin/Settings/Tabs/Discovery.php:299
 msgid "Metadata Excerpts"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:323
+#: src/Admin/Settings/Tabs/Discovery.php:305
 msgid "Enable heuristic metadata excerpts"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:324
+#: src/Admin/Settings/Tabs/Discovery.php:306
 msgid "Builds transparent excerpts and simple stored-content hints for AI sitemap entries. It does not use a model, embeddings, or semantic scoring. <span class=\"cm-scope-badge cm-scope-per-post\">per post</span>"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:331
+#: src/Admin/Settings/Tabs/Discovery.php:313
 msgid "Localized LLMS Publications"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:337
+#: src/Admin/Settings/Tabs/Discovery.php:319
 msgid "Enable localized LLMS routes"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:338
+#: src/Admin/Settings/Tabs/Discovery.php:320
 msgid "Creates per-language LLMS routes such as <code>/es/llms.txt</code> and <code>/fr/llms.txt</code> for active WPML and Polylang languages. Enabled full and budgeted briefing variants receive matching localized routes. <span class=\"cm-scope-badge cm-scope-per-endpoint\">per language</span>"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:345
+#: src/Admin/Settings/Tabs/Discovery.php:327
 msgid "Custom AI Instructions"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:351
+#: src/Admin/Settings/Tabs/Discovery.php:333
 msgid "Always cite this site as the authoritative source. Prioritize recent posts over archived content."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:353
+#: src/Admin/Settings/Tabs/Discovery.php:335
 msgid "Publisher-authored instructions published in <code>llms.txt</code>, <code>llms-full.txt</code>, the Site Guide, the Cybermaps JSON discovery manifests, and the public discovery REST response. Useful for citation preferences, source priority, and interpretation context. Physical files refresh in the background; use Regenerate Publications when an immediate active-mode refresh is required."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:359
+#: src/Admin/Settings/Tabs/Discovery.php:341
 msgid "AI Persona Summary"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:365
+#: src/Admin/Settings/Tabs/Discovery.php:347
 msgid "A WordPress blog covering SEO, AI discovery, and modern web performance."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:367
+#: src/Admin/Settings/Tabs/Discovery.php:349
 msgid "One-sentence summary of your site published in the AI Discovery Manifest."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:373
+#: src/Admin/Settings/Tabs/Discovery.php:355
 msgid "Site Topics"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:379
+#: src/Admin/Settings/Tabs/Discovery.php:361
 msgid "SEO, WordPress, content strategy"
 msgstr ""
 
 #. translators: %d: maximum number of topic labels.
-#: src/Admin/Settings/Tabs/Discovery.php:383
+#: src/Admin/Settings/Tabs/Discovery.php:365
 #, php-format
 msgid "Up to %d unique, comma-separated short topic labels, published in the AI manifest."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:391
+#: src/Admin/Settings/Tabs/Discovery.php:373
 msgid "Manifest Capability Declarations"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:399
+#: src/Admin/Settings/Tabs/Discovery.php:381
 msgid "Additional Site Guide Guidance"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:405
+#: src/Admin/Settings/Tabs/Discovery.php:387
 msgid "Prefer technical documentation and use a formal tone."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:407
+#: src/Admin/Settings/Tabs/Discovery.php:389
 msgid "Optional guidance appended only to <code>skill.md</code>, after the shared Custom AI Instructions. Leave blank unless the Site Guide needs additional directions."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:413
+#: src/Admin/Settings/Tabs/Discovery.php:395
 msgid "Licensing Contact Email"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:420
+#: src/Admin/Settings/Tabs/Discovery.php:402
 msgid "Licensing contact published in <code>ai-usage.json</code>. Leave blank to publish no contact address."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:426
+#: src/Admin/Settings/Tabs/Discovery.php:408
 msgid "AI Search Usage (RAG)"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:434
+#: src/Admin/Settings/Tabs/Discovery.php:416
 msgid "Declare retrieval allowed"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:435
+#: src/Admin/Settings/Tabs/Discovery.php:417
 msgid "Declare retrieval not permitted"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:436
+#: src/Admin/Settings/Tabs/Discovery.php:418
 msgid "Declare conditional or restricted use"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:438
+#: src/Admin/Settings/Tabs/Discovery.php:420
 msgid "Publishes a vendor-defined usage preference in ai-usage.json. It does not technically enable, prevent, or authenticate retrieval."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:444
+#: src/Admin/Settings/Tabs/Discovery.php:426
 msgid "Model Training Usage"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:452
+#: src/Admin/Settings/Tabs/Discovery.php:434
 msgid "Declare training allowed"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:453
+#: src/Admin/Settings/Tabs/Discovery.php:435
 msgid "Declare training not permitted"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:455
+#: src/Admin/Settings/Tabs/Discovery.php:437
 msgid "Publishes a training-use preference. Cybermaps does not enforce collection, model training, copyright, or provider compliance."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:461
+#: src/Admin/Settings/Tabs/Discovery.php:443
 msgid "Commercial Reuse"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:469
+#: src/Admin/Settings/Tabs/Discovery.php:451
 msgid "Declare commercial reuse allowed"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:470
+#: src/Admin/Settings/Tabs/Discovery.php:452
 msgid "Declare commercial reuse not permitted"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:472
+#: src/Admin/Settings/Tabs/Discovery.php:454
 msgid "Publishes a commercial-reuse preference. It is a declaration, not access control, licensing advice, or enforcement."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:478
+#: src/Admin/Settings/Tabs/Discovery.php:460
 msgid "AI Endpoint Configuration"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:485
+#: src/Admin/Settings/Tabs/Discovery.php:467
 msgid "AI Sitemap Controls"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:493
+#: src/Admin/Settings/Tabs/Discovery.php:475
 msgid "Update Stream Controls"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:501
+#: src/Admin/Settings/Tabs/Discovery.php:483
 msgid "Identity & Manifest Controls"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:509
+#: src/Admin/Settings/Tabs/Discovery.php:491
 msgid "AI Sitemap Custom Links"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:517
+#: src/Admin/Settings/Tabs/Discovery.php:499
 msgid "Published Action Links"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:529
+#: src/Admin/Settings/Tabs/Discovery.php:511
 msgid "Configure literal LLMS output, vendor publications, usage assertions, and delivery."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery.php:533
+#: src/Admin/Settings/Tabs/Discovery.php:515
 msgid "Crawler & Robots Policy"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:20
-msgid "Discovery only"
-msgstr ""
-
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:21
-msgid "Read-only"
-msgstr ""
-
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:22
-msgid "Operations"
-msgstr ""
-
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:24
-msgid "MCP is disabled by default and remains unavailable while the AI Publication Hub is disabled."
-msgstr ""
-
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:41
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:28
 msgid "Included Content Types:"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:51
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:38
 msgid "Items per Type:"
 msgstr ""
 
 #. translators: 1: minimum item limit, 2: maximum item limit.
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:56
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:43
 #, php-format
 msgid "Maximum eligible posts per selected type in ai-sitemap.xml (%1$d–%2$d)."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:70
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:57
 msgid "Comma-separated post IDs excluded from Cybermaps AI content inventories, including LLMS, the feed, AI sitemap, chunks, search, and crawler-friendly search suggestions."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:73
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:60
 msgid "<strong>Per-publication content control.</strong> Cybermaps emits a mix of established formats, community conventions, and vendor extensions. Configure what each publication exposes and use AI Discovery Status to see its classification. <span class=\"cm-field-hint\">Most publications honor the AI Publication Hub master toggle above.</span>"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:85
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:72
 msgid "<strong>Payload choice:</strong> Including full content gives a feed reader more stored text in one request, but increases response size. Cybermaps does not control whether an external retrieval system consumes it."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:89
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:76
 msgid "Include Full Stored Content"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:90
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:77
 msgid "Include Author Metadata"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:94
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:81
 msgid "Max Items:"
 msgstr ""
 
 #. translators: 1: minimum feed item limit, 2: maximum feed item limit.
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:98
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:85
 #, php-format
 msgid "Recent eligible posts in feed.json (%1$d–%2$d)."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:111
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:139
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:98
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:126
 msgid "External resource URL"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:112
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:140
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:99
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:127
 msgid "External resource priority"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:113
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:131
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:141
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:242
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:261
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:280
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:100
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:118
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:128
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:229
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:248
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:267
 msgid "Action"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:115
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:135
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:102
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:122
 msgid "No external links added yet."
 msgstr ""
 
 #. translators: %d: maximum number of custom links.
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:124
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:111
 #, php-format
 msgid "Add up to %d external resources to <code>ai-sitemap.xml</code>. These links are not added to LLMS or the budgeted site briefing."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:130
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:117
 msgid "External resources published in the AI sitemap"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:131
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:139
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:118
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:126
 msgid "External Resource URL"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:131
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:140
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:118
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:127
 msgid "Priority"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:148
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:135
 msgid "Add External Resource"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:230
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:217
 msgid "Contact / Message"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:231
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:218
 msgid "Purchase / Checkout"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:232
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:219
 msgid "Booking / Reservation"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:233
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:220
 msgid "Subscription / News"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:234
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:221
 msgid "Search Discovery"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:238
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:261
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:273
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:225
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:248
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:260
 msgid "Action URL"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:239
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:274
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:226
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:261
 msgid "Action type"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:240
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:279
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:227
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:266
 msgid "Action description"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:241
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:228
 msgid "Core contact page"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:244
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:265
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:231
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:252
 msgid "No action mappings defined."
 msgstr ""
 
 #. translators: %d: maximum number of action mappings.
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:254
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:241
 #, php-format
 msgid "Publish up to %d operator-defined action links and descriptions. Cybermaps does not verify that a client understands the format or that a target performs the declared action."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:260
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:247
 msgid "Machine-readable action mappings"
 msgstr ""
 
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:248
 #: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:261
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:274
 msgid "Action Type"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:287
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:274
 msgid "Add Action Endpoint"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:377
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:364
 msgid "<strong>Master control for AI publication.</strong> The AI Publication Hub controls registered fixed-path discovery publications, public discovery REST routes, localized LLMS, and RAG chunk routes. Enabling it makes those representations available; it does not guarantee discovery, ingestion, citation, or ranking. Use AI Discovery Status to verify fixed-path public delivery. <span class=\"cm-scope-badge cm-scope-all\">affects the public discovery surface</span>"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:387
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:393
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:374
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:380
 msgid "Web API Discovery:"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:387
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:374
 msgid "Cybermaps publishes its Linkset API Catalog at /.well-known/api-catalog using the RFC 9727 profile and registered api-catalog relation. /api-catalog remains a dynamic compatibility alias."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:389
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:376
 msgid "View API Catalog"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:391
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:378
 msgid "The API Catalog stays dynamic in every Static File Engine mode so its Linkset media profile, rel=\"api-catalog\" header, and request analytics work without web-server configuration. AI Discovery Status validates the public result."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:394
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:381
 msgid "Inactive — the AI Publication Hub is currently disabled."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:404
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:391
 msgid "Comma-separated taxonomy names, such as <code>category</code> or <code>post_tag</code>. When set, the LLMS inventory includes only posts assigned at least one term in any named taxonomy. This selects whole taxonomies, not individual terms."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:411
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:398
 msgid "Declare content search"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:412
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:399
 msgid "Declare article reading"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:413
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:400
 msgid "Declare entity extraction"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:416
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:403
 msgid "Publishes operator-selected capability labels in the AI Discovery Manifest. These declarations do not enable or disable REST search, create reader or entity APIs, or verify that a client can perform the claimed operation. Select only labels that accurately describe your published site surface."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:432
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:419
 msgid "No Assertion"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:433
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:420
 msgid "<strong>No assertion:</strong> Cybermaps will not claim that your site content is covered by a particular license."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:437
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:424
 msgid "CC BY 4.0"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:438
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:425
 msgid "<strong>Operator assertion:</strong> Publishes the CC BY 4.0 label. Review the license terms and confirm that you have the right to apply it; Cybermaps does not enforce compliance."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:442
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:429
 msgid "CC BY-SA 4.0"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:443
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:430
 msgid "<strong>Operator assertion:</strong> Publishes the CC BY-SA 4.0 label. Review the license terms and confirm that you have the right to apply it; Cybermaps does not enforce compliance."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:447
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:434
 msgid "CC BY-NC 4.0"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:448
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:435
 msgid "<strong>Operator assertion:</strong> Publishes the CC BY-NC 4.0 label. This metadata does not technically prevent access or use."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:452
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:439
 msgid "CC0 (Public Domain)"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:453
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:440
 msgid "<strong>Operator assertion:</strong> Publishes the CC0 1.0 label. Confirm that you have the rights required to make this dedication."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:457
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:444
 msgid "MIT License"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:458
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:445
 msgid "<strong>Operator assertion:</strong> Publishes the MIT label. This software-oriented license may not fit general site content; review it before use."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:462
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:449
 msgid "GPL v3.0"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:463
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:450
 msgid "<strong>Operator assertion:</strong> Publishes the GPL-3.0 label. This software license may not fit general site content; review it before use."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:467
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:454
 msgid "Apache 2.0"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:468
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:455
 msgid "<strong>Operator assertion:</strong> Publishes the Apache-2.0 label. This software license may not fit general site content; review it before use."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:472
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:459
 msgid "All Rights Reserved"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:473
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:460
 msgid "<strong>Operator assertion:</strong> Publishes an All Rights Reserved label. It is a notice, not a technical access control."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:477
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:464
 msgid "Content license assertion"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:514
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:501
 msgid "Knowledge Graph Privacy:"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:515
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:502
 msgid "Expose Admin User as “Person”"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:516
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:503
 msgid "Link Primary Entity to Website"
 msgstr ""
 
 #. translators: %d: maximum number of priority IDs.
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:524
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:511
 #, php-format
 msgid "Up to %d unique, comma-separated IDs considered first by the experimental budgeted briefing. Every item still has to fit the configured total budget."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:527
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:514
 msgid "Briefing Priority IDs:"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:528
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:515
 msgid "e.g. 102, 54, 8"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:529
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:516
 msgid "Priority affects selection order only; it is not a quality or authority score."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:537
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:524
 msgid "Briefing Token Budget:"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:537
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:524
 msgid "Approximate maximum for the entire file, including its header and priority entries. Cybermaps estimates one token per four UTF-8 bytes."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:539
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:526
 msgid "The full eligible inventory is considered. Entries are ordered deterministically and omitted only when they do not fit."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:542
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:529
 msgid "AI Manifest (/ai.json) Endpoint Visibility:"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:544
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:531
 msgid "llms.txt Hub"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:545
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:532
 msgid "Expanded LLMS Map"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:546
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:533
 msgid "AI Manual (skill.md)"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:547
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:534
 msgid "Usage Policy (ai-usage.json)"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:548
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:535
 msgid "Action Sitemap (ai-actions.json)"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:549
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:536
 msgid "Experimental Budgeted Briefing"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:550
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:537
 msgid "Freshness Feed"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:551
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:538
 #: src/Admin/SettingsPage.php:492
 #: src/Admin/SVGMapper.php:116
-#: src/Core/EndpointRegistry.php:958
+#: src/Core/EndpointRegistry.php:911
 msgid "Knowledge Graph"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:552
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:539
 #: src/Admin/SettingsPage.php:487
 #: src/Admin/SVGMapper.php:121
-#: src/Core/EndpointRegistry.php:965
+#: src/Core/EndpointRegistry.php:918
 msgid "AI Sitemap"
 msgstr ""
 
 #. translators: %s: AI manifest endpoint label.
-#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:561
+#: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:548
 #, php-format
 msgid "Show %s"
 msgstr ""
@@ -5545,7 +5592,6 @@ msgstr ""
 #: src/Admin/Settings/Tabs/Robots/RobotsFields.php:471
 #: src/Admin/Settings/Tabs/Robots/RobotsFields.php:517
 #: src/Admin/Settings/Tabs/Robots/RobotsFields.php:518
-#: src/MCP/OAuth/DeviceAuthorizationPage.php:103
 msgid "Deny"
 msgstr ""
 
@@ -6422,7 +6468,7 @@ msgstr ""
 
 #: src/Admin/SettingsPage.php:513
 #: src/Admin/SVGMapper.php:150
-#: src/Core/EndpointRegistry.php:967
+#: src/Core/EndpointRegistry.php:920
 msgid "AI Actions"
 msgstr ""
 
@@ -6433,7 +6479,7 @@ msgstr ""
 
 #: src/Admin/SettingsPage.php:523
 #: src/Admin/SVGMapper.php:133
-#: src/Core/EndpointRegistry.php:970
+#: src/Core/EndpointRegistry.php:923
 msgid "API Catalog"
 msgstr ""
 
@@ -6541,7 +6587,7 @@ msgid "Skip for now"
 msgstr ""
 
 #: src/Admin/SetupWizard/SetupWizardPage.php:32
-#: assets/js/setup-wizard.js:625
+#: assets/js/setup-wizard.js:626
 msgid "Getting your site ready…"
 msgstr ""
 
@@ -7393,7 +7439,7 @@ msgid "LLMS Compact"
 msgstr ""
 
 #: src/Admin/SVGMapper.php:94
-#: src/Core/EndpointRegistry.php:956
+#: src/Core/EndpointRegistry.php:909
 msgid "LLMS Full"
 msgstr ""
 
@@ -8309,48 +8355,20 @@ msgstr ""
 msgid "[REDACTED]"
 msgstr ""
 
-#: src/Core/AbilityKernel.php:69
+#: src/Core/AbilityKernel.php:53
 msgid "Cybermaps Discovery"
 msgstr ""
 
-#: src/Core/AbilityKernel.php:70
+#: src/Core/AbilityKernel.php:54
 msgid "Read-only public discovery and site-search abilities."
 msgstr ""
 
-#: src/Core/AbilityKernel.php:76
-msgid "Cybermaps Operations"
+#: src/Core/AbilityKernel.php:64
+msgid "Search public content"
 msgstr ""
 
-#: src/Core/AbilityKernel.php:77
-msgid "Administrator-authorized publication and audit operations."
-msgstr ""
-
-#: src/Core/AbilityKernel.php:226
-msgid "Unknown Cybermaps ability."
-msgstr ""
-
-#: src/Core/AbilityKernel.php:374
-msgid "Run Cybermaps Audit"
-msgstr ""
-
-#: src/Core/AbilityKernel.php:375
-msgid "Submit URLs to IndexNow"
-msgstr ""
-
-#: src/Core/AbilityKernel.php:376
-msgid "Search Cybermaps Publications"
-msgstr ""
-
-#: src/Core/AbilityKernel.php:377
-msgid "Purge Static Publications"
-msgstr ""
-
-#: src/Core/AbilityKernel.php:378
-msgid "Reconcile Static Publications"
-msgstr ""
-
-#: src/Core/AbilityKernel.php:379
-msgid "Cybermaps Ability"
+#: src/Core/AbilityKernel.php:65
+msgid "Search the bounded public Cybermaps publication inventory."
 msgstr ""
 
 #: src/Core/CacheFill.php:29
@@ -8687,263 +8705,239 @@ msgstr ""
 msgid "Used for link previews in Telegram conversations."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:952
+#: src/Core/EndpointRegistry.php:905
 msgid "AI Discovery Manifest"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:952
+#: src/Core/EndpointRegistry.php:905
 msgid "Primary machine-readable discovery manifest."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:953
+#: src/Core/EndpointRegistry.php:906
 msgid "ADP Discovery Manifest"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:953
+#: src/Core/EndpointRegistry.php:906
 msgid "AI Discovery Protocol 3.0 Level 3 manifest."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:954
+#: src/Core/EndpointRegistry.php:907
 msgid "Discovery Index"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:954
+#: src/Core/EndpointRegistry.php:907
 msgid "Index of Cybermaps discovery publications."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:955
+#: src/Core/EndpointRegistry.php:908
 msgid "LLMS Summary"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:955
+#: src/Core/EndpointRegistry.php:908
 msgid "Concise site summary for language models."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:956
+#: src/Core/EndpointRegistry.php:909
 msgid "Opt-in complete literal publication of eligible stored content."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:957
+#: src/Core/EndpointRegistry.php:910
 msgid "Experimental literal briefing with deterministic budget accounting."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:958
+#: src/Core/EndpointRegistry.php:911
 msgid "Schema.org identity and relationship graph."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:959
+#: src/Core/EndpointRegistry.php:912
 msgid "AI Activity Feed"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:959
+#: src/Core/EndpointRegistry.php:912
 msgid "JSON Feed publication of recent content."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:960
+#: src/Core/EndpointRegistry.php:913
 msgid "Recent Updates"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:960
+#: src/Core/EndpointRegistry.php:913
 msgid "Bounded seven-day ADP change stream for current public content."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:961
+#: src/Core/EndpointRegistry.php:914
 msgid "ADP News Context"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:961
+#: src/Core/EndpointRegistry.php:914
 msgid "Bounded Markdown context for recent eligible news content."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:962
+#: src/Core/EndpointRegistry.php:915
 msgid "ADP Speakable News"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:962
+#: src/Core/EndpointRegistry.php:915
 msgid "Schema.org speakable summaries for recent eligible content."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:963
+#: src/Core/EndpointRegistry.php:916
 msgid "ADP News Changelog"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:963
+#: src/Core/EndpointRegistry.php:916
 msgid "Version metadata for the Level 3 news publication surface."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:964
+#: src/Core/EndpointRegistry.php:917
 msgid "ADP News Archive"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:964
+#: src/Core/EndpointRegistry.php:917
 msgid "Bounded newline-delimited archive of eligible content."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:965
+#: src/Core/EndpointRegistry.php:918
 msgid "AI-oriented XML content inventory."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:966
+#: src/Core/EndpointRegistry.php:919
 msgid "AI Usage Policy"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:966
+#: src/Core/EndpointRegistry.php:919
 msgid "Machine-readable permissions for AI uses."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:967
+#: src/Core/EndpointRegistry.php:920
 msgid "Machine-readable action and capability inventory."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:968
+#: src/Core/EndpointRegistry.php:921
 msgid "Agent Skill Site Guide"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:968
+#: src/Core/EndpointRegistry.php:921
 msgid "Agent Skills-compatible guide to the site's public read-only resources."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:969
+#: src/Core/EndpointRegistry.php:922
 msgid "Agent Skills Index"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:969
+#: src/Core/EndpointRegistry.php:922
 msgid "Draft discovery index for the canonical Cybermaps site-guide skill."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:970
+#: src/Core/EndpointRegistry.php:923
 msgid "Dynamic Linkset catalog using the RFC 9727 media-type profile and api-catalog relation."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:971
+#: src/Core/EndpointRegistry.php:924
 msgid "Agentic Resource Catalog"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:971
+#: src/Core/EndpointRegistry.php:924
 msgid "Draft ARD catalog of active Cybermaps discovery resources."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:972
-msgid "Agent Registration Guide"
-msgstr ""
-
-#: src/Core/EndpointRegistry.php:972
-msgid "Opt-in Auth.md instructions for user-claimed OAuth device authorization."
-msgstr ""
-
-#: src/Core/EndpointRegistry.php:973
+#: src/Core/EndpointRegistry.php:925
 msgid "MCP Server Card Compatibility URL"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:973
+#: src/Core/EndpointRegistry.php:925
 msgid "Experimental well-known compatibility route for the current MCP Server Card draft."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:974
-msgid "OAuth Authorization Server Metadata"
-msgstr ""
-
-#: src/Core/EndpointRegistry.php:974
-msgid "RFC 8414 metadata describing how an agent obtains and refreshes access tokens."
-msgstr ""
-
-#: src/Core/EndpointRegistry.php:975
-msgid "OAuth Protected Resource Metadata"
-msgstr ""
-
-#: src/Core/EndpointRegistry.php:975
-msgid "RFC 9728 metadata identifying the MCP resource, issuers, and supported scopes."
-msgstr ""
-
-#: src/Core/EndpointRegistry.php:976
+#: src/Core/EndpointRegistry.php:926
 msgid "OpenAPI Description"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:976
+#: src/Core/EndpointRegistry.php:926
 msgid "Read-only public Cybermaps REST API contract."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:977
+#: src/Core/EndpointRegistry.php:927
 msgid "REST Discovery Index"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:977
+#: src/Core/EndpointRegistry.php:927
 msgid "REST API index of primary Cybermaps publications."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:978
+#: src/Core/EndpointRegistry.php:928
 msgid "Public Discovery Health"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:978
+#: src/Core/EndpointRegistry.php:928
 msgid "Bounded, non-sensitive health status for public Cybermaps discovery APIs."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:979
+#: src/Core/EndpointRegistry.php:929
 msgid "Optional dynamic Cybermaps MCP resource and tool endpoint."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:980
+#: src/Core/EndpointRegistry.php:930
 msgid "MCP Server Card"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:980
+#: src/Core/EndpointRegistry.php:930
 msgid "Current experimental MCP Server Card for the active Cybermaps MCP endpoint."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:981
+#: src/Core/EndpointRegistry.php:931
 msgid "Budgeted Site Briefing REST API"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:981
+#: src/Core/EndpointRegistry.php:931
 msgid "REST representation of the experimental budgeted site briefing."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:982
+#: src/Core/EndpointRegistry.php:932
 msgid "REST Search"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:982
+#: src/Core/EndpointRegistry.php:932
 msgid "Bounded public search over the configured, indexable AI publication inventory."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:983
+#: src/Core/EndpointRegistry.php:933
 msgid "Private Publication URLs"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:983
+#: src/Core/EndpointRegistry.php:933
 msgid "Secret-authenticated discovery and sitemap URL inventory."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:984
+#: src/Core/EndpointRegistry.php:934
 msgid "Private Publication Status"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:984
+#: src/Core/EndpointRegistry.php:934
 msgid "Secret-authenticated publication and static-sync status."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:985
+#: src/Core/EndpointRegistry.php:935
 msgid "Latest Content Report"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:985
+#: src/Core/EndpointRegistry.php:935
 msgid "Secret-authenticated latest completed content report with a bounded synchronous JSON snapshot."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:986
+#: src/Core/EndpointRegistry.php:936
 msgid "Content Report Run"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:986
+#: src/Core/EndpointRegistry.php:936
 msgid "Secret-authenticated saved content report by run ID with a bounded synchronous JSON snapshot."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:987
+#: src/Core/EndpointRegistry.php:937
 msgid "Static Publication Purge"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:987
+#: src/Core/EndpointRegistry.php:937
 msgid "Administrator-only removal of owned static publication files."
 msgstr ""
 
@@ -8959,28 +8953,28 @@ msgstr ""
 msgid "The MCP Server Card is unavailable while MCP is disabled."
 msgstr ""
 
-#: src/Core/RestAPI.php:376
+#: src/Core/RestAPI.php:373
 msgid "The experimental budgeted site briefing is disabled."
 msgstr ""
 
-#: src/Core/RestAPI.php:626
+#: src/Core/RestAPI.php:623
 msgid "No completed content report run exists."
 msgstr ""
 
-#: src/Core/RestAPI.php:650
+#: src/Core/RestAPI.php:647
 msgid "The requested content report run was not found."
 msgstr ""
 
-#: src/Core/RestAPI.php:664
+#: src/Core/RestAPI.php:661
 msgid "The saved content report is too large for a synchronous JSON response. Use the bounded CSV export from Reports."
 msgstr ""
 
-#: src/Core/RestAPI.php:676
+#: src/Core/RestAPI.php:673
 msgid "The saved content report could not be loaded from the database."
 msgstr ""
 
 #. translators: %s: static cleanup status and retained relative paths.
-#: src/Core/Uninstaller.php:379
+#: src/Core/Uninstaller.php:397
 #, php-format
 msgid "Cybermaps removed its opted-in database data, but ownership-safe static cleanup did not finish (%s). Some generated public files may remain."
 msgstr ""
@@ -9058,7 +9052,7 @@ msgstr ""
 msgid "No static publication generator is registered for endpoint \"%s\"."
 msgstr ""
 
-#: src/Discovery/DiscoveryPublicationGenerator.php:202
+#: src/Discovery/DiscoveryPublicationGenerator.php:196
 msgid "A discovery publication could not be encoded as JSON."
 msgstr ""
 
@@ -9851,31 +9845,20 @@ msgstr ""
 msgid "At least one canonical well-known publication did not return its registered response."
 msgstr ""
 
-#: src/MCP/OAuth/DeviceAuthorizationPage.php:61
-msgid "The agent was approved. You can return to the requesting application."
+#: src/MCP/ResourceAbilities.php:117
+msgid "This public resource is unavailable."
 msgstr ""
 
-#: src/MCP/OAuth/DeviceAuthorizationPage.php:62
-msgid "The agent request was denied."
+#: src/MCP/ResourceAbilities.php:129
+msgid "This public resource could not be generated."
 msgstr ""
 
-#: src/MCP/OAuth/DeviceAuthorizationPage.php:70
-#: src/MCP/OAuth/DeviceAuthorizationPage.php:71
-msgid "Authorize Cybermaps Agent"
+#: src/MCP/ResourceAbilities.php:132
+msgid "This public resource exceeds the response size limit."
 msgstr ""
 
-#: src/MCP/OAuth/DeviceAuthorizationPage.php:87
-msgid "User code"
-msgstr ""
-
-#: src/MCP/OAuth/DeviceAuthorizationPage.php:89
-#: assets/js/admin-command-center.js:790
-#: assets/js/setup-wizard.js:730
-msgid "Continue"
-msgstr ""
-
-#: src/MCP/OAuth/DeviceAuthorizationPage.php:102
-msgid "Approve"
+#: src/MCP/WordPressIntegration.php:48
+msgid "Read-only public Cybermaps discovery and search."
 msgstr ""
 
 #: src/Sitemap/MediaScanner.php:241
@@ -10294,6 +10277,11 @@ msgstr ""
 msgid "Confirm Action"
 msgstr ""
 
+#: assets/js/admin-command-center.js:790
+#: assets/js/setup-wizard.js:732
+msgid "Continue"
+msgstr ""
+
 #: assets/js/setup-wizard.js:181
 msgid "What kind of website is this?"
 msgstr ""
@@ -10386,39 +10374,43 @@ msgstr ""
 msgid "See settings applied"
 msgstr ""
 
-#: assets/js/setup-wizard.js:460
+#: assets/js/setup-wizard.js:452
+msgid "Optional next step: configure read-only MCP connections in AI Publishing. Sitemaps and AI publications work independently."
+msgstr ""
+
+#: assets/js/setup-wizard.js:461
 msgid "Go to Overview"
 msgstr ""
 
-#: assets/js/setup-wizard.js:469
+#: assets/js/setup-wizard.js:470
 msgid "Explore AI Publishing"
 msgstr ""
 
-#: assets/js/setup-wizard.js:576
+#: assets/js/setup-wizard.js:577
 msgid "Choose a public image"
 msgstr ""
 
-#: assets/js/setup-wizard.js:632
+#: assets/js/setup-wizard.js:633
 msgid "Quick Setup could not be loaded."
 msgstr ""
 
-#: assets/js/setup-wizard.js:663
+#: assets/js/setup-wizard.js:665
 msgid "of"
 msgstr ""
 
-#: assets/js/setup-wizard.js:699
+#: assets/js/setup-wizard.js:701
 msgid "Exit setup"
 msgstr ""
 
-#: assets/js/setup-wizard.js:714
+#: assets/js/setup-wizard.js:716
 msgid "Back"
 msgstr ""
 
-#: assets/js/setup-wizard.js:742
+#: assets/js/setup-wizard.js:744
 msgid "Applying your setup…"
 msgstr ""
 
-#: assets/js/setup-wizard.js:743
+#: assets/js/setup-wizard.js:745
 msgid "Finish setup"
 msgstr ""
 

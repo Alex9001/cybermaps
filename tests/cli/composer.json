@@ -1,0 +1,14 @@
+{
+  "require": {
+    "wp-cli/wp-cli-bundle": "2.12.0",
+    "symfony/finder": "^7.3"
+  },
+  "config": {
+    "platform": {
+      "php": "8.2.0"
+    },
+    "allow-plugins": {
+      "wp-cli/wp-cli-bundle": true
+    }
+  }
+}

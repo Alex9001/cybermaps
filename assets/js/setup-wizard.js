@@ -449,6 +449,7 @@
                       })
                   )
                 : null,
+            el('p', { key: 'mcp' }, [props.mcpStatus, ' ', __('Optional next step: configure read-only MCP connections in AI Publishing. Sitemaps and AI publications work independently.', 'cybermaps')]),
             el('div', { key: 'actions', className: 'cm-quick-setup__complete-actions' }, [
                 el(
                     'a',
@@ -638,7 +639,8 @@
                 answers: answers,
                 preview: preview,
                 result: result,
-                overviewUrl: overviewUrl
+                overviewUrl: overviewUrl,
+                mcpStatus: data.mcp_status
             });
         }
 

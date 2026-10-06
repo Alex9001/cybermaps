@@ -51,6 +51,7 @@
             "@lint:phpcompat",
             "@lint:phpcs",
             "@wporg:check",
+            "@mcp:check",
             "python3 -B bin/check-distribution.py",
             "@i18n:check",
             "@manifest:check",
@@ -96,7 +97,11 @@
         ],
         "release:status": "python3 -B bin/release_gate.py status",
         "test:release-gates": "python3 -B -m unittest discover -s tests/tooling -p test_gate_*.py",
-        "validation:setup": "python3 -B bin/setup-validation.py"
+        "validation:setup": "python3 -B bin/setup-validation.py",
+        "mcp:check": [
+            "php bin/check-mcp-contract.php",
+            "python3 -B tests/tooling/test_mcp_contract.py"
+        ]
     },
     "config": {
         "allow-plugins": {

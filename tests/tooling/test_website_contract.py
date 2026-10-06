@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import shutil
 import tarfile
 import io
 import tempfile
@@ -22,9 +23,10 @@ class WebsiteContractTest(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.source = Path(self.temp.name)
-        archive = subprocess.check_output(['git', 'archive', 'HEAD'], cwd=ROOT)
-        with tarfile.open(fileobj=io.BytesIO(archive)) as tar:
-            tar.extractall(self.source, filter='data')
+        for directory in ('src', 'docs', 'assets'):
+            shutil.copytree(ROOT / directory, self.source / directory, ignore=shutil.ignore_patterns('generated'))
+        for filename in ('cybermaps.php', 'readme.txt', 'uninstall.php', 'changelog.txt'):
+            shutil.copy2(ROOT / filename, self.source / filename)
 
     def export(self, success=True):
         result = subprocess.run(['php', str(ROOT / 'docs/dev/generate-docs.php'), '--website'],
@@ -41,10 +43,10 @@ class WebsiteContractTest(unittest.TestCase):
         facts = self.export()
         paths = {route['path'] for route in facts['routes']}
         self.assertEqual(facts['route_count'], len(paths))
-        self.assertEqual(len(paths), 64)
-        self.assertTrue({'/robots.txt', '/{key}.txt', '/cybermaps-agent-auth',
+        self.assertEqual(len(paths), 53)
+        self.assertTrue({'/robots.txt', '/{key}.txt', '/wp-json/mcp/cybermaps',
                          '/wp-json/cybermaps/v1/editor/translation/{post_id}',
-                         '/wp-json/cybermaps/v1/oauth/authorize'} <= paths)
+                         '/wp-json/cybermaps/v1/mcp/server-card'} <= paths)
         self.assertEqual(facts['limits']['llms_full_bytes'], 33554431)
         self.assertEqual(facts['limits']['llms_summary_bytes'], 4194303)
 

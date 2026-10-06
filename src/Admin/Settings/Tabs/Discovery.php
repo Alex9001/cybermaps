@@ -47,7 +47,7 @@ class Discovery implements SettingsTab {
 			array(
 				'label_for'   => 'enable_discovery_hub',
 				'label'       => __( 'Enable AI Publication Hub', 'cybermaps' ),
-				'description' => __( 'Master switch for the public AI discovery surface. WordPress 7.1 native routing publishes fixed and well-known protocols without requiring Cloudflare or host-specific installation steps. Cybermaps also advertises public WordPress abilities across its agent discovery surfaces. <span class="cm-desc-example">These emerging integrations put enabled sites ahead of common discovery tooling; client adoption still varies.</span>', 'cybermaps' ),
+				'description' => __( 'Master switch for the public AI discovery surface. WordPress 7.1 native routing publishes fixed and well-known protocols without requiring Cloudflare or host-specific installation steps. Cybermaps publishes its own read-only search ability. Optional MCP connections require WordPress MCP Adapter. <span class="cm-desc-example">These emerging integrations put enabled sites ahead of common discovery tooling; client adoption still varies.</span>', 'cybermaps' ),
 				'maturity'    => 'publication_hub',
 			)
 		);
@@ -59,24 +59,6 @@ class Discovery implements SettingsTab {
 			'cybermaps-ai',
 			'cybermaps_discovery_hub_section',
 			array( 'label_for' => 'mcp_mode' )
-		);
-
-		add_settings_field(
-			'agent_registration_mode',
-			__( 'Agent Registration', 'cybermaps' ),
-			array( \Cybermaps\Admin\Settings\Fields\FieldRenderer::class, 'render_select_field' ),
-			'cybermaps-ai',
-			'cybermaps_discovery_hub_section',
-			array(
-				'label_for'   => 'agent_registration_mode',
-				'default'     => 'off',
-				'options'     => array(
-					'off'          => __( 'Off', 'cybermaps' ),
-					'user_claimed' => __( 'User-claimed OAuth', 'cybermaps' ),
-				),
-				'description' => __( 'Allows a signed-in WordPress user to review and approve an Auth.md registration claim. Cybermaps never creates an account or credential without that approval.', 'cybermaps' ),
-				'maturity'    => 'agent_registration',
-			)
 		);
 
 		add_settings_field(

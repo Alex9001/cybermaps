@@ -3,7 +3,7 @@ Contributors: oreshkin
 Tags: sitemap, llms-txt, technical-seo, content-audit, indexnow
 Requires at least: 7.1
 Tested up to: 7.1
-Stable tag: 7.5.4
+Stable tag: 8.0.0
 Requires PHP: 8.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -12,73 +12,72 @@ Publish WordPress sitemaps and machine-readable maps.
 
 == Description ==
 
-XML/News/RSS/HTML sitemaps, llms.txt, Markdown, JSON discovery, static delivery,
-local analytics, and reports. MCP requires authorization and consent.
-No ranking guarantees.
+Sitemaps, AI discovery, static delivery and reports.
+Read-only MCP needs MCP Adapter 0.7.0+. No ranking guarantees.
 
 == Installation ==
 
-Activate, then open **Cybermaps → Overview → Quick Setup**.
+Activate; open Cybermaps → Overview → Quick Setup.
+MCP: in AI Publishing, install/activate MCP Adapter, enable read-only MCP and save.
+Use /wp-json/mcp/cybermaps with HTTPS and a Subscriber's WordPress Application
+Password, or adapter WP-CLI transport. Other features need no adapter.
+Connection and 7.x migration guide: https://cybermaps.dev/docs/mcp/
 
 == Source Code ==
 
-Release source: https://github.com/Alex9001/cybermaps/tree/v7.5.4
-Editable, unminified JS/CSS lives in assets/; setup-wizard.js uses wp.element.
-No compilation: packaging copies assets unchanged. Build: composer install; bash bin/package-candidate.sh. Details:
-https://github.com/Alex9001/cybermaps/blob/v7.5.4/docs/dev/RELEASE-WORKFLOW.md
+https://github.com/Alex9001/cybermaps/tree/v8.0.0
+Editable JS/CSS: assets/; setup-wizard.js uses wp.element. No compilation.
+Build: composer install; bash bin/package-candidate.sh. Assets copied unchanged.
 
 == External Services ==
 
-= Cloudflare and the Cybermaps OAuth relay =
+= Cloudflare and Cybermaps OAuth relay =
 
-**Connect Cloudflare & optimize** contacts https://connect.cybermaps.dev
-for a one-time, five-minute transaction. The relay receives a PKCE challenge,
-random state, and authorization code, not the verifier, access token,
-WordPress identity, site URL, or rules. Its hosting provider processes network
-metadata; rate limits use salted IP hashes. WordPress sends authorization
-credentials directly to Cloudflare to exchange/revoke tokens and sends zone,
-hostname, and rule configuration for the requested optimization.
-Manual tokens and self-managed OAuth bypass the relay.
-
-Relay service and privacy: https://cybermaps.dev/privacy/#cloudflare-oauth-relay
-Cloudflare terms: https://www.cloudflare.com/website-terms/
-Cloudflare privacy: https://www.cloudflare.com/privacypolicy/
+Connect Cloudflare contacts https://connect.cybermaps.dev for a five-minute
+transaction: PKCE challenge, random state and authorization code. No verifier,
+access token, WordPress identity, site URL or rules reach the relay. Hosting
+processes network metadata; rate limits use salted IP hashes. WordPress sends
+credentials directly to Cloudflare for token exchange/revocation, plus zone,
+hostname and rules for requested optimization. Manual/self-managed modes bypass
+the relay. Policies:
+https://cybermaps.dev/privacy/#cloudflare-oauth-relay
+https://www.cloudflare.com/website-terms/
+https://www.cloudflare.com/privacypolicy/
 
 = IndexNow =
 
-When enabled, eligible publication changes queue URLs, host, verification key,
-and key location for https://api.indexnow.org/indexnow. Headless frontends
-must proxy or publish Cybermaps' generated `/{key}.txt` verification path.
-Terms and privacy: https://www.indexnow.org/terms
+Enabled publication changes send URLs, host, verification key and key location
+to https://api.indexnow.org/indexnow. Headless sites must proxy or publish Cybermaps' generated `/{key}.txt` verification path.
+Terms/privacy: https://www.indexnow.org/terms
 
 = WebSub =
 
-When WebSub and AI publishing are enabled, content reconciliation sends the
-public /feed.json URL and a publish notification to configured HTTPS hubs.
-The default hubs are Google PubSubHubbub (https://pubsubhubbub.appspot.com/)
-and Superfeedr (https://pubsubhubbub.superfeedr.com/).
-Google terms: https://policies.google.com/terms
-Google privacy: https://policies.google.com/privacy
-Superfeedr terms: https://superfeedr.com/terms
-Superfeedr privacy: https://superfeedr.com/privacy
-Custom hubs receive the same data under their own service policies.
+Enabled WebSub and AI publishing send public /feed.json and publish notifications
+to configured HTTPS hubs. Defaults and policies:
+https://pubsubhubbub.appspot.com/
+https://policies.google.com/terms
+https://policies.google.com/privacy
+https://pubsubhubbub.superfeedr.com/
+https://superfeedr.com/terms
+https://superfeedr.com/privacy
+Custom hubs receive the same data under their own policies.
 
 = Public delivery checks =
 
-Status checks GET/HEAD the site or configured Frontend Base URL to verify
-responses. `X-Cybermaps-Diagnostic: 1` excludes probes from analytics.
-OAuth registration fetches client-supplied HTTPS metadata. Configured Varnish
-integration sends purge requests to your cache server.
+Status checks GET/HEAD the site or Frontend Base URL with `X-Cybermaps-Diagnostic: 1` to exclude analytics. Configured Varnish receives cache purge requests.
 
 == Privacy ==
 
-Opt-in crawler analytics stays in WordPress. IPs default to IPv4 /24 or IPv6
-/64 anonymization. Retention is 1–365 days with export and clearing controls.
-Public routes use local 60-second rate limits; REST search stores neither raw IPs nor queries.
-Logged-in and diagnostic requests omit identifying data.
-Data remains after uninstall unless Uninstall Cleanup was enabled beforehand.
+Opt-in analytics stays in WordPress. IPs default to /24 (IPv4) or /64 (IPv6).
+Retention: 1–365 days; export/clear available. Public routes use local 60-second rate limits.
+REST search stores neither raw IPs nor queries. Logged-in/diagnostic traffic omits
+identifying data. Uninstall retains data unless Uninstall Cleanup was enabled.
 
 == Changelog ==
+
+= 8.0.0 =
+* Optional WordPress MCP Adapter replaces custom MCP/OAuth. Only public resources and search remain; remote operations and arbitrary abilities are removed.
+* Guided setup, migration and release checks.
 
 = 7.5.4 =
 * Made public sitemap attribution an explicit, default-off choice.
@@ -181,6 +180,10 @@ Data remains after uninstall unless Uninstall Cleanup was enabled beforehand.
 Earlier release history is included in `changelog.txt`.
 
 == Upgrade Notice ==
+
+= 8.0.0 =
+MCP users: install MCP Adapter 0.7.0+, enable read-only MCP in AI Publishing and reconnect. Old endpoints, credentials and tasks are retired.
+
 
 = 7.5.4 =
 Public sitemap credits are now off by default. Enable them explicitly in XML Sitemaps if desired.

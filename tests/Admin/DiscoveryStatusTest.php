@@ -146,7 +146,7 @@ namespace Cybermaps\Tests\Admin {
 			$this->assertContains( '/knowledge-graph.json', $paths );
 			$this->assertContains( '/feed.json', $paths );
 			$this->assertContains( '/ai-sitemap.xml', $paths );
-			$this->assertSame( count( $paths ) - 4, $status['active_count'] );
+			$this->assertSame( count( $paths ) - 1, $status['active_count'] );
 			$this->assertSame( 0, $status['error_count'] );
 			$this->assertNotEmpty( $GLOBALS['cybermaps_mock_safe_remote_get_calls'] );
 			$this->assertSame(

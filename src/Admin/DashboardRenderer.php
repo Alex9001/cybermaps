@@ -41,6 +41,12 @@ final class DashboardRenderer {
 
 		return array(
 			array(
+				'label'  => __( 'MCP connections', 'cybermaps' ),
+				'active' => 'read_only' === \Cybermaps\MCP\WordPressIntegration::mode(),
+				'status' => MCPSetup::status(),
+				'detail' => __( 'Optional public search and discovery through WordPress MCP Adapter. Configure in AI Publishing.', 'cybermaps' ),
+			),
+			array(
 				'label'  => __( 'XML sitemaps', 'cybermaps' ),
 				'active' => true,
 				'status' => __( 'Available', 'cybermaps' ),

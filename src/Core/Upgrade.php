@@ -556,10 +556,8 @@ final class Upgrade {
 	}
 
 	private static function upgrade_oauth_schema(): bool {
-		\Cybermaps\MCP\OAuth\WpdbOAuthRepository::create_tables();
-
-		return \Cybermaps\MCP\OAuth\WpdbOAuthRepository::SCHEMA_VERSION
-			=== (string) get_option( \Cybermaps\MCP\OAuth\WpdbOAuthRepository::SCHEMA_OPTION, '' );
+		// Retain the historical step ID for interrupted upgrades; never recreate retired tables.
+		return true;
 	}
 
 	private static function reconcile_publications(): bool {

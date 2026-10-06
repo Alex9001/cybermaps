@@ -216,6 +216,7 @@ class Plugin {
 		add_action( 'wp_loaded', array( self::class, 'register_existing_publication_meta' ), 0 );
 		add_action( 'enqueue_block_editor_assets', array( self::class, 'enqueue_editor_assets' ) );
 
+		add_action( 'init', array( MCPMigration::class, 'run' ), -2 );
 		add_action( 'init', array( Upgrade::class, 'run' ), -1 );
 		add_action( Upgrade::RETRY_HOOK, array( Upgrade::class, 'run' ) );
 		add_action( \Cybermaps\Admin\NetworkSetup::RETRY_HOOK, array( \Cybermaps\Admin\NetworkSetup::class, 'maybe_upgrade' ) );

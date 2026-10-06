@@ -1,0 +1,13 @@
+{
+  "server_id": "cybermaps",
+  "namespace": "mcp",
+  "route": "/cybermaps",
+  "minimum_adapter_version": "0.7.0",
+  "tools": ["cybermaps/search"],
+  "resource_ids": [
+    "manifest", "adp_discovery", "discovery_index", "llms", "llms_full", "llms_tldr",
+    "knowledge_graph", "feed", "updates", "adp_news_llms", "adp_news_speakable",
+    "adp_news_changelog", "adp_news_archive", "ai_sitemap", "usage_policy", "actions",
+    "skill", "agent_skills", "api_catalog", "ai_catalog", "mcp_server_card", "openapi"
+  ]
+}

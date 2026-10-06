@@ -57,6 +57,40 @@ final class UninstallerTest extends TestCase {
 		parent::tearDown();
 	}
 
+	public function test_mcp_retirement_is_narrow_even_with_mcp_in_the_site_prefix(): void {
+		$db = $GLOBALS['wpdb'];
+		$db->prefix = 'wp_cybermaps_mcp_';
+		$keep = $db->prefix . 'cybermaps_audit_runs';
+		$remove = $db->prefix . 'cybermaps_mcp_tasks';
+		$db->existing_tables = array( $keep, $remove, 'wp_other_cybermaps_mcp_tasks' );
+		self::assertTrue( Uninstaller::remove_legacy_mcp_tables() );
+		self::assertSame( array( $keep, 'wp_other_cybermaps_mcp_tasks' ), $db->existing_tables );
+	}
+
+	public function test_mcp_migration_retries_failed_cleanup_then_preserves_new_consent(): void {
+		$db = $GLOBALS['wpdb'];
+		$db->existing_tables[] = 'wp_cybermaps_mcp_tasks';
+		$db->fail_drop_table = 'wp_cybermaps_mcp_tasks';
+		$GLOBALS['cybermaps_mock_options']['cybermaps_settings'] = array( 'mcp_mode' => 'operations', 'agent_registration_mode' => 'open', 'enable_discovery_hub' => '1', 'sitemap_posts_per_page' => 123 );
+		$GLOBALS['cybermaps_mock_scheduled']['cybermaps_mcp_run_task'] = 123;
+		\Cybermaps\Core\MCPMigration::run();
+		self::assertFalse( get_option( \Cybermaps\Core\MCPMigration::DONE_OPTION, false ) );
+		self::assertSame( 'off', get_option( 'cybermaps_settings' )['mcp_mode'] );
+		self::assertArrayNotHasKey( 'agent_registration_mode', get_option( 'cybermaps_settings' ) );
+		self::assertArrayNotHasKey( 'cybermaps_mcp_run_task', $GLOBALS['cybermaps_mock_scheduled'] );
+		$db->fail_drop_table = '';
+		\Cybermaps\Core\MCPMigration::run();
+		self::assertSame( '1', get_option( \Cybermaps\Core\MCPMigration::DONE_OPTION ) );
+		self::assertSame( 123, get_option( 'cybermaps_settings' )['sitemap_posts_per_page'] );
+		self::assertContains( 'wp_cybermaps_audit_runs', $db->existing_tables );
+		self::assertNotContains( 'wp_cybermaps_mcp_tasks', $db->existing_tables );
+		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['mcp_mode'] = 'read_only';
+		$db->queries = array();
+		\Cybermaps\Core\MCPMigration::run();
+		self::assertSame( 'read_only', get_option( 'cybermaps_settings' )['mcp_mode'] );
+		self::assertSame( array(), $db->queries );
+	}
+
 	public function test_uninstall_bootstrap_does_not_load_the_plugin_runtime(): void {
 		$contents = (string) file_get_contents( dirname( __DIR__, 2 ) . '/uninstall.php' );
 

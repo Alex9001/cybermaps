@@ -38,7 +38,7 @@ def now():
 
 def policy():
     value = json.loads(POLICY.read_text())
-    require(value['schema_version'] == 1 and len(value['conditions']) == 16 and {'website_prepared', 'website_live'} <= value['conditions'].keys(), 'Invalid release policy')
+    require(value['schema_version'] == 1 and len(value['conditions']) == 17 and {'website_prepared', 'website_live', 'remote_capabilities'} <= value['conditions'].keys(), 'Invalid release policy')
     return value
 
 
@@ -48,7 +48,7 @@ def identity():
     for name in sorted(set(n.decode() for n in names if n)):
         path = safe_path(ROOT / name)
         hashes.append((name, digest(path) if path.is_file() else 'DELETED'))
-    dependencies = {name: digest(ROOT / name) for name in ('vendor/composer/installed.json', 'docs/generated/tmp/browser-tools/package-lock.json')}
+    dependencies = {name: digest(ROOT / name) for name in ('vendor/composer/installed.json', 'docs/generated/tmp/browser-tools/package-lock.json', 'docs/generated/tmp/wp-cli-modern/vendor/composer/installed.json')}
     return dict(commit=git(ROOT, 'rev-parse', 'HEAD'), dependencies=dependencies,
                 source_sha256=hashlib.sha256(json.dumps(hashes).encode()).hexdigest(),
                 policy_sha256=digest(POLICY))

@@ -16,10 +16,11 @@ class RuntimeBindingTest(unittest.TestCase):
         result = dict(wordpress_version='7.1.2', php_version='8.2.33',
                       zip_sha256='frozen', commit='commit', plugin_check_environment='single-site',
                       wp_debug_clean=True, lifecycle_passed=True, multisite=False,
+                      mcp_read_only_passed=True, mcp_adapter_version='0.7.0',
                       stable_findings=[], experimental_findings=[])
         validate_result(result, '7.1.2', '8.2', False, 'frozen', 'commit')
         for key, value in [('zip_sha256', 'other'), ('commit', 'other'), ('lifecycle_passed', False),
-                           ('multisite', True), ('experimental_findings', [{'warning': 'new'}])]:
+                           ('multisite', True), ('mcp_read_only_passed', False), ('mcp_adapter_version', '0.6.0'), ('experimental_findings', [{'warning': 'new'}])]:
             with self.subTest(key=key), self.assertRaises(RuntimeError):
                 validate_result({**result, key: value}, '7.1.2', '8.2', False, 'frozen', 'commit')
 

@@ -43,7 +43,6 @@ class Settings {
 		'enable_header_discovery',
 		'enable_markdown_negotiation',
 		'enable_webmcp',
-		'agent_registration_mode',
 		'enable_indexnow',
 		'enable_shortcode',
 		'enable_video_schema',

@@ -138,7 +138,7 @@ final class DocsManifestTest extends TestCase {
 				array(
 					'/wp-json/cybermaps/v1/discovery',
 					'/wp-json/cybermaps/v1/health',
-					'/wp-json/cybermaps/v1/mcp',
+					'/wp-json/mcp/cybermaps',
 					'/wp-json/cybermaps/v1/mcp/server-card',
 				'/wp-json/cybermaps/v1/llms-tldr',
 				'/wp-json/cybermaps/v1/search',
@@ -173,7 +173,7 @@ final class DocsManifestTest extends TestCase {
 			$this->assertArrayHasKey( '/.well-known/api-catalog', $by_path );
 			$this->assertArrayHasKey( '/.well-known/ai-catalog.json', $by_path );
 			$this->assertArrayHasKey( '/.well-known/mcp/server-card.json', $by_path );
-			$this->assertArrayHasKey( '/auth.md', $by_path );
+			$this->assertArrayNotHasKey( '/auth.md', $by_path );
 		$this->assertArrayHasKey( '/.well-known/agent-skills/cybermaps-site-guide/SKILL.md', $by_path );
 		$this->assertTrue( $by_path['/.well-known/agent-skills/cybermaps-site-guide/SKILL.md']['canonical'] ?? false );
 		$this->assertFalse( $by_path['/skill.md']['canonical'] ?? true );
@@ -220,8 +220,6 @@ final class DocsManifestTest extends TestCase {
 				'/.well-known/api-catalog',
 				'/.well-known/ai-catalog.json',
 				'/.well-known/mcp/server-card.json',
-				'/.well-known/oauth-authorization-server',
-				'/.well-known/oauth-protected-resource',
 			),
 			array_column( $well_known_targets, 'path' )
 		);
@@ -246,8 +244,6 @@ final class DocsManifestTest extends TestCase {
 				'/.well-known/api-catalog',
 				'/.well-known/ai-catalog.json',
 				'/.well-known/mcp/server-card.json',
-				'/.well-known/oauth-authorization-server',
-				'/.well-known/oauth-protected-resource',
 			),
 			array_column( $all_targets, 'path' )
 		);

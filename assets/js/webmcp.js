@@ -33,41 +33,6 @@
         }
     }
 
-    function appendInput(params, prefix, value) {
-        if (Array.isArray(value)) {
-            value.forEach(function (item) { appendInput(params, prefix + "[]", item); });
-            return;
-        }
-        if (value && typeof value === "object") {
-            Object.keys(value).forEach(function (key) {
-                appendInput(params, prefix + "[" + key + "]", value[key]);
-            });
-            return;
-        }
-        if (value !== undefined && value !== null) {
-            params.append(prefix, String(value));
-        }
-    }
-
-    function registerPublicAbility(ability) {
-        register({
-            name: ability.name,
-            description: ability.description,
-            inputSchema: ability.inputSchema,
-            execute: function (input) {
-                var url = new URL(ability.runUrl, window.location.href);
-                appendInput(url.searchParams, "input", input || {});
-                var headers = { Accept: "application/json" };
-                if (config.restNonce) {
-                    headers["X-WP-Nonce"] = config.restNonce;
-                }
-                return fetch(url.toString(), { credentials: "same-origin", headers: headers })
-                    .then(readJson)
-                    .then(function (payload) { return result(JSON.stringify(payload)); });
-            }
-        });
-    }
-
     register({
         name: "cybermaps.search_site",
         description: "Search eligible public content published by this site.",
@@ -125,7 +90,4 @@
         }
     });
 
-    if (Array.isArray(config.abilities)) {
-        config.abilities.forEach(registerPublicAbility);
-    }
 }());

@@ -19,13 +19,7 @@ foreach ( array( 'wp_register_ability', 'wp_get_abilities', 'wp_has_ability' ) a
 	}
 }
 
-$expected_abilities = array(
-	'cybermaps/purge-static-publications',
-	'cybermaps/reconcile-static-publications',
-	'cybermaps/run-audit',
-	'cybermaps/search',
-	'cybermaps/submit-indexnow',
-);
+$expected_abilities = array( 'cybermaps/search' );
 $public_abilities   = wp_get_abilities(
 	array(
 		'namespace' => 'cybermaps',

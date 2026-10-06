@@ -58,12 +58,13 @@ class SettingsDiscoveryNormalizer {
 		}
 		if ( array_key_exists( 'mcp_mode', $input ) && is_scalar( $input['mcp_mode'] ) ) {
 			$mode                  = sanitize_key( (string) $input['mcp_mode'] );
-			$sanitized['mcp_mode'] = in_array( $mode, array( 'off', 'discovery', 'read_only', 'operations' ), true ) ? $mode : 'off';
+			$sanitized['mcp_mode'] = in_array( $mode, array( 'off', 'read_only' ), true ) ? $mode : 'off';
 		}
-		if ( array_key_exists( 'agent_registration_mode', $input ) && is_scalar( $input['agent_registration_mode'] ) ) {
-			$registration_mode                    = sanitize_key( (string) $input['agent_registration_mode'] );
-			$sanitized['agent_registration_mode'] = in_array( $registration_mode, array( 'off', 'user_claimed' ), true ) ? $registration_mode : 'off';
+		unset( $sanitized['agent_registration_mode'] );
+		if ( ! in_array( $sanitized['mcp_mode'] ?? 'off', array( 'off', 'read_only' ), true ) ) {
+			$sanitized['mcp_mode'] = 'off';
 		}
+
 		unset( $sanitized['enable_semantic_snippets'], $sanitized['ai_custom_skill_prompt'] );
 		return $sanitized;
 	}

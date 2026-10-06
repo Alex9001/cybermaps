@@ -145,7 +145,7 @@ class APICatalog {
 		if ( \Cybermaps\Core\AbilityKernel::get_instance()->has_public_abilities() ) {
 			$apis[] = array(
 				'id'   => 'wp_abilities',
-				'href' => rest_url( 'wp-abilities/v1/abilities' ),
+				'href' => rest_url( 'wp-abilities/v1/abilities/cybermaps/search' ),
 				'type' => 'application/json',
 			);
 		}

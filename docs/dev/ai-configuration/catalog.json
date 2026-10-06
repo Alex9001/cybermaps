@@ -1,7 +1,7 @@
 {
     "format": "cybermaps-ai-configuration-catalog",
     "format_version": 2,
-    "plugin_version": "7.5.4",
+    "plugin_version": "8.0.0",
     "sections": [
         {
             "id": "core_settings",
@@ -838,40 +838,12 @@
             "option": "cybermaps_settings",
             "field": "mcp_mode",
             "label": "Model Context Protocol",
-            "purpose": "Explicit optional MCP access tier. MCP remains unavailable while the AI Publication Hub is disabled.",
+            "purpose": "Optional read-only MCP connections require WordPress MCP Adapter 0.7.0 or newer and the AI Publication Hub.",
             "json_type": "string",
             "allowed": {
                 "enum": [
                     "off",
-                    "discovery",
-                    "read_only",
-                    "operations"
-                ]
-            },
-            "effective_default": "off",
-            "dependencies": [
-                {
-                    "field": "enable_discovery_hub",
-                    "condition": "equals",
-                    "value": true
-                }
-            ],
-            "example": "off",
-            "risk": "high"
-        },
-        {
-            "id": "agent_registration_mode",
-            "section_id": "ai_publishing",
-            "section_label": "AI Publishing",
-            "option": "cybermaps_settings",
-            "field": "agent_registration_mode",
-            "label": "Agent registration",
-            "purpose": "Controls opt-in user-reviewed Auth.md agent registration.",
-            "json_type": "string",
-            "allowed": {
-                "enum": [
-                    "off",
-                    "user_claimed"
+                    "read_only"
                 ]
             },
             "effective_default": "off",

@@ -12,7 +12,7 @@ from workspace import ROOT, require, package_files, git
 def verify_browser(path):
     result = json.loads(Path(path).read_text())
     require(result.get('schema_version') == 1 and result.get('passed') is True
-            and set(result.get('checks', [])) == {'wizard', 'icons', 'attribution-save', 'tooltip'}
+            and set(result.get('checks', [])) == {'wizard', 'icons', 'attribution-save', 'tooltip', 'mcp-setup'}
             and result.get('errors') == [] and result.get('browser'), 'Browser validation incomplete')
 
 
@@ -22,6 +22,7 @@ def validate_result(result, wp, php, multisite, archive_hash, commit):
     require(result.get('plugin_check_environment') == 'single-site' and result.get('wp_debug_clean') is True
             and result.get('lifecycle_passed') is True and result.get('multisite') is multisite,
             'Runtime coverage incomplete')
+    require(result.get('mcp_read_only_passed') is True and result.get('mcp_adapter_version') == json.loads((ROOT / 'docs/dev/release-policy.json').read_text())['mcp_adapter_version'], 'Read-only MCP runtime coverage incomplete')
     require(result.get('stable_findings') == [] and result.get('experimental_findings') == [], 'Runtime findings remain')
 
 

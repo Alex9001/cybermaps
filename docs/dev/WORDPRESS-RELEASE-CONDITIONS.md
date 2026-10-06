@@ -8,7 +8,10 @@ known regressions and require a policy review; a green scanner alone is insuffic
 
 Install Composer development dependencies and Docker/Podman, Python 3 with lxml,
 Node/npm, PHP and WP-CLI. Run `python3 -B bin/setup-validation.py` once to install
-the locked Playwright browser under `docs/generated/tmp/`. Runtime cases use three
+the locked Playwright browser and Composer-based WP-CLI under `docs/generated/tmp/`.
+The CLI uses its reviewed lockfile in `tests/cli/`, including a PHP 8.2-compatible
+Symfony Finder, rather than the container PHAR’s obsolete bundled dependency.
+Tool dependency changes invalidate validation evidence; notices are never filtered. Runtime cases use three
 isolated workers by default; `CYBERMAPS_MATRIX_WORKERS=1` through `6` adjusts
 concurrency without omitting any case.
 
@@ -39,7 +42,7 @@ receipt. Do not upload a candidate manually to bypass these conditions.
 
 The agent review is local `agent-review.json`, with exactly: `schema_version: 1`,
 the validation record's `identity` and `zip_sha256`, a named `reviewer`, UTC
-`reviewed_at`, and `sections`. Each of the six section names in release-policy.json
+`reviewed_at`, and `sections`. Each of the seven section names in release-policy.json
 must contain `status: "passed"`, a specific rationale, and a nonempty `evidence`
 mapping of repository-relative paths to SHA-256 hashes. Read the evidence before
 writing this record. Do not generate approvals from passing exit codes. No routine
@@ -63,6 +66,7 @@ owner sign-off is required. A changed package requires renewed agent review.
 14. An agent closes every policy and reviewer obligation with current evidence.
 15. Website content matches the exact candidate commit/channel; editorial reviews, tests, build and verification pass before promotion/publication.
 16. The published tag is deployed to cybermaps.dev and its live contracts, download links and changelog are verified before release completion.
+17. The exact artifact exposes only the reviewed read-only Cybermaps MCP surface. `composer mcp:check`, negative ability fixtures, dependency states, legacy migration and real adapter HTTP/CLI checks must pass. The `remote_capabilities` review must assess actual administrative authority, native REST and browser channels; read-only annotations and clean scanners are insufficient. Any expansion requires a new explicit product/policy decision and reviewer assessment.
 
 Website preparation records bind the canonical website content, validation log,
 plugin commit, version and channel; promotion additionally binds its Git commit
@@ -85,12 +89,13 @@ plugin. `website-prepared.json` and `website-live.json` retain the evidence.
 
 ## Reviewer issue map
 
-The private June 15, September 17 and September 26, 2026 emails were reviewed.
+The private June 15, September 17, September 26 and October 5, 2026 emails were reviewed.
 The September 26 review concerned 7.5.2; it does not establish approval of 7.5.3
 or this candidate. Do not commit private reviewer mail.
 
 | Reviewer category | Resolution and continuing evidence |
 | --- | --- |
+| Remote administration (October 5; 7.5.4) | Retire the custom MCP/OAuth server and arbitrary ability dispatcher; expose only owned read-only resources/search through optional WordPress MCP Adapter. Remove mutation abilities across native and browser channels. Prove the boundary using the reviewed MCP contract and real runtime tests; this agent review is not an independent infrastructure audit. |
 | Account/domain ownership | Owner confirmed resolved September 28; preserve that fact, do not claim another verification occurred. |
 | Trialware/Freemius | Standalone Core; package forbidden-marker checks and CoreBoundaryTest. |
 | Inline CSS/JS | Enqueued editable assets; source checker rejects literal script/style output. |

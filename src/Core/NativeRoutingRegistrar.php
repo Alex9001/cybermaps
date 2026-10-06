@@ -114,14 +114,10 @@ final class NativeRoutingRegistrar {
 			if ( ! str_starts_with( $path, '/.well-known/' ) ) {
 				continue;
 			}
-			if ( 'oauth_metadata' === $id ) {
-				$mcp = (string) ( $settings['mcp_mode'] ?? 'off' );
-				if ( empty( $settings['enable_discovery_hub'] ) || 'off' === $mcp ) {
-					continue;
-				}
-			} elseif ( ! $registry->is_enabled( $id, $settings ) ) {
+			if ( ! $registry->is_enabled( $id, $settings ) ) {
 				continue;
 			}
+
 			$paths[] = $path;
 		}
 		return $paths;
@@ -138,9 +134,6 @@ final class NativeRoutingRegistrar {
 					$rules[ $path ] = (string) $id;
 				}
 			}
-		}
-		foreach ( array( '/.well-known/oauth-authorization-server', '/.well-known/oauth-protected-resource' ) as $path ) {
-			$rules[ $path ] = 'oauth_metadata';
 		}
 		ksort( $rules );
 		return $rules;

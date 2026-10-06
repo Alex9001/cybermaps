@@ -27,7 +27,9 @@ endpoints for WordPress, with a static-file delivery engine.
 3. **Keep release metadata in sync** when bumping the version (see "Versioning").
 4. **Regenerate the docs manifest** after structural changes: `php docs/dev/generate-docs.php > docs/dev/manifest.json` (see "Docs generator").
 5. **Keep Core complete and standalone** — every visible control, documented URL,
-   scheduled event, and advertised capability must work with only this plugin active.
+   scheduled event, and advertised Core capability must work with only this plugin active.
+   Optional MCP connections require the separate WordPress MCP Adapter plugin,
+   explicit read-only opt-in and truthful dependency guidance.
 6. **Use `WP_Filesystem`**, not raw `fopen/fwrite/fclose/file_put_contents` — WordPress Plugin Check flags direct filesystem calls.
 7. **Escape on output, sanitize on input, nonce every destructive action.** This plugin targets WordPress.org Plugin Check cleanliness.
 8. **Configuration keys live in their owning sanitizer.** `SettingsSanitizer`
@@ -293,6 +295,17 @@ php docs/dev/generate-docs.php --ai-catalog > docs/dev/ai-configuration/catalog.
 - `docs/dev/manifest.json` — the generated machine-readable surface map (good first read for orientation).
 - `.claude/skills/agent-skills/skills/` — bundled WordPress skill references (plugin dev,
   REST API, block dev, performance, PHPStan, WP-CLI, plugin-directory guidelines, etc.).
+
+## MCP boundary
+
+MCP is optional and uses WordPress MCP Adapter 0.7.0+ after explicit opt-in.
+Only the owned read-only search tool and reviewed public resources may be
+registered. Never restore generic ability enumeration/dispatch, identity
+switching, custom MCP authentication or remote mutation abilities. Update and
+review `docs/dev/mcp-contract.json` for any deliberate surface change; run
+`composer mcp:check` and real adapter runtime checks. Adapter absence must leave
+Core usable and suppress MCP advertisements. Dashboard operations remain local
+authorized admin actions.
 
 ## Mandatory WordPress.org release conditions
 

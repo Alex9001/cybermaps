@@ -15,7 +15,8 @@
     "services_consent",
     "standalone",
     "directory_metadata",
-    "reviewer_feedback"
+    "reviewer_feedback",
+    "remote_capabilities"
   ],
   "brand_verification": {
     "status": "resolved",
@@ -37,12 +38,14 @@
     "runtime": "Exact ZIP passes supported runtimes, browser, lifecycle and multisite checks",
     "agent_review": "Specific current evidence closes all policy and reviewer obligations",
     "website_prepared": "Exact source commit/channel imported; guides reviewed; website tests, build and verification passed",
-    "website_live": "Published tag deployed to cybermaps.dev; production contracts, downloads and changelog verified"
+    "website_live": "Published tag deployed to cybermaps.dev; production contracts, downloads and changelog verified",
+    "remote_capabilities": "Only reviewed owned read-only MCP resources/search; no generic ability bridge, custom MCP authentication, or remote mutation abilities; dependency/migration/negative runtime evidence required"
   },
   "references": [
     "https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/",
     "https://developer.wordpress.org/plugins/wordpress-org/common-issues/",
     "https://developer.wordpress.org/apis/security/",
     "https://wordpress.org/plugins/plugin-check/"
-  ]
+  ],
+  "mcp_adapter_version": "0.7.0"
 }

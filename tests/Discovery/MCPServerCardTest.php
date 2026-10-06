@@ -12,7 +12,7 @@ class MCPServerCardTest extends TestCase {
 		$GLOBALS['cybermaps_mock_options'] = array(
 			'cybermaps_settings' => array(
 				'enable_discovery_hub' => '1',
-				'mcp_mode'             => 'discovery',
+				'mcp_mode'             => 'read_only',
 			),
 		);
 		$registry                          = new \ReflectionProperty( \Cybermaps\Core\EndpointRegistry::class, 'instance' );
@@ -26,8 +26,8 @@ class MCPServerCardTest extends TestCase {
 		$this->assertMatchesRegularExpression( '/^[a-zA-Z0-9.-]+\/[a-zA-Z0-9._-]+$/', $card['name'] );
 		$this->assertLessThanOrEqual( 100, strlen( $card['description'] ) );
 		$this->assertSame( 'streamable-http', $card['remotes'][0]['type'] );
-		$this->assertSame( 'https://example.com/wp-json/cybermaps/v1/mcp', $card['remotes'][0]['url'] );
-		$this->assertSame( array( '2026-07-28' ), $card['remotes'][0]['supportedProtocolVersions'] );
+		$this->assertSame( 'https://example.com/wp-json/mcp/cybermaps', $card['remotes'][0]['url'] );
+		$this->assertSame( array( '2025-11-25', '2026-07-28' ), $card['remotes'][0]['supportedProtocolVersions'] );
 		$this->assertArrayNotHasKey( 'tools', $card );
 		$this->assertArrayNotHasKey( 'resources', $card );
 		$this->assertArrayNotHasKey( 'prompts', $card );
@@ -49,6 +49,7 @@ class MCPServerCardTest extends TestCase {
 	}
 
 	public function test_card_availability_tracks_the_mcp_service(): void {
+		$adapter = \Cybermaps\Tests\AdapterFixture::enable();
 		$this->assertTrue( MCPServerCard::is_available() );
 
 		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['mcp_mode'] = 'off';

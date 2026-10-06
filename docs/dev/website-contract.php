@@ -39,8 +39,7 @@ function register_rest_route( string $namespace, string $route, array $args ): v
 function cybermaps_website_routes( array $manifest ): array {
     // Fail closed when a new registration owner needs to be added to this export.
     $owners = [
-        'src/Core/RestAPI.php', 'src/MCP/Transport.php',
-        'src/MCP/OAuth/OAuthRouteController.php', 'src/Admin/InternationalPanel.php',
+        'src/Core/RestAPI.php', 'src/Admin/InternationalPanel.php',
     ];
     foreach ( $manifest['source_classes'] as $source ) {
         $body = file_get_contents( CYBERMAPS_PLUGIN_DIR . $source['file'] );
@@ -66,17 +65,15 @@ function cybermaps_website_routes( array $manifest ): array {
     }
     $GLOBALS['cybermaps_website_rest'] = [];
     ( new \Cybermaps\Core\RestAPI() )->register_routes();
-    // Registration only needs the mode resolver; no MCP services or handlers run.
-    $transport = ( new ReflectionClass( \Cybermaps\MCP\Transport::class ) )->newInstanceWithoutConstructor();
-    ( new ReflectionProperty( $transport, 'mode_resolver' ) )->setValue( $transport, static fn(): string => 'discovery' );
-    $transport->register_routes();
     foreach ( [
-        \Cybermaps\MCP\OAuth\OAuthRouteController::class => 'register_routes',
         \Cybermaps\Admin\InternationalPanel::class => 'register_editor_route',
     ] as $class => $method ) {
         ( new ReflectionClass( $class ) )->newInstanceWithoutConstructor()->$method();
     }
     foreach ( $manifest['rest_api_routes'] as $endpoint ) {
+        if ( 'mcp' === $endpoint['namespace'] && '/cybermaps' === $endpoint['route'] ) {
+            $GLOBALS['cybermaps_website_rest'][ $endpoint['namespace'] . $endpoint['route'] ] = $endpoint;
+        }
         if ( ! isset( $GLOBALS['cybermaps_website_rest'][ $endpoint['namespace'] . $endpoint['route'] ] ) ) {
             throw new RuntimeException( 'Registry REST route is not registered at runtime: ' . $endpoint['full'] );
         }
@@ -86,7 +83,7 @@ function cybermaps_website_routes( array $manifest ): array {
         $routes[ $path ] = [
             'path' => $path, 'category' => 'rest', 'media_type' => $rest_types[ $endpoint['full'] ] ?? 'application/json',
             'label' => $endpoint['route'],
-            'condition' => 'Route-specific enablement and permissions; see MCP/REST documentation',
+            'condition' => 'mcp' === $endpoint['namespace'] ? 'Optional WordPress MCP Adapter 0.7.0+, explicit read-only opt-in, Publication Hub and WordPress authentication' : 'Route-specific enablement and permissions; see REST documentation',
             'static_mode' => 'dynamic',
         ];
     }
@@ -117,15 +114,9 @@ function cybermaps_website_routes( array $manifest ): array {
         'label' => 'WordPress virtual robots.txt with Cybermaps crawler policy',
         'condition' => 'WordPress virtual route; physical robots.txt takes precedence', 'static_mode' => 'dynamic',
     ];
-    $device_path = \Cybermaps\MCP\OAuth\DeviceAuthorizationPage::PATH;
     $routes['/{key}.txt'] = [
         'path' => '/{key}.txt', 'category' => 'verification', 'media_type' => 'text/plain',
         'label' => 'IndexNow site-key verification', 'condition' => 'IndexNow enabled; the site key is generated when needed',
-        'static_mode' => 'dynamic',
-    ];
-    $routes[ $device_path ] = [
-        'path' => $device_path, 'category' => 'authorization', 'media_type' => 'text/html',
-        'label' => 'Agent authorization', 'condition' => 'MCP user-claimed registration and WordPress login',
         'static_mode' => 'dynamic',
     ];
     ksort( $routes );

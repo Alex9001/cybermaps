@@ -1,6 +1,6 @@
 # Cybermaps — Technical Documentation
 
-> Version 7.5.4 · PHP 8.2 · WordPress 7.1
+> Version 8.0.0 · PHP 8.2 · WordPress 7.1
 
 Public sitemap credit is optional. In **Sitemaps**, enable **Show the CYBER MAPS
 credit on public sitemaps** to opt in. `show_sitemap_attribution` defaults to `0`
@@ -28,7 +28,7 @@ The generator emits JSON; it does not rewrite this guide, the feature
 reference, or the comparison. Those documents also describe runtime guards and
 administration flows that need to be checked against their owning classes.
 The general settings extraction and registry route inventory are not a
-substitute for the delegated normalizers or separately registered OAuth routes.
+substitute for the delegated normalizers or the optional adapter integration.
 Generated static counts describe registered targets, not a promise that every
 target is enabled, writable, or publicly conformant on a particular site.
 
@@ -75,24 +75,38 @@ preferences. `ai-input` remains Content-Signal-only. IndexNow submissions use
 the existing eligible-URL behavior and, when enabled, a durable deduplicating
 same-host database queue with bounded retries and batches of up to 10,000 URLs.
 
-MCP is disabled by default and has four explicit modes: `off`, `discovery`,
-`read_only`, and `operations`. Current MCP 2026-07-28 Streamable HTTP uses one
-stateless POST endpoint. The operations tier exposes exactly five bounded tools:
-`cybermaps.search`, `cybermaps.audit.run`, `cybermaps.static.reconcile`,
-`cybermaps.static.purge`, and `cybermaps.indexnow.submit`. OAuth 2.1
-authorization code with PKCE, consent, scoped bearer tokens, and WordPress
-capability checks are required. No tool edits content, settings, or general
-WordPress administration. `ai-actions.json` is descriptive metadata only and
-is never auto-executable.
+MCP connections are optional and require the separate **MCP Adapter** plugin by
+WordPress.org, version 0.7.0 or newer. Cybermaps works independently for sitemaps,
+AI publications, analytics, reports and dashboard operations. In **AI Publishing →
+Model Context Protocol**, install or activate the adapter through WordPress, then
+explicitly enable **Cybermaps MCP (read-only)** and save. Installing the adapter
+alone does not opt Cybermaps in. The AI Publication Hub must also be enabled.
 
-OAuth discovery remains pure OAuth metadata. Cybermaps does not advertise
-OpenID Connect, does not publish an OIDC discovery document, and does not
-fabricate a JWKS. The default-off `agent_registration_mode=user_claimed` flow
-uses RFC 8628 device approval and requires a logged-in WordPress user to review
-and approve the request before any account or credential is created. Auth.md
-publication is enabled when MCP is enabled and registration mode is
-`user_claimed`; there is no separate Auth.md switch. It is documented as an
-emerging agent-registration protocol, not as an established standard.
+The dedicated endpoint is `/wp-json/mcp/cybermaps`. It exposes the
+`cybermaps-search` tool and enabled public Core discovery resources, using their
+canonical publication URLs. Resources and search honor public-content eligibility
+and exclusions. Cybermaps does not project other plugins' abilities. Its four
+former operation abilities have also been removed from the native Abilities API.
+The standalone native `cybermaps/search` ability remains public and read-only.
+`ai-actions.json` describes operator-declared links and does not create tools.
+
+For HTTP clients, use HTTPS and a WordPress Application Password for a dedicated
+Subscriber account with the `read` capability. Enter credentials in the client;
+Cybermaps does not collect them. Clients must support WordPress authentication;
+OAuth-only clients cannot use the retired Cybermaps consent flow. The adapter also
+supports local/SSH WP-CLI transport via `wp mcp-adapter serve --server=cybermaps
+--user=USERNAME`. The adapter owns protocol negotiation, sessions and transport.
+MCP Adapter 0.7.0 supports revisions 2025-11-25 and 2026-07-28.
+Connect to the dedicated Cybermaps server. The adapter’s separate default server
+may expose abilities supplied by other plugins; Cybermaps does not control it.
+
+**Upgrading from 7.x:** the migration disables MCP, retires the old
+`/wp-json/cybermaps/v1/mcp` endpoint and OAuth/device routes, removes old credentials
+and pending MCP tasks, and withdraws OAuth metadata and Auth.md. Install the
+adapter, enable the new integration and reconnect clients. Remote audit, static
+purge/reconciliation and IndexNow tools are retired; use their dashboard controls.
+Deactivating the adapter makes MCP unavailable and withdraws its advertisements.
+The saved Cybermaps opt-in is preserved for a later reactivation.
 
 The default-off WebMCP bridge registers only three read-only browser tools:
 `cybermaps.search_site`, `cybermaps.get_page_markdown`, and
@@ -445,9 +459,6 @@ token overhead than rendering every full HTML page.
 | `/.well-known/ai-catalog.json` | `application/json` | Draft ARD catalog containing only active capabilities; `/ai-catalog.json` is the compatibility alias |
 | `/.well-known/mcp/server-card.json` | `application/json` | Requested compatibility path for the experimental current MCP Server Card |
 | `/cybermaps-openapi.json` | `application/vnd.oai.openapi+json` | Canonical OpenAPI 3.2.0 contract for Cybermaps' public read-only REST routes; retained 3.1.2 is negotiated explicitly |
-| `/.well-known/oauth-authorization-server` | `application/json` | RFC 8414 authorization-server metadata when MCP is enabled |
-| `/.well-known/oauth-protected-resource` | `application/json` | RFC 9728 metadata for the protected MCP resource when MCP is enabled |
-| `/auth.md` | `text/markdown` | Dynamic registration guide when MCP and `user_claimed` registration are enabled |
 
 `/ai.json` is the **Cybermaps AI Discovery Manifest 1.0**. It is a documented
 Cybermaps vendor extension, not a claim of an external protocol or independent
@@ -460,7 +471,7 @@ directives, JSON Feed, bounded updates, AI sitemap, and the four required
 hint is `daily`; Cybermaps also invalidates its cached publication when relevant
 site content or settings change. MCP is a separate, default-off capability;
 its transport and discovery metadata are available when the administrator
-enables an MCP mode. `/updates.json` reports only current public content changed in
+enables read-only MCP with a compatible adapter active. `/updates.json` reports only current public content changed in
 the last seven days and does not infer deletions without an event ledger.
 
 The canonical nested `SKILL.md` uses valid Agent Skills frontmatter. The draft
@@ -685,8 +696,6 @@ The default target inventory is:
 6. `/.well-known/api-catalog`
 7. `/.well-known/ai-catalog.json`
 8. `/.well-known/mcp/server-card.json` when MCP is enabled
-9. `/.well-known/oauth-authorization-server` when MCP is enabled
-10. `/.well-known/oauth-protected-resource` when MCP is enabled
 11. `/ai-discovery`
 
 Dynamic routing remains preferred because it controls protocol headers, media
@@ -1103,7 +1112,7 @@ saved deliverable below the documented limits.
 | `GET /wp-json/cybermaps/v1/discovery` | Public while the AI Publication Hub is enabled |
 | `GET /wp-json/cybermaps/v1/health` | Bounded public health while the hub is enabled |
 | `GET /wp-json/cybermaps/v1/mcp/server-card` | Public while the hub and MCP are enabled |
-| `POST /wp-json/cybermaps/v1/mcp` | Optional MCP transport; mode, caller authentication, scopes, and capability checks govern operations |
+| `POST /wp-json/mcp/cybermaps` | Optional MCP Adapter transport; explicit opt-in, WordPress authentication and `read` capability; public resources and search only |
 | `GET /wp-json/cybermaps/v1/llms-tldr` | Public while both the hub and budgeted briefing are enabled |
 | `GET /wp-json/cybermaps/v1/search` | Public while the hub is enabled |
 | `GET /wp-json/cybermaps/v1/urls` | `X-Cybermaps-Secret` |
@@ -1116,23 +1125,10 @@ Private JSON responses send non-cacheable headers. The API secret is generated
 locally, displayed in Advanced settings, redacted from CLI status, and included
 in site-configuration backups.
 
-The OAuth controller registers additional routes under `/wp-json/cybermaps/v1`
-when its MCP integration is active. These are separate from the registry's
-generated REST route list:
-
-| OAuth route | Contract |
-|---|---|
-| `GET /oauth/authorization-server` | Authorization-server metadata |
-| `GET /oauth/protected-resource` | Protected-resource metadata |
-| `GET /oauth/authorize` | Begin authorization with a logged-in WordPress user |
-| `POST /oauth/authorize` | Complete the nonce-bound consent transaction |
-| `POST /oauth/token` | Validate a supported grant and issue credentials |
-| `POST /oauth/revoke` | Process a validated revocation request |
-| `POST /oauth/device-authorization` | Device flow, gated by `user_claimed` registration |
-| `POST /oauth/clients` | Administrator-authorized client registration |
-
-MCP uses scoped OAuth credentials, not the private `X-Cybermaps-Secret` read API
-credential. Publication of metadata does not grant permission to execute tools.
+Cybermaps no longer registers OAuth or device authorization routes. MCP Adapter
+owns transport and WordPress authentication. Cybermaps' private read API secret
+cannot authenticate an MCP connection. The native Abilities API exposes only
+`cybermaps/search`; resource wrappers are private to the dedicated MCP server.
 
 ### WP-CLI
 
@@ -1263,9 +1259,8 @@ configuration import. Earlier Markdown templates are intentionally unsupported.
 - Cybermaps admin responses restrict framing to the same origin with a
   `Content-Security-Policy: frame-ancestors 'self'` header.
 - Public discovery documents are read-only. The admin REST purge requires
-  `manage_options`; the optional MCP operations mode exposes a separately
-  authenticated and capability-checked purge tool. Filesystem changes remain
-  ownership-verified.
+  `manage_options`. MCP exposes no purge, audit, IndexNow, reconciliation or
+  arbitrary WordPress ability execution. Filesystem changes remain ownership-verified.
 
 ## 12. Extension and lifecycle notes
 

@@ -54,6 +54,9 @@ final class Uninstaller {
 		'cybermaps_static_sync_epoch',
 		'cybermaps_logs_schema_version',
 		'cybermaps_audit_schema_version',
+		'cybermaps_mcp_retired',
+		'cybermaps_mcp_retirement_lock',
+		'cybermaps_mcp_migration_notice',
 		RuntimeCounterStore::READY_OPTION,
 		'cybermaps_edge_cache_delivery_status',
 		'cybermaps_edge_cache_pending_static',
@@ -198,20 +201,13 @@ final class Uninstaller {
 		return self::cleanup_owned_site_data( $purge_result );
 	}
 
-	/**
-	 * Remove opted-in site data independently from the best-effort static purge.
-	 *
-	 * @param array<string,mixed> $purge_result StaticBridge purge result.
-	 */
-	private static function cleanup_owned_site_data( array $purge_result ): bool {
-		/*
-		 * WordPress removes the plugin files after uninstall.php returns, so a
-		 * retryable static-file error cannot safely postpone database cleanup.
-		 * The operation lock is deleted below as an ownership fence; an in-flight
-		 * writer will observe the lost token and stop before its next write.
-		 */
-		self::report_incomplete_static_purge( $purge_result );
+	/** Remove only obsolete MCP tables during the 8.0 migration. */
+	public static function remove_legacy_mcp_tables(): bool {
+		return self::remove_owned_tables( true );
+	}
 
+	/** Drop only the fixed owned-table inventory; never accepts names from a caller. */
+	private static function remove_owned_tables( bool $legacy_mcp_only ): bool {
 		global $wpdb;
 		$tables_removed = true;
 		$owned_tables   = array(
@@ -229,12 +225,34 @@ final class Uninstaller {
 			$wpdb->prefix . 'cybermaps_mcp_tasks',
 		);
 		foreach ( $owned_tables as $owned_table ) {
+			if ( $legacy_mcp_only && ! str_starts_with( $owned_table, $wpdb->prefix . 'cybermaps_mcp_' ) ) {
+				continue;
+			}
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$dropped = $wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $owned_table ) );
 			if ( false === $dropped || ! self::table_was_removed( $owned_table ) ) {
 				$tables_removed = false;
 			}
 		}
+
+		return $tables_removed;
+	}
+
+	/**
+	 * Remove opted-in site data independently from the best-effort static purge.
+	 *
+	 * @param array<string,mixed> $purge_result StaticBridge purge result.
+	 */
+	private static function cleanup_owned_site_data( array $purge_result ): bool {
+		/*
+		 * WordPress removes the plugin files after uninstall.php returns, so a
+		 * retryable static-file error cannot safely postpone database cleanup.
+		 * The operation lock is deleted below as an ownership fence; an in-flight
+		 * writer will observe the lost token and stop before its next write.
+		 */
+		self::report_incomplete_static_purge( $purge_result );
+
+		$tables_removed = self::remove_owned_tables( false );
 
 		foreach ( self::POST_META_KEYS as $meta_key ) {
 			\delete_post_meta_by_key( $meta_key );

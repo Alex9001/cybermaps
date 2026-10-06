@@ -44,8 +44,8 @@ final class NativeRoutingRegistrarTest extends TestCase {
 		$this->assertContains( '/.well-known/api-catalog', $paths );
 		$this->assertContains( '/.well-known/agent-skills/index.json', $paths );
 		$this->assertContains( '/.well-known/agent-skills/cybermaps-site-guide/SKILL.md', $paths );
-		$this->assertContains( '/.well-known/oauth-authorization-server', $paths );
-		$this->assertContains( '/.well-known/oauth-protected-resource', $paths );
+		$this->assertNotContains( '/.well-known/oauth-authorization-server', $paths );
+		$this->assertNotContains( '/.well-known/oauth-protected-resource', $paths );
 		$this->assertContains( '/ai-discovery', $paths );
 	}
 }

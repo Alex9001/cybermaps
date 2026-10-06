@@ -1,6 +1,6 @@
-# Cybermaps 7.5.4 Feature Reference
+# Cybermaps 8.0.0 Feature Reference
 
-This reference describes Cybermaps 7.5.4 using the
+This reference describes Cybermaps 8.0.0 using the
 [generated source inventory](./dev/manifest.json). Cloudflare automation,
 Debugging, compatibility publication, and independent LiteSpeed/APCu controls
 are included; availability and public delivery depend on the configuration.
@@ -127,9 +127,6 @@ payload and token overhead than full-page rendering.
 | `/.well-known/api-catalog` | Linkset JSON | Established RFC 9727/RFC 9264 catalog with enriched per-API Linksets; `/api-catalog` is a dynamic compatibility alias |
 | `/.well-known/ai-catalog.json` | JSON | Draft ARD catalog of active capabilities; `/ai-catalog.json` is a compatibility alias |
 | `/.well-known/mcp/server-card.json` | JSON | Requested scanner compatibility for the experimental MCP Server Card whose canonical resource is `/wp-json/cybermaps/v1/mcp/server-card` |
-| `/.well-known/oauth-authorization-server` | JSON | RFC 8414 metadata when MCP is enabled |
-| `/.well-known/oauth-protected-resource` | JSON | RFC 9728 metadata for the protected MCP resource |
-| `/auth.md` | Markdown | Registration instructions when MCP and `user_claimed` registration are enabled |
 | `/cybermaps-openapi.json` | OpenAPI JSON | OpenAPI 3.2.0 public REST contract with explicit 3.1.2 negotiation |
 
 Additional publication features:
@@ -151,19 +148,16 @@ Additional publication features:
   equivalent web-server or CDN header configuration.
 - Revision-pinned Cybermaps ADP 3.0 Level 3 profile with the four required
   `/news/*` publications when AI Publishing and those publications are enabled.
-- Optional MCP 2026-07-28 stateless POST transport with `off`, `discovery`,
-  `read_only`, and `operations` modes. Operations exposes only five bounded
-  tools: `cybermaps.search`, `cybermaps.audit.run`,
-  `cybermaps.static.reconcile`, `cybermaps.static.purge`, and
-  `cybermaps.indexnow.submit`.
-- OAuth 2.1 PKCE consent and scoped WordPress capability checks protect MCP;
-  `ai-actions.json` remains descriptive metadata and never creates tools.
-- Pure OAuth metadata only: no OIDC claim, fabricated OIDC discovery, fake
-  JWKS, or unsupported A2A surface.
-- Default-off user-claimed RFC 8628 device approval with logged-in WordPress
-  review; that mode also enables emerging Auth.md publication while MCP is
-  enabled. No account or
-  credential is created before approval.
+- Optional read-only MCP through the separate WordPress MCP Adapter plugin
+  (0.7.0+), with explicit opt-in and WordPress authentication. The dedicated
+  `/wp-json/mcp/cybermaps` endpoint exposes public discovery resources and
+  `cybermaps-search`; dashboard operations remain standalone.
+- Guided install/activation/update instructions in AI Publishing, optional Quick
+  Setup completion guidance, and Overview status. Existing 7.x MCP clients must
+  reconnect; custom OAuth credentials and remote tasks are retired.
+- Explicit owned-ability allowlists; no generic third-party ability bridge or
+  remote audit, publication, purge or IndexNow tools. `ai-actions.json` remains
+  descriptive metadata and never creates tools.
 - Default-off read-only WebMCP tools for site search, same-origin Markdown, and
   discovery-resource listing, with safe no-op behavior in unsupported browsers.
 - Visible maturity guidance distinguishes established RFC standards, current
@@ -409,7 +403,7 @@ translation relationships.
 
 The separate AI Configuration Brief is a credential-excluding, site-aware
 Markdown handoff with current non-secret context, 121 editable fields in the
-7.5.4 generated contract, field guidance,
+8.0.0 generated contract, field guidance,
 dependencies, examples, risk levels, and an initially null JSON changes
 envelope. Imports are merge-only and require a server-generated preview that
 shows canonical sanitized values. Unknown or malformed input is rejected;

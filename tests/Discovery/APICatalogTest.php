@@ -62,10 +62,11 @@ class APICatalogTest extends TestCase {
 	}
 
 	public function test_catalog_mcp_item_requires_both_discovery_hub_and_mode(): void {
-		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['mcp_mode'] = 'discovery';
+		$adapter = \Cybermaps\Tests\AdapterFixture::enable();
+		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['mcp_mode'] = 'read_only';
 		$catalog = ( new APICatalog() )->get_catalog_data()['linkset'][0];
 
-		$this->assertSame( 'https://example.com/wp-json/cybermaps/v1/mcp', $catalog['item'][2]['href'] ?? null );
+		$this->assertSame( 'https://example.com/wp-json/mcp/cybermaps', $catalog['item'][2]['href'] ?? null );
 
 		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['enable_discovery_hub'] = '';
 		$catalog = ( new APICatalog() )->get_catalog_data()['linkset'][0];
@@ -93,11 +94,12 @@ class APICatalogTest extends TestCase {
 	}
 
 	public function test_mcp_api_context_uses_the_server_card_as_its_description(): void {
-		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['mcp_mode'] = 'discovery';
+		$adapter = \Cybermaps\Tests\AdapterFixture::enable();
+		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['mcp_mode'] = 'read_only';
 		$linkset = ( new APICatalog() )->get_catalog_data()['linkset'];
 		$mcp     = $linkset[3];
 
-		$this->assertSame( 'https://example.com/wp-json/cybermaps/v1/mcp', $mcp['anchor'] );
+		$this->assertSame( 'https://example.com/wp-json/mcp/cybermaps', $mcp['anchor'] );
 		$this->assertSame(
 			'https://example.com/wp-json/cybermaps/v1/mcp/server-card',
 			$mcp['service-desc'][0]['href'] ?? null

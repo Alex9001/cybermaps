@@ -22,11 +22,12 @@ class CapabilitiesTest extends TestCase {
         $this->assertStringContainsString('no vector or semantic ranking', $output);
 		$this->assertStringStartsWith( "---\nname: cybermaps-site-guide\n", $output );
 		$this->assertStringContainsString( 'generator-version: "' . CYBERMAPS_VERSION . '"', $output );
-		$this->assertStringContainsString( 'does not expose an MCP server because MCP is disabled by default', $output );
+		$this->assertStringContainsString( 'does not expose a Cybermaps MCP server', $output );
 		$this->assertStringContainsString( 'MCP is disabled by default', $output );
 	}
 
 	public function test_enabled_mcp_is_described_without_granting_operations(): void {
+		$adapter = \Cybermaps\Tests\AdapterFixture::enable();
 		$GLOBALS['cybermaps_mock_options']['cybermaps_settings'] = array(
 			'enable_discovery_hub' => '1',
 			'mcp_mode'            => 'read_only',
@@ -35,8 +36,8 @@ class CapabilitiesTest extends TestCase {
 		$output = ( new Capabilities() )->get_skill_markdown();
 
 		$this->assertStringContainsString( '## Optional MCP endpoint', $output );
-		$this->assertStringContainsString( '/wp-json/cybermaps/v1/mcp', $output );
-		$this->assertStringContainsString( 'Public resources in this guide do not grant permission', $output );
+		$this->assertStringContainsString( '/wp-json/mcp/cybermaps', $output );
+		$this->assertStringContainsString( 'exposes only public resources and read-only search', $output );
 		$this->assertStringNotContainsString( 'does not expose an MCP server', $output );
 	}
 

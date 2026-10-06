@@ -49,157 +49,6 @@ final class OpenAPI {
 	}
 
 	/**
-	 * Describe the public RFC 8628 device authorization request.
-	 *
-	 * @return array<string,mixed>
-	 */
-	private function device_authorization_operation(): array {
-		return array(
-			'summary'     => 'Begin a user-claimed OAuth 2.0 Device Authorization Grant.',
-			'operationId' => 'beginDeviceAuthorization',
-			'security'    => array(),
-			'requestBody' => array(
-				'required' => true,
-				'content'  => array(
-					'application/x-www-form-urlencoded' => array(
-						'schema' => array(
-							'type'                 => 'object',
-							'required'             => array( 'client_id' ),
-							'additionalProperties' => false,
-							'properties'           => array(
-								'client_id' => array(
-									'type'      => 'string',
-									'format'    => 'uri',
-									'pattern'   => '^https://',
-									'maxLength' => 191,
-								),
-								'scope'     => array(
-									'type'        => 'string',
-									'description' => 'Optional space-delimited subset of scopes approved by the Client ID Metadata Document.',
-									'maxLength'   => 255,
-								),
-								'resource'  => array(
-									'type'        => 'string',
-									'format'      => 'uri',
-									'description' => 'Optional target resource; when supplied it must identify the Cybermaps MCP resource.',
-									'maxLength'   => 2048,
-								),
-							),
-						),
-					),
-				),
-			),
-			'responses'   => array(
-				'200' => array(
-					'description' => 'Device authorization request accepted.',
-					'headers'     => array(
-						'Cache-Control' => array(
-							'schema' => array( 'const' => 'no-store' ),
-						),
-					),
-					'content'     => array(
-						'application/json' => array(
-							'schema' => $this->device_authorization_success_schema(),
-						),
-					),
-				),
-				'400' => $this->oauth_error_response(
-					'The request, scope, or target resource is invalid.',
-					array( 'invalid_request', 'invalid_scope', 'invalid_target' )
-				),
-				'401' => $this->oauth_error_response(
-					'The HTTPS Client ID Metadata Document is invalid or unauthorized.',
-					array( 'invalid_client', 'unauthorized_client' )
-				),
-				'403' => $this->oauth_error_response(
-					'User-claimed device authorization is unavailable.',
-					array( 'unauthorized_client' )
-				),
-			),
-		);
-	}
-
-	/**
-	 * Add device authorization only for the settled user-claimed mode.
-	 *
-	 * @param array<string,mixed> $paths OpenAPI path map.
-	 * @param array<string,mixed> $settings Current settings.
-	 */
-	private function append_device_authorization_path( array &$paths, array $settings ): void {
-		if ( ! \Cybermaps\MCP\OAuth\AgentRegistrationMode::is_user_claimed( $settings ) ) {
-			return;
-		}
-
-		$paths['/cybermaps/v1/oauth/device-authorization'] = array(
-			'post' => $this->device_authorization_operation(),
-		);
-	}
-
-	/**
-	 * RFC 8628 device authorization success schema.
-	 *
-	 * @return array<string,mixed>
-	 */
-	private function device_authorization_success_schema(): array {
-		return array(
-			'type'                 => 'object',
-			'required'             => array( 'device_code', 'user_code', 'verification_uri', 'verification_uri_complete', 'expires_in', 'interval' ),
-			'additionalProperties' => false,
-			'properties'           => array(
-				'device_code'               => array( 'type' => 'string' ),
-				'user_code'                 => array(
-					'type'    => 'string',
-					'pattern' => '^[A-Z2-9]{4}-[A-Z2-9]{4}$',
-				),
-				'verification_uri'          => array(
-					'type'   => 'string',
-					'format' => 'uri',
-				),
-				'verification_uri_complete' => array(
-					'type'   => 'string',
-					'format' => 'uri',
-				),
-				'expires_in'                => array(
-					'type'    => 'integer',
-					'minimum' => 1,
-				),
-				'interval'                  => array(
-					'type'    => 'integer',
-					'minimum' => 1,
-				),
-			),
-		);
-	}
-
-	/**
-	 * OAuth JSON error response implemented by the route controller.
-	 *
-	 * @param string[] $codes OAuth error codes possible for this status.
-	 * @return array<string,mixed>
-	 */
-	private function oauth_error_response( string $description, array $codes ): array {
-		return array(
-			'description' => $description,
-			'content'     => array(
-				'application/json' => array(
-					'schema' => array(
-						'type'                 => 'object',
-						'required'             => array( 'error', 'error_description' ),
-						'additionalProperties' => false,
-						'properties'           => array(
-							'error'             => array(
-								'type' => 'string',
-								'enum' => $codes,
-							),
-							'error_description' => array( 'type' => 'string' ),
-						),
-					),
-				),
-			),
-		);
-	}
-
-	/**
 	 * Build the contract from the endpoint registry so disabled experimental
 	 * routes and private integration routes cannot leak into public discovery.
 	 *
@@ -314,65 +163,7 @@ final class OpenAPI {
 			),
 		);
 
-		$document['components']['schemas']['McpJsonRpcRequest']  = array(
-			'type'                 => 'object',
-			'required'             => array( 'jsonrpc', 'id', 'method' ),
-			'additionalProperties' => false,
-			'properties'           => array(
-				'jsonrpc' => array( 'const' => '2.0' ),
-				'id'      => array( 'oneOf' => array( array( 'type' => 'string' ), array( 'type' => 'integer' ) ) ),
-				'method'  => array(
-					'type'      => 'string',
-					'minLength' => 1,
-				),
-				'params'  => array(
-					'type'                 => 'object',
-					'additionalProperties' => true,
-				),
-			),
-		);
-		$document['components']['schemas']['McpJsonRpcResponse'] = array(
-			'type'                 => 'object',
-			'required'             => array( 'jsonrpc', 'id' ),
-			'additionalProperties' => false,
-			'properties'           => array(
-				'jsonrpc' => array( 'const' => '2.0' ),
-				'id'      => array( 'oneOf' => array( array( 'type' => 'string' ), array( 'type' => 'integer' ), array( 'type' => 'null' ) ) ),
-				'result'  => array(
-					'type'                 => 'object',
-					'additionalProperties' => true,
-				),
-				'error'   => array(
-					'type'                 => 'object',
-					'additionalProperties' => true,
-				),
-			),
-		);
-		$document['components']['securitySchemes']               = array(
-			'oauth2'     => array(
-				'type'  => 'oauth2',
-				'flows' => array(
-					'authorizationCode' => array(
-						'authorizationUrl' => $rest_base . '/cybermaps/v1/oauth/authorize',
-						'tokenUrl'         => $rest_base . '/cybermaps/v1/oauth/token',
-						'scopes'           => array(
-							'cybermaps:read'              => 'Read public and authorized Cybermaps resources.',
-							'cybermaps:audit'             => 'Run bounded Cybermaps audits.',
-							'cybermaps:publish'           => 'Reconcile static Cybermaps publications.',
-							'cybermaps:purge'             => 'Purge owned Cybermaps publications.',
-							'cybermaps:abilities:execute' => 'Execute public WordPress abilities that perform updates.',
-						),
-					),
-				),
-			),
-			'bearerAuth' => array(
-				'type'   => 'http',
-				'scheme' => 'bearer',
-			),
-		);
-
 		if ( $registry->is_enabled( 'mcp', $settings ) ) {
-			$this->append_device_authorization_path( $document['paths'], $settings );
 			$document['paths']['/cybermaps/v1/mcp/server-card'] = array(
 				'get' => array(
 					'summary'     => 'Return the public MCP Server Card for the active Cybermaps service.',
@@ -390,50 +181,11 @@ final class OpenAPI {
 					),
 				),
 			);
-			$mcp_mode                               = (string) ( $settings['mcp_mode'] ?? 'discovery' );
-			$document['paths']['/cybermaps/v1/mcp'] = array(
-				'post' => array(
-					'summary'     => 'Process one stateless MCP JSON-RPC request.',
-					'operationId' => 'mcpRequest',
-					'security'    => 'discovery' === $mcp_mode ? array() : array( array( 'oauth2' => array( 'cybermaps:read' ) ) ),
-					'parameters'  => array(
-						array(
-							'name'     => 'MCP-Protocol-Version',
-							'in'       => 'header',
-							'required' => true,
-							'schema'   => array( 'const' => '2026-07-28' ),
-						),
-						array(
-							'name'     => 'Mcp-Method',
-							'in'       => 'header',
-							'required' => true,
-							'schema'   => array(
-								'type'      => 'string',
-								'minLength' => 1,
-							),
-						),
-						array(
-							'name'     => 'Mcp-Name',
-							'in'       => 'header',
-							'required' => true,
-							'schema'   => array(
-								'type'      => 'string',
-								'minLength' => 1,
-							),
-						),
-					),
-					'requestBody' => array(
-						'required' => true,
-						'content'  => array( 'application/json' => array( 'schema' => array( '$ref' => '#/components/schemas/McpJsonRpcRequest' ) ) ),
-					),
-					'responses'   => array(
-						'200' => array(
-							'description' => 'MCP JSON-RPC response.',
-							'content'     => array( 'application/json' => array( 'schema' => array( '$ref' => '#/components/schemas/McpJsonRpcResponse' ) ) ),
-						),
-						'405' => array( 'description' => 'Only POST is supported.' ),
-					),
-				),
+			$document['x-cybermaps-mcp']                        = array(
+				'url'            => $registry->get_url( 'mcp' ),
+				'provider'       => 'WordPress MCP Adapter',
+				'authentication' => 'WordPress Application Password over HTTPS',
+				'readOnly'       => true,
 			);
 		}
 
@@ -451,28 +203,8 @@ final class OpenAPI {
 		if ( ! \Cybermaps\Core\AbilityKernel::get_instance()->has_public_abilities() ) {
 			return;
 		}
-		$document['paths']['/wp-abilities/v1/abilities'] = array(
-			'get' => $this->operation( 'List public WordPress abilities and their client-safe schemas.', 'listPublicWordPressAbilities', array() ),
-		);
-		$ability_path                                    = '/wp-abilities/v1/abilities/{namespace}/{ability}/run';
-		$parameters                                      = array(
-			array(
-				'name'     => 'namespace',
-				'in'       => 'path',
-				'required' => true,
-				'schema'   => array( 'type' => 'string' ),
-			),
-			array(
-				'name'     => 'ability',
-				'in'       => 'path',
-				'required' => true,
-				'schema'   => array( 'type' => 'string' ),
-			),
-		);
-		$document['paths'][ $ability_path ]              = array(
-			'get'    => $this->operation( 'Run a read-only public WordPress ability.', 'runReadOnlyWordPressAbility', $parameters ),
-			'post'   => $this->operation( 'Run an updating public WordPress ability.', 'runUpdatingWordPressAbility', $parameters ),
-			'delete' => $this->operation( 'Run an idempotent destructive public WordPress ability.', 'runDestructiveWordPressAbility', $parameters ),
+		$document['paths']['/wp-abilities/v1/abilities/cybermaps/search/run'] = array(
+			'get' => $this->operation( 'Search eligible public Cybermaps content.', 'runCybermapsSearch', array() ),
 		);
 	}
 

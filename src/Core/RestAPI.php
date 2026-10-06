@@ -225,7 +225,7 @@ class RestAPI {
 	}
 
 	/**
-	 * Require an active MCP mode without requiring an OAuth access token.
+	 * Require the optional adapter integration; the server card itself is public.
 	 *
 	 * @return true|\WP_Error
 	 */
@@ -294,9 +294,6 @@ class RestAPI {
 		if ( $this->endpoints->is_enabled( 'rest_mcp', $settings ) ) {
 			$data['mcp']             = $this->endpoints->get_url( 'rest_mcp' );
 			$data['mcp_server_card'] = $this->endpoints->get_url( 'rest_mcp_server_card' );
-		}
-		if ( $this->endpoints->is_enabled( 'auth_md', $settings ) ) {
-			$data['auth'] = $this->endpoints->get_url( 'auth_md' );
 		}
 		$publisher_guidance = \Cybermaps\Discovery\PublisherGuidance::get( $settings );
 		if ( '' !== $publisher_guidance ) {
