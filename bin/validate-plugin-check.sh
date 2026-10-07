@@ -166,7 +166,7 @@ run_plugin_check() {
 }
 
 
-wp_cli eval 'require "/validation/wporg-mcp-preferences.php";' >> "${RUNTIME_DIR}/smoke.txt"
+wp_cli eval 'putenv( "CYBERMAPS_STATE_FIXTURE_DISPOSABLE=1" ); require "/validation/wporg-mcp-preferences.php";' >> "${RUNTIME_DIR}/smoke.txt"
 
 # Optional MCP integration is tested using the official plugin, never a protocol mock.
 MCP_ADAPTER_VERSION="$(python3 -B -c 'import json,sys; print(json.load(open(sys.argv[1]))["mcp_adapter_version"])' "${PROJECT_DIR}/docs/dev/release-policy.json")"

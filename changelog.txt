@@ -8,6 +8,7 @@ Cybermaps release history
 * Restore bounded post and metadata cache priming for uncached publications without caching failed database reads as empty results.
 * Move static ownership to per-path rows with resumable legacy migration, fenced writes and bounded reconciliation and lifecycle cleanup.
 * Validate identity and imported configuration independently from partial settings forms; use exact-byte conflict detection and rollback only owned changes.
+* Preserve concurrent settings saves and explicit choices during retired MCP cleanup, static-mode normalization and automatic translation defaults.
 * Preserve origin response headers and native REST serialization; reject incomplete Cloudflare rule responses and isolate concurrent authorization transactions.
 * Correct RSS UTC dates, XML character handling, multisite sitemap output, query aliases, canonical decisions and old-permalink notifications.
 * Report incomplete sitemap and audit scans explicitly; preserve queued edge invalidations and surface backpressure or scheduling failures.

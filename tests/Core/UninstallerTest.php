@@ -7,6 +7,7 @@ use Cybermaps\Core\Uninstaller;
 use PHPUnit\Framework\TestCase;
 
 final class UninstallerTest extends TestCase {
+	private bool $mcp_database_enabled = false;
 	protected function setUp(): void {
 		parent::setUp();
 
@@ -49,6 +50,7 @@ final class UninstallerTest extends TestCase {
 	}
 
 	protected function tearDown(): void {
+		if ( $this->mcp_database_enabled ) { \cybermaps_mock_disable_static_ownership_database(); $this->mcp_database_enabled = false; }
 		$GLOBALS['cybermaps_mock_is_multisite'] = false;
 		$GLOBALS['cybermaps_mock_is_main_site'] = true;
 		$GLOBALS['cybermaps_mock_options_by_blog'] = array();
@@ -68,6 +70,7 @@ final class UninstallerTest extends TestCase {
 	}
 
 	public function test_mcp_migration_retries_failed_cleanup_then_preserves_new_consent(): void {
+		$this->enable_mcp_database();
 		$db = $GLOBALS['wpdb'];
 		$db->existing_tables[] = 'wp_cybermaps_mcp_tasks';
 		$db->fail_drop_table = 'wp_cybermaps_mcp_tasks';
@@ -92,6 +95,7 @@ final class UninstallerTest extends TestCase {
 	}
 
 	public function test_cleanup_converts_80_adapter_opt_in_and_deletes_retired_preferences(): void {
+		$this->enable_mcp_database();
 		$GLOBALS['cybermaps_mock_options']['cybermaps_mcp_retired'] = '1';
 		$GLOBALS['cybermaps_mock_options']['cybermaps_mcp_migration_notice'] = '1';
 		$GLOBALS['cybermaps_mock_options']['cybermaps_settings'] = array( 'mcp_mode' => 'read_only', 'agent_registration_mode' => 'off' );
@@ -101,6 +105,7 @@ final class UninstallerTest extends TestCase {
 	}
 
 	public function test_old_read_only_mode_never_grants_new_adapter_consent(): void {
+		$this->enable_mcp_database();
 		$GLOBALS['cybermaps_mock_options']['cybermaps_settings'] = array( 'mcp_mode' => 'read_only' );
 		self::assertTrue( \Cybermaps\Core\MCPMigration::run() );
 		self::assertSame( array(), get_option( 'cybermaps_settings' ) );
@@ -524,6 +529,12 @@ final class UninstallerTest extends TestCase {
 				)
 			)
 		);
+	}
+
+	private function enable_mcp_database(): void {
+		require_once dirname( __DIR__ ) . '/mocks/mcp-migration-db.php';
+		\cybermaps_mock_enable_mcp_migration_database();
+		$this->mcp_database_enabled = true;
 	}
 
 	private function queries_contain( string $needle ): bool {

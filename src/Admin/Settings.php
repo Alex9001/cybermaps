@@ -87,24 +87,29 @@ class Settings {
 	 * ownership-safe reconciliation on installations that ran an earlier build.
 	 */
 	private function normalize_static_mode_setting(): void {
-		$settings = get_option( 'cybermaps_settings', array() );
-		if ( ! is_array( $settings ) ) {
-			$settings = array();
+		try {
+			$before = ConfigurationMutationStore::read( 'cybermaps_settings' );
+		} catch ( \RuntimeException ) {
+			return;
+		}
+		$settings = $before['exists'] ? $before['value'] : array();
+		if ( ! is_array( $settings ) || ( array() !== $settings && array_is_list( $settings ) ) ) {
+			return;
 		}
 
-		$changed = false;
-		if ( array_key_exists( 'enable_static_engine', $settings ) ) {
-			unset( $settings['enable_static_engine'] );
-			$changed = true;
+		$normalized = $settings;
+		unset( $normalized['enable_static_engine'] );
+		if ( ! isset( $normalized['static_engine_mode'] ) || ! in_array( $normalized['static_engine_mode'], array( 'off', 'well_known', 'all' ), true ) ) {
+			$normalized['static_engine_mode'] = 'well_known';
+		}
+		if ( $normalized === $settings ) {
+			return;
 		}
 
-		if ( ! isset( $settings['static_engine_mode'] ) || ! in_array( $settings['static_engine_mode'], array( 'off', 'well_known', 'all' ), true ) ) {
-			$settings['static_engine_mode'] = 'well_known';
-			$changed                        = true;
-		}
-
-		if ( $changed ) {
-			update_option( 'cybermaps_settings', $settings, false );
+		// Do not retry a stale normalization over a concurrent settings save.
+		$after = ConfigurationMutationStore::target( $normalized );
+		if ( ConfigurationMutationStore::write( 'cybermaps_settings', $before, $after ) ) {
+			ConfigurationMutationStore::notify( 'cybermaps_settings', $before, $after );
 		}
 	}
 

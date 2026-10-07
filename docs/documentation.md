@@ -114,6 +114,9 @@ operational modes. An explicit adapter opt-in made on 8.0.0 is converted to this
 setting; legacy 7.x preferences never grant adapter consent. The obsolete OAuth
 upgrade placeholder and migration notice have been removed. Deletion-only
 cleanup remains for direct upgrades from older installations.
+An existing `enable_mcp_adapter` choice takes precedence over retired preferences,
+including an explicit opt-out. Cleanup uses the observed settings bytes and the
+migration lock; a conflicting save leaves cleanup pending for a later retry.
 
 The default-off WebMCP bridge registers only three read-only browser tools:
 `cybermaps.search_site`, `cybermaps.get_page_markdown`, and
@@ -1359,6 +1362,12 @@ verification. New installations are stamped at the current data version before
 defaults are created, while existing installations retain and normalize their
 configuration. The four structured configuration roots and operational
 coordination options are explicitly non-autoloaded.
+
+Automatic static-mode normalization and translation defaults change only the
+settings value they actually observed. A conflicting save wins; these paths do
+not retry an old snapshot over newer settings. Translation defaults apply only
+when the choice is absent, and malformed structured settings are left intact.
+Successful writes invalidate the option caches and notify settings observers.
 
 ## 13. Operational checklist
 

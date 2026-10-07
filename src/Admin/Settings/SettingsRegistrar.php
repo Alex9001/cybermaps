@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace Cybermaps\Admin\Settings;
 
+use Cybermaps\Admin\ConfigurationMutationStore;
 use Cybermaps\Admin\Settings\Sanitizers\DiscoveryCenterSanitizer;
 use Cybermaps\Admin\Settings\Sanitizers\RobotsManagerSanitizer;
 use Cybermaps\Admin\Settings\Sanitizers\SettingsSanitizer;
@@ -48,19 +49,35 @@ class SettingsRegistrar {
 			array( RobotsManagerSanitizer::class, 'sanitize' )
 		);
 
-		$options = get_option( 'cybermaps_settings' );
-		if ( ! is_array( $options ) ) {
-			$options = array();
-		}
-		if ( ! isset( $options['enable_translation_integrations'] ) ) {
-			if ( \Cybermaps\Core\Plugin::is_translation_environment() ) {
-				$options['enable_translation_integrations'] = '1';
-				update_option( 'cybermaps_settings', $options, false );
-			}
-		}
+		self::maybe_enable_translation_integrations();
 
 		foreach ( $page->get_tabs() as $tab ) {
 			$tab->register_settings();
+		}
+	}
+
+	/** Initialize only a missing choice, without overwriting a concurrent save. */
+	private static function maybe_enable_translation_integrations(): void {
+		if ( ! \Cybermaps\Core\Plugin::is_translation_environment() ) {
+			return;
+		}
+		try {
+			$before = ConfigurationMutationStore::read( 'cybermaps_settings' );
+		} catch ( \RuntimeException ) {
+			return;
+		}
+		$options = $before['exists'] ? $before['value'] : array();
+		if ( ! is_array( $options ) || ( array() !== $options && array_is_list( $options ) ) ) {
+			return;
+		}
+		if ( array_key_exists( 'enable_translation_integrations', $options ) ) {
+			return;
+		}
+
+		$options['enable_translation_integrations'] = '1';
+		$after                                      = ConfigurationMutationStore::target( $options );
+		if ( ConfigurationMutationStore::write( 'cybermaps_settings', $before, $after ) ) {
+			ConfigurationMutationStore::notify( 'cybermaps_settings', $before, $after );
 		}
 	}
 

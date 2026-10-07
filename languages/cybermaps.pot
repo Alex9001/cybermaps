@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-07T12:16:48+00:00\n"
+"POT-Creation-Date: 2026-10-07T13:24:38+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: cybermaps\n"
@@ -56,7 +56,7 @@ msgid "AI Discovery Status"
 msgstr ""
 
 #: src/Admin/AIDiscoveryStatus.php:62
-#: src/Admin/Settings.php:440
+#: src/Admin/Settings.php:445
 #: src/Admin/SitemapStatus.php:62
 #: src/Admin/SitemapStatus.php:624
 #: src/Admin/SystemStatus.php:80
@@ -870,7 +870,7 @@ msgstr ""
 #: src/Admin/Logs.php:341
 #: src/Admin/MediaAuditor.php:165
 #: src/Admin/NetworkSettings.php:79
-#: src/Admin/Settings.php:502
+#: src/Admin/Settings.php:507
 #: src/Sitemap/Orchestrator.php:432
 msgid "Unauthorized"
 msgstr ""
@@ -920,8 +920,8 @@ msgstr ""
 #: src/Admin/Logs.php:338
 #: src/Admin/MediaAuditor.php:158
 #: src/Admin/NetworkSettings.php:90
-#: src/Admin/Settings.php:437
-#: src/Admin/Settings.php:495
+#: src/Admin/Settings.php:442
+#: src/Admin/Settings.php:500
 #: src/Admin/Settings/SettingsAjax.php:109
 #: src/Admin/Settings/SettingsAjax.php:344
 #: src/Admin/SetupWizard/SetupWizardController.php:141

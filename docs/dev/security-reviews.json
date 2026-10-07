@@ -1158,14 +1158,13 @@
           "$_SERVER"
         ],
         "suppressions": [],
-        "file_code_sha256": "a19e1fe468a6542f8b62dc5d8fb982454fb87f6367bf3e60dbbea9813c942d26",
+        "file_code_sha256": "65c17a6690e9020161a4538354d6b6905d65b7a691b42506f27cfa8a8aacf665",
         "code_sha256": "ca0b540363206745c5676ee256a1686c3258976655935039cc1b51e1ddf946e8",
         "findings": {}
       },
-      "rationale": "Authenticated admin-post action requires string POST method, manage_options and fixed cybermaps_verify_indexnow_key nonce before remote verification. It accepts no remote URL or selector from the request; the separately reviewed IndexNow helper derives current configured public key URL and uses safe bounded HTTP. Redirect is fixed local admin settings/sitemaps. SettingsActionBoundaryTest runs actual handler guards with wrong/missing/array method, denied capability and invalid nonce; authorized case intentionally terminates at nonce seam, so this is not proof of native remote verification.",
+      "rationale": "The registered authenticated admin-post handler requires a string POST method, manage_options and the fixed cybermaps_verify_indexnow_key nonce before IndexNow::verify_public_key_remote(true). No request URL or action selector is forwarded. The downstream service constructs the public key URL from the configured publication home and validated/generated key, uses wp_safe_remote_get with a two-second timeout, and accepts only HTTP 200 with the expected key body. The redirect is a fixed local admin URL. SettingsActionBoundaryTest::test_wrong_methods_reject_before_authorization_or_side_effects and test_expected_methods_still_require_capability_and_valid_nonce execute wrong/missing/array method, capability and nonce failures. The authorized case deliberately terminates at the nonce seam, so it does not prove live verification, full successful handler completion, a network response-byte bound or real WordPress nonce execution. Whole current containing file, registered caller and remote sink were independently inspected; only the containing-file fingerprint changed.",
       "tests": [
-        "tests/Admin/SettingsActionBoundaryTest.php",
-        "tests/Discovery/IndexNowTest.php"
+        "tests/Admin/SettingsActionBoundaryTest.php"
       ]
     },
     "src/Admin/Settings.php::static_intent_request": {
@@ -1177,14 +1176,14 @@
           "$_SERVER"
         ],
         "suppressions": [],
-        "file_code_sha256": "a19e1fe468a6542f8b62dc5d8fb982454fb87f6367bf3e60dbbea9813c942d26",
+        "file_code_sha256": "65c17a6690e9020161a4538354d6b6905d65b7a691b42506f27cfa8a8aacf665",
         "code_sha256": "fa313ade270e97294d551d5a0896d3acb1d4009953f9e1f464787cc8131a52bf",
         "findings": {}
       },
-      "rationale": "admin-post mutation callers reach static_intent_request: POST->manage_options->base action nonce before intent ID read, then intent nonce/manual acknowledgement before retry/resolve delegates. Test limits: Lifecycle tests prove setting sideeffects, accessibility proves externalform markup; neither invokes static_intent_request authorization/nonce rejection. Add targeted terminating intent boundary regression.",
+      "rationale": "The private helper is reached by the registered authenticated admin-post handle_resolve_static_intent action. It requires POST, manage_options and the fixed base action nonce before reading the intent ID, then checks the intent-bound nonce. Only scalar sanitized ID, nonce, confirmation and an allowlisted local return tab are returned. The handler passes the first three to StaticBridge::resolve_pending_intent, which independently rechecks capability, exact quiescence confirmation and intent nonce, compares the current pending intent identity and acquires the static-operation lock before recovery. SettingsPage supplies the matching POST form and two authorization values. AdminActionContractAuditTest::test_destructive_admin_post_actions_enforce_post_and_nonce_contracts checks source ordering and helper linkage; it is not a terminating HTTP execution. StaticBridgeLockTest::test_operator_recovery_requires_capability_exact_confirmation_and_intent_nonce executes the service rejection paths and retained intent in the WordPress mock. These tests do not execute static_intent_request method/capability/nonce failures through native admin-post or prove that workers were actually quiesced. Manual confirmation remains the documented operator contract. Whole current containing file and the actual form/caller/service were inspected; only the containing-file fingerprint changed.",
       "tests": [
-        "tests/Admin/SettingsLifecycleTest.php",
-        "tests/Admin/SettingsControlsAccessibilityTest.php"
+        "tests/Admin/AdminActionContractAuditTest.php",
+        "tests/Discovery/StaticBridgeLockTest.php"
       ]
     },
     "src/Admin/Settings/Sanitizers/SettingsSanitizer.php::get_active_tab": {

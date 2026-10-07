@@ -135,16 +135,27 @@ try {
 		$wpdb->suppress_errors( $configuration_fixture_suppress );
 	}
 	$configuration_fixture_assert( $configuration_fixture_base === ConfigurationMutationStore::read( 'cybermaps_settings' )['value'], 'Earlier settings bytes restored after database failure' );
+
+	// Shares this fixture's two connections and existing option snapshot/restore.
+	require __DIR__ . '/automatic-settings-cas.php';
 } finally {
-	foreach ( $configuration_fixture_before as $configuration_fixture_option => $configuration_fixture_raw ) {
-		if ( null === $configuration_fixture_raw ) {
-			$configuration_fixture_db->delete( $configuration_fixture_db->options, array( 'option_name' => $configuration_fixture_option ), array( '%s' ) );
-		} else {
-			$configuration_fixture_db->query( $configuration_fixture_db->prepare( 'INSERT INTO %i (option_name,option_value,autoload) VALUES (%s,%s,%s) ON DUPLICATE KEY UPDATE option_value=VALUES(option_value)', $configuration_fixture_db->options, $configuration_fixture_option, $configuration_fixture_raw, 'off' ) );
+	$configuration_fixture_restore_failures = array();
+	try {
+		foreach ( $configuration_fixture_before as $configuration_fixture_option => $configuration_fixture_raw ) {
+			if ( null === $configuration_fixture_raw ) {
+				$configuration_fixture_restored = $configuration_fixture_db->delete( $configuration_fixture_db->options, array( 'option_name' => $configuration_fixture_option ), array( '%s' ) );
+			} else {
+				$configuration_fixture_restored = $configuration_fixture_db->query( $configuration_fixture_db->prepare( 'INSERT INTO %i (option_name,option_value,autoload) VALUES (%s,%s,%s) ON DUPLICATE KEY UPDATE option_value=VALUES(option_value)', $configuration_fixture_db->options, $configuration_fixture_option, $configuration_fixture_raw, 'off' ) );
+			}
+			RawOptionStore::invalidate( $configuration_fixture_option );
+			if ( false === $configuration_fixture_restored || $configuration_fixture_raw !== RawOptionStore::read( $configuration_fixture_db, $configuration_fixture_option ) ) {
+				$configuration_fixture_restore_failures[] = $configuration_fixture_option;
+			}
 		}
-		RawOptionStore::invalidate( $configuration_fixture_option );
+	} finally {
+		$configuration_fixture_db->close();
 	}
-	$configuration_fixture_db->close();
+	$configuration_fixture_assert( array() === $configuration_fixture_restore_failures, 'All five configuration roots restored to exact original bytes' );
 }
 
-echo wp_json_encode( array( 'passed' => count( $configuration_fixture_results ), 'checks' => $configuration_fixture_results, 'external_object_cache' => wp_using_ext_object_cache() ) ) . "\n";
+echo wp_json_encode( array( 'passed' => count( $configuration_fixture_results ), 'checks' => $configuration_fixture_results, 'external_object_cache' => wp_using_ext_object_cache(), 'translation_detector' => $automatic_fixture_detector ) ) . "\n";

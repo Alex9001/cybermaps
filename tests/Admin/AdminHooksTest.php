@@ -12,6 +12,8 @@ use Cybermaps\Admin\Settings;
 use Cybermaps\Admin\SitemapStatus;
 use PHPUnit\Framework\TestCase;
 
+require_once dirname( __DIR__ ) . '/mocks/configuration-database.php';
+
 if ( ! defined( 'CYBERMAPS_PLUGIN_BASENAME' ) ) {
     define( 'CYBERMAPS_PLUGIN_BASENAME', 'cybermaps/cybermaps.php' );
 }
@@ -19,10 +21,13 @@ if ( ! defined( 'CYBERMAPS_PLUGIN_BASENAME' ) ) {
 class AdminHooksTest extends TestCase {
 
     private array $original_options;
+    private mixed $original_database;
 
     protected function setUp(): void {
         parent::setUp();
         $this->original_options = $GLOBALS['cybermaps_mock_options'];
+        $this->original_database = $GLOBALS['wpdb'] ?? null;
+        $GLOBALS['wpdb'] = new \CybermapsConfigurationDatabase();
         $GLOBALS['wp_hooks'] = array();
         $GLOBALS['cybermaps_mock_admin_pages'] = array();
         $GLOBALS['cybermaps_mock_enqueued_styles'] = array();
@@ -32,6 +37,7 @@ class AdminHooksTest extends TestCase {
 
     protected function tearDown(): void {
         $GLOBALS['cybermaps_mock_options'] = $this->original_options;
+        $GLOBALS['wpdb'] = $this->original_database;
         parent::tearDown();
     }
 

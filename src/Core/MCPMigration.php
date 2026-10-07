@@ -29,7 +29,7 @@ final class MCPMigration {
 		}
 		try {
 			if ( ! self::is_complete() ) {
-				self::retire();
+				self::retire( $lock );
 			}
 		} finally {
 			$lock->release();
@@ -43,8 +43,8 @@ final class MCPMigration {
 	}
 
 	/** Cleanup is idempotent; a failed drop keeps the integration unavailable for retry. */
-	private static function retire(): void {
-		if ( ! self::remove_settings() ) {
+	private static function retire( OptionLeaseLock $lock ): void {
+		if ( ! self::remove_settings( $lock ) || ! $lock->maintain() ) {
 			return;
 		}
 		foreach ( array( 'cybermaps_mcp_run_task', 'cybermaps_mcp_cleanup_tasks' ) as $hook ) {
@@ -63,15 +63,69 @@ final class MCPMigration {
 		$bridge->request_sync( false, true );
 	}
 
-	/** Delete retired fields; preserve only an adapter opt-in already made on 8.0. */
-	private static function remove_settings(): bool {
-		$settings = ConfigurationStore::settings();
-		if ( '1' === (string) get_option( self::DONE_OPTION, '' ) && 'read_only' === ( $settings['mcp_mode'] ?? '' ) ) {
+	/** Remove only fields from the exact authoritative settings observation. */
+	private static function remove_settings( OptionLeaseLock $lock ): bool {
+		global $wpdb;
+		try {
+			$raw = RawOptionStore::read( $wpdb, 'cybermaps_settings' );
+			if ( false === $raw ) {
+				return false;
+			}
+			if ( null === $raw ) {
+				return self::settings_still_match( $lock, null );
+			}
+			$settings = maybe_unserialize( $raw );
+			$version  = RawOptionStore::read( $wpdb, self::DONE_OPTION );
+			if ( ! is_array( $settings ) || false === $version ) {
+				return false;
+			}
+			$next = self::cleaned_settings( $settings, $version );
+			return $next === $settings
+				? self::settings_still_match( $lock, $raw )
+				: self::replace_settings( $lock, $raw, $settings, $next );
+		} finally {
+			// A conflict must also evict this request's stale pre-migration memo.
+			RawOptionStore::invalidate( 'cybermaps_settings' );
+		}
+	}
+
+	/** Preserve explicit canonical consent, including an opt-out, over retired fields. */
+	private static function cleaned_settings( array $settings, ?string $version ): array {
+		if ( '1' === $version && 'read_only' === ( $settings['mcp_mode'] ?? '' ) && ! array_key_exists( 'enable_mcp_adapter', $settings ) ) {
 			$settings['enable_mcp_adapter'] = '1';
 		}
 		unset( $settings['mcp_mode'], $settings['agent_registration_mode'] );
-		update_option( 'cybermaps_settings', $settings );
-		$stored = get_option( 'cybermaps_settings', array() );
-		return is_array( $stored ) && ! array_key_exists( 'mcp_mode', $stored ) && ! array_key_exists( 'agent_registration_mode', $stored );
+		return $settings;
+	}
+
+	/** Commit under both exact option bytes and the existing migration session fence. */
+	private static function replace_settings( OptionLeaseLock $lock, string $raw, array $settings, array $next ): bool {
+		global $wpdb;
+		$fence = $lock->get_database_fence();
+		if ( null === $fence || ! $lock->maintain() ) {
+			return false;
+		}
+		$next_raw = (string) maybe_serialize( $next );
+		if ( 1 !== RawOptionStore::replace( $wpdb, 'cybermaps_settings', $raw, $next_raw, $fence ) ) {
+			return false;
+		}
+		RawOptionStore::invalidate( 'cybermaps_settings' );
+		if ( ! self::settings_still_match( $lock, $next_raw ) ) {
+			return false;
+		}
+		\Cybermaps\Admin\ConfigurationMutationStore::notify(
+			'cybermaps_settings',
+			array(
+				'exists' => true,
+				'value'  => $settings,
+			),
+			array( 'value' => $next )
+		);
+		return self::settings_still_match( $lock, $next_raw );
+	}
+
+	private static function settings_still_match( OptionLeaseLock $lock, ?string $expected ): bool {
+		global $wpdb;
+		return RawOptionStore::read( $wpdb, 'cybermaps_settings' ) === $expected && $lock->maintain();
 	}
 }
