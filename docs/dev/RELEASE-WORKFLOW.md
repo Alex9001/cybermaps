@@ -70,6 +70,12 @@ packaging/parity and Plugin Check. The builder already runs Plugin Check, so
 the publisher does not invoke a second full `release:validate`. Small input
 freshness checks also run when the builder is used independently.
 
+Every mandatory runtime case requires native publication cache-priming checks,
+including the converted multisite case. The bounded fixture reuses 201 posts or
+creates and removes its own temporary posts; `publication_priming_passed` must
+be explicitly true in both fixture output and matrix evidence. This regression
+check does not replace the separate controlled performance workload.
+
 The installer checks the checksum, stages bounded regular package files,
 verifies them, moves the previous installation to a rollback directory, then
 swaps the new directory in and verifies it again. Exceptions during the swap

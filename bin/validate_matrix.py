@@ -16,6 +16,12 @@ def verify_browser(path):
             and result.get('errors') == [] and result.get('browser'), 'Browser validation incomplete')
 
 
+def verify_priming_fixture(path):
+    result = json.loads(Path(path).read_text())
+    require(isinstance(result, dict) and result.get('publication_priming_passed') is True,
+            'Native publication priming fixture incomplete')
+
+
 def validate_result(result, wp, php, multisite, archive_hash, commit):
     require(result['wordpress_version'] == wp and result['php_version'].startswith(php + '.'), 'Runtime version mismatch')
     require(result['zip_sha256'] == archive_hash and result['commit'] == commit, 'Runtime evidence belongs to another ZIP or commit')
@@ -25,6 +31,7 @@ def validate_result(result, wp, php, multisite, archive_hash, commit):
     require(result.get('mcp_read_only_passed') is True and result.get('mcp_adapter_version') == json.loads((ROOT / 'docs/dev/release-policy.json').read_text())['mcp_adapter_version'], 'Read-only MCP runtime coverage incomplete')
     require(result.get('sitemap_regressions_passed') is True, 'Sitemap runtime regressions incomplete')
     require(result.get('rest_representation_passed') is True, 'Native REST representation regressions incomplete')
+    require(result.get('publication_priming_passed') is True, 'Native publication priming regressions incomplete')
     for key in ('configuration_persistence', 'cloudflare_persistence', 'audit_run_lock', 'static_ownership', 'state_cutover'):
         require(result.get(key + '_passed') is True, f'Native {key} regressions incomplete')
     require(result.get('stable_findings') == [] and result.get('experimental_findings') == [], 'Runtime findings remain')
@@ -33,6 +40,9 @@ def validate_result(result, wp, php, multisite, archive_hash, commit):
 def main():
     if sys.argv[1] == '--verify-browser':
         verify_browser(sys.argv[2])
+        return
+    if sys.argv[1] == '--verify-priming':
+        verify_priming_fixture(sys.argv[2])
         return
     archive, output = map(Path, sys.argv[1:3])
     _, archive_hash = package_files(archive)

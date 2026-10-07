@@ -137,6 +137,9 @@ final class PublicationQuery {
 		if ( $query->get( self::MARKER ) === $this->marker ) {
 			self::assert_database_result( $rows );
 			$this->observed = true;
+			if ( is_array( $rows ) ) {
+				PublicationPostCache::prime( $rows, $query );
+			}
 		}
 		return $rows;
 	}

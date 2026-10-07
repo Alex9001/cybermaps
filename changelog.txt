@@ -5,6 +5,7 @@ Cybermaps release history
 -----
 * Enforce producer byte budgets before Markdown, JSON and link allocations; preserve completeness evidence and avoid caching partial publications.
 * Clean up worker-owned native cache entries during discovery scans; use supported runtime-only flushes for external caches.
+* Restore bounded post and metadata cache priming for uncached publications without caching failed database reads as empty results.
 * Move static ownership to per-path rows with resumable legacy migration, fenced writes and bounded reconciliation and lifecycle cleanup.
 * Validate identity and imported configuration independently from partial settings forms; use exact-byte conflict detection and rollback only owned changes.
 * Preserve origin response headers and native REST serialization; reject incomplete Cloudflare rule responses and isolate concurrent authorization transactions.

@@ -297,6 +297,13 @@ External sitemap URLs remain index references: the Static File Engine never
 copies or claims ownership of them. Additional page URLs are emitted in the
 miscellaneous child without fabricated `lastmod` or `changefreq` values.
 
+Candidate reads check database failures before later result filters run.
+Successful bounded full-row selections can prime post objects and metadata
+through WordPress cache APIs, with metadata reads grouped in batches of 100.
+Failed native metadata reads stop publication before staged cache entries are
+installed. Existing cache entries and a caller's suspended cache-addition
+state are preserved; query-result caching remains disabled for these reads.
+
 Media discovery can be disabled, set to Standard, or set to Advanced. Standard
 records featured and attached images only. Advanced additionally parses inline
 images, direct `<video>`/`<source>` URLs, and YouTube or Vimeo references from

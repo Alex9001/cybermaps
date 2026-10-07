@@ -3,7 +3,7 @@
     "version": "8.0.2",
     "php_min": "8.2",
     "wp_min": "7.1",
-    "generated_at": "2026-10-07T09:48:56+00:00",
+    "generated_at": "2026-10-07T12:16:48+00:00",
     "discovery_endpoints": [
         {
             "id": "manifest",
@@ -2846,6 +2846,13 @@
         },
         {
             "namespace": "Cybermaps\\Sitemap",
+            "class": "PublicationPostCache",
+            "fqcn": "Cybermaps\\Sitemap\\PublicationPostCache",
+            "file": "src/Sitemap/PublicationPostCache.php",
+            "summary": "Restore bounded object/metadata priming without caching failed SQL as empty."
+        },
+        {
+            "namespace": "Cybermaps\\Sitemap",
             "class": "PublicationQuery",
             "fqcn": "Cybermaps\\Sitemap\\PublicationQuery",
             "file": "src/Sitemap/PublicationQuery.php",
@@ -2936,7 +2943,7 @@
             "summary": "Small sitemap XML writer with a native XMLWriter fast path."
         }
     ],
-    "class_count": 239,
+    "class_count": 240,
     "publication_limits": {
         "llms_summary_bytes": 4194303,
         "llms_full_bytes": 33554431,

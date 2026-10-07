@@ -23,7 +23,11 @@ pinned Plugin Check, experimental and low-severity checks, debug logs, upgrade,
 activation, deactivation, uninstall retention/deletion, and browser interactions.
 The runtime evidence also requires sitemap regressions, native REST
 serialization, configuration/upgrade compare-and-swap, Cloudflare persistence,
-audit lease acquisition, bounded ownership migration and state cutover checks.
+audit lease acquisition, bounded ownership migration, state cutover and native
+publication cache-priming checks. Every runtime case, including converted
+multisite, requires `publication_priming_passed` to be explicitly true. The
+priming fixture reuses 201 posts or seeds and removes its own bounded temporary
+posts; it does not establish performance at any corpus size.
 Missing or false evidence flags reject the candidate. Relay security, WebMCP
 browser security, admin UI contract tests using a mocked DOM, and
 performance-harness self-tests run in the same candidate gate; harness

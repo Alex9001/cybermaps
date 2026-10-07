@@ -194,6 +194,8 @@ if [ "${CYBERMAPS_TEST_MULTISITE:-0}" = "1" ]; then
 	wp_cli plugin activate mcp-adapter --network --quiet
 	wp_cli eval 'require "/validation/wporg-multisite.php";' >> "${RUNTIME_DIR}/smoke.txt"
 fi
+wp_cli eval 'putenv( "CYBERMAPS_PRIMING_PROBE=1" ); putenv( "CYBERMAPS_PRIMING_PROBE_SEED=1" ); require "/validation/publication-cache-priming.php";' > "${RUNTIME_DIR}/publication-cache-priming.json"
+python3 -B "${PROJECT_DIR}/bin/validate_matrix.py" --verify-priming "${RUNTIME_DIR}/publication-cache-priming.json"
 wp_cli eval 'require "/validation/wporg-lifecycle.php";'  >> "${RUNTIME_DIR}/smoke.txt"
 
 COMMIT="$(git -C "${PROJECT_DIR}" rev-parse HEAD)"
@@ -231,6 +233,7 @@ report = {
     "lifecycle_passed": True,
     "sitemap_regressions_passed": True,
     "rest_representation_passed": True,
+    "publication_priming_passed": True,
     "configuration_persistence_passed": True,
     "cloudflare_persistence_passed": True,
     "audit_run_lock_passed": True,
