@@ -42,6 +42,7 @@ try {
 		foreach ( array( 'unfenced', 'owned', 'released', 'reconnected', 'unfenced_error', 'owned_error', 'missing_fence' ) as $case ) {
 			$reset( 'insert' !== $verb );
 			$before = RawOptionStore::read( $main, $option );
+			$assert( ( 'insert' === $verb ? null : '' ) === $before, 'Initial raw authority was read exactly for ' . $verb . '/' . $case );
 			$fence = null;
 			if ( in_array( $case, array( 'owned', 'released', 'reconnected', 'owned_error' ), true ) ) {
 				$lock = new DatabaseSessionLock( 'raw-native', DB_NAME . '|' . $table );
@@ -67,12 +68,21 @@ try {
 			};
 			add_filter( 'query', $filter );
 			$result = $mutate( $verb, $fence );
+			$sql_error = (string) $main->last_error;
 			remove_filter( 'query', $filter ); $filter = null;
 			$expected_result = str_ends_with( $case, '_error' ) ? false : ( in_array( $case, array( 'unfenced', 'owned' ), true ) ? 1 : 0 );
-			$assert( $expected_result === $result && 1 === $hits, 'Exact affected/failure result and one mutation for ' . $verb . '/' . $case );
+			$matches = $expected_result === $result && ( false === $expected_result ? '' !== $sql_error : '' === $sql_error );
+			if ( 'missing_fence' === $case ) {
+				// MariaDB rejects the empty owner with zero rows; MySQL rejects its
+				// empty lock name with this explicit SQL error. Neither grants authority.
+				$matches = ( 0 === $result && '' === $sql_error )
+					|| ( false === $result && str_starts_with( $sql_error, "Incorrect user-level lock name ''." ) );
+			}
+			$assert( $matches && 1 === $hits, 'Exact affected/failure result and one mutation for ' . $verb . '/' . $case );
 			$expected = 1 === $expected_result ? ( 'remove' === $verb ? null : 'next' ) : $before;
-			$assert( $expected === RawOptionStore::read( $main, $option ), 'Exact raw authority preserved for ' . $verb . '/' . $case );
-			$receipts[] = array( 'verb' => $verb, 'case' => $case, 'result' => $result, 'mutation_statements' => $hits );
+			$after = RawOptionStore::read( $main, $option );
+			$assert( $expected === $after, 'Exact raw authority preserved for ' . $verb . '/' . $case );
+			$receipts[] = array( 'verb' => $verb, 'case' => $case, 'result' => $result, 'result_type' => get_debug_type( $result ), 'sql_error' => $sql_error, 'before' => $before, 'after' => $after, 'mutation_statements' => $hits );
 			$successor?->release(); $successor = null;
 			$lock?->release(); $lock = null;
 		}
