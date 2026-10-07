@@ -44,11 +44,13 @@ const equal = ( left, right ) => {
 };
 
 export const validateCreateBody = ( body ) => Boolean(
-	body
+	body && typeof body === 'object' && ! Array.isArray( body )
+	&& Object.keys( body ).length === 3
+	&& Object.keys( body ).every( ( key ) => [ 'protocol_version', 'code_challenge_method', 'code_challenge' ].includes( key ) )
 	&& body.protocol_version === 1
 	&& body.code_challenge_method === 'S256'
 	&& typeof body.code_challenge === 'string'
-	&& /^[A-Za-z0-9_-]{43,128}$/.test( body.code_challenge )
+	&& /^[A-Za-z0-9_-]{43}$/.test( body.code_challenge )
 );
 
 export const transactionIdFromState = ( state ) => {
@@ -83,6 +85,13 @@ export const buildAuthorizationUrl = ( config, state, challenge ) => {
 	return url.toString();
 };
 
+const requiredBindingsPresent = ( env ) => [
+	'CREATE_IP_RATE_LIMITER', 'CREATE_BURST_RATE_LIMITER', 'POLL_RATE_LIMITER',
+	'RELAY_IP_RATE_LIMITER', 'RELAY_BURST_RATE_LIMITER',
+].every( ( name ) => env[name] && typeof env[name].limit === 'function' )
+	&& env.OAUTH_TRANSACTIONS && typeof env.OAUTH_TRANSACTIONS.get === 'function'
+	&& typeof env.OAUTH_TRANSACTIONS.idFromName === 'function';
+
 const configuration = ( env ) => {
 	const clientId = String( env.CLOUDFLARE_OAUTH_CLIENT_ID || '' ).trim();
 	const scopes = String( env.CLOUDFLARE_OAUTH_SCOPES || '' ).trim();
@@ -90,7 +99,8 @@ const configuration = ( env ) => {
 	const configuredScopes = scopes.split( /\s+/ ).filter( Boolean ).sort();
 	const rateLimitSecret = String( env.RATE_LIMIT_SECRET || '' );
 	if (
-		! /^[A-Za-z0-9._-]{8,256}$/.test( clientId )
+		! requiredBindingsPresent( env )
+		|| ! /^[A-Za-z0-9._-]{8,256}$/.test( clientId )
 		|| JSON.stringify( configuredScopes ) !== JSON.stringify( EXPECTED_SCOPES )
 		|| redirectUri !== 'https://connect.cybermaps.dev/cloudflare/callback'
 		|| rateLimitSecret.length < 32
@@ -106,12 +116,27 @@ const configuration = ( env ) => {
 };
 
 const readJson = async ( request ) => {
-	if ( ! ( request.headers.get( 'content-type' ) || '' ).toLowerCase().startsWith( 'application/json' ) ) throw new Error( 'invalid_content_type' );
-	const length = Number( request.headers.get( 'content-length' ) || 0 );
-	if ( length > MAX_BODY_BYTES ) throw new Error( 'request_too_large' );
-	const text = await request.text();
-	if ( text.length > MAX_BODY_BYTES ) throw new Error( 'request_too_large' );
-	return JSON.parse( text || '{}' );
+	const type = ( request.headers.get( 'content-type' ) || '' ).split( ';' )[0].trim().toLowerCase();
+	if ( type !== 'application/json' || ! request.body ) throw new Error( 'invalid_content_type' );
+	const length = request.headers.get( 'content-length' );
+	if ( length !== null && ( ! /^\d+$/.test( length ) || Number( length ) > MAX_BODY_BYTES ) ) throw new Error( 'request_too_large' );
+	const reader = request.body.getReader();
+	const decoder = new TextDecoder( 'utf-8', { fatal: true } );
+	let bytes = 0;
+	let text = '';
+	try {
+		while ( true ) {
+			const { value, done } = await reader.read();
+			if ( done ) break;
+			bytes += value.byteLength;
+			if ( bytes > MAX_BODY_BYTES ) throw new Error( 'request_too_large' );
+			text += decoder.decode( value, { stream: true } );
+		}
+		text += decoder.decode();
+		return JSON.parse( text );
+	} finally {
+		await reader.cancel();
+	}
 };
 
 const transactionStub = ( env, transactionId ) => env.OAUTH_TRANSACTIONS.get( env.OAUTH_TRANSACTIONS.idFromName( transactionId ) );
@@ -123,7 +148,7 @@ const limitedResponse = ( retryAfter, reason ) => json(
 );
 
 const applyRateLimit = async ( binding, key, retryAfter, reason ) => {
-	if ( ! binding ) return null;
+	if ( ! binding || typeof binding.limit !== 'function' ) return json( { error: 'service_not_configured' }, 503 );
 	const result = await binding.limit( { key } );
 	if ( result.success ) return null;
 	console.warn( JSON.stringify( { event: 'rate_limited', reason } ) );
@@ -189,6 +214,14 @@ const createTransaction = async ( request, env ) => {
 };
 
 const consumeTransaction = async ( request, env, transactionId ) => {
+	try {
+		const body = await readJson( request );
+		if ( ! body || typeof body !== 'object' || Array.isArray( body ) || Object.keys( body ).length !== 1 || body.protocol_version !== 1 ) {
+			return json( { error: 'invalid_request' }, 400 );
+		}
+	} catch {
+		return json( { error: 'invalid_request' }, 400 );
+	}
 	const authorization = request.headers.get( 'authorization' ) || '';
 	if ( ! authorization.startsWith( 'Bearer ' ) ) return json( { error: 'missing_transaction_secret' }, 401 );
 	const pollLimit = await applyRateLimit( env.POLL_RATE_LIMITER, transactionId, 5, 'transaction_poll' );
@@ -237,6 +270,10 @@ export class OAuthTransaction {
 	}
 
 	async fetch( request ) {
+		return this.state.blockConcurrencyWhile( () => this.route( request ) );
+	}
+
+	async route( request ) {
 		const path = new URL( request.url ).pathname;
 		if ( path === '/reserve' && request.method === 'POST' ) return this.reserve( request );
 		if ( path === '/create' && request.method === 'POST' ) return this.create( request );
@@ -246,8 +283,8 @@ export class OAuthTransaction {
 	}
 
 	async create( request ) {
-		if ( await this.state.storage.get( 'transaction' ) ) return json( { error: 'already_exists' }, 409 );
 		const value = await request.json();
+		if ( await this.state.storage.get( 'transaction' ) ) return json( { error: 'already_exists' }, 409 );
 		await this.state.storage.put( 'transaction', { ...value, status: 'pending', pollCount: 0, nextPollAt: 0 } );
 		await this.state.storage.setAlarm( value.expiresAt );
 		return json( { status: 'created' }, 201 );
@@ -272,9 +309,9 @@ export class OAuthTransaction {
 	}
 
 	async callback( request ) {
+		const result = await request.json();
 		const current = await this.state.storage.get( 'transaction' );
 		if ( ! current || current.expiresAt <= Date.now() || current.status !== 'pending' ) return json( { error: 'expired_or_consumed' }, 410 );
-		const result = await request.json();
 		if ( ! equal( current.state, result.state ) ) return json( { error: 'state_mismatch' }, 400 );
 		if ( result.error || ! result.code ) current.status = 'denied';
 		else {
@@ -286,10 +323,11 @@ export class OAuthTransaction {
 	}
 
 	async consume( request ) {
+		const supplied = ( request.headers.get( 'authorization' ) || '' ).replace( /^Bearer\s+/i, '' );
+		const secretHash = await digest( supplied );
 		const current = await this.state.storage.get( 'transaction' );
 		if ( ! current || current.expiresAt <= Date.now() ) return json( { status: 'expired' } );
-		const supplied = ( request.headers.get( 'authorization' ) || '' ).replace( /^Bearer\s+/i, '' );
-		if ( ! equal( current.secretHash, await digest( supplied ) ) ) return json( { error: 'invalid_transaction_secret' }, 403 );
+		if ( ! equal( current.secretHash, secretHash ) ) return json( { error: 'invalid_transaction_secret' }, 403 );
 		if ( current.status === 'pending' ) {
 			if ( current.pollCount >= current.maxPolls ) {
 				await this.state.storage.deleteAll();
@@ -322,7 +360,7 @@ export default {
 			return json( {
 				status: configuration( env ) ? 'ok' : 'degraded',
 				protocol_version: 1,
-				controls: [ 'adaptive_polling', 'daily_budget', 'per_ip_rate_limit', 'per_transaction_poll_limit', 'relay_burst_limit' ],
+				controls: configuration( env ) ? [ 'adaptive_polling', 'daily_budget', 'per_ip_rate_limit', 'per_transaction_poll_limit', 'relay_burst_limit' ] : [],
 			} );
 		}
 		const statefulRequest = request.method === 'POST'

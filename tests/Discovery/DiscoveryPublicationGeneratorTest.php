@@ -42,6 +42,23 @@ final class DiscoveryPublicationGeneratorTest extends \WP_UnitTestCase {
 		);
 	}
 
+	public function test_retired_literal_caches_do_not_replay_before_current_analysis(): void {
+		\Cybermaps\Core\CacheManager::set( 'cybermaps_llms_cache', 'Retired incorrect literal body', HOUR_IN_SECONDS, 'discovery' );
+		\Cybermaps\Core\CacheManager::set( 'cybermaps_llms_full_cache', 'Retired incorrect full body', HOUR_IN_SECONDS, 'discovery' );
+		$llms = new \Cybermaps\Discovery\LLMS();
+		$summary = $llms->get_llms_content();
+		$full = $llms->get_llms_content( true );
+		$this->assertStringNotContainsString( 'Retired incorrect', $summary );
+		$this->assertStringNotContainsString( 'Retired incorrect', $full );
+		$this->assertStringContainsString( 'Literal resource', $summary );
+		$this->assertStringContainsString( 'Complete literal body.', $full );
+		$this->assertSame( $summary, \Cybermaps\Core\CacheManager::get( \Cybermaps\Discovery\LLMS::SUMMARY_CACHE_KEY, 'discovery', $found ) );
+		$this->assertTrue( $found );
+		\Cybermaps\Discovery\LLMS::invalidate_cache();
+		$this->assertFalse( get_transient( 'cybermaps_llms_cache' ) );
+		$this->assertFalse( get_transient( 'cybermaps_llms_full_cache' ) );
+	}
+
 	public function test_full_body_is_not_retained_in_the_generators_request_cache(): void {
 		$settings  = $GLOBALS['cybermaps_mock_options']['cybermaps_settings'];
 		$target    = array(

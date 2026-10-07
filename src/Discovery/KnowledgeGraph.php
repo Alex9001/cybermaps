@@ -44,7 +44,10 @@ class KnowledgeGraph {
 	 * @return string
 	 */
 	public function get_json_content(): string {
-		$settings = \Cybermaps\Core\ConfigurationStore::settings();
+		$generation = \Cybermaps\Core\CacheManager::get_generation( 'discovery', true );
+		self::require_current_generation( $generation );
+		$settings = \Cybermaps\Core\ConfigurationStore::publication_settings();
+		\Cybermaps\Core\ConfigurationStore::publication_discovery();
 
 		$expose_admin = ! empty( $settings['ai_kg_expose_admin'] );
 		$link_org     = ! empty( $settings['ai_kg_link_org'] );
@@ -71,7 +74,16 @@ class KnowledgeGraph {
 
 		$data = apply_filters( 'cybermaps_knowledge_graph_data', $data );
 
-		return \Cybermaps\Core\ProtocolOutput::json( $data );
+		$output = \Cybermaps\Core\ProtocolOutput::json( $data );
+		self::require_current_generation( $generation );
+		return $output;
+	}
+
+	/** Reject derived offers collected before an observed privacy change. */
+	private static function require_current_generation( int $generation ): void {
+		if ( $generation < 0 || \Cybermaps\Core\CacheManager::get_generation( 'discovery', true ) !== $generation ) {
+			throw new \Cybermaps\Core\BuildUnavailableException( esc_html__( 'Cybermaps content changed during knowledge graph publication. Please retry shortly.', 'cybermaps' ) );
+		}
 	}
 
 	/**
@@ -89,7 +101,7 @@ class KnowledgeGraph {
 			);
 		}
 
-		$main_entity = \Cybermaps\Core\IdentityEntityBuilder::build( $identity_data );
+		$main_entity = \Cybermaps\Core\IdentityEntityBuilder::build( $identity_data, false, \Cybermaps\SEO\PublicationEligibility::AI );
 		return array(
 			'entity_id' => (string) $main_entity['@id'],
 			'graph'     => array( $main_entity ),

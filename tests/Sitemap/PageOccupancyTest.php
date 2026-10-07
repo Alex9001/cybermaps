@@ -250,6 +250,7 @@ final class PageOccupancyTest extends \WP_UnitTestCase {
 
 	public function test_resumed_static_omissions_filter_a_fresh_index_inventory(): void {
 		$orchestrator = new Orchestrator();
+		( new \ReflectionMethod( Orchestrator::class, 'begin_publication' ) )->invoke( $orchestrator );
 		$property     = new \ReflectionProperty( Orchestrator::class, 'internal_sitemap_entries' );
 		$property->setValue(
 			$orchestrator,
@@ -431,6 +432,7 @@ final class PageOccupancyTest extends \WP_UnitTestCase {
 	 * @param array<string, ProviderInterface> $providers
 	 */
 	private function inject_providers( Orchestrator $orchestrator, array $providers ): void {
+		( new \ReflectionMethod( Orchestrator::class, 'begin_publication' ) )->invoke( $orchestrator );
 		$property = new \ReflectionProperty( Orchestrator::class, 'providers' );
 		$property->setValue( $orchestrator, $providers );
 	}

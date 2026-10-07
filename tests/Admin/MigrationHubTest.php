@@ -6,9 +6,14 @@ namespace Cybermaps\Tests\Admin;
 use Cybermaps\Admin\MigrationHub;
 use PHPUnit\Framework\TestCase;
 
+require_once dirname( __DIR__ ) . '/mocks/configuration-database.php';
+
 final class MigrationHubTest extends TestCase {
+	use \CybermapsConfigurationDatabaseFixture;
+
 	protected function setUp(): void {
 		parent::setUp();
+		$this->install_configuration_database();
 		$GLOBALS['cybermaps_mock_options']     = array();
 		$GLOBALS['cybermaps_mock_transients']  = array();
 		$GLOBALS['cybermaps_mock_actions']     = array();
@@ -552,7 +557,7 @@ final class MigrationHubTest extends TestCase {
 		$this->assertSame( $before_robots, get_option( 'cybermaps_robots_manager' ) );
 	}
 
-	public function test_apply_targets_snapshots_every_group_before_option_hooks_can_mutate_it(): void {
+	public function test_apply_targets_preserves_competing_write_instead_of_restoring_stale_snapshot(): void {
 		$before_settings = array( 'agency_name' => 'Before' );
 		$before_robots   = array( 'takeover_enabled' => false );
 		$before_identity = array( 'name' => 'Before' );
@@ -587,13 +592,13 @@ final class MigrationHubTest extends TestCase {
 			);
 			$this->fail( 'A throwing option hook should fail the import.' );
 		} catch ( \RuntimeException $error ) {
-			$this->assertStringContainsString( 'restored the previous configuration', $error->getMessage() );
+			$this->assertStringContainsString( 'Conflicting values were preserved', $error->getMessage() );
 		} finally {
 			unset( $GLOBALS['cybermaps_mock_update_option_behavior'] );
 		}
 
 		$this->assertSame( $before_settings, get_option( 'cybermaps_settings' ) );
-		$this->assertSame( $before_robots, get_option( 'cybermaps_robots_manager' ) );
+		$this->assertSame( array( 'hook_mutation' => true ), get_option( 'cybermaps_robots_manager' ) );
 		$this->assertSame( $before_identity, get_option( 'cybermaps_identity_data' ) );
 	}
 

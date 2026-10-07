@@ -7,11 +7,19 @@ use Cybermaps\Core\OptionLeaseLock;
 use Cybermaps\Core\Upgrade;
 use Cybermaps\Discovery\StaticOwnershipStore;
 
+require_once dirname( __DIR__ ) . '/mocks/configuration-database.php';
+
 final class UpgradeTest extends \WP_UnitTestCase {
 	private $previous_wpdb;
+	private array $previous_actions;
 
 	protected function setUp(): void {
 		parent::setUp();
+		$this->previous_actions = $GLOBALS['cybermaps_mock_action_callbacks'] ?? array();
+		$GLOBALS['cybermaps_mock_action_callbacks']['updated_option'][] = static function ( $option, $old, $value ): void {
+			$behavior = $GLOBALS['cybermaps_mock_update_option_behavior'] ?? null;
+			if ( is_callable( $behavior ) ) { $behavior( $option, $value, 'after' ); }
+		};
 		$this->previous_wpdb               = $GLOBALS['wpdb'] ?? null;
 		$GLOBALS['wpdb']                   = new UpgradeWpdbStub(
 			array(
@@ -74,6 +82,11 @@ final class UpgradeTest extends \WP_UnitTestCase {
 			'name'   => 'post',
 			'public' => true,
 		);
+		$GLOBALS['cybermaps_mock_taxonomies'] = array( 'category', 'post_tag' );
+		$GLOBALS['cybermaps_mock_taxonomy_objects'] = array(
+			'category' => (object) array( 'name' => 'category', 'public' => true ),
+			'post_tag' => (object) array( 'name' => 'post_tag', 'public' => true ),
+		);
 		unset( $GLOBALS['cybermaps_mock_update_option_behavior'] );
 		unset( $GLOBALS['cybermaps_mock_add_option_behavior'] );
 		unset( $GLOBALS['cybermaps_mock_get_option_observer'] );
@@ -88,10 +101,13 @@ final class UpgradeTest extends \WP_UnitTestCase {
 		};
 		unset( $GLOBALS['cybermaps_mock_option_autoload_values'] );
 		unset( $GLOBALS['cybermaps_test_database_session_lock_use_sql'] );
+		unset( $GLOBALS['cybermaps_test_static_ownership_use_sql'] );
 		( new \ReflectionProperty( Upgrade::class, 'upgrade_lock' ) )->setValue( null, null );
 	}
 
 	protected function tearDown(): void {
+		$GLOBALS['cybermaps_mock_action_callbacks'] = $this->previous_actions;
+		unset( $GLOBALS['cybermaps_test_static_ownership_use_sql'] );
 		unset( $GLOBALS['cybermaps_mock_update_option_behavior'] );
 		unset( $GLOBALS['cybermaps_mock_add_option_behavior'] );
 		unset( $GLOBALS['cybermaps_mock_get_option_observer'] );
@@ -124,11 +140,11 @@ final class UpgradeTest extends \WP_UnitTestCase {
 				'archetype'    => 'blog',
 				'overrides'    => array(
 					'post_type:post' => 0.8,
-					'post_tag'       => 0.4,
+					'taxonomy:post_tag' => 0.4,
 				),
 				'type_intents' => array(
 					'post_type:post' => 'informational',
-					'post_tag'       => 'transactional',
+					'taxonomy:post_tag' => 'transactional',
 				),
 				'disabled'     => array(),
 			),
@@ -269,6 +285,7 @@ final class UpgradeTest extends \WP_UnitTestCase {
 	}
 
 	public function test_version_6_0_install_runs_the_6_1_static_ownership_migration(): void {
+		$GLOBALS['wpdb']->enable_ownership_database();
 		$path = 'legacy-upgrade-owned.txt';
 		$hash = \str_repeat( 'a', 32 );
 		$GLOBALS['cybermaps_mock_options']['cybermaps_data_version'] = '6.0.0';
@@ -312,6 +329,9 @@ final class UpgradeTest extends \WP_UnitTestCase {
 		$status['static_next_retry'] = 0;
 		update_option( 'cybermaps_upgrade_state', $status, false );
 		unset( $GLOBALS['cybermaps_test_database_session_lock_use_sql'] );
+		$GLOBALS['wpdb'] = new UpgradeWpdbStub( $GLOBALS['wpdb']->postmeta_rows );
+		$GLOBALS['wpdb']->postmeta_query_count = $postmeta_queries;
+		$GLOBALS['wpdb']->enable_ownership_database();
 		Upgrade::run();
 
 		$this->assertSame( StaticOwnershipStore::SCHEMA_VERSION, StaticOwnershipStore::current_schema() );
@@ -319,6 +339,80 @@ final class UpgradeTest extends \WP_UnitTestCase {
 		$this->assertSame( 0, Upgrade::get_status()['static_pending'] );
 		$this->assertFalse( get_option( 'cybermaps_upgrade_state', false ) );
 		$this->assertSame( $postmeta_queries, $GLOBALS['wpdb']->postmeta_query_count );
+	}
+
+	public function test_configuration_migration_conflicts_preserve_the_competitor_and_retry_from_fresh_state(): void {
+		foreach ( array( 'cybermaps_settings', 'cybermaps_discovery_center' ) as $option ) {
+			$GLOBALS['cybermaps_mock_options']['cybermaps_data_version'] = '5.1.1';
+			$GLOBALS['cybermaps_mock_options']['cybermaps_settings'] = array( 'static_engine_mode' => 'off', 'agency_name' => 'Before' );
+			$GLOBALS['cybermaps_mock_options']['cybermaps_discovery_center'] = '{"overrides":{"post":0}}';
+			unset( $GLOBALS['cybermaps_mock_options']['cybermaps_upgrade_state'] );
+			$competing = 'cybermaps_settings' === $option ? array( 'static_engine_mode' => 'off', 'agency_name' => 'Concurrent administrator' ) : '{"overrides":{"post":0.9}}';
+			$fired = false;
+			$GLOBALS['wpdb']->before_configuration_query = static function ( string $target ) use ( $option, $competing, &$fired ): void {
+				if ( $target === $option && ! $fired ) {
+					$fired = true;
+					$GLOBALS['cybermaps_mock_options'][ $option ] = $competing;
+				}
+			};
+			Upgrade::run();
+			$this->assertTrue( $fired );
+			$this->assertSame( $competing, get_option( $option ) );
+			$this->assertSame( '5.1.1', get_option( 'cybermaps_data_version' ) );
+			$this->assertSame( 'cybermaps_settings' === $option ? 'normalize_settings' : 'normalize_discovery', Upgrade::get_status()['last_step'] );
+			$GLOBALS['wpdb']->before_configuration_query = null;
+			$this->make_retry_due();
+			Upgrade::run();
+			$this->assertSame( '6.6.0', get_option( 'cybermaps_data_version' ) );
+			if ( 'cybermaps_settings' === $option ) {
+				$this->assertSame( 'Concurrent administrator', get_option( $option )['agency_name'] );
+			} else {
+				$this->assertSame( 0.9, json_decode( get_option( $option ), true )['overrides']['post_type:post'] );
+			}
+		}
+	}
+
+	public function test_configuration_migration_insert_conflict_and_database_failure_remain_retryable(): void {
+		unset( $GLOBALS['cybermaps_mock_options']['cybermaps_settings'] );
+		$competing = array( 'static_engine_mode' => 'off', 'agency_name' => 'Concurrent insert' );
+		$GLOBALS['wpdb']->before_configuration_query = static function ( string $option ) use ( $competing ): void {
+			if ( 'cybermaps_settings' === $option ) { $GLOBALS['cybermaps_mock_options'][ $option ] = $competing; }
+		};
+		Upgrade::run();
+		$this->assertSame( $competing, get_option( 'cybermaps_settings' ) );
+		$this->assertSame( '5.1.1', get_option( 'cybermaps_data_version' ) );
+		$GLOBALS['wpdb']->before_configuration_query = null;
+		$GLOBALS['wpdb']->fail_configuration_write = true;
+		$this->make_retry_due();
+		Upgrade::run();
+		$this->assertSame( $competing, get_option( 'cybermaps_settings' ) );
+		$this->assertSame( '5.1.1', get_option( 'cybermaps_data_version' ) );
+		$this->assertSame( 'normalize_settings', Upgrade::get_status()['last_step'] );
+		$GLOBALS['wpdb']->fail_configuration_write = false;
+		$this->make_retry_due();
+		Upgrade::run();
+		$this->assertSame( '6.6.0', get_option( 'cybermaps_data_version' ) );
+		$this->assertSame( 'Concurrent insert', get_option( 'cybermaps_settings' )['agency_name'] );
+	}
+
+	public function test_configuration_migration_cannot_write_after_lease_takeover_at_sql_boundary(): void {
+		$before = get_option( 'cybermaps_settings' );
+		$successor = array( 'token' => 'new-upgrade-owner', 'time' => time() );
+		$GLOBALS['wpdb']->before_configuration_query = static function () use ( $successor ): void {
+			$GLOBALS['cybermaps_mock_options']['cybermaps_upgrade_lock'] = $successor;
+		};
+		Upgrade::run();
+		$this->assertSame( $before, get_option( 'cybermaps_settings' ) );
+		$this->assertSame( $successor, get_option( 'cybermaps_upgrade_lock' ) );
+		$this->assertSame( '5.1.1', get_option( 'cybermaps_data_version' ) );
+	}
+
+	public function test_empty_saved_discovery_is_a_valid_unchanged_existing_row(): void {
+		update_option( 'cybermaps_discovery_center', '' );
+		Upgrade::run();
+		$this->assertSame( '6.6.0', get_option( 'cybermaps_data_version' ) );
+		$this->assertArrayHasKey( 'cybermaps_discovery_center', $GLOBALS['cybermaps_mock_options'] );
+		$this->assertSame( '', get_option( 'cybermaps_discovery_center' ) );
 	}
 
 	public function test_failed_settings_write_does_not_stamp_the_upgrade_and_can_retry(): void {
@@ -372,6 +466,31 @@ final class UpgradeTest extends \WP_UnitTestCase {
 
 		$this->assertSame( '6.6.0', get_option( 'cybermaps_data_version' ) );
 		$this->assertNotSame( $legacy, get_option( 'cybermaps_discovery_center', '' ) );
+	}
+
+	public function test_invalid_owned_legacy_discovery_field_blocks_version_until_repaired(): void {
+		$invalid = wp_json_encode( array( 'archetype' => 'blog', 'overrides' => array( 'post' => array( 'wrong' ) ), 'retired' => true ) );
+		update_option( 'cybermaps_discovery_center', $invalid );
+		Upgrade::run();
+		$this->assertSame( '5.1.1', get_option( 'cybermaps_data_version' ) );
+		$this->assertSame( $invalid, get_option( 'cybermaps_discovery_center' ) );
+		$this->assertSame( 'normalize_discovery', Upgrade::get_status()['last_step'] );
+		update_option( 'cybermaps_discovery_center', wp_json_encode( array( 'overrides' => array( 'post' => 0 ), 'retired' => true ) ) );
+		$this->make_retry_due();
+		Upgrade::run();
+		$this->assertSame( '6.6.0', get_option( 'cybermaps_data_version' ) );
+		$this->assertTrue( json_decode( get_option( 'cybermaps_discovery_center' ), true )['disabled']['post_type:post'] );
+	}
+
+	public function test_malformed_legacy_discovery_json_is_not_marked_migrated(): void {
+		foreach ( array( '{broken', '["not a record"]' ) as $invalid ) {
+			update_option( 'cybermaps_discovery_center', $invalid );
+			$this->make_retry_due();
+			Upgrade::run();
+			$this->assertSame( '5.1.1', get_option( 'cybermaps_data_version' ) );
+			$this->assertSame( $invalid, get_option( 'cybermaps_discovery_center' ) );
+			$this->assertSame( 'normalize_discovery', Upgrade::get_status()['last_step'] );
+		}
 	}
 
 	public function test_failed_audit_schema_does_not_stamp_the_upgrade_and_can_retry(): void {
@@ -519,8 +638,8 @@ final class UpgradeTest extends \WP_UnitTestCase {
 		$advanced_state                   = Upgrade::get_status();
 		$advanced_state['step']           = 2;
 		$injected                         = false;
-		$GLOBALS['cybermaps_mock_get_option_observer'] = static function ( string $option ) use ( &$injected, $advanced_state ): void {
-			if ( $injected || 'cybermaps_upgrade_lock' !== $option ) {
+		$GLOBALS['cybermaps_mock_add_option_behavior'] = static function ( string $option, mixed $value, string $stage ) use ( &$injected, $advanced_state ): void {
+			if ( $injected || 'cybermaps_upgrade_lock' !== $option || 'before' !== $stage ) {
 				return;
 			}
 			$injected = true;
@@ -539,8 +658,8 @@ final class UpgradeTest extends \WP_UnitTestCase {
 		$settled_state                    = Upgrade::get_status();
 		$settled_state['step'] = 10;
 		$completed                        = false;
-		$GLOBALS['cybermaps_mock_get_option_observer'] = static function ( string $option ) use ( &$completed, $settled_state ): void {
-			if ( $completed || 'cybermaps_upgrade_lock' !== $option ) {
+		$GLOBALS['cybermaps_mock_add_option_behavior'] = static function ( string $option, mixed $value, string $stage ) use ( &$completed, $settled_state ): void {
+			if ( $completed || 'cybermaps_upgrade_lock' !== $option || 'before' !== $stage ) {
 				return;
 			}
 			$completed = true;
@@ -904,6 +1023,13 @@ class UpgradeWpdbStub {
 	public string $base_prefix = 'wp_';
 	public string $postmeta    = 'wp_postmeta';
 	public string $last_error  = '';
+	public string $options = 'wp_options';
+	public array $last_result = array();
+	public ?\CybermapsMockStaticOwnershipDatabase $ownership = null;
+	private array $ownership_prepared = array();
+	private \CybermapsConfigurationDatabase $configuration;
+	public mixed $before_configuration_query = null;
+	public bool $fail_configuration_write = false;
 
 	/** @var array<int,array<string,mixed>> */
 	public array $postmeta_rows;
@@ -914,13 +1040,28 @@ class UpgradeWpdbStub {
 
 	public function __construct( array $rows ) {
 		$this->postmeta_rows = $rows;
+		$this->configuration = new \CybermapsConfigurationDatabase();
 	}
 
 	public function get_charset_collate(): string {
 		return 'DEFAULT CHARACTER SET utf8mb4';
 	}
 
+	/** Opt into production ownership SQL/fences without replacing postmeta behavior. */
+	public function enable_ownership_database(): void {
+		$this->ownership = new \CybermapsMockStaticOwnershipDatabase();
+		$this->ownership->set_blog_id( 1 );
+		$this->options = 'wp_options';
+		$GLOBALS['cybermaps_test_static_ownership_use_sql'] = true;
+		$GLOBALS['cybermaps_test_database_session_lock_use_sql'] = true;
+	}
+
 	public function prepare( string $query, mixed ...$args ): string {
+		if ( ! in_array( $this->postmeta, $args, true ) && ! str_starts_with( $query, 'SHOW TABLES LIKE' ) ) {
+			$key = 'ownership-prepared-' . count( $this->ownership_prepared );
+			$this->ownership_prepared[ $key ] = array( 'query' => $query, 'args' => $args );
+			return $key;
+		}
 		foreach ( $args as $arg ) {
 			if ( false !== strpos( $query, '%i' ) ) {
 				$query = (string) preg_replace( '/%i/', (string) $arg, $query, 1 );
@@ -936,6 +1077,19 @@ class UpgradeWpdbStub {
 	}
 
 	public function get_var( mixed $query ): mixed {
+		$prepared = $this->ownership_prepared[ $query ] ?? null;
+		if ( is_array( $prepared ) && 'SELECT option_value FROM %i WHERE option_name = %s LIMIT 1' === $prepared['query'] ) {
+			$result = $this->configuration->get_var( $this->configuration->prepare( $prepared['query'], ...$prepared['args'] ) );
+			$this->last_error = $this->configuration->last_error;
+			$this->last_result = $this->configuration->last_result;
+			return $result;
+		}
+		if ( null !== $this->ownership && ( isset( $this->ownership_prepared[ $query ] ) || 'SELECT CONNECTION_ID()' === $query ) ) {
+			$result = $this->ownership->get_var( $this->ownership_prepared[ $query ] ?? $query );
+			$this->last_error = $this->ownership->last_error;
+			$this->last_result = $this->ownership->last_result;
+			return $result;
+		}
 		if ( is_string( $query ) && str_starts_with( $query, 'SHOW TABLES LIKE ' ) ) {
 			$table = stripslashes( trim( substr( $query, strlen( 'SHOW TABLES LIKE ' ) ), "' " ) );
 			return in_array( $table, $this->existing_tables, true ) ? $table : null;
@@ -945,6 +1099,27 @@ class UpgradeWpdbStub {
 	}
 
 	public function query( string $query ) {
+		$prepared = $this->ownership_prepared[ $query ] ?? null;
+		if ( is_array( $prepared ) && str_contains( $prepared['query'], ' AS lease ' ) ) {
+			return $this->guarded_option_query( $prepared );
+		}
+		if ( is_array( $prepared ) && ! str_contains( $prepared['query'], 'IS_USED_LOCK' ) && preg_match( '/^(UPDATE %i SET option_value|DELETE FROM %i WHERE option_name|INSERT (?:IGNORE )?INTO %i \\(option_name)/', $prepared['query'] ) ) {
+			$result = $this->configuration->query( $this->configuration->prepare( $prepared['query'], ...$prepared['args'] ) );
+			$this->last_error = $this->configuration->last_error;
+			$this->last_result = $this->configuration->last_result;
+			return $result;
+		}
+		$ownership_control = in_array( $query, array( 'SELECT CONNECTION_ID() AS connection_id', 'SELECT @@SESSION.innodb_lock_wait_timeout AS lock_wait', 'SET TRANSACTION ISOLATION LEVEL SERIALIZABLE', 'START TRANSACTION', 'COMMIT', 'ROLLBACK' ), true );
+		if ( null !== $this->ownership && ( isset( $this->ownership_prepared[ $query ] ) || $ownership_control ) ) {
+			$prepared = $this->ownership_prepared[ $query ] ?? array( 'query' => $query, 'args' => array() );
+			if ( str_contains( $prepared['query'], ' AS lease ' ) ) {
+				return $this->guarded_option_query( $prepared );
+			}
+			$result = $this->ownership->query( $prepared );
+			$this->last_error = $this->ownership->last_error;
+			$this->last_result = $this->ownership->last_result;
+			return $result;
+		}
 		if ( str_starts_with( trim( $query ), 'INSERT INTO wp_postmeta' ) ) {
 			++$this->postmeta_query_count;
 			if ( $this->fail_next_insert ) {
@@ -987,6 +1162,43 @@ class UpgradeWpdbStub {
 			return 1;
 		}
 		return 1;
+	}
+
+	/** Share the existing exact lease/state CAS executor with ownership storage. */
+	private function guarded_option_query( array $prepared ): int|false {
+		$this->last_error = '';
+		$update = str_starts_with( $prepared['query'], 'UPDATE' );
+		$insert = str_starts_with( $prepared['query'], 'INSERT' );
+		$option = $prepared['args'][ $update ? 6 : ( $insert ? 1 : 4 ) ];
+		$value = $update || $insert ? maybe_unserialize( $prepared['args'][ $update ? 4 : 2 ] ) : null;
+		$is_configuration = in_array( $option, array( 'cybermaps_settings', 'cybermaps_discovery_center' ), true );
+		if ( $is_configuration && is_callable( $this->before_configuration_query ) ) {
+			( $this->before_configuration_query )( $option, $value );
+		}
+		if ( $is_configuration && $this->fail_configuration_write ) {
+			$this->last_error = 'Injected configuration database failure';
+			return false;
+		}
+		$behavior = $GLOBALS['cybermaps_mock_update_option_behavior'] ?? null;
+		$add_behavior = $GLOBALS['cybermaps_mock_add_option_behavior'] ?? null;
+		if ( $insert && is_callable( $add_behavior ) ) { $add_behavior( $option, $value, 'before' ); }
+		if ( is_callable( $behavior ) && ( $update || $insert ) ) { $behavior( $option, $value, 'before' ); }
+		$rows = array_map( static fn( $value ): string => (string) maybe_serialize( $value ), $GLOBALS['cybermaps_mock_options'] );
+		$guard = new UpgradeOptionCasWpdbStub( $rows );
+		$result = $guard->query( $prepared );
+		foreach ( $rows as $option => $raw ) {
+			if ( ! array_key_exists( $option, $guard->rows ) ) {
+				unset( $GLOBALS['cybermaps_mock_options'][ $option ] );
+			}
+		}
+		foreach ( $guard->rows as $option => $raw ) {
+			if ( ! isset( $rows[ $option ] ) || $rows[ $option ] !== $raw ) {
+				$GLOBALS['cybermaps_mock_options'][ $option ] = maybe_unserialize( $raw );
+			}
+		}
+		$option = $prepared['args'][ $update ? 6 : ( $insert ? 1 : 4 ) ];
+		if ( ! $is_configuration && 1 === $result && is_callable( $behavior ) && ( $update || $insert ) ) { $behavior( $option, $value, 'after' ); }
+		return $result;
 	}
 }
 
@@ -1112,7 +1324,7 @@ final class UpgradeOptionCasWpdbStub {
 /** wpdb-routing drop-in analogue: query-capable, but not the exact Core wpdb class. */
 final class UpgradeDropInWpdbStub extends UpgradeWpdbStub {
 	public function get_var( mixed $query ): mixed {
-		if ( is_string( $query ) && str_starts_with( $query, 'SHOW TABLES LIKE ' ) ) {
+		if ( is_string( $query ) && ( str_starts_with( $query, 'SHOW TABLES LIKE ' ) || str_starts_with( $query, 'ownership-prepared-' ) ) ) {
 			return parent::get_var( $query );
 		}
 

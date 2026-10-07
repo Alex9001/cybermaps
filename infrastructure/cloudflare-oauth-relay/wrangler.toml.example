@@ -1,7 +1,24 @@
 name = "cybermaps-cloudflare-oauth-relay"
 main = "src/index.js"
 compatibility_date = "2026-08-31"
-routes = [{ pattern = "connect.cybermaps.dev", custom_domain = true }]
+
+routes = [
+  { pattern = "connect.cybermaps.dev", custom_domain = true }
+]
+
+[vars]
+CLOUDFLARE_OAUTH_CLIENT_ID = "replace-with-public-client-id"
+CLOUDFLARE_OAUTH_SCOPES = "zone.read zone-transform-rules.write cache-settings.write"
+CLOUDFLARE_OAUTH_REDIRECT_URI = "https://connect.cybermaps.dev/cloudflare/callback"
+DAILY_TRANSACTION_LIMIT = "1500"
+MAX_TRANSACTION_POLLS = "48"
+
+[observability]
+enabled = true
+head_sampling_rate = 1.0
+
+[observability.logs]
+invocation_logs = false
 
 [[durable_objects.bindings]]
 name = "OAUTH_TRANSACTIONS"
@@ -11,7 +28,44 @@ class_name = "OAuthTransaction"
 tag = "v1"
 new_sqlite_classes = ["OAuthTransaction"]
 
-# Configure with wrangler secret put:
-# CLOUDFLARE_OAUTH_CLIENT_ID
-# CLOUDFLARE_OAUTH_SCOPES
-# CLOUDFLARE_OAUTH_REDIRECT_URI
+[[ratelimits]]
+name = "CREATE_IP_RATE_LIMITER"
+namespace_id = "720010"
+
+  [ratelimits.simple]
+  limit = 5
+  period = 60
+
+[[ratelimits]]
+name = "CREATE_BURST_RATE_LIMITER"
+namespace_id = "720011"
+
+  [ratelimits.simple]
+  limit = 100
+  period = 60
+
+[[ratelimits]]
+name = "POLL_RATE_LIMITER"
+namespace_id = "720012"
+
+  [ratelimits.simple]
+  limit = 15
+  period = 60
+
+[[ratelimits]]
+name = "RELAY_IP_RATE_LIMITER"
+namespace_id = "720013"
+
+  [ratelimits.simple]
+  limit = 120
+  period = 60
+
+[[ratelimits]]
+name = "RELAY_BURST_RATE_LIMITER"
+namespace_id = "720014"
+
+  [ratelimits.simple]
+  limit = 300
+  period = 60
+
+# Install RATE_LIMIT_SECRET with wrangler secret put before deployment.

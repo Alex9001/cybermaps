@@ -20,8 +20,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Serves the community llms.txt convention and the opt-in literal full corpus.
  */
 class LLMS {
-	public const SUMMARY_CACHE_KEY         = 'cybermaps_llms_cache';
-	public const FULL_CACHE_KEY            = 'cybermaps_llms_full_cache';
+	public const SUMMARY_CACHE_KEY         = 'cybermaps_llms_cache_v4';
+	public const FULL_CACHE_KEY            = 'cybermaps_llms_full_cache_v4';
 	public const OUTPUT_MAX_BYTES          = ( 4 * 1024 * 1024 ) - 1;
 	public const FULL_OUTPUT_MAX_BYTES     = ( 32 * 1024 * 1024 ) - 1;
 	private const CACHE_TTL                = 12 * HOUR_IN_SECONDS;
@@ -40,7 +40,13 @@ class LLMS {
 		$is_summary = 'summary' === $route['type'];
 		$is_full    = 'full' === $route['type'];
 
-		$settings = \Cybermaps\Core\ConfigurationStore::settings();
+		$generation = CacheManager::get_generation( 'discovery', true );
+		try {
+			$this->require_current_generation( $generation );
+			$settings = \Cybermaps\Core\ConfigurationStore::publication_settings();
+		} catch ( BuildUnavailableException $error ) {
+			PublicationRequestGuard::serve_unavailable( $error );
+		}
 		if (
 			empty( $settings['enable_discovery_hub'] )
 			|| ( $is_full && empty( $settings['enable_llms_full'] ) )
@@ -67,13 +73,15 @@ class LLMS {
 					\Cybermaps\Core\TranslationHelper::switch_to_language( $original_language );
 				}
 			}
+			$this->require_current_generation( $generation );
+			Integrity::send_headers( $output, HOUR_IN_SECONDS, null, $generation );
+			$this->require_current_generation( $generation );
 		} catch ( BuildUnavailableException $error ) {
 			PublicationRequestGuard::serve_unavailable( $error );
 		} catch ( PublicationSizeLimitException $error ) {
 			$this->serve_size_limit_error( $error );
 		}
 
-		Integrity::send_headers( $output );
 		header( 'Content-Type: text/markdown; charset=utf-8' );
 
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
@@ -90,22 +98,28 @@ class LLMS {
 		bool $skip_cache = false,
 		string $language = ''
 	): string {
+		$generation = CacheManager::get_generation( 'discovery', true );
+		$this->require_current_generation( $generation );
 		// Language variants share generation fences, but never cached bodies.
 		$key = $is_full ? self::FULL_CACHE_KEY : self::SUMMARY_CACHE_KEY;
 		if ( '' !== $language ) {
 			$key .= ':' . sanitize_key( $language );
 		}
-		$producer = function () use ( $is_full, $language, $skip_cache ): string {
-			$settings  = \Cybermaps\Core\ConfigurationStore::settings();
+		$producer = function () use ( $is_full, $language, $skip_cache, $generation ): string {
+			$this->require_current_generation( $generation );
+			$settings = \Cybermaps\Core\ConfigurationStore::publication_settings();
+			\Cybermaps\Core\ConfigurationStore::publication_discovery();
 			$inventory = new PublicationInventory( $settings, null, $language );
 			$analyzer  = new ContentAnalyzer( ! $skip_cache && ! $is_full );
 			$extractor = new VisibleTextExtractor( $analyzer );
-			return $is_full
+			$output    = $is_full
 				? $this->generate_full( $settings, $inventory, $analyzer )
 				: $this->generate_summary( $settings, $inventory, $extractor );
+			$this->require_current_generation( $generation );
+			return $output;
 		};
 
-		return (string) CacheManager::remember(
+		$output = (string) CacheManager::remember(
 			$key,
 			self::CACHE_TTL,
 			'discovery',
@@ -118,6 +132,15 @@ class LLMS {
 			60,
 			$skip_cache || $is_full
 		);
+		$this->require_current_generation( $generation );
+		return $output;
+	}
+
+	/** Cache admission alone cannot authorize returning a revoked body. */
+	private function require_current_generation( int $generation ): void {
+		if ( $generation < 0 || CacheManager::get_generation( 'discovery', true ) !== $generation ) {
+			throw new BuildUnavailableException( esc_html__( 'Cybermaps content changed during LLMS publication. Please retry shortly.', 'cybermaps' ) );
+		}
 	}
 
 	/**
@@ -255,13 +278,17 @@ class LLMS {
 				$current_post_type = $post_type;
 			}
 
-			$post_title = $this->markdown_text( (string) get_the_title( $post ) );
+			$raw_title = (string) get_the_title( $post );
+			$raw_url   = (string) get_permalink( $post );
+			PublicationSizeLimitException::require_capacity( strlen( $output ) + strlen( $raw_title ) * 2 + strlen( $raw_url ) * 2 + 1024, 'llms.txt', self::OUTPUT_MAX_BYTES );
+			$post_title = $this->markdown_text( $raw_title );
 			$url        = MarkdownAlternate::url_for_post( $post );
 			if ( '' === $url ) {
 				$url = URLManager::rewrite_url( (string) get_permalink( $post ) );
 			}
 			$summary = $extractor->summary( $post, 40 );
-			$entry   = '- [' . $post_title . '](' . $url . ')';
+			PublicationSizeLimitException::require_capacity( strlen( $output ) + strlen( $post_title ) + strlen( $url ) + strlen( $summary ) + 16, 'llms.txt', self::OUTPUT_MAX_BYTES );
+			$entry = '- [' . $post_title . '](' . $url . ')';
 			if ( '' !== $summary ) {
 				$entry .= ': ' . str_replace( "\n", ' ', $summary );
 			}
@@ -402,8 +429,10 @@ class LLMS {
 	}
 
 	private function append_full_post( string &$output, object $post, ContentAnalyzer $analyzer ): void {
-		$title     = $this->markdown_text( (string) get_the_title( $post ) );
+		$raw_title = (string) get_the_title( $post );
 		$url       = URLManager::rewrite_url( (string) get_permalink( $post ) );
+		PublicationSizeLimitException::require_capacity( strlen( $output ) + strlen( $raw_title ) * 2 + strlen( $url ) + 1024, 'llms-full.txt', self::FULL_OUTPUT_MAX_BYTES );
+		$title     = $this->markdown_text( $raw_title );
 		$modified  = (string) ( $post->post_modified_gmt ?? $post->post_date_gmt ?? '' );
 		$metadata  = '## ' . $title . "\n\n";
 		$metadata .= '- URL: ' . $url . "\n";
@@ -419,7 +448,11 @@ class LLMS {
 			throw new PublicationSizeLimitException( 'llms-full.txt', self::FULL_OUTPUT_MAX_BYTES ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Domain exception data is later JSON-encoded or escaped by status views.
 		}
 		$this->require_memory_headroom( strlen( $raw_content ), 'llms-full.txt' );
-		$text = (string) $analyzer->analyze_post( $post )['markdown'];
+		$analysis = $analyzer->analyze_post( $post );
+		if ( empty( $analysis['complete'] ) ) {
+			PublicationSizeLimitException::require_capacity( self::FULL_OUTPUT_MAX_BYTES + 1, 'llms-full.txt', self::FULL_OUTPUT_MAX_BYTES );
+		}
+		$text = (string) $analysis['markdown'];
 		$this->append_complete(
 			$output,
 			'' !== $text ? $text . "\n\n" : "[No visible stored text]\n\n",

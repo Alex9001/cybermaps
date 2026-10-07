@@ -421,4 +421,64 @@ class AIContentSelectorTest extends \WP_UnitTestCase {
 			}
 		}
 	}
+
+	/** @dataProvider per_type_limits */
+	public function test_slices_obey_each_type_limit_and_match_membership( int $limit ): void {
+		$posts = array();
+		foreach ( array( 'post', 'page' ) as $index => $type ) {
+			$posts[ $type ] = array_map(
+				static fn( int $id ): object => (object) array( 'ID' => $id, 'post_type' => $type, 'post_status' => 'publish', 'post_password' => '' ),
+				range( $index * 1000 + 1, $index * 1000 + 301 )
+			);
+		}
+		$query = static fn( array $args ): array => array_slice( $posts[ $args['post_type'] ], ( $args['paged'] - 1 ) * $args['posts_per_page'], $args['posts_per_page'] );
+		$settings = array( 'ai_sitemap_types' => array( 'post', 'page' ), 'ai_sitemap_limit' => $limit );
+		$canonical = new AIContentSelector( $settings, $query );
+		$expected = array_map( static fn( object $post ): int => (int) $post->ID, $canonical->get_posts() );
+		$actual = $this->collect_slices( new AIContentSelector( $settings, $query ) );
+		$this->assertCount( 2 * $limit, $actual );
+		$this->assertSame( $expected, $actual );
+		$this->assertTrue( $canonical->contains( $limit ) );
+		$this->assertFalse( $canonical->contains( $limit + 1 ) );
+	}
+
+	public static function per_type_limits(): array {
+		return array_map( static fn( int $limit ): array => array( $limit ), array( 1, 26, 99, 100, 251 ) );
+	}
+
+	public function test_near_scan_cap_continuations_keep_query_width_and_retain_eligible_tail(): void {
+		$posts = array();
+		for ( $id = 1; $id <= 5050; ++$id ) {
+			$posts[] = (object) array( 'ID' => $id, 'post_type' => 'post', 'post_status' => 'publish', 'post_password' => '' );
+			if ( $id <= 4700 ) {
+				$GLOBALS['cybermaps_mock_post_meta'][ $id ]['_cybermaps_exclude_ai'] = '1';
+			}
+		}
+		$widths = array();
+		$query = static function( array $args ) use ( $posts, &$widths ): array {
+			$widths[] = $args['posts_per_page'];
+			return array_slice( $posts, ( $args['paged'] - 1 ) * $args['posts_per_page'], $args['posts_per_page'] );
+		};
+		$settings = array( 'ai_sitemap_types' => array( 'post' ), 'ai_sitemap_limit' => 1000 );
+		$expected = array_map( static fn( object $post ): int => (int) $post->ID, ( new AIContentSelector( $settings, $query ) )->get_posts() );
+		$actual = $this->collect_slices( new AIContentSelector( $settings, $query ) );
+		$this->assertSame( range( 4701, 5000 ), $expected );
+		$this->assertSame( $expected, $actual );
+		$this->assertSame( array( 250 ), array_values( array_unique( $widths ) ) );
+	}
+
+	private function collect_slices( AIContentSelector $selector ): array {
+		$cursor = array();
+		$ids = array();
+		$iterations = 0;
+		do {
+			$batch = $selector->get_id_batch( $cursor, 25 );
+			$this->assertLessThanOrEqual( 25, count( $batch['ids'] ) );
+			$this->assertLessThanOrEqual( 100, ++$iterations, 'Continuation must finish.' );
+			$ids = array_merge( $ids, $batch['ids'] );
+			$cursor = $batch['cursor'];
+		} while ( ! $batch['complete'] );
+		$this->assertSame( $ids, array_values( array_unique( $ids ) ) );
+		return $ids;
+	}
 }

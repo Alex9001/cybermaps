@@ -32,7 +32,27 @@ class DiscoveryCenterSanitizer {
 		if ( is_string( $data ) ) {
 			return $data;
 		}
+		return self::normalize( $data );
+	}
 
+	/** Validate a complete import record without consulting the destination. */
+	public static function sanitize_import( array $input ): string {
+		$data = SettingsSubmission::import_record( $input, self::submission_schema() );
+		if ( null === $data ) {
+			throw new \InvalidArgumentException( esc_html__( 'The imported discovery strategy has invalid fields or exceeds its limits.', 'cybermaps' ) );
+		}
+		return self::normalize( $data );
+	}
+
+	/** Migrate persisted legacy data, retiring only fields outside this owner. */
+	public static function migrate_saved( array $input ): string {
+		if ( count( $input ) > 128 || ( array() !== $input && array_is_list( $input ) ) ) {
+			throw new \InvalidArgumentException( esc_html__( 'The saved discovery strategy has an invalid legacy record.', 'cybermaps' ) );
+		}
+		return self::sanitize_import( array_intersect_key( $input, self::submission_schema() ) );
+	}
+
+	private static function normalize( array $data ): string {
 		$overrides = self::sanitize_priority_map( $data['overrides'] ?? array() );
 		$disabled  = self::sanitize_disabled_map( $data['disabled'] ?? array() );
 		self::migrate_disabled_overrides( $overrides, $disabled );
@@ -70,15 +90,39 @@ class DiscoveryCenterSanitizer {
 		if ( SettingsSanitizer::is_incomplete_main_submission() ) {
 			return self::current_value();
 		}
-		if ( ! is_string( $input ) ) {
+		if ( null === $input ) {
 			return self::current_value();
 		}
-		if ( '' === trim( $input ) ) {
-			return '';
+		$data = SettingsSubmission::decode( $input, self::submission_schema() );
+		if ( null === $data ) {
+			add_settings_error( 'cybermaps_discovery_center', 'cybermaps_invalid_strategy', __( 'The discovery strategy submission was invalid. Your saved strategy was preserved.', 'cybermaps' ) );
+			return self::current_value();
 		}
+		return $data;
+	}
 
-		$data = json_decode( $input, true );
-		return is_array( $data ) ? $data : '';
+	/** Exact transport fields; normalization still handles historical identities. */
+	private static function submission_schema(): array {
+		// Allow bounded legacy entries before identity expansion and the 200-item
+		// canonical output cap, without copying an arbitrary submitted map.
+		$map = array(
+			'type' => 'map',
+			'max'  => 2 * \Cybermaps\Discovery\PublicationConstraints::CONTENT_GROUP_MAP_MAX,
+		);
+		return array(
+			'archetype'    => array(
+				'type' => 'text',
+				'max'  => 128,
+			),
+			'overrides'    => $map + array( 'value' => array( 'type' => 'number' ) ),
+			'type_intents' => $map + array(
+				'value' => array(
+					'type' => 'text',
+					'max'  => 128,
+				),
+			),
+			'disabled'     => $map + array( 'value' => array( 'type' => 'flag' ) ),
+		);
 	}
 
 	/**

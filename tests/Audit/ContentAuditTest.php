@@ -60,6 +60,26 @@ final class ContentAuditTest extends TestCase {
 		$this->assertSame( 300, $result['findings'][0]['evidence']['minimum_words'] );
 	}
 
+	public function test_incomplete_text_has_no_full_count_hash_or_thin_claim_in_any_export(): void {
+		$post = $this->post( 88, 'post', 'Small bounded fixture with more than sixty four bytes of text for the injected limit.', '2020-01-01 00:00:00' );
+		$extractor = new \Cybermaps\Content\VisibleTextExtractor( new \Cybermaps\Content\ContentAnalyzer( false, 64 ) );
+		$result = ( new ContentAuditEvaluator( $extractor ) )->evaluate( $post, AuditPolicy::from_settings( array() ), strtotime( '2026-07-26 UTC' ), true );
+		$this->assertNull( $result['resource']['word_count'] );
+		$this->assertSame( '', $result['resource']['content_hash'] );
+		$this->assertFalse( $result['resource']['measurement']['text_complete'] );
+		$this->assertGreaterThan( 0, $result['resource']['measurement']['sample_words'] );
+		$keys = array_column( $result['findings'], 'key' );
+		$this->assertNotContains( 'thin_content', $keys );
+		$this->assertContains( 'content_analysis_incomplete', $keys );
+		$this->assertContains( 'stale_content', $keys );
+		$this->assertNotContains( 'missing_media', $keys );
+		$run = array( 'resources' => array( $result['resource'] ), 'findings' => array_map( static fn( array $finding ): array => array_merge( $finding, array( 'finding_key' => $finding['key'] ) ), $result['findings'] ) );
+		$exporter = new AuditExporter();
+		$this->assertStringContainsString( 'Full word count, content hash, and thin-content findings are unavailable.', $exporter->csv( $run ) );
+		$this->assertStringContainsString( 'Incomplete text analysis', $exporter->html( $run ) );
+		$this->assertNull( json_decode( $exporter->json( $run ), true )['resources'][0]['word_count'] );
+	}
+
 	public function test_page_has_no_default_age_or_media_finding(): void {
 		$post   = $this->post( 2, 'page', implode( ' ', array_fill( 0, 100, 'word' ) ), '2020-01-01 00:00:00' );
 		$result = ( new ContentAuditEvaluator() )->evaluate(
@@ -263,6 +283,15 @@ final class ContentAuditTest extends TestCase {
 		$this->assertSame( array(), $diff['added'] );
 		$this->assertSame( array(), $diff['resolved'] );
 		$this->assertCount( 1, $diff['persisting'] );
+	}
+
+	public function test_incomplete_text_does_not_falsely_resolve_prior_thin_content(): void {
+		$baseline = array( 'id' => 1, 'analysis' => array( 'text_complete' => true ), 'findings' => array( array( 'resource_key' => 'post:1:8', 'finding_key' => 'thin_content' ) ) );
+		$current = array( 'id' => 2, 'analysis' => array( 'text_complete' => false ), 'findings' => array( array( 'resource_key' => 'post:1:8', 'finding_key' => 'content_analysis_incomplete' ) ) );
+		$diff = ( new ContentAuditService() )->compare( $current, $baseline );
+		$this->assertFalse( $diff['text_comparable'] );
+		$this->assertSame( array(), $diff['resolved'] );
+		$this->assertSame( 'content_analysis_incomplete', $diff['added'][0]['finding_key'] );
 	}
 
 	public function test_exports_use_preserved_findings_and_escape_spreadsheet_formulas(): void {

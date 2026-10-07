@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Cybermaps\Audit;
 
+use Cybermaps\Core\RawOptionStore;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -125,7 +127,7 @@ KEY severity (severity)
 	/**
 	 * Acquire the single site-local report-generation lease.
 	 *
-	 * add_option() provides the normal atomic insert. An expired or malformed
+	 * An insert-only statement acquires an absent lease. An expired or malformed
 	 * lease is replaced with an exact-value compare-and-swap so one contender
 	 * cannot delete or overwrite a newer owner's lease.
 	 */
@@ -137,7 +139,7 @@ KEY severity (severity)
 		$replacement = $this->encode_run_lock( $token, time() + $ttl_seconds );
 
 		$this->reset_database_error();
-		if ( add_option( self::RUN_LOCK_OPTION, $replacement, '', false ) ) {
+		if ( $this->insert_run_lock( $replacement ) ) {
 			return $token;
 		}
 		$this->assert_database_write_succeeded();
@@ -145,7 +147,7 @@ KEY severity (severity)
 		$observed = $this->read_run_lock_raw();
 		if ( null === $observed ) {
 			$this->reset_database_error();
-			if ( add_option( self::RUN_LOCK_OPTION, $replacement, '', false ) ) {
+			if ( $this->insert_run_lock( $replacement ) ) {
 				return $token;
 			}
 			$this->assert_database_write_succeeded();
@@ -177,6 +179,18 @@ KEY severity (severity)
 
 		$this->invalidate_run_lock_cache();
 		return $token;
+	}
+
+	/** WordPress add_option() may UPSERT after concurrent absent observations. */
+	private function insert_run_lock( string $replacement ): bool {
+		global $wpdb;
+		$this->reset_database_error();
+		$inserted = RawOptionStore::insert( $wpdb, self::RUN_LOCK_OPTION, $replacement );
+		if ( false === $inserted ) {
+			throw new \RuntimeException( esc_html__( 'Cybermaps could not acquire the content report lock.', 'cybermaps' ) );
+		}
+		RawOptionStore::invalidate( self::RUN_LOCK_OPTION );
+		return 1 === $inserted;
 	}
 
 	/**
@@ -858,7 +872,8 @@ KEY severity (severity)
 		int $run_id,
 		int $baseline_run_id,
 		int $current_finding_count,
-		bool $include_internal_links = true
+		bool $include_internal_links = true,
+		bool $include_text = true
 	): array {
 		global $wpdb;
 		$runs      = $wpdb->prefix . 'cybermaps_audit_runs';
@@ -910,7 +925,8 @@ KEY severity (severity)
 					AND baseline_finding.finding_key = current_finding.finding_key
 				WHERE current_finding.run_id = %d
 				AND baseline_finding.id IS NULL
-				AND (%d = 1 OR current_finding.finding_key NOT IN (%s, %s, %s))',
+				AND (%d = 1 OR current_finding.finding_key NOT IN (%s, %s, %s))
+				AND (%d = 1 OR current_finding.finding_key <> %s)',
 				$findings,
 				$resources,
 				$resources,
@@ -921,7 +937,9 @@ KEY severity (severity)
 				(int) $include_internal_links,
 				'potential_orphan',
 				'no_homepage_path',
-				'deeply_linked'
+				'deeply_linked',
+				(int) $include_text,
+				'thin_content'
 			)
 		);
 		$this->assert_database_read_succeeded();
@@ -942,7 +960,8 @@ KEY severity (severity)
 					AND current_finding.finding_key = baseline_finding.finding_key
 				WHERE baseline_finding.run_id = %d
 				AND current_finding.id IS NULL
-				AND (%d = 1 OR baseline_finding.finding_key NOT IN (%s, %s, %s))',
+				AND (%d = 1 OR baseline_finding.finding_key NOT IN (%s, %s, %s))
+				AND (%d = 1 OR baseline_finding.finding_key <> %s)',
 				$findings,
 				$resources,
 				$resources,
@@ -953,7 +972,9 @@ KEY severity (severity)
 				(int) $include_internal_links,
 				'potential_orphan',
 				'no_homepage_path',
-				'deeply_linked'
+				'deeply_linked',
+				(int) $include_text,
+				'thin_content'
 			)
 		);
 		$this->assert_database_read_succeeded();
@@ -973,7 +994,8 @@ KEY severity (severity)
 					AND baseline_finding.resource_id = baseline_resource.id
 					AND baseline_finding.finding_key = current_finding.finding_key
 				WHERE current_finding.run_id = %d
-				AND (%d = 1 OR current_finding.finding_key NOT IN (%s, %s, %s))',
+				AND (%d = 1 OR current_finding.finding_key NOT IN (%s, %s, %s))
+				AND (%d = 1 OR current_finding.finding_key <> %s)',
 				$findings,
 				$resources,
 				$resources,
@@ -984,7 +1006,9 @@ KEY severity (severity)
 				(int) $include_internal_links,
 				'potential_orphan',
 				'no_homepage_path',
-				'deeply_linked'
+				'deeply_linked',
+				(int) $include_text,
+				'thin_content'
 			)
 		);
 		$this->assert_database_read_succeeded();
@@ -1032,16 +1056,12 @@ KEY severity (severity)
 	private function read_run_lock_raw(): ?string {
 		global $wpdb;
 		$this->reset_database_error();
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching -- Lock coordination must observe the database value rather than an object-cache copy.
-		$value = $wpdb->get_var(
-			$wpdb->prepare(
-				'SELECT option_value FROM %i WHERE option_name = %s LIMIT 1',
-				$wpdb->options,
-				self::RUN_LOCK_OPTION
-			)
-		);
+		$value = \Cybermaps\Core\RawOptionStore::read( $wpdb, self::RUN_LOCK_OPTION );
 		$this->assert_database_read_succeeded();
-		return null === $value ? null : (string) $value;
+		if ( false === $value ) {
+			throw new \RuntimeException( esc_html__( 'Cybermaps could not read the saved content report data.', 'cybermaps' ) );
+		}
+		return $value;
 	}
 
 	private function encode_run_lock( string $token, int $expires ): string {
@@ -1079,6 +1099,12 @@ KEY severity (severity)
 	private function hydrate_resource( array $row ): array {
 		$row['indexability'] = self::decode_json_array( (string) $row['indexability_json'] );
 		$row['measurement']  = self::decode_json_array( (string) $row['measurement_json'] );
+		// The legacy NOT NULL column stores zero only as a placeholder when the
+		// persisted completeness marker says no full-text measurement exists.
+		if ( false === ( $row['measurement']['text_complete'] ?? null ) ) {
+			$row['word_count']   = null;
+			$row['content_hash'] = '';
+		}
 		return $row;
 	}
 

@@ -16,6 +16,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Orchestrator {
 	public const URLS_PER_PAGE = 2000;
 
+	private bool $diagnostic_response    = false;
+	private ?int $publication_generation = null;
+
 	/**
 	 * Provider registry.
 	 *
@@ -606,17 +609,22 @@ class Orchestrator {
 		\Cybermaps\Discovery\Integrity::handle_preflight();
 		\Cybermaps\Core\ReadOnlyRequest::enforce();
 
-		list( $provider_id, $provider ) = $this->resolve_request_provider( $sitemap_type );
-		$this->validate_network_request( $sitemap_type );
-		$page = $this->requested_sitemap_page( $query_vars );
-		$this->validate_sitemap_page( $sitemap_type, $provider_id, $provider, $page );
+		try {
+			$this->begin_publication();
+			list( $provider_id, $provider ) = $this->resolve_request_provider( $sitemap_type );
+			$this->validate_network_request( $sitemap_type );
+			$page = $this->requested_sitemap_page( $query_vars );
+			$this->validate_sitemap_page( $sitemap_type, $provider_id, $provider, $page );
 
-		$response = $this->prepare_sitemap_response( $sitemap_type, $provider_id, $provider, $page );
-		$this->begin_sitemap_response();
-		if ( null !== $response['cached'] ) {
-			$this->serve_sitemap_xml( $response['cached'], $response['canonical_type'] );
+			$response = $this->prepare_sitemap_response( $sitemap_type, $provider_id, $provider, $page );
+			$this->begin_sitemap_response();
+			if ( null !== $response['cached'] ) {
+				$this->serve_sitemap_xml( $response['cached'], $response['canonical_type'] );
+			}
+			$this->render_sitemap_response( $response, $page );
+		} catch ( \Cybermaps\Core\BuildUnavailableException $error ) {
+			\Cybermaps\Discovery\PublicationRequestGuard::serve_unavailable( $error );
 		}
-		$this->render_sitemap_response( $response, $page );
 	}
 
 	/**
@@ -632,9 +640,8 @@ class Orchestrator {
 	 * @param array<string,mixed> $query_vars Request query variables.
 	 */
 	private function requested_sitemap_type( array $query_vars ): string {
-		return isset( $query_vars['cybermaps_sitemap'] )
-			? (string) $query_vars['cybermaps_sitemap']
-			: (string) get_query_var( 'cybermaps_sitemap' );
+		$value = array_key_exists( 'cybermaps_sitemap', $query_vars ) ? $query_vars['cybermaps_sitemap'] : get_query_var( 'cybermaps_sitemap' );
+		return is_string( $value ) && strlen( $value ) <= 128 ? $value : '';
 	}
 
 	/**
@@ -751,13 +758,14 @@ class Orchestrator {
 		?ProviderInterface $provider,
 		int $page
 	): array {
+		$cache_generation = $this->begin_publication();
 		$canonical_type   = '' !== $provider_id ? $provider_id : $sitemap_type;
 		$cache_key        = $this->get_response_cache_key( $canonical_type, $page );
 		$cache_enabled    = $this->is_response_cache_enabled( $canonical_type );
-		$cache_generation = $cache_enabled ? \Cybermaps\Core\CacheManager::get_generation( 'sitemap', true ) : 0;
 		$is_regular_child = $this->is_regular_child( $sitemap_type, $provider_id );
 		$cached           = $this->cached_sitemap_response( $cache_enabled, $cache_key, $is_regular_child );
 		$preloaded_urls   = $this->preloaded_child_urls( $provider, $page, $is_regular_child, $cached );
+		$this->assert_current_generation( $cache_generation );
 
 		return array(
 			'canonical_type'   => $canonical_type,
@@ -799,6 +807,7 @@ class Orchestrator {
 			return null;
 		}
 		$urls = $provider ? $provider->get_urls( $page ) : array();
+		$this->assert_current_generation( $this->publication_generation ?? -1 );
 		if ( empty( $urls ) ) {
 			$this->issue_404();
 		}
@@ -817,16 +826,17 @@ class Orchestrator {
 
 		header( 'Content-Type: application/xml; charset=utf-8', true );
 		header( 'X-Robots-Tag: noindex, follow', true );
-		$diagnostic_header = isset( $_SERVER['HTTP_X_CYBERMAPS_DIAGNOSTIC_CHALLENGE'] )
+		$diagnostic_header = isset( $_SERVER['HTTP_X_CYBERMAPS_DIAGNOSTIC_CHALLENGE'] ) && is_string( $_SERVER['HTTP_X_CYBERMAPS_DIAGNOSTIC_CHALLENGE'] )
 			? \sanitize_text_field( \wp_unslash( (string) $_SERVER['HTTP_X_CYBERMAPS_DIAGNOSTIC_CHALLENGE'] ) )
 			: '';
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public read-only cache-busting challenge; no state mutation.
-		$diagnostic_query = isset( $_GET['cybermaps_php_path_probe'] )
+		$diagnostic_query = isset( $_GET['cybermaps_php_path_probe'] ) && is_string( $_GET['cybermaps_php_path_probe'] )
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Same read-only challenge value validated against the request header.
 			? \sanitize_text_field( \wp_unslash( (string) $_GET['cybermaps_php_path_probe'] ) )
 			: '';
-		$diagnostic = self::validate_diagnostic_challenge( $diagnostic_header, $diagnostic_query );
-		if ( '' !== $diagnostic ) {
+		$diagnostic                = self::validate_diagnostic_challenge( $diagnostic_header, $diagnostic_query );
+		$this->diagnostic_response = '' !== $diagnostic;
+		if ( $this->diagnostic_response ) {
 			\nocache_headers();
 			header( 'Cache-Control: no-store, no-cache, must-revalidate, max-age=0', true );
 			header( 'X-Cybermaps-Diagnostic-Response: ' . $diagnostic, true );
@@ -842,6 +852,7 @@ class Orchestrator {
 			$page,
 			$response['preloaded_urls']
 		);
+		$this->assert_current_generation( $response['cache_generation'] );
 		if ( $response['is_regular_child'] && ! $this->child_xml_contains_url( $xml ) ) {
 			$this->issue_404();
 		}
@@ -855,15 +866,18 @@ class Orchestrator {
 			);
 		}
 
+		$this->assert_current_generation( $response['cache_generation'] );
 		$this->serve_sitemap_xml( $xml, $response['canonical_type'] );
 	}
 
 	private function serve_sitemap_xml( string $xml, string $canonical_type ): never {
-		$not_modified = \Cybermaps\Discovery\Integrity::send_representation_headers(
-			$xml,
-			\Cybermaps\Discovery\PublicationCachePolicy::for_publication( 'sitemap', $canonical_type )
-		);
+		$this->assert_current_generation( $this->publication_generation ?? -1 );
+		$policy             = \Cybermaps\Discovery\PublicationCachePolicy::for_publication( 'sitemap', $canonical_type );
+		$policy['no_store'] = $this->diagnostic_response;
+		$not_modified       = \Cybermaps\Discovery\Integrity::send_representation_headers( $xml, $policy );
+		$this->assert_current_generation( $this->publication_generation ?? -1 );
 		if ( $not_modified ) {
+			status_header( 304 );
 			ob_end_clean();
 			exit;
 		}
@@ -964,6 +978,7 @@ class Orchestrator {
 	 * @return ProviderInterface|null
 	 */
 	public function get_provider( string $type ) {
+		$this->begin_publication();
 		$provider_id = $this->resolve_provider_id( $type );
 		if ( '' === $provider_id ) {
 			return null;
@@ -1059,6 +1074,7 @@ class Orchestrator {
 	 * @return array<int, array{provider_id:string,provider_kind:string,provider_name:string,page:int,filename:string,loc:string,lastmod:string}>
 	 */
 	public function get_internal_sitemap_entries(): array {
+		$generation = $this->begin_publication();
 		if ( null !== $this->internal_sitemap_entries ) {
 			return $this->internal_sitemap_entries;
 		}
@@ -1066,6 +1082,7 @@ class Orchestrator {
 		$manifest = PageOccupancyManifest::load();
 		if ( PageOccupancyManifest::is_usable( $manifest ) ) {
 			$this->internal_sitemap_entries = PageOccupancyManifest::entries_for_index( $manifest, $this );
+			$this->assert_current_generation( $generation );
 			return $this->internal_sitemap_entries;
 		}
 
@@ -1106,6 +1123,7 @@ class Orchestrator {
 		}
 
 		$this->internal_sitemap_entries = $entries;
+		$this->assert_current_generation( $generation );
 		return $entries;
 	}
 
@@ -1115,6 +1133,7 @@ class Orchestrator {
 	 * @return array<int, array{provider_id:string,weight:int}>
 	 */
 	public function collect_weighted_providers(): array {
+		$this->begin_publication();
 		$provider_ids = ProviderIdentity::system_providers(
 			! empty( $this->settings['enable_google_news'] )
 		);
@@ -1182,6 +1201,7 @@ class Orchestrator {
 	 * index instead of publishing a schema-invalid empty urlset with HTTP 200.
 	 */
 	public function generate_static_child_xml( string $type, int $page ): ?string {
+		$generation  = $this->begin_publication();
 		$provider_id = $this->resolve_provider_id( $type );
 		$provider    = $this->get_provider( $provider_id );
 		if ( ! $provider ) {
@@ -1190,6 +1210,7 @@ class Orchestrator {
 		}
 
 		$urls = $provider->get_urls( $page );
+		$this->assert_current_generation( $generation );
 		if ( empty( $urls ) && ProviderIdentity::NEWS !== $provider_id ) {
 			$this->omit_internal_sitemap_entry( $provider_id, $page );
 			return null;
@@ -1255,6 +1276,37 @@ class Orchestrator {
 	 * @return string
 	 */
 	public function generate_xml( string $type, int $page, ?array $preloaded_urls = null ) {
+		$generation = $this->begin_publication();
+		$xml        = $this->render_xml( $type, $page, $preloaded_urls );
+		$this->assert_current_generation( $generation );
+		return $xml;
+	}
+
+	/** Capture configuration before any provider, inventory or cache observation. */
+	private function begin_publication(): int {
+		if ( null !== $this->publication_generation ) {
+			$this->assert_current_generation( $this->publication_generation );
+			return $this->publication_generation;
+		}
+		$generation     = \Cybermaps\Core\CacheManager::get_generation( 'sitemap', true );
+		$this->settings = \Cybermaps\Core\ConfigurationStore::publication_settings();
+		\Cybermaps\Core\ConfigurationStore::publication_discovery();
+		$this->providers                = array();
+		$this->internal_sitemap_entries = null;
+		$this->assert_current_generation( $generation );
+		$this->publication_generation = $generation;
+		return $generation;
+	}
+
+	/** Reject bytes or inventory selected before an observed privacy change. */
+	private function assert_current_generation( int $generation ): void {
+		if ( $generation < 0 || \Cybermaps\Core\CacheManager::get_generation( 'sitemap', true ) !== $generation ) {
+			throw new \Cybermaps\Core\BuildUnavailableException( esc_html__( 'Cybermaps stopped sitemap publication because its content changed during selection. Please retry shortly.', 'cybermaps' ) );
+		}
+	}
+
+	/** Render only within the configuration/generation snapshot owned by the caller. */
+	private function render_xml( string $type, int $page, ?array $preloaded_urls = null ): string {
 		if ( 'ai_sitemap' === $type ) {
 			$ai = new \Cybermaps\Discovery\AISitemap();
 			return $ai->get_content();

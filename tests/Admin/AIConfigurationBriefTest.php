@@ -8,9 +8,14 @@ use Cybermaps\Admin\MigrationHub;
 use Cybermaps\Admin\Settings;
 use PHPUnit\Framework\TestCase;
 
+require_once dirname( __DIR__ ) . '/mocks/configuration-database.php';
+
 final class AIConfigurationBriefTest extends TestCase {
+	use \CybermapsConfigurationDatabaseFixture;
+
 	protected function setUp(): void {
 		parent::setUp();
+		$this->install_configuration_database();
 		$GLOBALS['cybermaps_mock_options']    = array();
 		$GLOBALS['cybermaps_mock_actions']    = array();
 		$GLOBALS['cybermaps_mock_filters']    = array();
@@ -328,7 +333,7 @@ final class AIConfigurationBriefTest extends TestCase {
 		$this->assertSame( 1, array_count_values( array_column( $GLOBALS['wp_hooks'], 'hook' ) )['shutdown'] ?? 0 );
 	}
 
-	public function test_apply_rolls_back_an_unreviewed_mutation_to_an_untargeted_root(): void {
+	public function test_apply_preserves_competing_mutation_to_an_untargeted_root(): void {
 		update_option( 'cybermaps_settings', array( 'agency_name' => 'Before' ) );
 		update_option( 'cybermaps_robots_manager', array( 'takeover_enabled' => false ) );
 		$content = $this->changes_json(
@@ -356,13 +361,13 @@ final class AIConfigurationBriefTest extends TestCase {
 			);
 			$this->fail( 'An unreviewed mutation to another Cybermaps root must fail the import.' );
 		} catch ( \RuntimeException $error ) {
-			$this->assertStringContainsString( 'restored the previous configuration', $error->getMessage() );
+			$this->assertStringContainsString( 'Conflicting values were preserved', $error->getMessage() );
 		} finally {
 			unset( $GLOBALS['cybermaps_mock_update_option_behavior'] );
 		}
 
 		$this->assertSame( array( 'agency_name' => 'Before' ), get_option( 'cybermaps_settings' ) );
-		$this->assertSame( array( 'takeover_enabled' => false ), get_option( 'cybermaps_robots_manager' ) );
+		$this->assertSame( array( 'takeover_enabled' => true, 'manual_directives' => 'UNREVIEWED' ), get_option( 'cybermaps_robots_manager' ) );
 	}
 
 	public function test_invalid_or_invented_v2_values_are_errors_and_cannot_write(): void {

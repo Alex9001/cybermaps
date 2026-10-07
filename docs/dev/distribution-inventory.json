@@ -51,6 +51,11 @@
       "source": "assets/js/edge-optimization.js",
       "build": "Copied unchanged; no compilation."
     },
+    "assets/js/identity-page-selector.js": {
+      "license": "GPL-2.0-or-later",
+      "source": "assets/js/identity-page-selector.js",
+      "build": "Copied unchanged; no compilation."
+    },
     "assets/js/media-auditor.js": {
       "license": "GPL-2.0-or-later",
       "source": "assets/js/media-auditor.js",

@@ -164,6 +164,20 @@ class SearchTest extends \WP_UnitTestCase {
 		$this->assertSame( 1024, strlen( $data['results'][0]['snippet'] ) );
 	}
 
+	public function test_empty_metadata_fallback_uses_bounded_literal_content_without_rendering(): void {
+		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['enable_content_hints'] = '0';
+		$post = (object) array( 'ID' => 97, 'post_type' => 'post', 'post_excerpt' => '<b>Stored excerpt</b><template>hidden</template>[demo]Literal[/demo]', 'post_content' => 'Body' );
+		$GLOBALS['cybermaps_mock_posts'][97] = $post;
+		$snippet = ( new \ReflectionMethod( Search::class, 'result_snippet' ) )->invoke( null, $post );
+		self::assertSame( 'Stored excerpt Literal', $snippet );
+		$post->post_excerpt = '';
+		$post->post_content = str_repeat( 'Ordinary words ', 30000 ) . 'PRIVATE SUFFIX';
+		$snippet = ( new \ReflectionMethod( Search::class, 'result_snippet' ) )->invoke( null, $post );
+		self::assertStringStartsWith( 'Ordinary words', $snippet );
+		self::assertStringNotContainsString( 'PRIVATE SUFFIX', $snippet );
+		self::assertLessThan( 400, strlen( $snippet ) );
+	}
+
 	/**
 	 * @return array<string, array{mixed, int}>
 	 */

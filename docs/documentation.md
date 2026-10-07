@@ -1,6 +1,6 @@
 # Cybermaps — Technical Documentation
 
-> Version 8.0.1 · PHP 8.2 · WordPress 7.1
+> Version 8.0.2 · PHP 8.2 · WordPress 7.1
 
 Public sitemap credit is optional. In **Sitemaps**, enable **Show the CYBER MAPS
 credit on public sitemaps** to opt in. `show_sitemap_attribution` defaults to `0`
@@ -136,10 +136,11 @@ not client adoption or a promise that any crawler will use the publication.
 AI Discovery Status separates configuration, advertisement, availability, body
 validity, and protocol conformance. When a compatibility alias works but its
 canonical well-known URL does not, the page identifies likely
-`/.well-known/` interception. Core discovery mode materializes ownership-safe
-canonical bodies automatically; diagnostics keep body availability distinct
-from media-type and header conformance. Cybermaps can maintain an owned
-well-known rewrite block on compatible Apache/LiteSpeed installations and,
+`/.well-known/` interception. The default static mode materializes five
+ownership-safe Core files; API Catalog, AI Catalog, MCP server cards, and
+`/ai-discovery` remain dynamic and must reach WordPress. Diagnostics keep body
+availability distinct from media-type and header conformance. Cybermaps can
+maintain an owned well-known rewrite block on compatible Apache/LiteSpeed installations and,
 after explicit authorization, its own Cloudflare rules. It does not edit nginx
 or Varnish configuration.
 
@@ -464,7 +465,7 @@ token overhead than rendering every full HTML page.
 | `/.well-known/agent-skills/index.json` | `application/json` | Agent Skills Discovery 0.2.0 draft index with a SHA-256 digest of the exact guide bytes |
 | `/.well-known/api-catalog` | `application/linkset+json` | Established RFC 9727/RFC 9264 Linkset API Catalog with enriched per-API Linksets; `/api-catalog` is a dynamic compatibility alias |
 | `/.well-known/ai-catalog.json` | `application/json` | Draft ARD catalog containing only active capabilities; `/ai-catalog.json` is the compatibility alias |
-| `/.well-known/mcp/server-card.json` | `application/json` | Requested compatibility path for the experimental current MCP Server Card |
+| `/.well-known/mcp/server-card.json` | `application/mcp-server-card+json` | Requested compatibility path for the experimental current MCP Server Card |
 | `/cybermaps-openapi.json` | `application/vnd.oai.openapi+json` | Canonical OpenAPI 3.2.0 contract for Cybermaps' public read-only REST routes; retained 3.1.2 is negotiated explicitly |
 
 `/ai.json` is the **Cybermaps AI Discovery Manifest 1.0**. It is a documented
@@ -683,6 +684,10 @@ Engine is an optional materialization layer:
 Dynamic publication-file responses include Cybermaps-managed CORS, ETag, Repr-Digest,
 X-Robots-Tag, CSP, and RFC 9111-oriented cache-policy headers. Content-Digest
 is opt-in and requires a verified identity-encoded response.
+Native WordPress REST routes use public cache policy without Cybermaps byte
+digests, entity tags, or conditional `304` responses. WordPress can transform
+their final representation through field selection, embedding, envelope mode,
+JSON formatting, and response filters after the route callback returns.
 When a physical copy is served directly, PHP does not receive the request, so
 the web server or CDN must add any equivalent headers required by the
 deployment.
@@ -690,7 +695,7 @@ deployment.
 | Mode | Physical publication |
 |---|---|
 | `off` | No generated files; supported requests use WordPress when the server routes them to PHP |
-| `well_known` | Up to eleven small registered root, discovery-index, and canonical well-known targets, limited to enabled capabilities; this is the default |
+| `well_known` | Five small registered root and canonical Agent Skills targets while the Discovery Hub is enabled; this is the default |
 | `all` | The sitemap index and internal children, enabled RSS output, protocol-safe discovery files, localized LLMS output, and eligible RAG chunks |
 
 The default target inventory is:
@@ -700,21 +705,17 @@ The default target inventory is:
 3. `/ai-actions.json`
 4. `/.well-known/agent-skills/cybermaps-site-guide/SKILL.md`
 5. `/.well-known/agent-skills/index.json`
-6. `/.well-known/api-catalog`
-7. `/.well-known/ai-catalog.json`
-8. `/.well-known/mcp/server-card.json` when MCP is enabled
-11. `/ai-discovery`
 
-Dynamic routing remains preferred because it controls protocol headers, media
-types, throttling, and PHP-side request observations. Some nginx and
-OpenLiteSpeed configurations intercept `/.well-known/` before WordPress. The
-ownership-safe physical fallbacks make canonical bodies available in that
-environment when the root is writable and the server serves those files.
-`/ai-discovery` is also materialized. Writing a correct physical file does not
-invalidate a cached response already held by nginx or another proxy. An extensionless static API
-Catalog may still receive a generic media type from the origin; Cybermaps
-therefore reports availability and body validity separately from RFC 9727
-header conformance and never labels the wrong media type conformant.
+API Catalog (`/.well-known/api-catalog`), AI Catalog
+(`/.well-known/ai-catalog.json`), the optional MCP server card
+(`/.well-known/mcp/server-card.json`), and `/ai-discovery` stay dynamic in every
+mode. WordPress must handle these requests to apply their protocol headers,
+media types, throttling, and request observations. Some nginx and OpenLiteSpeed
+configurations intercept these paths before WordPress; follow the routing
+guidance in Sitemap Status to pass the canonical paths and aliases to PHP.
+Reconciliation removes legacy physical copies only when their content still
+matches Cybermaps ownership evidence and reports retained conflicts. Existing
+proxy cache entries can require separate invalidation.
 
 `/skill.md` remains a dynamic compatibility URL. The canonical nested
 `SKILL.md` can be materialized, but `.md` alone does not guarantee a server will
@@ -743,13 +744,26 @@ verification.
 Full sync, purge, ownership migration, and static-file mutations use an
 installation-local option lease plus a connection-scoped MySQL/MariaDB advisory
 lock acquired through WordPress Core's `wpdb` connection. Lease renewal,
-release, ownership-shard changes, and write-intent changes compare the exact
+release, ownership-record changes, and write-intent changes compare the exact
 observed database value and prove the same advisory-lock owner and connection in
 the mutation statement. A request that loses or reconnects its database session
 fails the static mutation closed and queues reconciliation; dynamic publication
 remains available. Database drop-ins that replace the exact Core `wpdb` class or
 may route statements across different connections are unsupported for static
 mutation.
+
+Ownership schema 3 stores one row per normalized path in the site-local
+`cybermaps_static_ownership` table. Reconciliation and cleanup use bounded
+keyset pages instead of loading every recorded path. Legacy option maps are
+copied through resumable, byte-bounded slices. Each slice checks the source
+length and digest; a short final InnoDB transaction verifies the sources,
+promotes the schema, and retires the legacy records together. A changed source,
+failed statement, lost connection, or incompatible transaction leaves migration
+incomplete for retry. Core writers share the same operation lock across the
+upgrade. Direct edits to these internal storage options are outside that writer
+contract. Source digest verification still scans the legacy blob and can make
+large migrations expensive; bounded PHP slices do not imply constant database
+work.
 
 Immediately before a file move or ownership-verified deletion, Cybermaps stores
 one durable typed intent containing the normalized path, prior ownership
@@ -785,7 +799,7 @@ state, and cleanup mutations compare exact observed values while that fence is
 held, so an older release cannot downgrade a future schema or erase a future
 retry. The physical shared-table migration uses one installation-wide fence;
 site-option coordination remains network-specific. A database drop-in that
-cannot provide the required Core connection-bound fence defers only the sharded
+cannot provide the required Core connection-bound fence defers only the legacy
 static-ownership migration with bounded retry state; unrelated 6.1.0 migrations,
 the data-version checkpoint, and dynamic publication continue normally.
 
@@ -873,9 +887,12 @@ Diagnostic logging is disabled by default. Administrators can enable it for one,
 four, or 24 hours while reproducing a problem. Cybermaps stores at most 200
 events in non-autoloaded site options and automatically stops collection when
 the selected window expires. Events older than seven days are discarded.
-Support bundles combine the secret-free system report with recent redacted
-events. They omit credentials, cookies and headers, request bodies, crawler
-analytics, IP and email addresses, full URLs, and absolute paths.
+Support bundles combine the system report with recent diagnostic events. The
+logger does not collect credential options, request headers or bodies, cookies,
+or crawler analytics. It applies bounded, best-effort redaction to common
+credential assignments, IP and email addresses, URLs, and absolute paths in
+messages, including retained events. Free-form text and supplied status data may
+still contain private information; review each bundle locally before sharing it.
 
 After Cloudflare confirms a rule mutation, the Advanced page verifies every
 eligible discovery resource from the administrator's browser. This avoids
@@ -1031,7 +1048,16 @@ attachments. The reader captures a maximum post ID and processes stable
 pagination. Attached-image presence is resolved once per batch, and completed
 batch objects are released from the runtime cache. Posts and pages use the
 configurable rules; another public post type uses a 150-word fallback with no
-age or required-media finding.
+age or required-media finding. Report generation is synchronous. It is not a
+background job that resumes after a request timeout.
+
+When an object-cache implementation cannot release its runtime data, both scan
+passes share a fallback budget of 1,000 candidate hydrations, a 20-second
+deadline, and a 32 MiB memory-headroom check. Exceeding that budget fails the run
+and releases its lease; it never completes a partial report or flushes the
+persistent cache backend. These checks happen at batch boundaries. They do not
+interrupt a database query or guarantee that an unusually large row fits in
+memory. A timeout or failed run is not evidence of full-site coverage.
 
 Only one Content Intelligence Report can run for a site at a time. Generation
 uses an atomic, ownership-token lease that is refreshed before each content
@@ -1039,6 +1065,9 @@ batch and before completion. The lease expires ten minutes after its last
 refresh, so a fatal error or timed-out request cannot strand report generation;
 expired takeover and release use exact-value comparisons so an older request
 cannot overwrite or delete a newer owner's lease.
+
+Initial lease acquisition uses an insert-only database statement. Empty or
+expired lease values can be recovered without replacing a concurrent winner.
 
 Each saved report records:
 
@@ -1074,6 +1103,15 @@ coverage limitation and suppresses all internal-link findings. Link findings
 participate in baseline trends only when both reports used the same complete
 analysis version; other finding categories remain comparable with older runs.
 
+Template inspection reads bounded stored overrides, active-theme files and
+registered template source without rendering dynamic blocks or block hooks.
+WordPress query-style page links are matched to their canonical resources.
+When literal text extraction is incomplete, saved measurements expose a null
+full word count, omit the full content fingerprint, and record an incomplete
+analysis finding. Thin-content findings and comparisons are suppressed for
+that incomplete analysis; an unavailable measurement is never reported as a
+resolved thin-content issue.
+
 Thin-content, freshness, and media findings apply only to public,
 search-indexable resources. Sitemap-only, AI-only, and Content Discovery Strategy
 exclusions do not suppress report findings. Search-noindex, password,
@@ -1106,9 +1144,9 @@ large snapshots with HTTP 413 before hydrating them: CSV supports up to 50,000
 current findings; printable HTML supports up to 25,000 current-plus-baseline
 findings; and full JSON—whether exported or read through REST—supports up to
 25,000 combined current resources, current findings, and baseline findings. CSV
-response rows are emitted incrementally. These bounds protect the request from
-predictable memory exhaustion while preserving the exact
-saved deliverable below the documented limits.
+response rows are emitted incrementally. These are row-count bounds, not byte
+budgets: unusually large saved text fields can still increase hydration and
+serialization memory. Accepted exports preserve the saved deliverable exactly.
 
 ## 9. REST API, WP-CLI, and publishing integrations
 
@@ -1149,9 +1187,10 @@ cannot authenticate an MCP connection. The native Abilities API exposes only
 When enabled, Cybermaps queues a content URL when it enters, changes within,
 or leaves the eligible published sitemap inventory, including deletion. The
 durable database queue deduplicates same-host URLs, records retry state, and
-builds bounded submissions. Each non-blocking request sends the public URL,
+builds bounded submissions. Each request sends the public URL,
 host, site-specific IndexNow key, and key-location URL to
-`https://api.indexnow.org/indexnow`.
+`https://api.indexnow.org/indexnow`. The background worker waits for the response
+with a five-second HTTP timeout so it can record success or schedule a retry.
 While enabled, `/{key}.txt` serves the site key to GET and HEAD requests with a
 one-day public cache header. If `frontend_base_url` points to a different host,
 IndexNow requires that public frontend to proxy or publish the same generated
@@ -1168,6 +1207,14 @@ responses also advertise exactly one `rel="self"` topic plus the configured
 `rel="hub"` links. The feed remains dynamic in every Static File Engine mode
 so its media type and discovery contract do not depend on server configuration.
 The hub list accepts up to 10 unique validated HTTPS URLs.
+
+Publication notifications are best effort: one request retains the first 1,000
+distinct site-and-post snapshots until shutdown, then compares their final state
+under each site's settings and queues. Additional captures are skipped without
+aborting content saves or announcing intermediate editor state. When diagnostic
+logging is enabled, an incomplete-delivery warning records retained and skipped
+counts; it contains no post URLs. This limit does not imply that every bulk edit
+received a notification.
 
 ## 10. Site-configuration backup and migration
 
@@ -1261,8 +1308,9 @@ configuration import. Earlier Markdown templates are intentionally unsupported.
 - CSV exports protect spreadsheet-leading formula characters and use UTF-8
   output.
 - Configuration imports are size-bounded, parsed before writes, sanitized by
-  their owning configuration group, verified after writes, and rolled back on
-  a failed verification.
+  their owning configuration group, and verified after writes. Failed verification
+  triggers an ownership-safe rollback attempt; concurrent changes are preserved
+  and partial or conflicting outcomes are reported.
 - Cybermaps admin responses restrict framing to the same origin with a
   `Content-Security-Policy: frame-ancestors 'self'` header.
 - Public discovery documents are read-only. The admin REST purge requires
@@ -1285,13 +1333,18 @@ Activation creates the required analytics, translation, and report storage,
 schedules log cleanup, adds rewrite rules, and initializes publication state.
 Relevant settings changes invalidate caches and schedule ownership-safe static
 reconciliation. Deactivation clears scheduled events and rewrite rules.
-It also removes unchanged Core-owned generated output; reactivation schedules
-restoration for the selected physical-publication mode.
+It makes a bounded attempt to remove unchanged Core-owned generated output.
+Lock contention, storage failure, retained conflicts, or the cooperative
+ten-second cleanup deadline can leave files in place. No purge continuation
+remains scheduled after deactivation or uninstall. Reactivation schedules
+restoration for the selected physical-publication mode where supported.
 
 Uninstall always clears scheduled hooks and attempts to remove unchanged
 Core-owned generated files. Persistent options, tables, and post metadata are
-removed only when **Uninstall Cleanup** was enabled beforehand. Edited and
-pre-existing files are retained.
+removed only when **Uninstall Cleanup** was enabled beforehand. This data
+cleanup does not depend on every generated file being removed. Non-sensitive
+cache-generation fences remain to prevent reuse of stale external cache data.
+Edited and pre-existing files are retained.
 
 The 6.0 data upgrade is an idempotent, stepwise transaction with a renewable
 owner lock, persisted step state, exponential retry backoff, and post-write

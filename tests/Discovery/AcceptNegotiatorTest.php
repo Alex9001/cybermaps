@@ -16,6 +16,10 @@ final class AcceptNegotiatorTest extends TestCase {
 	public static function preference_cases(): array {
 		return array(
 			'explicit only'       => array( 'text/markdown', true ),
+			'unrelated higher q'  => array( 'text/markdown;q=0.5, application/json;q=1', true ),
+			'unrelated first'     => array( 'application/json;q=1, text/markdown;q=0.1', true ),
+			'html veto with unrelated' => array( 'text/markdown;q=0.5, application/json;q=1, text/html;q=0', true ),
+			'matching wildcard higher q' => array( 'text/markdown;q=0.5, application/json;q=1, text/*;q=0.8', false ),
 			'explicit tie'        => array( 'text/html, text/markdown', true ),
 			'markdown preferred'  => array( 'text/html;q=0.5, text/markdown;q=0.9', true ),
 			'html preferred'      => array( 'text/markdown;q=0.5, text/html', false ),

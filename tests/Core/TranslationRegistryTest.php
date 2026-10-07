@@ -135,6 +135,57 @@ final class TranslationRegistryTest extends \WP_UnitTestCase {
 		$this->assertFalse( $GLOBALS['wpdb']->queried_group_max );
 	}
 
+	public function test_failed_transaction_start_or_commit_never_reports_a_group(): void {
+		foreach ( array( 'START TRANSACTION', 'COMMIT' ) as $failure ) {
+			$database = new TranslationRegistryWpdbStub( array() );
+			$database->fail_transaction = $failure;
+			$GLOBALS['wpdb'] = $database;
+			self::assertSame( 0, ( new TranslationRegistry() )->update_relationship( 0, 1, 300, 'de', 'post' ) );
+			self::assertSame( array(), $database->rows );
+			self::assertSame( 'COMMIT' === $failure ? array( 'START TRANSACTION', 'COMMIT', 'ROLLBACK' ) : array( 'START TRANSACTION' ), $database->transactions );
+		}
+	}
+
+	public function test_failed_collision_read_rolls_back_without_joining_an_unrelated_group(): void {
+		$existing = array( array( 'id' => 1, 'group_id' => 1000000000002, 'site_id' => 1, 'item_id' => 100, 'item_type' => 'post', 'lang_code' => 'en' ) );
+		$database = new TranslationRegistryWpdbStub( $existing );
+		$database->fail_read = 'id <>';
+		$GLOBALS['wpdb'] = $database;
+		self::assertSame( 0, ( new TranslationRegistry() )->update_relationship( 0, 1, 200, 'fr' ) );
+		self::assertSame( $existing, $database->rows );
+		self::assertSame( array( 'START TRANSACTION', 'ROLLBACK' ), $database->transactions );
+		self::assertNotSame( 1000000000002, ( new TranslationRegistry() )->update_relationship( 0, 1, 200, 'fr' ) );
+	}
+
+	public function test_failed_previous_group_read_does_not_mutate_existing_relationship(): void {
+		$database = $GLOBALS['wpdb'];
+		$before = $database->rows;
+		$database->fail_read = 'SELECT group_id';
+		self::assertSame( 0, ( new TranslationRegistry() )->update_relationship( 90, 1, 100, 'fr' ) );
+		self::assertSame( $before, $database->rows );
+		self::assertSame( array(), $database->transactions );
+	}
+
+	public function test_failed_deletion_precondition_preserves_row_and_remote_cache(): void {
+		$database = $GLOBALS['wpdb'];
+		$before = $database->rows;
+		$database->fail_read = 'SELECT group_id';
+		self::assertFalse( ( new TranslationRegistry() )->delete_relationship( 1, 100 ) );
+		self::assertSame( $before, $database->rows );
+		self::assertSame( array(), $GLOBALS['cybermaps_mock_switched_blogs'] );
+	}
+
+	public function test_failed_affected_site_read_preserves_update_and_delete_authority(): void {
+		$database = $GLOBALS['wpdb'];
+		$before = $database->rows;
+		$database->fail_read = 'SELECT DISTINCT site_id';
+		self::assertSame( 0, ( new TranslationRegistry() )->update_relationship( 90, 1, 100, 'fr' ) );
+		self::assertSame( $before, $database->rows );
+		$database->fail_read = 'SELECT DISTINCT site_id';
+		self::assertFalse( ( new TranslationRegistry() )->delete_relationship( 1, 100 ) );
+		self::assertSame( $before, $database->rows );
+	}
+
 	public function test_atomic_upsert_preserves_one_row_per_site_item_and_type(): void {
 		$registry = new TranslationRegistry();
 		$registry->update_relationship( 20, 1, 100, 'en-gb', 'post' );
@@ -297,6 +348,10 @@ final class TranslationRegistryWpdbStub {
 	public string $base_prefix = 'wp_';
 	public int $insert_id = 0;
 	public bool $queried_group_max = false;
+	public string $fail_transaction = '';
+	public string $last_error = '';
+	public string $fail_read = '';
+	private array $transaction_rows = array();
 
 	/** @var string[] */
 	public array $transactions = array();
@@ -320,6 +375,12 @@ final class TranslationRegistryWpdbStub {
 	}
 
 	public function get_var( string $query ) {
+		$this->last_error = '';
+		if ( '' !== $this->fail_read && str_contains( $query, $this->fail_read ) ) {
+			$this->fail_read = '';
+			$this->last_error = 'Injected registry read failure';
+			return null;
+		}
 		if ( str_contains( $query, 'MAX(group_id)' ) ) {
 			$this->queried_group_max = true;
 			return max( array_column( $this->rows, 'group_id' ) ) + 1;
@@ -355,6 +416,12 @@ final class TranslationRegistryWpdbStub {
 	}
 
 	public function get_results( string $query, $output = null ): array {
+		$this->last_error = '';
+		if ( '' !== $this->fail_read && str_contains( $query, $this->fail_read ) ) {
+			$this->fail_read = '';
+			$this->last_error = 'Injected registry row read failure';
+			return array();
+		}
 		if ( str_contains( $query, 'SELECT DISTINCT related.site_id' ) ) {
 			preg_match( '/source\\.site_id = ([0-9]+)/', $query, $matches );
 			$source_site_id = (int) ( $matches[1] ?? 0 );
@@ -429,6 +496,15 @@ final class TranslationRegistryWpdbStub {
 		$query = trim( $query );
 		if ( in_array( $query, array( 'START TRANSACTION', 'COMMIT', 'ROLLBACK' ), true ) ) {
 			$this->transactions[] = $query;
+			if ( $query === $this->fail_transaction ) {
+				return false;
+			}
+			if ( 'START TRANSACTION' === $query ) {
+				$this->transaction_rows = $this->rows;
+			}
+			if ( 'ROLLBACK' === $query ) {
+				$this->rows = $this->transaction_rows;
+			}
 			return 1;
 		}
 

@@ -26,9 +26,11 @@ class StaticBridgeSyncReportTest extends \WP_UnitTestCase {
 		);
 		unset( $GLOBALS['cybermaps_mock_wp_filesystem_put_contents_callback'] );
 		$this->delete_generated_files();
+		\cybermaps_mock_enable_static_ownership_database( true );
 	}
 
 	protected function tearDown(): void {
+		\cybermaps_mock_disable_static_ownership_database();
 		$this->delete_generated_files();
 		unset(
 			$GLOBALS['cybermaps_mock_home_url'],
@@ -141,17 +143,27 @@ class StaticBridgeSyncReportTest extends \WP_UnitTestCase {
 		$GLOBALS['cybermaps_mock_filter_callbacks']['cybermaps_publication_eligibility'] = array(
 			static fn ( $decision ) => $decision->with_reasons( array( 'test_exclusion' ) ),
 		);
-		$GLOBALS['wpdb'] = new class() {
+		$GLOBALS['wpdb'] = new class( $previous_wpdb ) {
 			public string $posts = 'wp_posts';
-
-			public function prepare( string $query, mixed ...$args ): array {
-				return array( 'query' => $query, 'args' => $args );
+			public string $prefix = 'wp_';
+			public string $options = 'wp_options';
+			public string $last_error = '';
+			public array $last_result = array();
+			public function __construct( private \CybermapsMockStaticOwnershipDatabase $database ) {}
+			public function prepare( string $query, mixed ...$args ): array { return $this->database->prepare( $query, ...$args ); }
+			public function get_var( array|string $query ): mixed {
+				if ( str_contains( is_array( $query ) ? $query['query'] : $query, 'post_type' ) ) { return 4000; }
+				$value = $this->database->get_var( $query );
+				$this->last_error = $this->database->last_error;
+				return $value;
 			}
-
-			public function get_var( mixed $query ): int {
-				unset( $query );
-				return 4000;
+			public function query( array|string $query ): int|false {
+				$value = $this->database->query( $query );
+				$this->last_error = $this->database->last_error;
+				$this->last_result = $this->database->last_result;
+				return $value;
 			}
+			public function get_charset_collate(): string { return $this->database->get_charset_collate(); }
 		};
 
 		$bridge = StaticBridge::get_instance();
@@ -217,6 +229,8 @@ class StaticBridgeSyncReportTest extends \WP_UnitTestCase {
 			'.well-known/.htaccess'     => "# BEGIN Cybermaps\nRewriteEngine On\n# END Cybermaps\n",
 			'.well-known/ai-discovery'  => '{}',
 			'.well-known/api-catalog'   => '{}',
+			'.well-known/ai-catalog.json' => '{}',
+			'.well-known/mcp/server-card.json' => '{}',
 			'ai-discovery'              => '{}',
 		);
 		foreach ( $legacy_files as $filename => $content ) {
@@ -227,7 +241,7 @@ class StaticBridgeSyncReportTest extends \WP_UnitTestCase {
 		$report = $bridge->sync_all();
 
 		$this->assertSame( 'complete', $report['status'] );
-		foreach ( array( '.well-known/.htaccess', '.well-known/ai-discovery' ) as $filename ) {
+		foreach ( array_keys( $legacy_files ) as $filename ) {
 			$this->assertNotContains( $filename, $report['desired'] );
 			$this->assertContains( $filename, $report['deleted'] );
 			$this->assertFileDoesNotExist( ABSPATH . $filename );
@@ -236,14 +250,23 @@ class StaticBridgeSyncReportTest extends \WP_UnitTestCase {
 				\get_option( 'cybermaps_static_hashes', array() )
 			);
 		}
-		$this->assertContains( 'ai-discovery', $report['desired'] );
-		$this->assertContains( 'ai-discovery', $report['written'] );
-		$this->assertFileExists( ABSPATH . 'ai-discovery' );
-		$this->assertArrayHasKey( 'ai-discovery', \get_option( 'cybermaps_static_hashes', array() ) );
-		$this->assertContains( '.well-known/api-catalog', $report['desired'] );
-		$this->assertContains( '.well-known/api-catalog', $report['written'] );
-		$this->assertFileExists( ABSPATH . '.well-known/api-catalog' );
-		$this->assertArrayHasKey( '.well-known/api-catalog', \get_option( 'cybermaps_static_hashes', array() ) );
+
+	}
+
+	public function test_host_modified_protocol_files_are_retained_without_republication(): void {
+		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['static_engine_mode'] = 'all';
+		$bridge = StaticBridge::get_instance();
+		$paths = array( 'ai-discovery', '.well-known/api-catalog', '.well-known/ai-catalog.json', '.well-known/mcp/server-card.json' );
+		foreach ( $paths as $path ) {
+			$this->assertTrue( $bridge->write_file( $path, '{}' ) );
+			file_put_contents( ABSPATH . $path, '{"owner":"host"}' );
+		}
+		$report = $bridge->sync_all();
+		foreach ( $paths as $path ) {
+			$this->assertSame( 'content_changed', $report['retained'][ $path ] );
+			$this->assertNotContains( $path, $report['desired'] );
+			$this->assertSame( '{"owner":"host"}', file_get_contents( ABSPATH . $path ) );
+		}
 	}
 
 	public function test_modified_legacy_publication_is_retained(): void {
@@ -421,6 +444,8 @@ class StaticBridgeSyncReportTest extends \WP_UnitTestCase {
 			'.well-known/.htaccess',
 			'.well-known/ai-discovery',
 			'.well-known/api-catalog',
+			'.well-known/ai-catalog.json',
+			'.well-known/mcp/server-card.json',
 		);
 		foreach ( EndpointRegistry::get_instance()->get_static_targets( 'all' ) as $target ) {
 			$files[] = (string) $target['filename'];

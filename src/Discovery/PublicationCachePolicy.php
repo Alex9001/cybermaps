@@ -111,6 +111,14 @@ final class PublicationCachePolicy {
 	 * @param array<string,mixed> $policy Normalized policy.
 	 */
 	public static function cache_control( array $policy ): string {
+		if ( ! empty( $policy['no_store'] ) ) {
+			return 'no-store, no-cache, must-revalidate, max-age=0';
+		}
+		return self::public_cache_control( $policy );
+	}
+
+	/** @param array<string,mixed> $policy Normalized public cache policy. */
+	private static function public_cache_control( array $policy ): string {
 		$parts            = array( 'public', 'max-age=' . max( 0, (int) ( $policy['browser_ttl'] ?? self::DEFAULT_BROWSER_TTL ) ) );
 		$must             = ! empty( $policy['must_revalidate'] );
 		$stale            = max( 0, (int) ( $policy['stale_while_revalidate'] ?? 0 ) )
@@ -212,7 +220,10 @@ final class PublicationCachePolicy {
 		$all = array();
 		foreach ( array_merge( explode( ',', $existing ), $tokens ) as $token ) {
 			$token = trim( (string) $token );
-			if ( '' === $token || '*' === $token || 1 !== preg_match( '/^[!#$%&\'*+.^_`|~0-9A-Za-z-]+$/', $token ) ) {
+			if ( '*' === $token ) {
+				return '*';
+			}
+			if ( '' === $token || 1 !== preg_match( '/^[!#$%&\'*+.^_`|~0-9A-Za-z-]+$/', $token ) ) {
 				continue;
 			}
 			$all[ strtolower( $token ) ] = $token;

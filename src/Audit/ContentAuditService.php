@@ -19,7 +19,8 @@ final class ContentAuditService {
 		private readonly AuditRunRepository $repository = new AuditRunRepository(),
 		private readonly ContentAuditEvaluator $evaluator = new ContentAuditEvaluator(),
 		private readonly PublishedPostSource $post_source = new PublishedPostSource(),
-		?InternalLinkAnalyzer $link_analyzer = null
+		?InternalLinkAnalyzer $link_analyzer = null,
+		private readonly ?AuditRuntimeBudget $runtime_budget = null
 	) {
 		$this->link_analyzer = $link_analyzer ?? new InternalLinkAnalyzer( null, null, $this->post_source );
 	}
@@ -45,7 +46,8 @@ final class ContentAuditService {
 			$baseline_id = $this->repository->latest_completed_run_id();
 			$run_id      = $this->repository->begin( $policy, $baseline_id );
 			try {
-				$post_types = \Cybermaps\Core\PublicationPostTypes::names();
+				$before_load = $this->runtime_checkpoint();
+				$post_types  = \Cybermaps\Core\PublicationPostTypes::names();
 				if ( empty( $post_types ) ) {
 					$post_types = array( 'post', 'page' );
 				}
@@ -54,8 +56,10 @@ final class ContentAuditService {
 					function () use ( $lock_token ): void {
 						$this->renew_run_lock( $lock_token );
 						$this->flush_runtime_cache();
-					}
+					},
+					$before_load
 				);
+				$text_complete  = true;
 				$resource_count = 0;
 				$finding_count  = 0;
 				$snapshot       = hash_init( 'sha256' );
@@ -67,7 +71,7 @@ final class ContentAuditService {
 					)
 				);
 
-				foreach ( $this->post_source->batches( $post_types ) as $posts ) {
+				foreach ( $this->post_source->batches( $post_types, $before_load ) as $posts ) {
 					$this->renew_run_lock( $lock_token );
 					try {
 						$attached_image_parents = $this->post_source->attached_image_parent_ids( $posts );
@@ -75,13 +79,14 @@ final class ContentAuditService {
 							if ( ! is_object( $post ) || ! isset( $post->ID ) ) {
 								continue;
 							}
-							$result  = $this->evaluator->evaluate(
+							$result        = $this->evaluator->evaluate(
 								$post,
 								$policy,
 								null,
 								isset( $attached_image_parents[ (int) $post->ID ] )
 							);
-							$post_id = (int) $post->ID;
+							$text_complete = $text_complete && $result['resource']['measurement']['text_complete'];
+							$post_id       = (int) $post->ID;
 							$result['resource']['measurement']['internal_links'] = $link_results['measurements'][ $post_id ] ?? array(
 								'analysis_complete' => false,
 							);
@@ -105,6 +110,9 @@ final class ContentAuditService {
 					}
 				}
 
+				$link_results['analysis']['text_complete'] = $text_complete;
+				$before_load( 0 );
+				$this->update_snapshot_hash( $snapshot, array( 'text_complete' => $text_complete ) );
 				$this->renew_run_lock( $lock_token );
 				$this->repository->complete(
 					$run_id,
@@ -155,7 +163,7 @@ final class ContentAuditService {
 		}
 		$baseline_id       = (int) ( $run['baseline_run_id'] ?? 0 );
 		$has_link_analysis = InternalLinkAnalyzer::ANALYSIS_VERSION === (int) ( $run['analysis']['internal_link_version'] ?? 0 );
-		$baseline_analysis = $has_link_analysis && $baseline_id > 0
+		$baseline_analysis = $baseline_id > 0
 			? $this->repository->get_run_analysis( $baseline_id )
 			: null;
 		$link_comparable   = ! $has_link_analysis || $baseline_id < 1
@@ -164,16 +172,19 @@ final class ContentAuditService {
 				&& $this->link_analyses_are_comparable( (array) ( $run['analysis'] ?? array() ), $baseline_analysis )
 			);
 
-		$run['diff'] = $this->repository->finding_diff_counts(
+		$text_comparable = $baseline_id < 1 || $this->text_analyses_are_comparable( (array) ( $run['analysis'] ?? array() ), (array) $baseline_analysis );
+		$run['diff']     = $this->repository->finding_diff_counts(
 			$run_id,
 			$baseline_id,
 			(int) ( $run['finding_count'] ?? 0 ),
-			$link_comparable
+			$link_comparable,
+			$text_comparable
 		);
 		if ( $has_link_analysis ) {
 			$run['diff']['internal_links_comparable'] = $link_comparable;
 		}
 
+		$run['diff']['text_comparable'] = $text_comparable;
 		return $run;
 	}
 
@@ -195,13 +206,30 @@ final class ContentAuditService {
 			$previous = $this->without_internal_link_findings( $previous );
 		}
 
+		$text_comparable = null === $baseline || $this->text_analyses_are_comparable( (array) ( $run['analysis'] ?? array() ), (array) ( $baseline['analysis'] ?? array() ) );
+		if ( ! $text_comparable ) {
+			$current  = $this->without_thin_findings( $current );
+			$previous = $this->without_thin_findings( $previous );
+		}
+
 		return array(
 			'baseline_run_id'           => (int) ( $baseline['id'] ?? 0 ),
 			'added'                     => array_values( array_diff_key( $current, $previous ) ),
 			'resolved'                  => array_values( array_diff_key( $previous, $current ) ),
 			'persisting'                => array_values( array_intersect_key( $current, $previous ) ),
 			'internal_links_comparable' => $link_comparable,
+			'text_comparable'           => $text_comparable,
 		);
+	}
+
+	/** Legacy snapshots without this marker retain their established meaning. */
+	private function text_analyses_are_comparable( array $current, array $baseline ): bool {
+		return false !== ( $current['text_complete'] ?? true ) && false !== ( $baseline['text_complete'] ?? true );
+	}
+
+	/** @return array<string,array<string,mixed>> */
+	private function without_thin_findings( array $findings ): array {
+		return array_filter( $findings, static fn( array $finding ): bool => 'thin_content' !== ( $finding['finding_key'] ?? $finding['key'] ?? '' ) );
 	}
 
 	/** @param array<string,array<string,mixed>> $findings @return array<string,array<string,mixed>> */
@@ -288,15 +316,20 @@ final class ContentAuditService {
 	 * their persistent backend.
 	 */
 	private function flush_runtime_cache(): void {
-		if (
-			function_exists( 'wp_cache_flush_runtime' )
-			&& (
-				! function_exists( 'wp_cache_supports' )
-				|| wp_cache_supports( 'flush_runtime' )
-			)
-		) {
+		if ( AuditRuntimeBudget::cleanup_supported() ) {
 			wp_cache_flush_runtime();
 		}
+	}
+
+	/** Share one fallback budget across inventory and text-measurement passes. */
+	private function runtime_checkpoint(): \Closure {
+		if ( AuditRuntimeBudget::cleanup_supported() ) {
+			return static function ( int $candidates = 0 ): void {
+				unset( $candidates );
+			};
+		}
+		$budget = $this->runtime_budget ?? new AuditRuntimeBudget();
+		return $budget->claim( ... );
 	}
 
 	private function renew_run_lock( string $token ): void {

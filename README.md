@@ -144,7 +144,7 @@ posting it. Use **Download support bundle** if copying is unavailable.
 
 - Publishing an endpoint does not guarantee discovery, training, citation,
   ranking, or use by an AI provider.
-- Complete `llms-full.txt` output is opt-in and fails explicitly at its 4 MiB
+- Complete `llms-full.txt` output is opt-in and fails explicitly at its 32 MiB
   safety boundary instead of silently presenting partial content as complete.
 - `/ai.json` implements Cybermaps AI Discovery Manifest 1.0, a vendor extension.
 - The AI Discovery Protocol 3.0 Level 3 surface includes the manifest, bounded
@@ -152,9 +152,12 @@ posting it. Use **Download support bundle** if copying is unavailable.
   archive publications. Optional MCP operations use authorized, consented access.
 - The Agent Skills guide includes a digest-bound 0.2.0 draft discovery index
   and the retained `/skill.md` compatibility URL.
-- Dynamic publications include CORS, ETag, and Content-Digest headers. For
-  physical static copies, the web server or CDN must supply equivalent headers
-  because those requests do not reach PHP.
+- Dynamic publication files include CORS, ETag, and Repr-Digest headers.
+  Content-Digest is opt-in for a verified identity-encoded response. Native
+  WordPress REST responses use public cache policy without Cybermaps byte
+  digests, entity tags, or conditional `304` responses because WordPress controls
+  their final serialization. For physical static copies, the web server or CDN
+  must supply equivalent headers because those requests do not reach PHP.
 
 </details>
 

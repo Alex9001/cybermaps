@@ -125,7 +125,7 @@ class TranslationRegistry {
 
 		// Capture the previous group so moving an item invalidates both sides.
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching -- The previous group must be read exactly before the relationship write so both affected cache families can be invalidated.
-		$previous_group_id = (int) $wpdb->get_var(
+		$previous_group_id = $wpdb->get_var(
 			$wpdb->prepare(
 				'SELECT group_id FROM %i WHERE site_id = %d AND item_id = %d AND item_type = %s',
 				$table,
@@ -135,6 +135,14 @@ class TranslationRegistry {
 			)
 		);
 		// phpcs:enable
+		if ( false === $previous_group_id || ! empty( $wpdb->last_error ) ) {
+			return 0;
+		}
+		$previous_group_id = $this->positive_scalar( $previous_group_id );
+		$affected_site_ids = $this->mutation_site_ids( array( $previous_group_id, $group_id ), $site_id, $type );
+		if ( null === $affected_site_ids ) {
+			return 0;
+		}
 
 		if ( $group_id < 1 ) {
 			$group_id = $previous_group_id;
@@ -160,7 +168,8 @@ class TranslationRegistry {
 				$site_id,
 				$item_id,
 				$type,
-				$lang
+				$lang,
+				$affected_site_ids
 			);
 			$saved                = $group_id > 0;
 			$relationship_changed = $saved;
@@ -171,13 +180,6 @@ class TranslationRegistry {
 		}
 
 		if ( $relationship_changed ) {
-			$affected_site_ids = array( $site_id );
-			foreach ( array_unique( array_filter( array( $previous_group_id, (int) $group_id ) ) ) as $affected_group_id ) {
-				$affected_site_ids = array_merge(
-					$affected_site_ids,
-					$this->get_group_site_ids( (int) $affected_group_id, $type )
-				);
-			}
 			$this->invalidate_sites( $affected_site_ids );
 		}
 
@@ -230,12 +232,16 @@ class TranslationRegistry {
 		int $site_id,
 		int $item_id,
 		string $type,
-		string $lang
+		string $lang,
+		array &$affected_site_ids
 	): int {
 		global $wpdb;
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Transactional insert/update coordination must observe exact registry state.
 		$transaction_started = false !== $wpdb->query( 'START TRANSACTION' );
-		$inserted            = $wpdb->query(
+		if ( ! $transaction_started ) {
+			return 0;
+		}
+		$inserted = $wpdb->query(
 			$wpdb->prepare(
 				'INSERT INTO %i
                     (group_id, site_id, item_id, item_type, lang_code)
@@ -270,7 +276,7 @@ class TranslationRegistry {
 			);
 		}
 
-		if ( $row_id < 1 ) {
+		if ( ! $this->valid_observed_identity( $row_id ) ) {
 			$this->finish_transaction( $transaction_started, false );
 			return 0;
 		}
@@ -303,15 +309,28 @@ class TranslationRegistry {
 				$row_id
 			)
 		);
-		if ( $stored_group_id < 1 ) {
+		if ( ! $this->valid_observed_identity( $stored_group_id ) ) {
 			$this->finish_transaction( $transaction_started, false );
 			return 0;
 		}
 
-		$this->finish_transaction( $transaction_started, true );
 		// phpcs:enable
+		return $this->finish_group_creation( $stored_group_id, $site_id, $type, $affected_site_ids );
+	}
 
-		return $stored_group_id;
+	private function finish_group_creation( int $group_id, int $site_id, string $type, array &$affected_site_ids ): int {
+		$sites = $this->mutation_site_ids( array( $group_id ), $site_id, $type );
+		if ( null === $sites ) {
+			$this->finish_transaction( true, false );
+			return 0;
+		}
+		$affected_site_ids = $sites;
+		return $this->finish_transaction( true, true ) ? $group_id : 0;
+	}
+
+	private function valid_observed_identity( int $identity ): bool {
+		global $wpdb;
+		return $identity > 0 && empty( $wpdb->last_error );
 	}
 
 	/**
@@ -323,7 +342,7 @@ class TranslationRegistry {
 		for ( $namespace = 1; $namespace <= 8; ++$namespace ) {
 			$candidate = ( self::GENERATED_GROUP_OFFSET * $namespace ) + $row_id;
 			// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Collision detection must observe the exact shared registry state.
-			$collision = (int) $wpdb->get_var(
+			$collision = $wpdb->get_var(
 				$wpdb->prepare(
 					'SELECT id FROM %i
                     WHERE group_id = %d AND id <> %d
@@ -335,7 +354,10 @@ class TranslationRegistry {
 			);
 			// phpcs:enable
 
-			if ( $collision < 1 ) {
+			if ( false === $collision || ! empty( $wpdb->last_error ) ) {
+				return 0;
+			}
+			if ( null === $collision ) {
 				return $candidate;
 			}
 		}
@@ -344,21 +366,24 @@ class TranslationRegistry {
 	}
 
 	/**
-	 * Commit or roll back an optional transaction.
+	 * Commit or roll back a transaction, reporting database failure.
 	 */
-	private function finish_transaction( bool $started, bool $commit ): void {
+	private function finish_transaction( bool $started, bool $commit ): bool {
 		if ( ! $started ) {
-			return;
+			return false;
 		}
 
 		global $wpdb;
 		if ( $commit ) {
             // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Fixed transaction-control statement; there are no values to prepare.
-			$wpdb->query( 'COMMIT' );
-		} else {
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Fixed transaction-control statement; there are no values to prepare.
-			$wpdb->query( 'ROLLBACK' );
+			$committed = false !== $wpdb->query( 'COMMIT' );
+			if ( $committed ) {
+				return true;
+			}
 		}
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Fixed transaction-control statement; there are no values to prepare.
+		$rolled_back = false !== $wpdb->query( 'ROLLBACK' );
+		return ! $commit && $rolled_back;
 	}
 
 	/**
@@ -383,7 +408,7 @@ class TranslationRegistry {
 		$table = $wpdb->base_prefix . 'cybermaps_translations';
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching -- Deletion must read the exact prior group before changing the shared relationship table.
-		$group_id = (int) $wpdb->get_var(
+		$group_id = $wpdb->get_var(
 			$wpdb->prepare(
 				'SELECT group_id FROM %i WHERE site_id = %d AND item_id = %d AND item_type = %s',
 				$table,
@@ -392,7 +417,14 @@ class TranslationRegistry {
 				$type
 			)
 		);
-		$result   = $wpdb->delete(
+		if ( false === $group_id || ! empty( $wpdb->last_error ) ) {
+			return false;
+		}
+		$affected_site_ids = $this->mutation_site_ids( array( $this->positive_scalar( $group_id ) ), $site_id, $type );
+		if ( null === $affected_site_ids ) {
+			return false;
+		}
+		$result = $wpdb->delete(
 			$table,
 			array(
 				'site_id'   => $site_id,
@@ -404,17 +436,23 @@ class TranslationRegistry {
 		// phpcs:enable
 
 		if ( $result ) {
-			$affected_site_ids = array( $site_id );
-			if ( $group_id > 0 ) {
-				$affected_site_ids = array_merge(
-					$affected_site_ids,
-					$this->get_group_site_ids( $group_id, $type )
-				);
-			}
 			$this->invalidate_sites( $affected_site_ids );
 		}
 
 		return false !== $result;
+	}
+
+	/** Resolve invalidation dependencies before changing relationship authority. */
+	private function mutation_site_ids( array $groups, int $site_id, string $type ): ?array {
+		$sites = array( $site_id );
+		foreach ( array_unique( array_filter( $groups ) ) as $group ) {
+			$members = $this->get_group_site_ids( (int) $group, $type );
+			if ( null === $members ) {
+				return null;
+			}
+			$sites = array_merge( $sites, $members );
+		}
+		return array_values( array_unique( $sites ) );
 	}
 
 	/**
@@ -472,8 +510,11 @@ class TranslationRegistry {
 		);
 		// phpcs:enable
 
+		if ( ! is_array( $members ) || ! empty( $wpdb->last_error ) ) {
+			return 0;
+		}
 		$removed = 0;
-		foreach ( is_array( $members ) ? $members : array() as $member ) {
+		foreach ( $members as $member ) {
 			if (
 				! is_object( $member )
 			) {
@@ -526,12 +567,11 @@ class TranslationRegistry {
 			return false;
 		}
 
-		$this->invalidate_sites(
-			array_merge(
-				array( $site_id ),
-				$this->get_group_site_ids( $group_id, $type )
-			)
-		);
+		$sites = $this->mutation_site_ids( array( $group_id ), $site_id, $type );
+		if ( null === $sites ) {
+			return false;
+		}
+		$this->invalidate_sites( $sites );
 		return true;
 	}
 
@@ -599,9 +639,9 @@ class TranslationRegistry {
 	/**
 	 * Return the distinct valid site IDs represented by one group.
 	 *
-	 * @return int[]
+	 * @return int[]|null Null when the authoritative lookup failed.
 	 */
-	private function get_group_site_ids( int $group_id, string $type ): array {
+	private function get_group_site_ids( int $group_id, string $type ): ?array {
 		$type = substr( sanitize_key( $type ), 0, 20 );
 		if ( $group_id < 1 || '' === $type ) {
 			return array();
@@ -624,7 +664,7 @@ class TranslationRegistry {
 		);
 		// phpcs:enable
 
-		return $this->site_ids_from_rows( $sites );
+		return is_array( $sites ) && empty( $wpdb->last_error ) ? $this->site_ids_from_rows( $sites ) : null;
 	}
 
 	/**

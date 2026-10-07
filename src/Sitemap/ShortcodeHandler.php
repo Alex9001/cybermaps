@@ -24,11 +24,12 @@ class ShortcodeHandler {
 	private const MAX_FILTER_TOKENS      = 200;
 	private const MAX_FILTER_TOKEN_BYTES = 200;
 
-	private array $current_wildcards = array();
-	private array $current_exacts    = array();
-	private int $rendered_count      = 0;
-	private bool $add_nofollow       = false;
-	private bool $css_enqueued       = false;
+	private array $current_wildcards   = array();
+	private array $current_exacts      = array();
+	private int $rendered_count        = 0;
+	private bool $add_nofollow         = false;
+	private bool $css_enqueued         = false;
+	private bool $selection_incomplete = false;
 
 	/**
 	 * Register the [cybermap] shortcode.
@@ -82,7 +83,8 @@ class ShortcodeHandler {
 	 * @return string
 	 */
 	public function render_shortcode( array $atts ): string {
-		$options = \Cybermaps\Core\ConfigurationStore::settings();
+		$this->selection_incomplete = false;
+		$options                    = \Cybermaps\Core\ConfigurationStore::settings();
 		if ( empty( $options['enable_shortcode'] ) ) {
 			return '';
 		}
@@ -102,23 +104,31 @@ class ShortcodeHandler {
 		$eligibility        = new PublicationEligibility();
 		$sections           = array();
 		$remaining_capacity = $config['limit'];
-		$this->append_post_sections(
-			$sections,
-			$remaining_capacity,
-			$post_types,
-			$exclusions['ids'],
-			$config,
-			$eligibility
-		);
-		$this->append_taxonomy_sections(
-			$sections,
-			$remaining_capacity,
-			$taxonomies,
-			$exclusions['ids'],
-			$config,
-			$options,
-			$eligibility
-		);
+		try {
+			$this->append_post_sections(
+				$sections,
+				$remaining_capacity,
+				$post_types,
+				$exclusions['ids'],
+				$config,
+				$eligibility
+			);
+			$this->append_taxonomy_sections(
+				$sections,
+				$remaining_capacity,
+				$taxonomies,
+				$exclusions['ids'],
+				$config,
+				$options,
+				$eligibility
+			);
+		} catch ( \Cybermaps\Core\BuildUnavailableException ) {
+			$this->selection_incomplete = true;
+		}
+
+		if ( $this->selection_incomplete ) {
+			return '<div class="cybermap-shortcode cybermap-unavailable"><p>' . esc_html__( 'Sitemap selection is temporarily unavailable. Please retry later.', 'cybermaps' ) . '</p></div>';
+		}
 
 		if ( empty( $sections ) ) {
 			return '<div class="cybermap-shortcode cybermap-empty"><p>' . esc_html__( 'No pages found.', 'cybermaps' ) . '</p></div>';
@@ -401,42 +411,46 @@ class ShortcodeHandler {
 		$page           = 1;
 		add_filter( 'posts_where', array( $this, 'filter_wildcards' ) );
 
-		do {
-			$batch_size  = min( self::QUERY_BATCH_SIZE, self::MAX_SCAN_ITEMS - $inspected );
-			$args        = array(
-				'post_type'      => $post_types,
-				'posts_per_page' => $batch_size,
-				'paged'          => $page,
-				'post_status'    => 'publish',
-				// phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in
-				'post__not_in'   => $exclude_ids,
-				'orderby'        => 'title',
-				'order'          => $sort_order,
-				'fields'         => 'all',
-				'no_found_rows'  => true,
-			);
-			$query       = new \WP_Query( $args );
-			$batch       = (array) $query->posts;
-			$batch_count = count( $batch );
-			$inspected  += $batch_count;
+		try {
+			do {
+				$batch_size  = min( self::QUERY_BATCH_SIZE, self::MAX_SCAN_ITEMS - $inspected );
+				$args        = array(
+					'post_type'      => $post_types,
+					'posts_per_page' => $batch_size,
+					'paged'          => $page,
+					'post_status'    => 'publish',
+					// phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in
+					'post__not_in'   => $exclude_ids,
+					'orderby'        => 'title',
+					'order'          => $sort_order,
+					'fields'         => 'all',
+					'no_found_rows'  => true,
+				);
+				$rows        = PublicationQuery::posts( $args );
+				$batch       = array_slice( $rows, 0, $batch_size );
+				$batch_count = count( $batch );
+				$inspected  += $batch_count;
 
-			foreach ( $batch as $post ) {
-				if ( ! $this->is_eligible_post( $post, $exclude_ids, $eligibility ) ) {
-					continue;
+				foreach ( $batch as $post ) {
+					if ( ! $this->is_eligible_post( $post, $exclude_ids, $eligibility ) ) {
+						continue;
+					}
+					$grouped_posts[ (string) $post->post_type ][] = $post;
+					++$eligible_count;
+					if ( $eligible_count >= $limit ) {
+						break;
+					}
 				}
-				$grouped_posts[ (string) $post->post_type ][] = $post;
-				++$eligible_count;
-				if ( $eligible_count >= $limit ) {
-					break;
-				}
-			}
-			++$page;
-		} while (
-			$eligible_count < $limit
-			&& $inspected < self::MAX_SCAN_ITEMS
-			&& $batch_count === $batch_size
-		);
-		remove_filter( 'posts_where', array( $this, 'filter_wildcards' ) );
+				++$page;
+			} while (
+				$eligible_count < $limit
+				&& $inspected < self::MAX_SCAN_ITEMS
+				&& $batch_count === $batch_size
+			);
+			$this->selection_incomplete = $eligible_count < $limit && $inspected >= self::MAX_SCAN_ITEMS && $batch_count === $batch_size;
+		} finally {
+			remove_filter( 'posts_where', array( $this, 'filter_wildcards' ) );
+		}
 		return $grouped_posts;
 	}
 
@@ -554,7 +568,7 @@ class ShortcodeHandler {
 		$offset     = 0;
 		while ( $node_count < $capacity && $offset < self::MAX_SCAN_ITEMS ) {
 			$batch_size = min( self::QUERY_BATCH_SIZE, self::MAX_SCAN_ITEMS - $offset );
-			$terms      = get_terms(
+			$terms      = PublicationQuery::terms(
 				array(
 					'taxonomy'   => $taxonomy,
 					'hide_empty' => empty( $options['include_empty_terms'] ),
@@ -565,6 +579,7 @@ class ShortcodeHandler {
 				)
 			);
 			if ( is_wp_error( $terms ) || ! is_array( $terms ) ) {
+				$this->selection_incomplete = true;
 				break;
 			}
 
@@ -580,6 +595,9 @@ class ShortcodeHandler {
 			if ( $node_count >= $capacity || count( $batch ) < $batch_size ) {
 				break;
 			}
+		}
+		if ( $node_count < $capacity && $offset >= self::MAX_SCAN_ITEMS && count( $batch ) === $batch_size ) {
+			$this->selection_incomplete = true;
 		}
 		return $nodes;
 	}

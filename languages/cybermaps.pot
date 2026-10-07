@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: CYBERMAPS: XML Sitemaps & llms.txt 8.0.1\n"
+"Project-Id-Version: CYBERMAPS: XML Sitemaps & llms.txt 8.0.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/cybermaps\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-06T09:06:31+00:00\n"
+"POT-Creation-Date: 2026-10-07T10:31:26+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: cybermaps\n"
@@ -51,124 +51,128 @@ msgstr ""
 
 #: src/Admin/AIDiscoveryStatus.php:48
 #: src/Admin/AIDiscoveryStatus.php:49
-#: src/Admin/AIDiscoveryStatus.php:210
+#: src/Admin/AIDiscoveryStatus.php:221
 msgid "AI Discovery Status"
 msgstr ""
 
 #: src/Admin/AIDiscoveryStatus.php:62
-#: src/Admin/Settings.php:439
+#: src/Admin/Settings.php:440
 #: src/Admin/SitemapStatus.php:62
-#: src/Admin/SitemapStatus.php:620
+#: src/Admin/SitemapStatus.php:624
 #: src/Admin/SystemStatus.php:80
 msgid "You do not have permission to access this page."
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:94
+#: src/Admin/AIDiscoveryStatus.php:95
 msgid "How to read this page"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:96
+#: src/Admin/AIDiscoveryStatus.php:97
 msgid "Intended describes the selected publication mode; it does not prove how the web server answered."
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:97
+#: src/Admin/AIDiscoveryStatus.php:98
 msgid "On disk confirms only that a local static copy exists."
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:98
+#: src/Admin/AIDiscoveryStatus.php:99
 msgid "Observed is dynamic when the Cybermaps response marker is present, static when the public body exactly matches an owned file, and otherwise unverified."
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:99
+#: src/Admin/AIDiscoveryStatus.php:100
 msgid "Body validation checks the public status, expected media type, and a nonempty parseable body."
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:100
+#: src/Admin/AIDiscoveryStatus.php:101
 msgid "Header conformance is separate: it checks only the additional headers a web server or CDN must attach to static copies."
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:104
+#: src/Admin/AIDiscoveryStatus.php:105
 msgid "Static server requirements"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:106
+#: src/Admin/AIDiscoveryStatus.php:118
 msgid "Allow the selected extension-bearing JSON files to be served with their declared JSON media types."
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:107
+#: src/Admin/AIDiscoveryStatus.php:119
 msgid "For static copies, configure Cache-Control, CORS, Content-Digest calculated from the deployed body, and opt-in Content-Usage where enabled."
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:108
+#: src/Admin/AIDiscoveryStatus.php:120
 msgid "Cybermaps keeps its custom discovery documents at ordinary root paths, avoiding unregistered .well-known aliases."
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:109
-msgid "Canonical well-known fallback bodies remain available when the server bypasses WordPress. Debugging separates body availability from media-type, CORS, cache, and digest conformance."
+#: src/Admin/AIDiscoveryStatus.php:121
+msgid "Core discovery mode publishes five files: /ai.json, /ai-usage.json, /ai-actions.json, /.well-known/agent-skills/cybermaps-site-guide/SKILL.md, and /.well-known/agent-skills/index.json."
+msgstr ""
+
+#: src/Admin/AIDiscoveryStatus.php:122
+msgid "API Catalog, AI Catalog, MCP Server Card, and /ai-discovery remain dynamic in every mode. Route these requests to WordPress so their required headers and request observation work."
 msgstr ""
 
 #. translators: %s: UTC validation timestamp.
-#: src/Admin/AIDiscoveryStatus.php:205
+#: src/Admin/AIDiscoveryStatus.php:216
 #, php-format
 msgid "Checked: %s UTC"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:208
+#: src/Admin/AIDiscoveryStatus.php:219
 msgid "Not checked"
 msgstr ""
 
 #. translators: %d: number of registered public discovery paths.
-#: src/Admin/AIDiscoveryStatus.php:213
+#: src/Admin/AIDiscoveryStatus.php:224
 #, php-format
 msgid "Validate delivery, media type, and parseable output for all %d registered discovery paths."
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:228
+#: src/Admin/AIDiscoveryStatus.php:239
 msgid "Refresh validation"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:241
-#: src/Admin/DiscoveryStatus.php:330
-#: src/Core/RestAPI.php:220
-#: src/Discovery/Search.php:34
+#: src/Admin/AIDiscoveryStatus.php:252
+#: src/Admin/DiscoveryStatus.php:331
+#: src/Core/RestAPI.php:213
+#: src/Discovery/Search.php:45
 msgid "AI Publication Hub is disabled."
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:242
+#: src/Admin/AIDiscoveryStatus.php:253
 msgid "Enable it in Settings → AI Publishing to activate these publications."
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:249
+#: src/Admin/AIDiscoveryStatus.php:260
 msgid "Validated responses"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:250
+#: src/Admin/AIDiscoveryStatus.php:261
 msgid "Confirmed errors"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:251
+#: src/Admin/AIDiscoveryStatus.php:262
 msgid "Unverified checks"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:253
+#: src/Admin/AIDiscoveryStatus.php:264
 msgid "Publication intent"
 msgstr ""
 
 #. translators: %d: number of paths intended for static publication.
-#: src/Admin/AIDiscoveryStatus.php:255
+#: src/Admin/AIDiscoveryStatus.php:266
 #, php-format
 msgid "%d paths intended static"
 msgstr ""
 
 #. translators: %s: latest static reconciliation status.
-#: src/Admin/AIDiscoveryStatus.php:256
+#: src/Admin/AIDiscoveryStatus.php:267
 #: src/Admin/SitemapStatus.php:104
 #, php-format
 msgid "Reconciliation: %s"
 msgstr ""
 
 #. translators: %d: number of intended static files missing from disk.
-#: src/Admin/AIDiscoveryStatus.php:283
+#: src/Admin/AIDiscoveryStatus.php:294
 #, php-format
 msgid "%d intended static file is missing."
 msgid_plural "%d intended static files are missing."
@@ -176,45 +180,45 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of intended static files missing from disk.
-#: src/Admin/AIDiscoveryStatus.php:284
+#: src/Admin/AIDiscoveryStatus.php:295
 msgid "This is a publication-state warning. The HTTP result below determines whether a dynamic fallback still makes the public URL usable."
 msgstr ""
 
 #. translators: %s: structured static reconciliation state.
-#: src/Admin/AIDiscoveryStatus.php:297
+#: src/Admin/AIDiscoveryStatus.php:308
 #, php-format
 msgid "Static publication reconciliation: %s."
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:320
+#: src/Admin/AIDiscoveryStatus.php:331
 #: src/Audit/DiscoveryReportExporter.php:126
 msgid "Healthy"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:321
-#: src/Admin/AIDiscoveryStatus.php:352
-#: src/Admin/AIDiscoveryStatus.php:353
-#: src/Admin/SystemStatus.php:251
+#: src/Admin/AIDiscoveryStatus.php:332
+#: src/Admin/AIDiscoveryStatus.php:363
+#: src/Admin/AIDiscoveryStatus.php:364
+#: src/Admin/SystemStatus.php:257
 #: src/Audit/DiscoveryReportExporter.php:38
 msgid "Needs attention"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:322
-#: src/Admin/AIDiscoveryStatus.php:492
-#: src/Admin/AIDiscoveryStatus.php:654
-#: src/Admin/AIDiscoveryStatus.php:663
-#: src/Admin/AIDiscoveryStatus.php:671
-#: src/Admin/AIDiscoveryStatus.php:687
-#: src/Admin/AIDiscoveryStatus.php:705
+#: src/Admin/AIDiscoveryStatus.php:333
+#: src/Admin/AIDiscoveryStatus.php:505
+#: src/Admin/AIDiscoveryStatus.php:673
+#: src/Admin/AIDiscoveryStatus.php:682
+#: src/Admin/AIDiscoveryStatus.php:690
+#: src/Admin/AIDiscoveryStatus.php:706
+#: src/Admin/AIDiscoveryStatus.php:724
 #: src/Audit/DiscoveryReportExporter.php:128
 msgid "Unverified"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:323
-#: src/Admin/AIDiscoveryStatus.php:451
-#: src/Admin/AIDiscoveryStatus.php:600
-#: src/Admin/AIDiscoveryStatus.php:653
-#: src/Admin/AIDiscoveryStatus.php:704
+#: src/Admin/AIDiscoveryStatus.php:334
+#: src/Admin/AIDiscoveryStatus.php:464
+#: src/Admin/AIDiscoveryStatus.php:619
+#: src/Admin/AIDiscoveryStatus.php:672
+#: src/Admin/AIDiscoveryStatus.php:723
 #: src/Admin/DashboardRenderer.php:64
 #: src/Admin/Settings/Tabs/Advanced.php:155
 #: src/Admin/SVGMapper.php:193
@@ -224,384 +228,391 @@ msgstr ""
 msgid "Disabled"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:327
+#: src/Admin/AIDiscoveryStatus.php:338
 #: src/Admin/MaturityGuidance.php:80
 #: src/Admin/Settings/Tabs/Discovery.php:234
 msgid "Markdown for Agents"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:330
+#: src/Admin/AIDiscoveryStatus.php:341
 msgid "Cybermaps origin"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:330
+#: src/Admin/AIDiscoveryStatus.php:341
 msgid "CDN or edge"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:347
-#: src/Admin/AIDiscoveryStatus.php:348
+#: src/Admin/AIDiscoveryStatus.php:358
+#: src/Admin/AIDiscoveryStatus.php:359
 msgid "Installed"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:349
-#: src/Admin/AIDiscoveryStatus.php:475
-#: src/Admin/AIDiscoveryStatus.php:662
+#: src/Admin/AIDiscoveryStatus.php:360
+#: src/Admin/AIDiscoveryStatus.php:488
+#: src/Admin/AIDiscoveryStatus.php:681
 msgid "Not required"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:350
+#: src/Admin/AIDiscoveryStatus.php:361
 #: src/Admin/DashboardRenderer.php:91
-#: src/Admin/DiscoveryAnalytics.php:1055
+#: src/Admin/DiscoveryAnalytics.php:1060
 msgid "Dynamic only"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:351
+#: src/Admin/AIDiscoveryStatus.php:362
 msgid "Server-managed"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:354
-#: src/Admin/AIDiscoveryStatus.php:602
+#: src/Admin/AIDiscoveryStatus.php:365
+#: src/Admin/AIDiscoveryStatus.php:621
 msgid "Pending"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:358
+#: src/Admin/AIDiscoveryStatus.php:369
 msgid "Automatic well-known routing"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:360
+#: src/Admin/AIDiscoveryStatus.php:371
 msgid "Cybermaps will reconcile compatible origin routing automatically."
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:373
-#: src/Admin/AIDiscoveryStatus.php:422
+#: src/Admin/AIDiscoveryStatus.php:384
+#: src/Admin/AIDiscoveryStatus.php:435
 #: src/Admin/LocalDeliveryController.php:67
 #: src/Audit/DiscoveryReportExporter.php:51
 msgid "Publication"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:373
-#: src/Admin/AIDiscoveryStatus.php:403
+#: src/Admin/AIDiscoveryStatus.php:384
+#: src/Admin/AIDiscoveryStatus.php:416
 #: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:248
 #: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:266
 msgid "Description"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:373
-#: src/Admin/AIDiscoveryStatus.php:436
+#: src/Admin/AIDiscoveryStatus.php:384
+#: src/Admin/AIDiscoveryStatus.php:449
 #: src/Audit/DiscoveryReportExporter.php:52
 msgid "Expected type"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:373
-#: src/Admin/AIDiscoveryStatus.php:447
+#: src/Admin/AIDiscoveryStatus.php:384
+#: src/Admin/AIDiscoveryStatus.php:460
 #: src/Audit/DiscoveryReportExporter.php:53
 msgid "Intended"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:373
-#: src/Admin/AIDiscoveryStatus.php:471
+#: src/Admin/AIDiscoveryStatus.php:384
+#: src/Admin/AIDiscoveryStatus.php:484
 msgid "On disk"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:373
-#: src/Admin/AIDiscoveryStatus.php:504
+#: src/Admin/AIDiscoveryStatus.php:384
+#: src/Admin/AIDiscoveryStatus.php:517
 msgid "Observed"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:373
-#: src/Admin/AIDiscoveryStatus.php:514
+#: src/Admin/AIDiscoveryStatus.php:384
+#: src/Admin/AIDiscoveryStatus.php:525
+#: src/Admin/AIDiscoveryStatus.php:533
 msgid "PHP observation"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:373
-#: src/Admin/AIDiscoveryStatus.php:539
+#: src/Admin/AIDiscoveryStatus.php:384
+#: src/Admin/AIDiscoveryStatus.php:558
 msgid "Availability & body"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:373
-#: src/Admin/AIDiscoveryStatus.php:555
+#: src/Admin/AIDiscoveryStatus.php:384
+#: src/Admin/AIDiscoveryStatus.php:574
 msgid "Protocol conformance"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:373
-#: src/Admin/AIDiscoveryStatus.php:569
+#: src/Admin/AIDiscoveryStatus.php:384
+#: src/Admin/AIDiscoveryStatus.php:588
 #: src/Admin/SitemapStatus.php:487
 #: src/Admin/SitemapStatus.php:496
 msgid "View"
 msgstr ""
 
 #. translators: 1: publication maturity, 2: adoption evidence, 3: delivery class.
-#: src/Admin/AIDiscoveryStatus.php:427
+#: src/Admin/AIDiscoveryStatus.php:440
 #, php-format
 msgid "%1$s · %2$s · %3$s"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:455
+#: src/Admin/AIDiscoveryStatus.php:468
 msgid "Static copy"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:459
-#: src/Admin/AIDiscoveryStatus.php:702
+#: src/Admin/AIDiscoveryStatus.php:472
+#: src/Admin/AIDiscoveryStatus.php:721
 #: src/Audit/DiscoveryReportExporter.php:124
 msgid "Dynamic"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:483
+#: src/Admin/AIDiscoveryStatus.php:496
 msgid "Present"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:488
+#: src/Admin/AIDiscoveryStatus.php:501
 msgid "Absent"
 msgstr ""
 
+#: src/Admin/AIDiscoveryStatus.php:525
+#: src/Admin/AIDiscoveryStatus.php:689
+#: src/Admin/SystemStatus.php:258
+#: src/Admin/SystemStatusCollector.php:135
+#: src/Admin/SystemStatusCollector.php:238
+#: src/Admin/SystemStatusCollector.php:258
+#: src/Admin/SystemStatusCollector.php:267
+msgid "Unavailable"
+msgstr ""
+
+#: src/Admin/AIDiscoveryStatus.php:525
+msgid "The analytics database could not be read. Request counts are unknown."
+msgstr ""
+
 #. translators: %s: database timestamp.
-#: src/Admin/AIDiscoveryStatus.php:511
+#: src/Admin/AIDiscoveryStatus.php:530
 #, php-format
 msgid "Last PHP: %s"
 msgstr ""
 
 #. translators: %s: database timestamp.
-#: src/Admin/AIDiscoveryStatus.php:512
+#: src/Admin/AIDiscoveryStatus.php:531
 msgid "No PHP-observed request"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:518
+#: src/Admin/AIDiscoveryStatus.php:537
 #: src/Admin/Settings/Tabs/Robots/RobotsFields.php:469
 msgid "Not published"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:522
+#: src/Admin/AIDiscoveryStatus.php:541
 msgid "Not observable when static"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:526
+#: src/Admin/AIDiscoveryStatus.php:545
 msgid "Observable when PHP runs"
 msgstr ""
 
 #. translators: 1: all PHP endpoint observations, 2: observations with a matching crawler User-Agent signature.
-#: src/Admin/AIDiscoveryStatus.php:530
+#: src/Admin/AIDiscoveryStatus.php:549
 #, php-format
 msgid "%1$d PHP · %2$d UA matched"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:559
+#: src/Admin/AIDiscoveryStatus.php:578
 msgid "Delivery policy:"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:561
+#: src/Admin/AIDiscoveryStatus.php:580
 #: src/Admin/LocalDeliveryController.php:41
 msgid "Configure local delivery"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:577
+#: src/Admin/AIDiscoveryStatus.php:596
 msgid "Open publication"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:583
+#: src/Admin/AIDiscoveryStatus.php:602
 msgid "Publish all eligible copies"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:584
+#: src/Admin/AIDiscoveryStatus.php:603
 msgid "Publish core discovery files"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:585
+#: src/Admin/AIDiscoveryStatus.php:604
 msgid "Dynamic-only delivery"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:591
+#: src/Admin/AIDiscoveryStatus.php:610
 #: src/Admin/SitemapStatus.php:546
 msgid "Complete"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:592
+#: src/Admin/AIDiscoveryStatus.php:611
 #: src/Admin/SitemapStatus.php:547
 msgid "Partial"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:593
+#: src/Admin/AIDiscoveryStatus.php:612
 #: src/Admin/SitemapStatus.php:548
-#: src/Admin/SitemapStatus.php:586
+#: src/Admin/SitemapStatus.php:587
 msgid "Failed"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:594
+#: src/Admin/AIDiscoveryStatus.php:613
 #: src/Admin/SitemapStatus.php:550
 msgid "Busy"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:595
-#: src/Admin/SitemapStatus.php:552
+#: src/Admin/AIDiscoveryStatus.php:614
+#: src/Admin/SitemapStatus.php:553
 msgid "Skipped"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:596
+#: src/Admin/AIDiscoveryStatus.php:615
 msgid "Files missing"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:597
+#: src/Admin/AIDiscoveryStatus.php:616
 msgid "Reconciliation required"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:598
+#: src/Admin/AIDiscoveryStatus.php:617
 msgid "Scheduling failed"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:599
-#: src/Admin/SystemStatus.php:253
+#: src/Admin/AIDiscoveryStatus.php:618
+#: src/Admin/SystemStatus.php:259
 #: src/Admin/SystemStatusCollector.php:95
 msgid "Not applicable"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:617
+#: src/Admin/AIDiscoveryStatus.php:636
 msgid "At least one path selected for static publication has no resolved file on disk. Its public URL may still work through the dynamic fallback."
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:618
+#: src/Admin/AIDiscoveryStatus.php:637
 msgid "Settings or publication mode changed after the latest stored report. The queued reconciliation must complete before physical files are current."
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:619
+#: src/Admin/AIDiscoveryStatus.php:638
 msgid "Another generated-file operation held the publication lock. Cybermaps will retry."
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:620
+#: src/Admin/AIDiscoveryStatus.php:639
 msgid "The latest reconciliation was intentionally skipped; inspect the stored report for its reason."
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:625
+#: src/Admin/AIDiscoveryStatus.php:644
 msgid "No completed reconciliation report is recorded for the selected publication intent yet."
 msgstr ""
 
 #. translators: 1: conflict count, 2: failure count, 3: retained-file count.
-#: src/Admin/AIDiscoveryStatus.php:634
+#: src/Admin/AIDiscoveryStatus.php:653
 #, php-format
 msgid "Latest attempt — conflicts: %1$d; failures: %2$d; retained files: %3$d. Public HTTP validation remains authoritative for availability."
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:645
+#: src/Admin/AIDiscoveryStatus.php:664
 msgid "WordPress could not schedule the background static reconciliation."
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:651
+#: src/Admin/AIDiscoveryStatus.php:670
 #: src/Audit/DiscoveryReportExporter.php:36
 msgid "Validated"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:652
+#: src/Admin/AIDiscoveryStatus.php:671
 #: src/Admin/SitemapStatus.php:549
 #: src/Audit/DiscoveryReportExporter.php:127
 msgid "Error"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:660
-#: src/Admin/AIDiscoveryStatus.php:685
+#: src/Admin/AIDiscoveryStatus.php:679
+#: src/Admin/AIDiscoveryStatus.php:704
 msgid "Conformant"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:661
+#: src/Admin/AIDiscoveryStatus.php:680
 msgid "Missing or mismatched"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:669
+#: src/Admin/AIDiscoveryStatus.php:688
 #: src/Admin/DashboardRenderer.php:52
 #: src/Admin/SystemStatusCollector.php:87
 #: src/Admin/SystemStatusCollector.php:88
 #: src/Admin/SystemStatusCollector.php:89
 #: src/Admin/SystemStatusCollector.php:90
 #: src/Admin/SystemStatusCollector.php:170
-#: src/Admin/SystemStatusCollector.php:245
-#: src/Admin/SystemStatusCollector.php:257
-#: src/Admin/SystemStatusCollector.php:260
+#: src/Admin/SystemStatusCollector.php:258
+#: src/Admin/SystemStatusCollector.php:270
+#: src/Admin/SystemStatusCollector.php:273
 msgid "Available"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:670
-#: src/Admin/SystemStatus.php:252
-#: src/Admin/SystemStatusCollector.php:135
-#: src/Admin/SystemStatusCollector.php:245
-#: src/Admin/SystemStatusCollector.php:254
-msgid "Unavailable"
-msgstr ""
-
-#: src/Admin/AIDiscoveryStatus.php:677
+#: src/Admin/AIDiscoveryStatus.php:696
 msgid "Body valid"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:678
+#: src/Admin/AIDiscoveryStatus.php:697
 msgid "Body invalid"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:679
+#: src/Admin/AIDiscoveryStatus.php:698
 msgid "Body unverified"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:686
+#: src/Admin/AIDiscoveryStatus.php:705
 msgid "Not conformant"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:703
+#: src/Admin/AIDiscoveryStatus.php:722
 #: src/Audit/DiscoveryReportExporter.php:125
 msgid "Static"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:720
+#: src/Admin/AIDiscoveryStatus.php:739
 msgid "Experimental, opt-in publications"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:721
+#: src/Admin/AIDiscoveryStatus.php:740
 msgid "Legacy compatibility publications"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:722
+#: src/Admin/AIDiscoveryStatus.php:741
 msgid "Essential publications"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:728
+#: src/Admin/AIDiscoveryStatus.php:747
 msgid "standards-track specification"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:729
+#: src/Admin/AIDiscoveryStatus.php:748
 msgid "formal draft"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:730
+#: src/Admin/AIDiscoveryStatus.php:749
 msgid "community convention"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:731
+#: src/Admin/AIDiscoveryStatus.php:750
 msgid "experimental proposal"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:732
+#: src/Admin/AIDiscoveryStatus.php:751
 msgid "legacy"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:733
+#: src/Admin/AIDiscoveryStatus.php:752
 msgid "vendor extension"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:739
+#: src/Admin/AIDiscoveryStatus.php:758
 msgid "provider documented"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:740
+#: src/Admin/AIDiscoveryStatus.php:759
 msgid "known consumer"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:741
+#: src/Admin/AIDiscoveryStatus.php:760
 msgid "independent producers"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:742
+#: src/Admin/AIDiscoveryStatus.php:761
 msgid "reference only"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:748
+#: src/Admin/AIDiscoveryStatus.php:767
 msgid "REST API"
 msgstr ""
 
-#: src/Admin/AIDiscoveryStatus.php:749
+#: src/Admin/AIDiscoveryStatus.php:768
 msgid "fixed path"
 msgstr ""
 
@@ -688,96 +699,166 @@ msgstr ""
 msgid "Cloudflare authorization error %1$d: %2$s"
 msgstr ""
 
-#: src/Admin/CloudflareOAuthTransactionStore.php:30
+#: src/Admin/CloudflareOAuthTransactionStore.php:35
 msgid "The Cloudflare operation is invalid."
 msgstr ""
 
-#: src/Admin/CloudflareOAuthTransactionStore.php:33
+#: src/Admin/CloudflareOAuthTransactionStore.php:38
 msgid "The Cloudflare OAuth mode is invalid."
 msgstr ""
 
-#: src/Admin/CloudflareOAuthTransactionStore.php:63
+#: src/Admin/CloudflareOAuthTransactionStore.php:75
 msgid "The Cloudflare transaction is incomplete."
 msgstr ""
 
-#: src/Admin/CloudflareOAuthTransactionStore.php:120
+#: src/Admin/CloudflareOAuthTransactionStore.php:109
+msgid "Cloudflare authorization is already in progress. Finish it or wait for it to expire before starting again."
+msgstr ""
+
+#: src/Admin/CloudflareOAuthTransactionStore.php:150
+msgid "Cloudflare authorization was replaced or expired. Start again."
+msgstr ""
+
+#: src/Admin/CloudflareOAuthTransactionStore.php:159
+msgid "Cloudflare authorization state could not be saved. Start again."
+msgstr ""
+
+#: src/Admin/CloudflareOAuthTransactionStore.php:165
+#: src/Admin/CloudflareOptionStore.php:59
+#: src/Admin/CloudflareRuleManager.php:43
+msgid "The Cloudflare operation lost its database lock. Start again."
+msgstr ""
+
+#: src/Admin/CloudflareOAuthTransactionStore.php:174
+msgid "A Cloudflare transaction ID is required."
+msgstr ""
+
+#: src/Admin/CloudflareOAuthTransactionStore.php:186
 msgid "A signed-in administrator is required for Cloudflare authorization."
 msgstr ""
 
-#: src/Admin/CloudflareRuleManager.php:47
-msgid "No enabled static discovery resources are eligible for Cloudflare header repair."
+#: src/Admin/CloudflareOptionStore.php:22
+msgid "Cloudflare operation state could not be read safely. Please retry."
 msgstr ""
 
-#: src/Admin/CloudflareRuleManager.php:49
+#: src/Admin/CloudflareOptionStore.php:37
+msgid "Cloudflare operation state could not be saved. The operation is incomplete; verify the provider before retrying."
+msgstr ""
+
+#: src/Admin/CloudflareRuleManager.php:58
 msgid "Cybermaps discovery response headers"
 msgstr ""
 
-#: src/Admin/CloudflareRuleManager.php:73
+#: src/Admin/CloudflareRuleManager.php:75
 msgid "Cybermaps discovery origin isolation"
 msgstr ""
 
-#: src/Admin/CloudflareRuleManager.php:96
+#: src/Admin/CloudflareRuleManager.php:90
 msgid "Cybermaps discovery cache safety"
 msgstr ""
 
-#: src/Admin/CloudflareRuleManager.php:242
+#: src/Admin/CloudflareRuleManager.php:254
 msgid "Cloudflare rules were not changed because one or more enabled origin resources did not return a valid body."
 msgstr ""
 
-#: src/Admin/CloudflareRuleManager.php:261
+#: src/Admin/CloudflareRuleManager.php:274
 msgid "Cloudflare returned a ruleset without an identifier."
 msgstr ""
 
+#: src/Admin/CloudflareRuleManager.php:285
+msgid "The Cloudflare operation failed and some changes could not be restored. Review the rules in Cloudflare before retrying."
+msgstr ""
+
 #. translators: %s: Cloudflare rule reference.
-#: src/Admin/CloudflareRuleManager.php:290
+#: src/Admin/CloudflareRuleManager.php:307
 #, php-format
 msgid "Cloudflare rule reference %s is already used by an unrelated rule."
 msgstr ""
 
-#: src/Admin/CloudflareRuleManager.php:530
+#: src/Admin/CloudflareRuleManager.php:383
+msgid "An older Cloudflare rule for this hostname cannot be safely adopted. Review its scope in Cloudflare before retrying."
+msgstr ""
+
+#: src/Admin/CloudflareRuleManager.php:584
 msgid "The configured public site URL is not a valid HTTP origin."
 msgstr ""
 
-#: src/Admin/CloudflareRuleManager.php:534
+#: src/Admin/CloudflareRuleManager.php:588
 msgid "The public hostname cannot be represented safely in a Cloudflare rule."
 msgstr ""
 
-#: src/Admin/CloudflareRuleManager.php:578
+#: src/Admin/CloudflareRuleManager.php:632
 msgid "The public request failed."
 msgstr ""
 
-#: src/Admin/CloudflareRuleManager.php:596
-msgid "Body and required headers are available."
+#: src/Admin/CloudflareRuleManager.php:650
+msgid "The public body and MIME type are valid; origin cache policy is preserved."
 msgstr ""
 
-#: src/Admin/CloudflareRuleManager.php:596
-msgid "The body or expected edge headers need attention."
+#: src/Admin/CloudflareRuleManager.php:650
+msgid "The public body or MIME type needs attention. An incorrect origin MIME type must be repaired at the origin."
 msgstr ""
 
-#: src/Admin/CloudflareRulesClient.php:64
+#: src/Admin/CloudflareRuleManager.php:742
+msgid "Saved Cloudflare operation history is unavailable. No rule changes were started; retry when database access is restored."
+msgstr ""
+
+#: src/Admin/CloudflareRulesClient.php:56
+msgid "The authorized Cloudflare zone inventory is incomplete or exceeds the safe lookup limit. Authorize only the intended zone and try again."
+msgstr ""
+
+#: src/Admin/CloudflareRulesClient.php:80
 msgid "The Cloudflare authorization cannot access an active zone matching the public hostname."
 msgstr ""
 
-#: src/Admin/CloudflareRulesClient.php:68
+#: src/Admin/CloudflareRulesClient.php:84
 msgid "More than one authorized Cloudflare zone matches this hostname. Authorize only the intended account and try again."
 msgstr ""
 
-#: src/Admin/CloudflareRulesClient.php:136
-msgid "Cybermaps could not encode the Cloudflare rule request."
+#: src/Admin/CloudflareRulesClient.php:113
+msgid "Cloudflare did not return a complete created ruleset. Review the rules in Cloudflare before retrying."
+msgstr ""
+
+#: src/Admin/CloudflareRulesClient.php:120
+msgid "Cloudflare returned duplicate rule identifiers. Review the rules in Cloudflare before retrying."
 msgstr ""
 
 #: src/Admin/CloudflareRulesClient.php:143
+msgid "Cloudflare returned an invalid rule mutation result. Review the rules in Cloudflare before retrying."
+msgstr ""
+
+#: src/Admin/CloudflareRulesClient.php:147
+msgid "Cloudflare did not identify the changed rule. Review the rules in Cloudflare before retrying."
+msgstr ""
+
+#: src/Admin/CloudflareRulesClient.php:150
+msgid "Cloudflare returned an unexpected rule identifier. Review the rules in Cloudflare before retrying."
+msgstr ""
+
+#: src/Admin/CloudflareRulesClient.php:160
+msgid "Cloudflare returned a rule that does not match the requested configuration. Review the rules in Cloudflare before retrying."
+msgstr ""
+
+#: src/Admin/CloudflareRulesClient.php:205
+msgid "Cybermaps could not encode the Cloudflare rule request."
+msgstr ""
+
+#: src/Admin/CloudflareRulesClient.php:212
 msgid "Cloudflare could not be reached securely. Check outbound HTTPS connectivity and try again."
 msgstr ""
 
-#: src/Admin/CloudflareRulesClient.php:164
+#: src/Admin/CloudflareRulesClient.php:233
 msgid "Cloudflare rejected the request."
 msgstr ""
 
 #. translators: 1: HTTP status code, 2: provider error.
-#: src/Admin/CloudflareRulesClient.php:165
+#: src/Admin/CloudflareRulesClient.php:234
 #, php-format
 msgid "Cloudflare API error %1$d: %2$s"
+msgstr ""
+
+#: src/Admin/ConfigurationMutationStore.php:19
+msgid "Cybermaps could not read the stored configuration safely."
 msgstr ""
 
 #: src/Admin/ContentAuditManager.php:45
@@ -786,11 +867,11 @@ msgstr ""
 #: src/Admin/ContentAuditManager.php:282
 #: src/Admin/DiscoveryAnalytics.php:61
 #: src/Admin/Logs.php:299
-#: src/Admin/Logs.php:335
-#: src/Admin/MediaAuditor.php:163
-#: src/Admin/NetworkSettings.php:78
-#: src/Admin/Settings.php:501
-#: src/Sitemap/Orchestrator.php:429
+#: src/Admin/Logs.php:341
+#: src/Admin/MediaAuditor.php:165
+#: src/Admin/NetworkSettings.php:79
+#: src/Admin/Settings.php:502
+#: src/Sitemap/Orchestrator.php:432
 msgid "Unauthorized"
 msgstr ""
 
@@ -836,12 +917,15 @@ msgstr ""
 #: src/Admin/ContentAuditManager.php:352
 #: src/Admin/DiscoveryAuditor.php:44
 #: src/Admin/Logs.php:306
-#: src/Admin/MediaAuditor.php:156
-#: src/Admin/NetworkSettings.php:89
-#: src/Admin/Settings.php:494
-#: src/Admin/Settings/SettingsAjax.php:338
+#: src/Admin/Logs.php:338
+#: src/Admin/MediaAuditor.php:158
+#: src/Admin/NetworkSettings.php:90
+#: src/Admin/Settings.php:437
+#: src/Admin/Settings.php:495
+#: src/Admin/Settings/SettingsAjax.php:109
+#: src/Admin/Settings/SettingsAjax.php:344
 #: src/Admin/SetupWizard/SetupWizardController.php:141
-#: src/Sitemap/Orchestrator.php:440
+#: src/Sitemap/Orchestrator.php:443
 msgid "Invalid request method."
 msgstr ""
 
@@ -942,13 +1026,13 @@ msgid "Generated server and edge rules"
 msgstr ""
 
 #: src/Admin/DeploymentGuidance.php:56
-msgid "Cybermaps never writes server, cache, reverse-proxy, or CDN configuration. Review and apply only the rule for your deployment, then refresh public validation."
+msgid "These generated snippets are advisory and are not applied automatically. Review and apply the rule for your deployment, then refresh public validation. Optional Cloudflare actions apply only the changes you authorize."
 msgstr ""
 
 #: src/Admin/DeploymentGuidance.php:59
-#: src/Admin/SystemStatusCollector.php:183
-#: src/Admin/SystemStatusCollector.php:202
-#: src/Admin/SystemStatusCollector.php:232
+#: src/Admin/SystemStatusCollector.php:187
+#: src/Admin/SystemStatusCollector.php:210
+#: src/Admin/SystemStatusCollector.php:249
 msgid "Configured"
 msgstr ""
 
@@ -1001,7 +1085,7 @@ msgstr ""
 
 #: src/Admin/DiscoveryAnalytics.php:50
 #: src/Admin/DiscoveryAnalytics.php:51
-#: src/Admin/DiscoveryAnalytics.php:174
+#: src/Admin/DiscoveryAnalytics.php:179
 msgid "Discovery Analytics"
 msgstr ""
 
@@ -1015,8 +1099,8 @@ msgid "Overview"
 msgstr ""
 
 #: src/Admin/DiscoveryAnalytics.php:78
-#: src/Admin/DiscoveryAnalytics.php:550
-#: src/Admin/DiscoveryAnalytics.php:645
+#: src/Admin/DiscoveryAnalytics.php:555
+#: src/Admin/DiscoveryAnalytics.php:650
 msgid "Endpoints"
 msgstr ""
 
@@ -1044,232 +1128,236 @@ msgstr ""
 msgid "Every number below is a request that executed WordPress/PHP. Physical files, web-server rules, CDNs, and full-page caches can serve additional requests that Cybermaps cannot observe. Crawler names come from self-reported User-Agent signatures and are not verified identities."
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:96
+#: src/Admin/DiscoveryAnalytics.php:97
 msgid "Rolling evidence window"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:97
+#: src/Admin/DiscoveryAnalytics.php:98
 msgid "30-day overview"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:99
+#: src/Admin/DiscoveryAnalytics.php:100
 msgid "Counts are limited by the configured retention period when it is shorter than 30 days."
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:107
+#: src/Admin/DiscoveryAnalytics.php:108
 msgid "Discovery publications"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:108
+#: src/Admin/DiscoveryAnalytics.php:109
 msgid "Endpoint activity"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:110
+#: src/Admin/DiscoveryAnalytics.php:111
 msgid "Aliases are consolidated by endpoint ID. Internal, browser, automated, crawler-candidate, and unknown requests appear only when they reach PHP."
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:118
+#: src/Admin/DiscoveryAnalytics.php:119
 msgid "Unmatched identity evidence"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:119
+#: src/Admin/DiscoveryAnalytics.php:120
 msgid "Unidentified request patterns"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:121
+#: src/Admin/DiscoveryAnalytics.php:122
 msgid "Patterns group similar stored observations by the locally available evidence. They can reveal repeat clients without claiming to identify their operator."
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:129
+#: src/Admin/DiscoveryAnalytics.php:130
 msgid "UA signature claims"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:130
+#: src/Admin/DiscoveryAnalytics.php:131
 msgid "Crawler content activity"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:132
+#: src/Admin/DiscoveryAnalytics.php:133
 msgid "Ordinary content requests are retained for registered User-Agent matches and conservative crawler candidates. The aggregates below report UA-matched crawlers."
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:140
+#: src/Admin/DiscoveryAnalytics.php:141
 msgid "Request surface"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:141
+#: src/Admin/DiscoveryAnalytics.php:142
 msgid "30-day activity trend"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:175
+#: src/Admin/DiscoveryAnalytics.php:153
+msgid "Analytics are unavailable while database reads are failing."
+msgstr ""
+
+#: src/Admin/DiscoveryAnalytics.php:180
 msgid "Review discovery endpoint observations, claimed crawler visits, and unidentified request patterns that reached WordPress/PHP."
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:178
+#: src/Admin/DiscoveryAnalytics.php:183
 msgid "Recording enabled"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:178
+#: src/Admin/DiscoveryAnalytics.php:183
 msgid "Recording disabled"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:182
+#: src/Admin/DiscoveryAnalytics.php:187
 msgid "Coverage: PHP only"
 msgstr ""
 
 #. translators: %s: Static File Engine mode.
-#: src/Admin/DiscoveryAnalytics.php:188
+#: src/Admin/DiscoveryAnalytics.php:193
 #, php-format
 msgid "Static mode: %s"
 msgstr ""
 
 #. translators: %d: analytics retention days.
-#: src/Admin/DiscoveryAnalytics.php:196
+#: src/Admin/DiscoveryAnalytics.php:201
 #, php-format
 msgid "Retention: %d day"
 msgid_plural "Retention: %d days"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Admin/DiscoveryAnalytics.php:204
+#: src/Admin/DiscoveryAnalytics.php:209
 msgid "Open publication status"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:220
+#: src/Admin/DiscoveryAnalytics.php:225
 msgid "Analytics history was cleared."
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:224
+#: src/Admin/DiscoveryAnalytics.php:229
 msgid "Analytics history could not be cleared. Check the database health message and site logs."
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:238
+#: src/Admin/DiscoveryAnalytics.php:243
 msgid "Recording is disabled"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:238
+#: src/Admin/DiscoveryAnalytics.php:243
 msgid "Existing history remains available, but Cybermaps is not recording new endpoint observations or crawler activity."
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:239
+#: src/Admin/DiscoveryAnalytics.php:244
 msgid "Configure recording"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:256
+#: src/Admin/DiscoveryAnalytics.php:261
 msgid "PHP endpoint observations"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:257
+#: src/Admin/DiscoveryAnalytics.php:262
 msgid "Registered endpoint requests retained by Cybermaps, including internal, browser, automated, and unknown requests. Diagnostic probes are excluded."
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:262
+#: src/Admin/DiscoveryAnalytics.php:267
 msgid "Claimed crawler requests"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:263
+#: src/Admin/DiscoveryAnalytics.php:268
 msgid "Endpoint and content observations whose self-reported User-Agent matched an explicit registry signature."
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:268
+#: src/Admin/DiscoveryAnalytics.php:273
 msgid "Internal requests"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:269
+#: src/Admin/DiscoveryAnalytics.php:274
 msgid "Requests made by a logged-in WordPress user. The request log records the numeric user ID."
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:274
-#: src/Admin/DiscoveryAnalytics.php:652
+#: src/Admin/DiscoveryAnalytics.php:279
+#: src/Admin/DiscoveryAnalytics.php:657
 msgid "Crawler candidates"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:275
+#: src/Admin/DiscoveryAnalytics.php:280
 msgid "Bot-like requests whose User-Agent is not in the bundled crawler registry."
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:280
-#: src/Admin/DiscoveryAnalytics.php:654
+#: src/Admin/DiscoveryAnalytics.php:285
+#: src/Admin/DiscoveryAnalytics.php:659
 msgid "Automated / unknown"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:281
+#: src/Admin/DiscoveryAnalytics.php:286
 msgid "Automated clients, browsers, missing User-Agents, unknown clients, and unclassified legacy endpoint observations."
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:308
+#: src/Admin/DiscoveryAnalytics.php:313
 msgid "Endpoint"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:309
+#: src/Admin/DiscoveryAnalytics.php:314
 msgid "PHP observations"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:310
+#: src/Admin/DiscoveryAnalytics.php:315
 msgid "UA signature matched"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:311
-#: src/Admin/DiscoveryAnalytics.php:528
+#: src/Admin/DiscoveryAnalytics.php:316
+#: src/Admin/DiscoveryAnalytics.php:533
 msgid "Claimed crawlers"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:312
+#: src/Admin/DiscoveryAnalytics.php:317
 msgid "Errors"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:313
+#: src/Admin/DiscoveryAnalytics.php:318
 msgid "Last observed"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:318
+#: src/Admin/DiscoveryAnalytics.php:323
 msgid "No endpoint requests have reached WordPress/PHP in the reporting window."
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:346
+#: src/Admin/DiscoveryAnalytics.php:351
 msgid "Unclassified endpoint"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:366
+#: src/Admin/DiscoveryAnalytics.php:371
 msgid "Client pattern"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:367
+#: src/Admin/DiscoveryAnalytics.php:372
 msgid "Stored evidence"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:368
+#: src/Admin/DiscoveryAnalytics.php:373
 msgid "Activity"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:369
+#: src/Admin/DiscoveryAnalytics.php:374
 msgid "First seen"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:370
+#: src/Admin/DiscoveryAnalytics.php:375
 msgid "Last seen"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:375
+#: src/Admin/DiscoveryAnalytics.php:380
 msgid "No unidentified request patterns are available in the reporting window."
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:466
+#: src/Admin/DiscoveryAnalytics.php:471
 msgid "No stored User-Agent evidence"
 msgstr ""
 
 #. translators: %s: site-specific pseudonymous requester key.
-#: src/Admin/DiscoveryAnalytics.php:478
-#: src/Admin/DiscoveryAnalytics.php:793
+#: src/Admin/DiscoveryAnalytics.php:483
+#: src/Admin/DiscoveryAnalytics.php:798
 #, php-format
 msgid "Requester: %s"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:490
+#: src/Admin/DiscoveryAnalytics.php:495
 msgid "Evidence unavailable for this legacy pattern"
 msgstr ""
 
 #. translators: %s: request count.
-#: src/Admin/DiscoveryAnalytics.php:499
+#: src/Admin/DiscoveryAnalytics.php:504
 #, php-format
 msgid "%s request"
 msgid_plural "%s requests"
@@ -1277,342 +1365,342 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: 1: endpoint request count, 2: distinct endpoint count.
-#: src/Admin/DiscoveryAnalytics.php:500
+#: src/Admin/DiscoveryAnalytics.php:505
 #, php-format
 msgid "%1$s endpoint observations · %2$s distinct endpoints"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:526
+#: src/Admin/DiscoveryAnalytics.php:531
 msgid "Top content paths"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:528
+#: src/Admin/DiscoveryAnalytics.php:533
 msgid "Path"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:528
+#: src/Admin/DiscoveryAnalytics.php:533
 msgid "Visits"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:531
+#: src/Admin/DiscoveryAnalytics.php:536
 msgid "No UA-matched crawler content visits in the reporting window."
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:548
+#: src/Admin/DiscoveryAnalytics.php:553
 msgid "Claimed crawler signatures"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:550
+#: src/Admin/DiscoveryAnalytics.php:555
 msgid "Claimed crawler"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:550
-#: src/Admin/DiscoveryAnalytics.php:646
+#: src/Admin/DiscoveryAnalytics.php:555
+#: src/Admin/DiscoveryAnalytics.php:651
 msgid "Content"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:553
+#: src/Admin/DiscoveryAnalytics.php:558
 msgid "No claimed crawler signatures in the reporting window."
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:570
+#: src/Admin/DiscoveryAnalytics.php:575
 msgid "Claimed activity by category"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:573
+#: src/Admin/DiscoveryAnalytics.php:578
 msgid "No UA-matched crawler activity in the reporting window."
 msgstr ""
 
 #. translators: 1: endpoint requests, 2: content-page requests.
-#: src/Admin/DiscoveryAnalytics.php:578
+#: src/Admin/DiscoveryAnalytics.php:583
 #, php-format
 msgid "Endpoint: %1$s · content: %2$s"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:595
+#: src/Admin/DiscoveryAnalytics.php:600
 msgid "No PHP-observed activity in the reporting window."
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:601
+#: src/Admin/DiscoveryAnalytics.php:606
 msgid "Day"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:602
+#: src/Admin/DiscoveryAnalytics.php:607
 msgid "PHP endpoints"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:603
+#: src/Admin/DiscoveryAnalytics.php:608
 msgid "UA-matched endpoints"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:604
+#: src/Admin/DiscoveryAnalytics.php:609
 msgid "UA-matched content"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:632
+#: src/Admin/DiscoveryAnalytics.php:637
 msgid "Retained evidence"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:633
+#: src/Admin/DiscoveryAnalytics.php:638
 msgid "Recent request log"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:634
+#: src/Admin/DiscoveryAnalytics.php:639
 msgid "The stream balances recent endpoint observations with retained claimed and crawler-candidate content visits."
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:637
+#: src/Admin/DiscoveryAnalytics.php:642
 msgid "Export full retained history"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:642
+#: src/Admin/DiscoveryAnalytics.php:647
 msgid "Filter by request type"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:643
+#: src/Admin/DiscoveryAnalytics.php:648
 msgid "Request type"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:644
-#: src/Admin/DiscoveryAnalytics.php:650
+#: src/Admin/DiscoveryAnalytics.php:649
+#: src/Admin/DiscoveryAnalytics.php:655
 msgid "All"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:648
+#: src/Admin/DiscoveryAnalytics.php:653
 msgid "Filter by identity evidence"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:649
+#: src/Admin/DiscoveryAnalytics.php:654
 msgid "Identity evidence"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:651
+#: src/Admin/DiscoveryAnalytics.php:656
 msgid "Claimed"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:653
-#: src/Admin/DiscoveryAnalytics.php:917
-#: src/Admin/DiscoveryAnalytics.php:974
+#: src/Admin/DiscoveryAnalytics.php:658
+#: src/Admin/DiscoveryAnalytics.php:922
+#: src/Admin/DiscoveryAnalytics.php:979
 msgid "Internal"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:655
-#: src/Admin/DiscoveryAnalytics.php:1029
+#: src/Admin/DiscoveryAnalytics.php:660
+#: src/Admin/DiscoveryAnalytics.php:1034
 msgid "Legacy"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:661
+#: src/Admin/DiscoveryAnalytics.php:666
 msgid "No PHP-observed endpoint or retained crawler requests are stored yet."
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:670
+#: src/Admin/DiscoveryAnalytics.php:675
 msgid "No stored requests match the selected filters."
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:735
-#: src/Admin/Logs.php:731
+#: src/Admin/DiscoveryAnalytics.php:740
+#: src/Admin/Logs.php:741
 msgid "endpoint"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:735
-#: src/Admin/Logs.php:732
+#: src/Admin/DiscoveryAnalytics.php:740
+#: src/Admin/Logs.php:742
 msgid "content"
 msgstr ""
 
 #. translators: %d: HTTP response status code.
-#: src/Admin/DiscoveryAnalytics.php:760
+#: src/Admin/DiscoveryAnalytics.php:765
 #, php-format
 msgid "HTTP %d · PHP"
 msgstr ""
 
 #. translators: %s: stable crawler registry identifier.
-#: src/Admin/DiscoveryAnalytics.php:779
+#: src/Admin/DiscoveryAnalytics.php:784
 #, php-format
 msgid "Crawler ID: %s"
 msgstr ""
 
 #. translators: %d: numeric WordPress user ID.
-#: src/Admin/DiscoveryAnalytics.php:783
+#: src/Admin/DiscoveryAnalytics.php:788
 #, php-format
 msgid "WP user: #%d"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:811
+#: src/Admin/DiscoveryAnalytics.php:816
 msgid "Site-local data"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:812
+#: src/Admin/DiscoveryAnalytics.php:817
 msgid "Recording and retention"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:814
+#: src/Admin/DiscoveryAnalytics.php:819
 msgid "Analytics records remain in this WordPress database and are not sent to the Cybermaps developer."
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:832
+#: src/Admin/DiscoveryAnalytics.php:837
 msgid "Record PHP-observed crawler analytics"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:834
+#: src/Admin/DiscoveryAnalytics.php:839
 msgid "Records registered endpoint requests that reach PHP, plus UA-matched and conservative crawler-candidate visits to ordinary content. Cybermaps diagnostic probes are excluded. Disabling recording does not delete existing history."
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:846
+#: src/Admin/DiscoveryAnalytics.php:851
 msgid "Anonymize stored IP addresses"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:848
+#: src/Admin/DiscoveryAnalytics.php:853
 msgid "Enabled by default. IPv4 addresses are reduced to their /24 network and IPv6 addresses to /64. Turn this off to store full resolved IP addresses locally. This choice affects only future records; existing history is not changed."
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:850
+#: src/Admin/DiscoveryAnalytics.php:855
 msgid "Retention period"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:860
+#: src/Admin/DiscoveryAnalytics.php:865
 msgid "days"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:862
+#: src/Admin/DiscoveryAnalytics.php:867
 msgid "The daily cleanup job removes older rows. Reports can show no more history than this setting retains."
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:864
+#: src/Admin/DiscoveryAnalytics.php:869
 msgid "Save analytics settings"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:868
+#: src/Admin/DiscoveryAnalytics.php:873
 msgid "Stored history"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:869
+#: src/Admin/DiscoveryAnalytics.php:874
 msgid "Export the complete retained dataset before clearing it if you need an offline record."
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:872
+#: src/Admin/DiscoveryAnalytics.php:877
 msgid "Export CSV"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:874
+#: src/Admin/DiscoveryAnalytics.php:879
 msgid "Clear all retained Cybermaps analytics history? This cannot be undone."
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:877
+#: src/Admin/DiscoveryAnalytics.php:882
 msgid "Clear history"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:916
+#: src/Admin/DiscoveryAnalytics.php:921
 msgid "Claimed (UA signature matched)"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:918
-#: src/Admin/DiscoveryAnalytics.php:975
+#: src/Admin/DiscoveryAnalytics.php:923
+#: src/Admin/DiscoveryAnalytics.php:980
 msgid "Crawler candidate"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:919
+#: src/Admin/DiscoveryAnalytics.php:924
 msgid "Automated client"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:920
+#: src/Admin/DiscoveryAnalytics.php:925
 msgid "Browser / manual"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:921
+#: src/Admin/DiscoveryAnalytics.php:926
 msgid "No User-Agent"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:922
+#: src/Admin/DiscoveryAnalytics.php:927
 msgid "Unknown client"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:923
+#: src/Admin/DiscoveryAnalytics.php:928
 msgid "Legacy record"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:949
+#: src/Admin/DiscoveryAnalytics.php:954
 msgid "Logged-in site user"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:959
+#: src/Admin/DiscoveryAnalytics.php:964
 msgid "Legacy internal request"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:976
+#: src/Admin/DiscoveryAnalytics.php:981
 msgid "Unidentified client"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:977
+#: src/Admin/DiscoveryAnalytics.php:982
 msgid "Legacy internal"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:978
+#: src/Admin/DiscoveryAnalytics.php:983
 msgid "Unclassified"
 msgstr ""
 
 #. translators: %s: coarse accepted-media category such as json or html.
-#: src/Admin/DiscoveryAnalytics.php:992
+#: src/Admin/DiscoveryAnalytics.php:997
 #, php-format
 msgid "Accept: %s"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:1002
+#: src/Admin/DiscoveryAnalytics.php:1007
 msgid "Network"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:1003
+#: src/Admin/DiscoveryAnalytics.php:1008
 msgid "IP"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:1004
+#: src/Admin/DiscoveryAnalytics.php:1009
 msgid "Stored address"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:1005
+#: src/Admin/DiscoveryAnalytics.php:1010
 msgid "Address"
 msgstr ""
 
 #. translators: 1: address type, 2: stored address, 3: IP resolution source, 4: storage mode.
-#: src/Admin/DiscoveryAnalytics.php:1010
+#: src/Admin/DiscoveryAnalytics.php:1015
 #, php-format
 msgid "%1$s: %2$s · Source: %3$s · Storage: %4$s"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:1020
+#: src/Admin/DiscoveryAnalytics.php:1025
 #: src/Admin/ShortcodeBuilder.php:219
 #: assets/js/setup-wizard.js:349
 msgid "None"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:1025
+#: src/Admin/DiscoveryAnalytics.php:1030
 msgid "Direct"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:1026
+#: src/Admin/DiscoveryAnalytics.php:1031
 msgid "Trusted proxy"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:1027
+#: src/Admin/DiscoveryAnalytics.php:1032
 msgid "Anonymized"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:1028
+#: src/Admin/DiscoveryAnalytics.php:1033
 msgid "Full"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:1053
+#: src/Admin/DiscoveryAnalytics.php:1058
 msgid "Full publication cache"
 msgstr ""
 
-#: src/Admin/DiscoveryAnalytics.php:1054
+#: src/Admin/DiscoveryAnalytics.php:1059
 msgid "Compatibility files"
 msgstr ""
 
 #: src/Admin/DiscoveryAuditor.php:51
 #: src/Admin/EdgeOptimizationController.php:77
-#: src/Admin/EdgeOptimizationController.php:407
-#: src/Admin/Settings/SettingsAjax.php:154
-#: src/Admin/Settings/SettingsAjax.php:190
+#: src/Admin/EdgeOptimizationController.php:474
+#: src/Admin/Settings/SettingsAjax.php:160
+#: src/Admin/Settings/SettingsAjax.php:196
 #: src/Admin/SetupWizard/SetupWizardController.php:104
 msgid "Insufficient permissions."
 msgstr ""
@@ -1811,126 +1899,127 @@ msgstr ""
 msgid "Change frequency"
 msgstr ""
 
-#: src/Admin/DiscoveryStatus.php:230
+#: src/Admin/DiscoveryStatus.php:231
 msgid "(alternate)"
 msgstr ""
 
-#: src/Admin/DiscoveryStatus.php:329
+#: src/Admin/DiscoveryStatus.php:330
 msgid "This optional publication is disabled."
 msgstr ""
 
-#: src/Admin/DiscoveryStatus.php:353
+#: src/Admin/DiscoveryStatus.php:354
 msgid "Header conformance could not be checked because the public request was skipped."
 msgstr ""
 
-#: src/Admin/DiscoveryStatus.php:355
+#: src/Admin/DiscoveryStatus.php:356
 msgid "This public check was skipped after repeated same-origin loopback failures. Delivery remains unverified."
 msgstr ""
 
-#: src/Admin/DiscoveryStatus.php:499
+#: src/Admin/DiscoveryStatus.php:500
 msgid "The server could not complete its own public HTTP check. Delivery is unverified, not proven broken."
 msgstr ""
 
 #. translators: 1: expected media type, 2: observed media type.
-#: src/Admin/DiscoveryStatus.php:547
+#: src/Admin/DiscoveryStatus.php:548
 #, php-format
 msgid "Expected %1$s but the server returned %2$s."
 msgstr ""
 
-#: src/Admin/DiscoveryStatus.php:549
+#: src/Admin/DiscoveryStatus.php:550
 msgid "no Content-Type"
 msgstr ""
 
-#: src/Admin/DiscoveryStatus.php:567
+#: src/Admin/DiscoveryStatus.php:568
 msgid "The API catalog Content-Type is missing the RFC 9727 profile parameter."
 msgstr ""
 
-#: src/Admin/DiscoveryStatus.php:617
+#: src/Admin/DiscoveryStatus.php:618
 msgid "The dynamic response reports a different Cybermaps version, which usually indicates a stale proxy cache."
 msgstr ""
 
-#: src/Admin/DiscoveryStatus.php:638
+#: src/Admin/DiscoveryStatus.php:639
 msgid "Public response, media type, and body validated."
 msgstr ""
 
-#: src/Admin/DiscoveryStatus.php:706
+#: src/Admin/DiscoveryStatus.php:707
 msgid "This path is dynamically delivered; static-server headers are not required."
 msgstr ""
 
-#: src/Admin/DiscoveryStatus.php:717
+#: src/Admin/DiscoveryStatus.php:718
 msgid "Static header conformance could not be checked because the public request was unavailable."
 msgstr ""
 
-#: src/Admin/DiscoveryStatus.php:911
+#: src/Admin/DiscoveryStatus.php:920
 msgid "GET validated, but the server could not complete the RFC 9727 HEAD check."
 msgstr ""
 
 #. translators: %d: HTTP response status code.
-#: src/Admin/DiscoveryStatus.php:921
+#: src/Admin/DiscoveryStatus.php:930
 #, php-format
 msgid "API Catalog HEAD returned HTTP %d."
 msgstr ""
 
-#: src/Admin/DiscoveryStatus.php:931
+#: src/Admin/DiscoveryStatus.php:940
 msgid "API Catalog HEAD is missing a Link header with rel=\"api-catalog\"."
 msgstr ""
 
-#: src/Admin/DiscoveryStatus.php:999
+#: src/Admin/DiscoveryStatus.php:1008
 msgid "The public response body is empty."
 msgstr ""
 
-#: src/Admin/DiscoveryStatus.php:1006
+#: src/Admin/DiscoveryStatus.php:1015
 msgid "The response reached the safe probe-size limit, so complete parsing could not be verified."
 msgstr ""
 
-#: src/Admin/DiscoveryStatus.php:1036
+#: src/Admin/DiscoveryStatus.php:1045
 msgid "Public request returned HTTP 507. LLMS Full exceeded its output or memory safety budget; no partial corpus was published. This does not by itself indicate a full disk."
 msgstr ""
 
 #. translators: %d: HTTP response status code.
-#: src/Admin/DiscoveryStatus.php:1040
+#: src/Admin/DiscoveryStatus.php:1049
 #, php-format
 msgid "Public request returned HTTP %d."
 msgstr ""
 
-#: src/Admin/DiscoveryStatus.php:1058
+#: src/Admin/DiscoveryStatus.php:1067
 msgid "The public response is not valid JSON."
 msgstr ""
 
-#: src/Admin/DiscoveryStatus.php:1064
+#: src/Admin/DiscoveryStatus.php:1073
 msgid "The API catalog body is not a valid nonempty Linkset."
 msgstr ""
 
-#: src/Admin/DiscoveryStatus.php:1085
+#: src/Admin/DiscoveryStatus.php:1094
 msgid "Each JSONL record must be a valid JSON object."
 msgstr ""
 
-#: src/Admin/DiscoveryStatus.php:1100
+#: src/Admin/DiscoveryStatus.php:1109
 msgid "The PHP XML extension is unavailable, so the XML body could not be parsed locally."
 msgstr ""
 
-#: src/Admin/DiscoveryStatus.php:1110
+#: src/Admin/DiscoveryStatus.php:1119
 msgid "The public response is not parseable XML."
 msgstr ""
 
-#: src/Admin/DiscoveryStatus.php:1245
+#: src/Admin/DiscoveryStatus.php:1260
 msgid "The public base URL contains a path. RFC well-known URIs belong at the origin root, so the server must map origin-root /.well-known/ requests to these publications."
 msgstr ""
 
-#: src/Admin/DiscoveryStatus.php:1252
+#: src/Admin/DiscoveryStatus.php:1267
 msgid "Headless mode is configured. These checks target the public frontend, but files written on the WordPress host are not automatically deployed to that frontend."
 msgstr ""
 
-#: src/Admin/DiscoveryStatus.php:1259
+#: src/Admin/DiscoveryStatus.php:1274
 msgid "One or more public checks were unverified because this server could not complete or fully parse its own request. This does not prove the endpoint is unavailable to external clients."
 msgstr ""
 
-#: src/Admin/DiscoveryStatus.php:1267
+#: src/Admin/DiscoveryStatus.php:1282
 msgid "The automatic well-known routing bridge needs attention."
 msgstr ""
 
-#: src/Admin/DiscoveryStatus.php:1273
-msgid "Cybermaps materializes enabled canonical discovery fallback bodies in compatibility mode. Dynamic delivery remains preferred, while Debugging and optional edge rules report or repair headers when a server serves physical files before WordPress."
+#: src/Admin/DiscoveryStatus.php:1288
+#: src/Admin/MaturityGuidance.php:98
+msgid "Core discovery mode publishes five files: /ai.json, /ai-usage.json, /ai-actions.json, the canonical Site Guide SKILL.md, and its Agent Skills index. API Catalog, AI Catalog, MCP Server Card, and /ai-discovery remain dynamic in every mode and must reach WordPress. Debugging checks delivery and headers; Advanced offers optional scoped Cloudflare response rules."
 msgstr ""
 
 #: src/Admin/EdgeOptimizationController.php:80
@@ -1945,7 +2034,11 @@ msgstr ""
 msgid "Cloudflare not detected"
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:98
+#: src/Admin/EdgeOptimizationController.php:88
+msgid "Another Cybermaps edge operation is running. Try again shortly."
+msgstr ""
+
+#: src/Admin/EdgeOptimizationController.php:95
 msgid "Cloudflare authorization could not be started."
 msgstr ""
 
@@ -1953,378 +2046,408 @@ msgstr ""
 msgid "Cloudflare authorization"
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:106
+#: src/Admin/EdgeOptimizationController.php:125
+msgid "GET is required."
+msgstr ""
+
+#: src/Admin/EdgeOptimizationController.php:128
 msgid "Sign in as an administrator to finish Cloudflare authorization."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:112
+#: src/Admin/EdgeOptimizationController.php:131
+msgid "Another Cybermaps edge operation is running. Retry this callback shortly."
+msgstr ""
+
+#: src/Admin/EdgeOptimizationController.php:137
+msgid "Cloudflare authorization could not be completed."
+msgstr ""
+
+#: src/Admin/EdgeOptimizationController.php:154
 msgid "Cloudflare authorization state is invalid or expired. Return to Cybermaps and start again."
 msgstr ""
 
 #. translators: %s: Cloudflare OAuth error.
-#: src/Admin/EdgeOptimizationController.php:119
+#: src/Admin/EdgeOptimizationController.php:162
 #, php-format
 msgid "Cloudflare authorization was not completed: %s"
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:124
+#: src/Admin/EdgeOptimizationController.php:166
 msgid "Cloudflare did not return a usable authorization code. Return to Cybermaps and start again."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:154
-msgid "Cloudflare authorization did not start."
-msgstr ""
-
-#: src/Admin/EdgeOptimizationController.php:167
+#: src/Admin/EdgeOptimizationController.php:187
 msgid "Another Cybermaps edge operation is finishing."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:174
+#: src/Admin/EdgeOptimizationController.php:197
 msgid "Cloudflare authorization did not complete."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:196
+#: src/Admin/EdgeOptimizationController.php:224
+msgid "Cloudflare authorization did not start."
+msgstr ""
+
+#: src/Admin/EdgeOptimizationController.php:240
 msgid "Cloudflare finished without a recoverable result."
 msgstr ""
 
 #. translators: %d: removed compatibility cache entries.
-#: src/Admin/EdgeOptimizationController.php:217
+#: src/Admin/EdgeOptimizationController.php:261
 #, php-format
 msgid "Cybermaps advanced every cache family and removed %d compatibility entries."
 msgstr ""
 
 #. translators: %s: static reconciliation status.
-#: src/Admin/EdgeOptimizationController.php:228
+#: src/Admin/EdgeOptimizationController.php:272
 #, php-format
 msgid "Static publication reconciliation finished with status: %s."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:245
-#: src/Admin/EdgeOptimizationController.php:267
+#: src/Admin/EdgeOptimizationController.php:289
+#: src/Admin/EdgeOptimizationController.php:311
 msgid "Waiting for Cloudflare authorization."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:253
+#: src/Admin/EdgeOptimizationController.php:294
+msgid "Cloudflare authorization expired or was declined. Start again."
+msgstr ""
+
+#: src/Admin/EdgeOptimizationController.php:297
 msgid "Cloudflare authorization expired. Start again."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:253
+#: src/Admin/EdgeOptimizationController.php:297
 msgid "Cloudflare authorization was declined or unavailable."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:257
+#: src/Admin/EdgeOptimizationController.php:301
 msgid "Cloudflare authorization state did not match the initiating administrator."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:273
+#: src/Admin/EdgeOptimizationController.php:317
 msgid "Cloudflare authorization did not include a code."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:296
+#: src/Admin/EdgeOptimizationController.php:340
 msgid "Save a valid Cloudflare OAuth client ID before using custom OAuth."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:328
+#: src/Admin/EdgeOptimizationController.php:372
 msgid "The Cloudflare rule operation did not complete."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:358
-msgid "Cloudflare installed the discovery headers, but cache safety needs attention. Review Debugging for details."
+#: src/Admin/EdgeOptimizationController.php:405
+msgid "Cloudflare updated the static MIME fallback profiles, but cache safety needs attention. Review Debugging for details."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:359
+#: src/Admin/EdgeOptimizationController.php:406
 msgid "Cloudflare authorization completed and Cybermaps rules were updated."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:361
+#: src/Admin/EdgeOptimizationController.php:408
+#: src/Admin/EdgeOptimizationController.php:453
+msgid "Cybermaps removed its current site rules. Older unscoped rules were retained for manual review in Cloudflare."
+msgstr ""
+
+#: src/Admin/EdgeOptimizationController.php:411
 msgid "The credential was discarded, but Cloudflare revocation could not be confirmed."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:375
+#: src/Admin/EdgeOptimizationController.php:425
 msgid "Cloudflare was not detected. Confirm that this hostname is orange-cloud proxied before using Cloudflare rule tools."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:379
+#: src/Admin/EdgeOptimizationController.php:429
 msgid "Another Cybermaps edge operation is already running. Wait briefly and try again."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:387
+#: src/Admin/EdgeOptimizationController.php:437
 msgid "The Cloudflare operation did not complete."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:403
+#: src/Admin/EdgeOptimizationController.php:463
+msgid "Cloudflare operation state could not be recorded."
+msgstr ""
+
+#: src/Admin/EdgeOptimizationController.php:470
+#: src/Admin/SitemapStatus.php:621
 msgid "POST is required."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:435
+#: src/Admin/EdgeOptimizationController.php:502
 msgid "The configured public hostname changed during Cloudflare authorization. Start the operation again."
 msgstr ""
 
-#: src/Admin/EdgeOptimizationController.php:443
+#: src/Admin/EdgeOptimizationController.php:510
 msgid "Enter a valid scoped Cloudflare API token. The token is used once and is not stored."
 msgstr ""
 
-#: src/Admin/IdentityHub.php:117
-msgid "Structured Data Engine:"
-msgstr ""
-
-#: src/Admin/IdentityHub.php:118
-msgid "The Identity Hub generates"
-msgstr ""
-
-#: src/Admin/IdentityHub.php:118
-msgid "JSON-LD Schema"
-msgstr ""
-
-#: src/Admin/IdentityHub.php:118
-msgid "from the information you enter and also publishes that identity in the Cybermaps graph. Search engines decide whether any rich result or knowledge feature is shown."
+#: src/Admin/EdgeOptimizationController.php:524
+msgid "The edge operation lost its database lock. Start the operation again."
 msgstr ""
 
 #: src/Admin/IdentityHub.php:119
+msgid "Structured Data Engine:"
+msgstr ""
+
+#: src/Admin/IdentityHub.php:120
+msgid "The Identity Hub generates"
+msgstr ""
+
+#: src/Admin/IdentityHub.php:120
+msgid "JSON-LD Schema"
+msgstr ""
+
+#: src/Admin/IdentityHub.php:120
+msgid "from the information you enter and also publishes that identity in the Cybermaps graph. Search engines decide whether any rich result or knowledge feature is shown."
+msgstr ""
+
+#: src/Admin/IdentityHub.php:121
 msgid "Learn more about Schema.org standards"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:124
+#: src/Admin/IdentityHub.php:126
 msgid "Basic Identity"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:125
+#: src/Admin/IdentityHub.php:127
 msgid "Primary entity data published as Schema.org JSON-LD and in the Cybermaps Knowledge Graph."
 msgstr ""
 
-#: src/Admin/IdentityHub.php:129
+#: src/Admin/IdentityHub.php:131
 msgid "Primary Entity Type:"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:129
+#: src/Admin/IdentityHub.php:131
 msgid "Determines the root @type for your JSON-LD Schema. Organization is for brands/groups; LocalBusiness is for physical stores/offices."
 msgstr ""
 
-#: src/Admin/IdentityHub.php:131
+#: src/Admin/IdentityHub.php:133
 msgid "Organization (General Brand)"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:132
+#: src/Admin/IdentityHub.php:134
 msgid "LocalBusiness (Physical Location)"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:133
+#: src/Admin/IdentityHub.php:135
 msgid "Person (Personal Blog/Portfolio)"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:138
+#: src/Admin/IdentityHub.php:140
 msgid "Supported Schema Subtype:"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:138
+#: src/Admin/IdentityHub.php:140
 msgid "Narrows the primary entity to one of the common Schema.org subtypes that Cybermaps explicitly supports."
 msgstr ""
 
-#: src/Admin/IdentityHub.php:140
+#: src/Admin/IdentityHub.php:142
 msgid "Use the primary entity type"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:145
+#: src/Admin/IdentityHub.php:147
 msgid "Only compatible supported subtypes are shown. Leave this at the primary type when no narrower choice is accurate."
 msgstr ""
 
-#: src/Admin/IdentityHub.php:149
+#: src/Admin/IdentityHub.php:151
 msgid "Official Entity Name (required to publish):"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:154
+#: src/Admin/IdentityHub.php:156
 msgid "Published Entity Description:"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:154
+#: src/Admin/IdentityHub.php:156
 msgid "This operator-authored description is included in configured JSON-LD identity and Knowledge Graph output."
 msgstr ""
 
-#: src/Admin/IdentityHub.php:155
+#: src/Admin/IdentityHub.php:157
 msgid "Describe the organization using factual language."
 msgstr ""
 
-#: src/Admin/IdentityHub.php:156
+#: src/Admin/IdentityHub.php:158
 msgid "Cybermaps publishes this text but cannot guarantee that any crawler reads or uses it."
 msgstr ""
 
-#: src/Admin/IdentityHub.php:162
+#: src/Admin/IdentityHub.php:164
 msgid "Contact & Location"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:163
+#: src/Admin/IdentityHub.php:165
 msgid "Geographic and contact information published in configured Schema.org output. Supports international addresses; search features are not guaranteed."
 msgstr ""
 
-#: src/Admin/IdentityHub.php:167
+#: src/Admin/IdentityHub.php:169
 msgid "Country:"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:168
+#: src/Admin/IdentityHub.php:170
 msgid "US"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:169
+#: src/Admin/IdentityHub.php:171
 msgid "Enter any ISO 3166-1 alpha-2 country code, such as US, GB, KE, or NZ."
 msgstr ""
 
-#: src/Admin/IdentityHub.php:173
+#: src/Admin/IdentityHub.php:175
 msgid "Street Address:"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:179
+#: src/Admin/IdentityHub.php:181
 msgid "City:"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:183
+#: src/Admin/IdentityHub.php:185
 msgid "State / Province / Region:"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:184
+#: src/Admin/IdentityHub.php:186
 msgid "e.g. CA, NSW, Bavaria"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:187
+#: src/Admin/IdentityHub.php:189
 msgid "Postal Code:"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:194
+#: src/Admin/IdentityHub.php:196
 msgid "Latitude:"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:195
+#: src/Admin/IdentityHub.php:197
 msgid "e.g. 40.7128"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:198
+#: src/Admin/IdentityHub.php:200
 msgid "Longitude:"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:199
+#: src/Admin/IdentityHub.php:201
 msgid "e.g. -74.0060"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:205
+#: src/Admin/IdentityHub.php:207
 msgid "Phone Number:"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:209
+#: src/Admin/IdentityHub.php:211
 msgid "Official Email:"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:227
+#: src/Admin/IdentityHub.php:229
 msgid "Social Profiles (sameAs)"
 msgstr ""
 
 #. translators: %d: maximum social-profile URLs.
-#: src/Admin/IdentityHub.php:232
+#: src/Admin/IdentityHub.php:234
 #, php-format
 msgid "Add up to %d public profile URLs."
 msgstr ""
 
-#: src/Admin/IdentityHub.php:243
-#: src/Admin/IdentityHub.php:540
+#: src/Admin/IdentityHub.php:245
+#: src/Admin/IdentityHub.php:533
 msgid "Social profile URL"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:243
+#: src/Admin/IdentityHub.php:245
 msgid "https://facebook.com/..."
 msgstr ""
 
-#: src/Admin/IdentityHub.php:244
-#: src/Admin/IdentityHub.php:569
+#: src/Admin/IdentityHub.php:246
+#: src/Admin/IdentityHub.php:562
 msgid "Remove social profile"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:248
+#: src/Admin/IdentityHub.php:250
 msgid "+ Add Social Profile"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:252
+#: src/Admin/IdentityHub.php:254
 msgid "Department Contact Points"
 msgstr ""
 
 #. translators: %d: maximum contact points.
-#: src/Admin/IdentityHub.php:257
+#: src/Admin/IdentityHub.php:259
 #, php-format
 msgid "Add up to %d department contacts."
 msgstr ""
 
-#: src/Admin/IdentityHub.php:269
-#: src/Admin/IdentityHub.php:570
+#: src/Admin/IdentityHub.php:271
+#: src/Admin/IdentityHub.php:563
 msgid "Remove contact point"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:271
-#: src/Admin/IdentityHub.php:541
+#: src/Admin/IdentityHub.php:273
+#: src/Admin/IdentityHub.php:534
 msgid "Contact type"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:273
-#: src/Admin/IdentityHub.php:551
+#: src/Admin/IdentityHub.php:275
+#: src/Admin/IdentityHub.php:544
 msgid "Customer Support"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:274
-#: src/Admin/IdentityHub.php:552
+#: src/Admin/IdentityHub.php:276
+#: src/Admin/IdentityHub.php:545
 msgid "Technical Support"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:275
-#: src/Admin/IdentityHub.php:553
+#: src/Admin/IdentityHub.php:277
+#: src/Admin/IdentityHub.php:546
 msgid "Sales"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:279
-#: src/Admin/IdentityHub.php:542
+#: src/Admin/IdentityHub.php:281
+#: src/Admin/IdentityHub.php:535
 msgid "Contact phone"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:280
-#: src/Admin/IdentityHub.php:538
+#: src/Admin/IdentityHub.php:282
+#: src/Admin/IdentityHub.php:531
 msgid "Phone"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:281
-#: src/Admin/IdentityHub.php:543
+#: src/Admin/IdentityHub.php:283
+#: src/Admin/IdentityHub.php:536
 msgid "Contact email"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:282
-#: src/Admin/IdentityHub.php:539
+#: src/Admin/IdentityHub.php:284
+#: src/Admin/IdentityHub.php:532
 msgid "Email"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:287
+#: src/Admin/IdentityHub.php:289
 msgid "+ Add Contact Point"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:311
+#: src/Admin/IdentityHub.php:313
 msgid "Identity Image & Logo"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:314
+#: src/Admin/IdentityHub.php:316
 msgid "Identity publication:"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:314
+#: src/Admin/IdentityHub.php:316
 msgid "The configured name, image, and social profiles are encoded as JSON-LD and included in Cybermaps discovery output. Organization and business identities also publish the image as their logo; Person identities publish it only as an image."
 msgstr ""
 
-#: src/Admin/IdentityHub.php:318
+#: src/Admin/IdentityHub.php:320
 msgid "Featured Brand Image:"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:324
-#: src/Admin/IdentityHub.php:575
+#: src/Admin/IdentityHub.php:326
+#: src/Admin/IdentityHub.php:568
 msgid "No Image"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:329
+#: src/Admin/IdentityHub.php:331
 msgid "Select Image"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:330
+#: src/Admin/IdentityHub.php:332
 #: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:101
 #: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:128
 #: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:230
@@ -2333,216 +2456,273 @@ msgstr ""
 msgid "Remove"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:338
+#: src/Admin/IdentityHub.php:340
 msgid "Business Hours"
 msgstr ""
 
 #. translators: %d: maximum opening-hour ranges per day.
-#: src/Admin/IdentityHub.php:343
+#: src/Admin/IdentityHub.php:345
 #, php-format
 msgid "Published only for LocalBusiness and its supported business subtypes. Add up to %d time ranges per day."
 msgstr ""
 
-#: src/Admin/IdentityHub.php:352
+#: src/Admin/IdentityHub.php:354
 msgid "Monday"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:353
+#: src/Admin/IdentityHub.php:355
 msgid "Tuesday"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:354
+#: src/Admin/IdentityHub.php:356
 msgid "Wednesday"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:355
+#: src/Admin/IdentityHub.php:357
 msgid "Thursday"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:356
+#: src/Admin/IdentityHub.php:358
 msgid "Friday"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:357
+#: src/Admin/IdentityHub.php:359
 msgid "Saturday"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:358
+#: src/Admin/IdentityHub.php:360
 msgid "Sunday"
 msgstr ""
 
 #. translators: %s: weekday name.
-#: src/Admin/IdentityHub.php:372
-#: src/Admin/IdentityHub.php:547
+#: src/Admin/IdentityHub.php:374
+#: src/Admin/IdentityHub.php:540
 #, php-format
 msgid "%s opening time"
 msgstr ""
 
 #. translators: %s: weekday name.
-#: src/Admin/IdentityHub.php:374
-#: src/Admin/IdentityHub.php:549
+#: src/Admin/IdentityHub.php:376
+#: src/Admin/IdentityHub.php:542
 #, php-format
 msgid "%s closing time"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:379
-#: src/Admin/IdentityHub.php:536
+#: src/Admin/IdentityHub.php:381
+#: src/Admin/IdentityHub.php:529
 msgid "to"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:382
-#: src/Admin/IdentityHub.php:568
+#: src/Admin/IdentityHub.php:384
+#: src/Admin/IdentityHub.php:561
 msgid "Remove business-hours slot"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:387
+#: src/Admin/IdentityHub.php:389
 msgid "+ Add Slot"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:407
+#: src/Admin/IdentityHub.php:409
 msgid "Product & Offer Catalogs"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:408
+#: src/Admin/IdentityHub.php:410
 msgid "Manual:"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:408
+#: src/Admin/IdentityHub.php:410
 msgid "List items explicitly."
 msgstr ""
 
-#: src/Admin/IdentityHub.php:408
+#: src/Admin/IdentityHub.php:410
 msgid "Automated:"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:408
+#: src/Admin/IdentityHub.php:410
 msgid "Automatically generates a catalog based on child pages of the selected parent page."
 msgstr ""
 
 #. translators: 1: maximum catalogs, 2: maximum items per catalog, 3: maximum items overall.
-#: src/Admin/IdentityHub.php:413
+#: src/Admin/IdentityHub.php:415
 #, php-format
 msgid "Up to %1$d catalogs, %2$d items per catalog, and %3$d manual items overall."
 msgstr ""
 
-#: src/Admin/IdentityHub.php:430
-#: src/Admin/IdentityHub.php:571
+#: src/Admin/IdentityHub.php:432
+#: src/Admin/IdentityHub.php:564
 msgid "Remove catalog"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:433
-#: src/Admin/IdentityHub.php:554
+#: src/Admin/IdentityHub.php:435
+#: src/Admin/IdentityHub.php:547
 msgid "Catalog Mode:"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:435
-#: src/Admin/IdentityHub.php:555
+#: src/Admin/IdentityHub.php:437
+#: src/Admin/IdentityHub.php:548
 msgid "Manual Entry"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:436
-#: src/Admin/IdentityHub.php:556
+#: src/Admin/IdentityHub.php:438
+#: src/Admin/IdentityHub.php:549
 msgid "Automated (Page Tree)"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:441
-#: src/Admin/IdentityHub.php:557
+#: src/Admin/IdentityHub.php:443
+#: src/Admin/IdentityHub.php:550
 msgid "Items Represent:"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:443
-#: src/Admin/IdentityHub.php:558
-#: src/Core/IdentityEntityBuilder.php:348
+#: src/Admin/IdentityHub.php:445
+#: src/Admin/IdentityHub.php:551
+#: src/Core/IdentityEntityBuilder.php:351
 msgid "Services"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:444
-#: src/Admin/IdentityHub.php:559
-#: src/Core/IdentityEntityBuilder.php:348
+#: src/Admin/IdentityHub.php:446
+#: src/Admin/IdentityHub.php:552
+#: src/Core/IdentityEntityBuilder.php:351
 msgid "Products"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:446
-#: src/Admin/IdentityHub.php:560
+#: src/Admin/IdentityHub.php:448
+#: src/Admin/IdentityHub.php:553
 msgid "Choose the Schema.org type that truthfully describes every item in this catalog."
 msgstr ""
 
-#: src/Admin/IdentityHub.php:451
-#: src/Admin/IdentityHub.php:561
+#: src/Admin/IdentityHub.php:453
+#: src/Admin/IdentityHub.php:554
 msgid "Catalog Name:"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:452
-#: src/Admin/IdentityHub.php:562
+#: src/Admin/IdentityHub.php:454
+#: src/Admin/IdentityHub.php:555
 msgid "e.g. Services or Products"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:453
-#: src/Admin/IdentityHub.php:563
+#: src/Admin/IdentityHub.php:455
+#: src/Admin/IdentityHub.php:556
 msgid "The primary identifier for this catalog grouping."
 msgstr ""
 
-#: src/Admin/IdentityHub.php:453
-#: src/Admin/IdentityHub.php:564
+#: src/Admin/IdentityHub.php:455
+#: src/Admin/IdentityHub.php:557
 msgid "Used for Knowledge Graph tagging."
 msgstr ""
 
-#: src/Admin/IdentityHub.php:456
-#: src/Admin/IdentityHub.php:565
+#: src/Admin/IdentityHub.php:458
+#: src/Admin/IdentityHub.php:558
 msgid "Items Offered:"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:463
-#: src/Admin/IdentityHub.php:550
+#: src/Admin/IdentityHub.php:465
+#: src/Admin/IdentityHub.php:543
 msgid "Catalog item"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:464
-#: src/Admin/IdentityHub.php:572
+#: src/Admin/IdentityHub.php:466
+#: src/Admin/IdentityHub.php:565
 msgid "Remove catalog item"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:468
-#: src/Admin/IdentityHub.php:566
+#: src/Admin/IdentityHub.php:470
+#: src/Admin/IdentityHub.php:559
 msgid "+ Add Item"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:473
-#: src/Admin/IdentityHub.php:567
+#: src/Admin/IdentityHub.php:475
+#: src/Admin/IdentityHub.php:560
 msgid "Parent Page (The Catalog):"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:480
-#: src/Admin/IdentityHub.php:501
-msgid "Select a parent page..."
-msgstr ""
-
-#: src/Admin/IdentityHub.php:490
+#: src/Admin/IdentityHub.php:487
 msgid "+ Create New Catalog"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:495
+#: src/Admin/IdentityHub.php:492
 msgid "Parent Page (The Catalog)"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:537
+#: src/Admin/IdentityHub.php:530
 msgid "https://..."
 msgstr ""
 
-#: src/Admin/IdentityHub.php:544
+#: src/Admin/IdentityHub.php:537
 msgid "opening time"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:545
+#: src/Admin/IdentityHub.php:538
 msgid "closing time"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:573
+#: src/Admin/IdentityHub.php:566
 msgid "Select Brand Image"
 msgstr ""
 
-#: src/Admin/IdentityHub.php:574
+#: src/Admin/IdentityHub.php:567
 msgid "Use Image"
+msgstr ""
+
+#: src/Admin/IdentityHub.php:1214
+msgid "The identity submission was invalid. Your saved identity was preserved."
+msgstr ""
+
+#: src/Admin/IdentityHub.php:1225
+msgid "The imported identity has invalid fields or exceeds its limits."
+msgstr ""
+
+#: src/Admin/IdentityPageSelector.php:23
+msgid "Page search failed. Please try again."
+msgstr ""
+
+#: src/Admin/IdentityPageSelector.php:24
+msgid "No matching public pages."
+msgstr ""
+
+#: src/Admin/IdentityPageSelector.php:25
+msgid "Choose a page from the matching results."
+msgstr ""
+
+#: src/Admin/IdentityPageSelector.php:26
+msgid "Enter at least two characters to search public pages."
+msgstr ""
+
+#. translators: %d: saved page identifier that is no longer publicly selectable.
+#: src/Admin/IdentityPageSelector.php:36
+#, php-format
+msgid "Page #%d (unavailable)"
+msgstr ""
+
+#: src/Admin/IdentityPageSelector.php:39
+msgid "Search public pages by title"
+msgstr ""
+
+#: src/Admin/IdentityPageSelector.php:40
+msgid "Search pages"
+msgstr ""
+
+#: src/Admin/IdentityPageSelector.php:41
+msgid "Next results"
+msgstr ""
+
+#: src/Admin/IdentityPageSelector.php:43
+msgid "Select a parent page..."
+msgstr ""
+
+#: src/Admin/IdentityPageSelector.php:56
+msgid "POST required."
+msgstr ""
+
+#: src/Admin/IdentityPageSelector.php:59
+msgid "Not authorized."
+msgstr ""
+
+#: src/Admin/IdentityPageSelector.php:74
+msgid "Enter a shorter title search of at least two characters."
+msgstr ""
+
+#: src/Admin/IdentityPageSelector.php:92
+msgid "Page search is unavailable. Please try again."
 msgstr ""
 
 #: src/Admin/InternationalPanel.php:69
@@ -2556,10 +2736,6 @@ msgstr ""
 
 #: src/Admin/InternationalPanel.php:126
 msgid "This post cannot be updated through the translation panel."
-msgstr ""
-
-#: src/Admin/InternationalPanel.php:129
-msgid "The translation relationship action could not be applied."
 msgstr ""
 
 #: src/Admin/InternationalPanel.php:151
@@ -2589,6 +2765,10 @@ msgstr ""
 
 #: src/Admin/InternationalPanel.php:162
 msgid "Automatic WPML or Polylang grouping is paused for this post until you resume it or assign a group manually."
+msgstr ""
+
+#: src/Admin/InternationalPanel.php:335
+msgid "The translation action did not complete. The post, relationship, or sync-pause changes may already have been saved. Reload this post to check its current state before retrying."
 msgstr ""
 
 #: src/Admin/LocalDeliveryController.php:34
@@ -2786,29 +2966,33 @@ msgstr ""
 msgid "Cybermaps could not restore its daily analytics and report-retention schedule. Check WP-Cron and the site database, then reload this administration page."
 msgstr ""
 
-#: src/Admin/Logs.php:344
+#: src/Admin/Logs.php:350
 msgid "Cybermaps could not read the analytics history for export."
 msgstr ""
 
-#: src/Admin/Logs.php:464
+#: src/Admin/Logs.php:470
 msgid "Export stopped before all retained rows could be read."
 msgstr ""
 
-#: src/Admin/Logs.php:712
+#: src/Admin/Logs.php:719
 msgid "CYBERMAPS: Recent PHP-Observed Requests"
 msgstr ""
 
-#: src/Admin/Logs.php:725
+#: src/Admin/Logs.php:733
+msgid "Analytics observations are unavailable because the database could not be read. Check Discovery Analytics and the site database logs."
+msgstr ""
+
+#: src/Admin/Logs.php:735
 msgid "No endpoint observations or crawler-signature requests have reached PHP yet."
 msgstr ""
 
 #. translators: %s: relative time (e.g. 5 minutes)
-#: src/Admin/Logs.php:740
+#: src/Admin/Logs.php:750
 #, php-format
 msgid "%s ago"
 msgstr ""
 
-#: src/Admin/Logs.php:752
+#: src/Admin/Logs.php:762
 msgid "Open Discovery Analytics"
 msgstr ""
 
@@ -2925,10 +3109,6 @@ msgstr ""
 msgid "Deployment required"
 msgstr ""
 
-#: src/Admin/MaturityGuidance.php:98
-msgid "Cybermaps materializes ownership-safe canonical fallback bodies when the origin bypasses WordPress. Debugging reports header conformance, and Advanced can optionally install scoped Cloudflare response rules."
-msgstr ""
-
 #: src/Admin/MCPSetup.php:25
 msgid "Install and activate WordPress MCP Adapter to enable MCP connections. Cybermaps’ sitemaps, AI publications and reports work independently."
 msgstr ""
@@ -2994,11 +3174,11 @@ msgid "Optional MCP requires MCP Adapter"
 msgstr ""
 
 #: src/Admin/MediaAuditor.php:28
-#: src/Admin/MediaAuditor.php:85
+#: src/Admin/MediaAuditor.php:86
 msgid "Media discovery is disabled. Save Standard or Advanced mode before starting a rescan."
 msgstr ""
 
-#: src/Admin/MediaAuditor.php:173
+#: src/Admin/MediaAuditor.php:175
 msgid "The media audit database query failed. Check database health and try again."
 msgstr ""
 
@@ -3307,119 +3487,127 @@ msgstr ""
 msgid "%1$s requires %2$s and %3$s to differ."
 msgstr ""
 
-#: src/Admin/MigrationHub.php:2102
+#: src/Admin/MigrationHub.php:2101
 msgid "The Cybermaps configuration changed while it was being read. Try the operation again."
 msgstr ""
 
 #. translators: %s: JSON parser error message.
-#: src/Admin/MigrationHub.php:2218
+#: src/Admin/MigrationHub.php:2213
 #, php-format
 msgid "The backup JSON is invalid: %s"
 msgstr ""
 
-#: src/Admin/MigrationHub.php:2232
+#: src/Admin/MigrationHub.php:2227
 msgid "The backup does not contain configuration data."
 msgstr ""
 
-#: src/Admin/MigrationHub.php:2247
+#: src/Admin/MigrationHub.php:2242
 msgid "This is not a Cybermaps configuration backup."
 msgstr ""
 
-#: src/Admin/MigrationHub.php:2250
+#: src/Admin/MigrationHub.php:2245
 msgid "This Cybermaps backup version is not supported."
 msgstr ""
 
 #. translators: %s: missing configuration group.
-#: src/Admin/MigrationHub.php:2265
+#: src/Admin/MigrationHub.php:2260
 #, php-format
 msgid "The backup is incomplete: %s is missing."
 msgstr ""
 
 #. translators: %s: malformed configuration group.
-#: src/Admin/MigrationHub.php:2274
+#: src/Admin/MigrationHub.php:2269
 #, php-format
 msgid "The backup is malformed: %s must be a configuration object."
 msgstr ""
 
-#: src/Admin/MigrationHub.php:2290
+#: src/Admin/MigrationHub.php:2285
 msgid "The backup is incomplete: cybermaps_indexnow_key is missing or malformed."
 msgstr ""
 
-#: src/Admin/MigrationHub.php:2296
+#: src/Admin/MigrationHub.php:2291
 msgid "The backup contains configuration groups that are not supported by this format version."
 msgstr ""
 
-#: src/Admin/MigrationHub.php:2301
+#: src/Admin/MigrationHub.php:2296
 msgid "The backup is malformed: api_secret must be a scalar value."
 msgstr ""
 
-#: src/Admin/MigrationHub.php:2332
+#: src/Admin/MigrationHub.php:2327
 msgid "The backup contains configuration values that cannot be verified safely."
 msgstr ""
 
-#: src/Admin/MigrationHub.php:2337
+#: src/Admin/MigrationHub.php:2332
 msgid "The backup integrity check failed. Download a fresh backup and try again."
 msgstr ""
 
-#: src/Admin/MigrationHub.php:2433
+#: src/Admin/MigrationHub.php:2428
 msgid "The destination API secret was preserved because the backup did not contain one."
 msgstr ""
 
-#: src/Admin/MigrationHub.php:2469
+#: src/Admin/MigrationHub.php:2464
 msgid "The backup did not contain an API secret, so Cybermaps generated a new one during Full Replace."
 msgstr ""
 
-#: src/Admin/MigrationHub.php:2592
+#: src/Admin/MigrationHub.php:2604
 msgid "The destination IndexNow key was preserved because the backup did not contain one."
 msgstr ""
 
-#: src/Admin/MigrationHub.php:2688
+#: src/Admin/MigrationHub.php:2677
+msgid "The import failed and Cybermaps could not reconcile the remaining configuration. Conflicting values were preserved. Review configuration and publication status before retrying."
+msgstr ""
+
+#: src/Admin/MigrationHub.php:2707
 msgid "The prepared import contains an unsupported configuration target."
 msgstr ""
 
-#: src/Admin/MigrationHub.php:2712
+#: src/Admin/MigrationHub.php:2731
 msgid "The prepared import is missing its destination-state guard."
 msgstr ""
 
-#: src/Admin/MigrationHub.php:2748
+#: src/Admin/MigrationHub.php:2767
 msgid "The destination configuration changed after preparation. Preview the file again before importing."
 msgstr ""
 
-#: src/Admin/MigrationHub.php:2757
+#: src/Admin/MigrationHub.php:2776
 msgid "WordPress could not verify the complete imported configuration."
 msgstr ""
 
-#: src/Admin/MigrationHub.php:2807
+#: src/Admin/MigrationHub.php:2811
+msgid "The configuration changed during import or the database write failed. Preview again before retrying."
+msgstr ""
+
+#: src/Admin/MigrationHub.php:2828
 msgid "The import failed before any configuration values were written."
 msgstr ""
 
 #. translators: %s: comma-separated configuration group names.
-#: src/Admin/MigrationHub.php:2818
+#: src/Admin/MigrationHub.php:2838
 #, php-format
-msgid "The import failed and Cybermaps could not fully restore these configuration groups: %s. Review the settings before retrying."
+msgid "The import failed and Cybermaps could not fully restore these configuration groups: %s. Conflicting values were preserved. Review the settings before retrying."
 msgstr ""
 
-#: src/Admin/MigrationHub.php:2827
+#: src/Admin/MigrationHub.php:2847
 msgid "The import failed. Cybermaps restored the previous configuration."
 msgstr ""
 
-#: src/Admin/MigrationHub.php:3020
+#: src/Admin/MigrationHub.php:3059
 msgid "Canonical JSON nesting exceeds the supported depth."
 msgstr ""
 
-#: src/Admin/MigrationHub.php:3084
+#: src/Admin/MigrationHub.php:3123
 msgid "Could not encode a canonical JSON object key."
 msgstr ""
 
-#: src/Admin/MigrationHub.php:3122
+#: src/Admin/MigrationHub.php:3161
 msgid "Could not encode a canonical JSON value."
 msgstr ""
 
-#: src/Admin/MigrationHub.php:3133
+#: src/Admin/MigrationHub.php:3172
 msgid "Cybermaps cannot back up a non-finite numeric configuration value."
 msgstr ""
 
-#: src/Admin/MigrationHub.php:3153
+#: src/Admin/MigrationHub.php:3192
 msgid "Cybermaps could not encode a numeric configuration value without losing precision."
 msgstr ""
 
@@ -3428,19 +3616,23 @@ msgstr ""
 msgid "Cybermaps Network Settings"
 msgstr ""
 
-#: src/Admin/NetworkSettings.php:46
+#: src/Admin/NetworkSettings.php:47
+msgid "Settings could not be saved. Please retry."
+msgstr ""
+
+#: src/Admin/NetworkSettings.php:47
 msgid "Settings saved."
 msgstr ""
 
-#: src/Admin/NetworkSettings.php:53
+#: src/Admin/NetworkSettings.php:54
 msgid "Network sitemap index"
 msgstr ""
 
-#: src/Admin/NetworkSettings.php:57
+#: src/Admin/NetworkSettings.php:58
 msgid "Publish a centralized sitemap index"
 msgstr ""
 
-#: src/Admin/NetworkSettings.php:60
+#: src/Admin/NetworkSettings.php:61
 msgid "The index lists the Cybermaps sitemap for each public site where the plugin is active:"
 msgstr ""
 
@@ -3488,6 +3680,26 @@ msgstr ""
 msgid "Physical origin-root files are disabled because sites share a web root. WordPress native routing remains active for the network origin."
 msgstr ""
 
+#: src/Admin/Settings/Sanitizers/DiscoveryCenterSanitizer.php:42
+msgid "The imported discovery strategy has invalid fields or exceeds its limits."
+msgstr ""
+
+#: src/Admin/Settings/Sanitizers/DiscoveryCenterSanitizer.php:50
+msgid "The saved discovery strategy has an invalid legacy record."
+msgstr ""
+
+#: src/Admin/Settings/Sanitizers/DiscoveryCenterSanitizer.php:98
+msgid "The discovery strategy submission was invalid. Your saved strategy was preserved."
+msgstr ""
+
+#: src/Admin/Settings/Sanitizers/RobotsManagerSanitizer.php:22
+msgid "The crawler policy submission was invalid. Your saved policy was preserved."
+msgstr ""
+
+#: src/Admin/Settings/Sanitizers/RobotsManagerSanitizer.php:32
+msgid "The imported crawler policy has invalid fields or exceeds its limits."
+msgstr ""
+
 #: src/Admin/Settings/Sanitizers/SettingsSanitizer.php:91
 msgid "PHP truncated the Cybermaps settings request before it was complete. No Cybermaps settings were changed; reduce unusually large repeater lists or ask your host to raise max_input_vars, then try again."
 msgstr ""
@@ -3522,48 +3734,48 @@ msgstr ""
 msgid "Review Static File Engine settings"
 msgstr ""
 
-#: src/Admin/Settings/SettingsAjax.php:107
+#: src/Admin/Settings/SettingsAjax.php:113
 msgid "You are not allowed to export Cybermaps configuration."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAjax.php:108
-#: src/Admin/Settings/SettingsAjax.php:127
+#: src/Admin/Settings/SettingsAjax.php:114
+#: src/Admin/Settings/SettingsAjax.php:133
 msgid "Configuration Export Error"
 msgstr ""
 
-#: src/Admin/Settings/SettingsAjax.php:124
+#: src/Admin/Settings/SettingsAjax.php:130
 msgid "Cybermaps could not generate the configuration download. Review the stored settings and try again."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAjax.php:170
+#: src/Admin/Settings/SettingsAjax.php:176
 msgid "Cybermaps could not preview this configuration file. No settings were changed."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAjax.php:203
+#: src/Admin/Settings/SettingsAjax.php:209
 #: assets/js/admin-command-center.js:501
 msgid "Preview this file before applying it."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAjax.php:227
+#: src/Admin/Settings/SettingsAjax.php:233
 msgid "The configuration import did not complete. Review the current settings before retrying."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAjax.php:255
+#: src/Admin/Settings/SettingsAjax.php:261
 msgid "No configuration data provided."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAjax.php:301
+#: src/Admin/Settings/SettingsAjax.php:307
 #: assets/js/admin-command-center.js:509
 msgid "Acknowledge the high-impact changes before applying this configuration."
 msgstr ""
 
 #. translators: 1: changed configuration groups, 2: unchanged configuration groups.
-#: src/Admin/Settings/SettingsAjax.php:318
+#: src/Admin/Settings/SettingsAjax.php:324
 #, php-format
 msgid "Configuration import complete. Changed groups: %1$d; already current: %2$d."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAjax.php:355
+#: src/Admin/Settings/SettingsAjax.php:361
 msgid "Settings"
 msgstr ""
 
@@ -3604,67 +3816,75 @@ msgid "The browser could not reach this resource."
 msgstr ""
 
 #: src/Admin/Settings/SettingsAssets.php:127
-msgid "Cloudflare proxy traffic was detected. Cloudflare rule tools are available."
+msgid "The public response timed out."
 msgstr ""
 
 #: src/Admin/Settings/SettingsAssets.php:128
-msgid "Manual Cloudflare confirmation accepted for this page. Authorization and public verification are still required."
+msgid "The public response cannot be read within the safe size limit."
 msgstr ""
 
 #: src/Admin/Settings/SettingsAssets.php:129
-msgid "Cloudflare proxy traffic was not detected. These controls remain disabled unless you explicitly confirm that this hostname is orange-cloud proxied."
+msgid "Cloudflare proxy traffic was detected. Cloudflare rule tools are available."
 msgstr ""
 
 #: src/Admin/Settings/SettingsAssets.php:130
-msgid "Checking the configured public hostname for Cloudflare proxy traffic…"
+msgid "Manual Cloudflare confirmation accepted for this page. Authorization and public verification are still required."
 msgstr ""
 
 #: src/Admin/Settings/SettingsAssets.php:131
-msgid "Cybermaps could not check the public hostname from this browser. Confirm the orange-cloud proxy manually only if you have verified it in Cloudflare DNS."
+msgid "Cloudflare proxy traffic was not detected. These controls remain disabled unless you explicitly confirm that this hostname is orange-cloud proxied."
 msgstr ""
 
 #: src/Admin/Settings/SettingsAssets.php:132
-msgid "Snippet copied."
+msgid "Checking the configured public hostname for Cloudflare proxy traffic…"
 msgstr ""
 
 #: src/Admin/Settings/SettingsAssets.php:133
+msgid "Cybermaps could not check the public hostname from this browser. Confirm the orange-cloud proxy manually only if you have verified it in Cloudflare DNS."
+msgstr ""
+
+#: src/Admin/Settings/SettingsAssets.php:134
+msgid "Snippet copied."
+msgstr ""
+
+#: src/Admin/Settings/SettingsAssets.php:135
 msgid "The snippet could not be copied automatically."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAssets.php:172
+#: src/Admin/Settings/SettingsAssets.php:174
 msgid "Save Changes after selecting a media discovery mode, then start the rescan."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAssets.php:173
+#: src/Admin/Settings/SettingsAssets.php:175
 #: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:317
 msgid "Rescan Media Now"
 msgstr ""
 
-#: src/Admin/Settings/SettingsAssets.php:174
+#: src/Admin/Settings/SettingsAssets.php:176
 msgid "Rescanning…"
 msgstr ""
 
-#: src/Admin/Settings/SettingsAssets.php:175
+#: src/Admin/Settings/SettingsAssets.php:177
 msgid "The media rescan cursor did not advance."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAssets.php:176
+#: src/Admin/Settings/SettingsAssets.php:178
 msgid "The media rescan exceeded its expected batch count."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAssets.php:177
+#: src/Admin/Settings/SettingsAssets.php:179
 msgid "Media rescan failed: "
 msgstr ""
 
-#: src/Admin/Settings/SettingsAssets.php:178
+#: src/Admin/Settings/SettingsAssets.php:180
 msgid "Media rescan complete."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAssets.php:179
+#: src/Admin/Settings/SettingsAssets.php:181
 msgid "The server did not return a usable response."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAssets.php:180
+#: src/Admin/Settings/SettingsAssets.php:182
 msgid "Connection error."
 msgstr ""
 
@@ -3809,8 +4029,8 @@ msgid "Active optimizations"
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:20
-#: src/Admin/SystemStatus.php:250
-#: src/Admin/SystemStatusCollector.php:186
+#: src/Admin/SystemStatus.php:256
+#: src/Admin/SystemStatusCollector.php:190
 msgid "Available but unused"
 msgstr ""
 
@@ -3828,7 +4048,7 @@ msgid "Connect Cloudflare and optimize"
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:42
-msgid "Open Cloudflare, choose the account that owns this hostname, review three narrowly scoped permissions, and press Authorize. Cybermaps then installs or repairs both discovery-header and cache-safety rules."
+msgid "Open Cloudflare, choose the account that owns this hostname, review three narrowly scoped permissions, and press Authorize. Cybermaps installs cache-safety rules and a missing-MIME fallback for eligible static files. Origin headers and dynamic endpoint policy remain authoritative; incorrect origin MIME types must be repaired at the origin."
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:47
@@ -4071,7 +4291,7 @@ msgid "Use all three permissions to install or remove both Cybermaps rule famili
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:194
-msgid "Install/repair discovery headers"
+msgid "Install missing static MIME fallback"
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:195
@@ -4290,7 +4510,7 @@ msgid "The selected content report was deleted."
 msgstr ""
 
 #: src/Admin/Settings/Tabs/ContentReview.php:289
-#: src/Audit/ContentAuditService.php:32
+#: src/Audit/ContentAuditService.php:33
 msgid "Another Content Intelligence Report is already running. Wait for it to finish before starting another."
 msgstr ""
 
@@ -4598,7 +4818,7 @@ msgid "Master switch for the public AI discovery surface. WordPress 7.1 native r
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Discovery.php:57
-#: src/Core/EndpointRegistry.php:929
+#: src/Core/EndpointRegistry.php:906
 msgid "Model Context Protocol"
 msgstr ""
 
@@ -4627,7 +4847,7 @@ msgid "Opt in to a complete literal publication of every eligible resource in th
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Discovery.php:95
-#: src/Core/EndpointRegistry.php:910
+#: src/Core/EndpointRegistry.php:887
 msgid "Budgeted Site Briefing"
 msgstr ""
 
@@ -5275,14 +5495,14 @@ msgstr ""
 #: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:538
 #: src/Admin/SettingsPage.php:492
 #: src/Admin/SVGMapper.php:116
-#: src/Core/EndpointRegistry.php:911
+#: src/Core/EndpointRegistry.php:888
 msgid "Knowledge Graph"
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Discovery/DiscoveryFields.php:539
 #: src/Admin/SettingsPage.php:487
 #: src/Admin/SVGMapper.php:121
-#: src/Core/EndpointRegistry.php:918
+#: src/Core/EndpointRegistry.php:895
 msgid "AI Sitemap"
 msgstr ""
 
@@ -5628,8 +5848,16 @@ msgid "Content-Usage path prefix"
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Robots/RobotsFields.php:517
+msgid "AI training preference"
+msgstr ""
+
+#: src/Admin/Settings/Tabs/Robots/RobotsFields.php:517
 #: src/Admin/Settings/Tabs/Robots/RobotsFields.php:518
 msgid "Inherit"
+msgstr ""
+
+#: src/Admin/Settings/Tabs/Robots/RobotsFields.php:518
+msgid "Search preference"
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Robots/RobotsFields.php:521
@@ -6141,7 +6369,7 @@ msgstr ""
 
 #: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:654
 #: src/Admin/ShortcodeBuilder.php:275
-#: src/Sitemap/ShortcodeHandler.php:652
+#: src/Sitemap/ShortcodeHandler.php:670
 msgid "Post Formats"
 msgstr ""
 
@@ -6463,7 +6691,7 @@ msgstr ""
 
 #: src/Admin/SettingsPage.php:513
 #: src/Admin/SVGMapper.php:150
-#: src/Core/EndpointRegistry.php:920
+#: src/Core/EndpointRegistry.php:897
 msgid "AI Actions"
 msgstr ""
 
@@ -6474,7 +6702,7 @@ msgstr ""
 
 #: src/Admin/SettingsPage.php:523
 #: src/Admin/SVGMapper.php:133
-#: src/Core/EndpointRegistry.php:923
+#: src/Core/EndpointRegistry.php:900
 msgid "API Catalog"
 msgstr ""
 
@@ -6582,7 +6810,7 @@ msgid "Skip for now"
 msgstr ""
 
 #: src/Admin/SetupWizard/SetupWizardPage.php:32
-#: assets/js/setup-wizard.js:626
+#: assets/js/setup-wizard.js:629
 msgid "Getting your site ready…"
 msgstr ""
 
@@ -7320,11 +7548,11 @@ msgid "Latest reconciliation: %1$s · attempted: %2$s · last complete success: 
 msgstr ""
 
 #: src/Admin/SitemapStatus.php:428
-msgid "Cybermaps does not publish sitemap files in this mode. Sitemap requests use the dynamic WordPress handlers when the web server routes them to PHP; the registered origin-root /.well-known/ compatibility targets are materialized."
+msgid "Cybermaps does not publish sitemap files in this mode. Sitemap requests use the dynamic WordPress handlers when the web server routes them to PHP; only the registered small compatibility publications are materialized. API Catalog and Discovery Index remain dynamic."
 msgstr ""
 
 #: src/Admin/SitemapStatus.php:429
-msgid "Cybermaps does not publish sitemap files in this mode. Sitemap requests use the dynamic WordPress handlers when the web server routes them to PHP. The Discovery Hub is disabled, so no /.well-known/ compatibility files are materialized."
+msgid "Cybermaps does not publish sitemap files in this mode. Sitemap requests use the dynamic WordPress handlers when the web server routes them to PHP. The Discovery Hub is disabled, so no compatibility publications are materialized. API Catalog and Discovery Index are not static files."
 msgstr ""
 
 #: src/Admin/SitemapStatus.php:432
@@ -7388,32 +7616,37 @@ msgstr ""
 msgid "Running"
 msgstr ""
 
-#: src/Admin/SitemapStatus.php:553
-msgid "Not run"
+#: src/Admin/SitemapStatus.php:552
+msgid "Continuation queued"
 msgstr ""
 
 #: src/Admin/SitemapStatus.php:554
-#: src/Admin/SitemapStatus.php:587
-#: src/Admin/SystemStatus.php:254
+msgid "Not run"
+msgstr ""
+
+#: src/Admin/SitemapStatus.php:556
+#: src/Admin/SitemapStatus.php:588
+#: src/Admin/SystemStatus.php:260
 #: src/Admin/SystemStatusCollector.php:83
 #: src/Admin/SystemStatusCollector.php:90
 #: src/Admin/SystemStatusCollector.php:112
+#: src/Admin/SystemStatusCollector.php:238
 msgid "Unknown"
 msgstr ""
 
-#: src/Admin/SitemapStatus.php:582
+#: src/Admin/SitemapStatus.php:583
 msgid "Ready"
 msgstr ""
 
-#: src/Admin/SitemapStatus.php:583
+#: src/Admin/SitemapStatus.php:584
 msgid "Building"
 msgstr ""
 
-#: src/Admin/SitemapStatus.php:584
+#: src/Admin/SitemapStatus.php:585
 msgid "Stale"
 msgstr ""
 
-#: src/Admin/SitemapStatus.php:585
+#: src/Admin/SitemapStatus.php:586
 msgid "Limited"
 msgstr ""
 
@@ -7434,7 +7667,7 @@ msgid "LLMS Compact"
 msgstr ""
 
 #: src/Admin/SVGMapper.php:94
-#: src/Core/EndpointRegistry.php:909
+#: src/Core/EndpointRegistry.php:886
 msgid "LLMS Full"
 msgstr ""
 
@@ -7455,7 +7688,7 @@ msgid "AI Policy"
 msgstr ""
 
 #: src/Admin/SVGMapper.php:192
-#: src/Admin/SystemStatus.php:249
+#: src/Admin/SystemStatus.php:255
 #: src/Admin/SystemStatusCollector.php:171
 msgid "Active"
 msgstr ""
@@ -7570,7 +7803,7 @@ msgid "Configure"
 msgstr ""
 
 #: src/Admin/SystemStatus.php:157
-msgid "Detection is evidence-based and may be inconclusive when a proxy hides the origin stack. The copied report intentionally omits secrets and deployment-specific paths."
+msgid "Detection is evidence-based and may be inconclusive when a proxy hides the origin stack. Review the copied report for private information before sharing it."
 msgstr ""
 
 #: src/Admin/SystemStatus.php:167
@@ -7578,7 +7811,7 @@ msgid "Cybermaps diagnostic logging"
 msgstr ""
 
 #: src/Admin/SystemStatus.php:168
-msgid "Temporarily records bounded Cybermaps operations and failures. It omits credentials, cookies, request bodies, crawler analytics, IP and email addresses, full URLs, and absolute filesystem paths."
+msgid "Temporarily records bounded Cybermaps operations and failures without collecting credential options, request headers or bodies, cookies, or crawler analytics. Common credentials, addresses, URLs, and paths in diagnostic messages receive best-effort redaction. Review every support bundle for private information before sharing it."
 msgstr ""
 
 #: src/Admin/SystemStatus.php:170
@@ -7617,11 +7850,17 @@ msgstr ""
 msgid "Use Copy or Download to load the current redacted events."
 msgstr ""
 
-#: src/Admin/SystemStatus.php:240
+#: src/Admin/SystemStatus.php:210
+#: src/Core/DiagnosticLogger.php:129
+#: src/Core/DiagnosticLogger.php:134
+msgid "Diagnostic events could not be cleared. Reload and try again."
+msgstr ""
+
+#: src/Admin/SystemStatus.php:246
 msgid "POST requests are required."
 msgstr ""
 
-#: src/Admin/SystemStatus.php:243
+#: src/Admin/SystemStatus.php:249
 msgid "You are not allowed to manage Cybermaps debugging."
 msgstr ""
 
@@ -7688,8 +7927,8 @@ msgstr ""
 
 #: src/Admin/SystemStatusCollector.php:112
 #: src/Admin/SystemStatusCollector.php:135
-#: src/Admin/SystemStatusCollector.php:183
-#: src/Admin/SystemStatusCollector.php:186
+#: src/Admin/SystemStatusCollector.php:187
+#: src/Admin/SystemStatusCollector.php:190
 msgid "Detected"
 msgstr ""
 
@@ -7751,168 +7990,193 @@ msgstr ""
 msgid "Cybermaps advances site-local cache generations and never flushes unrelated cache entries."
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:183
-msgid "Cybermaps-managed rules recorded"
+#: src/Admin/SystemStatusCollector.php:187
+msgid "Cybermaps-managed profiles recorded"
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:183
+#: src/Admin/SystemStatusCollector.php:187
 msgid "Use public verification to confirm that the active zone applies the recorded rules."
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:186
-msgid "Cloudflare can repair static discovery media types and protect negotiated responses."
+#: src/Admin/SystemStatusCollector.php:190
+msgid "Cloudflare can supply missing static media types and protect negotiated responses. Incorrect origin media types require origin repair."
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:189
-#: src/Admin/SystemStatusCollector.php:232
+#: src/Admin/SystemStatusCollector.php:193
 msgid "Not detected"
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:189
-#: src/Admin/SystemStatusCollector.php:233
+#: src/Admin/SystemStatusCollector.php:193
+#: src/Admin/SystemStatusCollector.php:244
 msgid "Not configured"
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:189
+#: src/Admin/SystemStatusCollector.php:193
 msgid "Cloudflare automation is optional and does not affect Core publication."
 msgstr ""
 
 #: src/Admin/SystemStatusCollector.php:199
-#: src/Admin/SystemStatusCollector.php:202
-#: src/Admin/SystemStatusCollector.php:205
+#: src/Admin/SystemStatusCollector.php:207
+#: src/Admin/SystemStatusCollector.php:210
+#: src/Admin/SystemStatusCollector.php:213
 msgid "Cloudflare discovery rules"
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:199
+#: src/Admin/SystemStatusCollector.php:207
 msgid "Installed state found"
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:199
+#: src/Admin/SystemStatusCollector.php:207
 msgid "Repair required"
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:199
+#: src/Admin/SystemStatusCollector.php:207
 msgid "The hostname, endpoint inventory, or expected headers changed after the last installation."
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:202
-msgid "Active configuration recorded"
+#: src/Admin/SystemStatusCollector.php:210
+msgid "Verified rule configuration recorded"
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:202
-msgid "Run public delivery checks to verify the observed edge response."
+#: src/Admin/SystemStatusCollector.php:210
+msgid "Profiles without eligible static targets are disabled. Enabled profiles only supply absent static MIME; origin headers and dynamic endpoint policy remain authoritative. Run public checks to observe delivery."
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:205
+#: src/Admin/SystemStatusCollector.php:213
 #: assets/js/setup-wizard.js:304
 msgid "Optional"
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:205
+#: src/Admin/SystemStatusCollector.php:213
 msgid "Not installed"
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:205
+#: src/Admin/SystemStatusCollector.php:213
 msgid "Core remains functional without Cloudflare. One-click OAuth can install both rule families without saving a credential."
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:213
 #: src/Admin/SystemStatusCollector.php:219
-#: src/Admin/SystemStatusCollector.php:221
+#: src/Admin/SystemStatusCollector.php:225
+#: src/Admin/SystemStatusCollector.php:231
+#: src/Admin/SystemStatusCollector.php:233
 msgid "Cloudflare credentials"
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:213
-#: src/Admin/SystemStatusCollector.php:219
-#: src/Admin/SystemStatusCollector.php:221
+#: src/Admin/SystemStatusCollector.php:225
+#: src/Admin/SystemStatusCollector.php:231
+#: src/Admin/SystemStatusCollector.php:233
 msgid "Not stored"
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:213
+#: src/Admin/SystemStatusCollector.php:225
 msgid "Revocation unconfirmed"
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:213
+#: src/Admin/SystemStatusCollector.php:225
 msgid "Cybermaps discarded the temporary credential, but Cloudflare did not confirm revocation. Revoke Cybermaps under Cloudflare OAuth authorizations."
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:217
+#: src/Admin/SystemStatusCollector.php:229
 msgid "The OAuth access token was used once, revoked, and removed from WordPress memory."
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:218
+#: src/Admin/SystemStatusCollector.php:230
 msgid "The fallback API token was used for one request, discarded, and never saved."
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:219
+#: src/Admin/SystemStatusCollector.php:231
 msgid "Disposed after use"
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:221
+#: src/Admin/SystemStatusCollector.php:233
 msgid "No authorization performed"
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:221
+#: src/Admin/SystemStatusCollector.php:233
 msgid "Cybermaps does not maintain a persistent Cloudflare connection."
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:233
-msgid "Exact-URL PURGE integration available"
+#: src/Admin/SystemStatusCollector.php:238
+msgid "Saved Cloudflare operation history could not be read. Rule installation and credential disposition are unknown. Retry when database access is restored."
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:235
-msgid "Cybermaps sends bounded exact-path invalidations through the opt-in adapter."
+#: src/Admin/SystemStatusCollector.php:244
+msgid "Configuration found"
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:235
-msgid "Varnish remains opt-in because its PURGE ACL and secret belong to the deployment."
+#: src/Admin/SystemStatusCollector.php:244
+msgid "Not enabled for diagnostic context"
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:246
+#: src/Admin/SystemStatusCollector.php:244
+msgid "The opt-in policy did not enable this diagnostic context. Eligibility is evaluated separately for each invalidation event; no PURGE was sent."
+msgstr ""
+
+#: src/Admin/SystemStatusCollector.php:247
+msgid "Opt-in found"
+msgstr ""
+
+#: src/Admin/SystemStatusCollector.php:247
+msgid "Configuration incomplete or invalid"
+msgstr ""
+
+#: src/Admin/SystemStatusCollector.php:247
+msgid "Provide an allowed PURGE endpoint and a secret. This read-only check sends no PURGE request."
+msgstr ""
+
+#: src/Admin/SystemStatusCollector.php:249
+msgid "Enabled for diagnostic context"
+msgstr ""
+
+#: src/Admin/SystemStatusCollector.php:249
+msgid "Configuration passed the read-only check. Enablement and target eligibility are checked for every invalidation event; delivery has not been tested."
+msgstr ""
+
+#: src/Admin/SystemStatusCollector.php:259
 msgid "Benefits PHP automatically"
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:246
+#: src/Admin/SystemStatusCollector.php:259
 msgid "Not active"
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:248
+#: src/Admin/SystemStatusCollector.php:261
 msgid "Compiled PHP bytecode is cached by the runtime; no Cybermaps-specific integration is required."
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:248
+#: src/Admin/SystemStatusCollector.php:261
 msgid "Enable OPcache at the PHP service level when appropriate."
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:254
+#: src/Admin/SystemStatusCollector.php:267
 msgid "Not used"
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:254
+#: src/Admin/SystemStatusCollector.php:267
 msgid "The required runtime or plugin integration was not detected."
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:257
+#: src/Admin/SystemStatusCollector.php:270
 msgid "Disabled in Cybermaps"
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:257
+#: src/Admin/SystemStatusCollector.php:270
 msgid "This optimization is available but its Cybermaps opt-out is active."
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:260
+#: src/Admin/SystemStatusCollector.php:273
 msgid "Used by Cybermaps"
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:265
+#: src/Admin/SystemStatusCollector.php:278
 msgid "Redis-backed WordPress object cache detected."
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:268
+#: src/Admin/SystemStatusCollector.php:281
 msgid "Persistent WordPress object cache detected; Memcached is available."
 msgstr ""
 
-#: src/Admin/SystemStatusCollector.php:271
+#: src/Admin/SystemStatusCollector.php:284
 msgid "A persistent WordPress object-cache drop-in is active."
 msgstr ""
 
@@ -7999,150 +8263,180 @@ msgid "Added since baseline"
 msgstr ""
 
 #: src/Audit/AuditExporter.php:175
-msgid "Thin content"
+msgid "Incomplete text analysis"
 msgstr ""
 
 #: src/Audit/AuditExporter.php:176
-msgid "Visible text below the configured policy minimum."
+msgid "Full text measurements are unavailable within the analysis limits."
 msgstr ""
 
 #: src/Audit/AuditExporter.php:177
-msgid "Thin Content Action Report"
+msgid "Incomplete Content Analysis Report"
 msgstr ""
 
 #: src/Audit/AuditExporter.php:180
-msgid "Freshness review"
+msgid "Thin content"
 msgstr ""
 
 #: src/Audit/AuditExporter.php:181
-msgid "Content beyond its configured review interval."
+msgid "Visible text below the configured policy minimum."
 msgstr ""
 
 #: src/Audit/AuditExporter.php:182
-msgid "Content Freshness Action Report"
+msgid "Thin Content Action Report"
 msgstr ""
 
 #: src/Audit/AuditExporter.php:185
-msgid "Media review"
+msgid "Freshness review"
 msgstr ""
 
 #: src/Audit/AuditExporter.php:186
-msgid "Content without detected stored media where policy requests review."
+msgid "Content beyond its configured review interval."
 msgstr ""
 
 #: src/Audit/AuditExporter.php:187
-msgid "Media Opportunity Action Report"
+msgid "Content Freshness Action Report"
 msgstr ""
 
 #: src/Audit/AuditExporter.php:190
-msgid "Potential orphan"
+msgid "Media review"
 msgstr ""
 
 #: src/Audit/AuditExporter.php:191
-msgid "No stored page or assigned navigation item links to the resource."
+msgid "Content without detected stored media where policy requests review."
 msgstr ""
 
 #: src/Audit/AuditExporter.php:192
-msgid "Potential Orphan Content Action Report"
+msgid "Media Opportunity Action Report"
 msgstr ""
 
 #: src/Audit/AuditExporter.php:195
-msgid "No homepage path"
+msgid "Potential orphan"
 msgstr ""
 
 #: src/Audit/AuditExporter.php:196
-msgid "Links exist, but the local graph has no path from the homepage or assigned navigation."
+msgid "No stored page or assigned navigation item links to the resource."
 msgstr ""
 
 #: src/Audit/AuditExporter.php:197
-msgid "Homepage Reachability Action Report"
+msgid "Potential Orphan Content Action Report"
 msgstr ""
 
 #: src/Audit/AuditExporter.php:200
-msgid "Three-plus clicks deep"
+msgid "No homepage path"
 msgstr ""
 
 #: src/Audit/AuditExporter.php:201
-msgid "The shortest stored path is at least three clicks from the homepage."
+msgid "Links exist, but the local graph has no path from the homepage or assigned navigation."
 msgstr ""
 
 #: src/Audit/AuditExporter.php:202
+msgid "Homepage Reachability Action Report"
+msgstr ""
+
+#: src/Audit/AuditExporter.php:205
+msgid "Three-plus clicks deep"
+msgstr ""
+
+#: src/Audit/AuditExporter.php:206
+msgid "The shortest stored path is at least three clicks from the homepage."
+msgstr ""
+
+#: src/Audit/AuditExporter.php:207
 msgid "Internal Link Depth Action Report"
 msgstr ""
 
 #. translators: 1: resource count, 2: unique content-link count, 3: assigned-navigation reference count.
-#: src/Audit/AuditExporter.php:216
+#: src/Audit/AuditExporter.php:221
 #, php-format
 msgid "Local link coverage: %1$d stored resources, %2$d unique content links, and %3$d assigned navigation references."
 msgstr ""
 
-#: src/Audit/AuditExporter.php:222
+#: src/Audit/AuditExporter.php:227
 msgid "The bounded scan was incomplete, so Cybermaps suppressed internal-link findings."
 msgstr ""
 
-#: src/Audit/AuditExporter.php:224
+#: src/Audit/AuditExporter.php:229
 msgid "Homepage click depth could not be established from local WordPress data."
+msgstr ""
+
+#: src/Audit/AuditExporter.php:239
+msgid "Text analysis was incomplete in one of the compared reports, so thin-content changes are excluded from comparison counts."
 msgstr ""
 
 #: src/Audit/AuditReadAPI.php:65
 msgid "The saved content report is too large for a synchronous JSON response."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:172
+#: src/Audit/AuditRunRepository.php:174
+#: src/Audit/AuditRunRepository.php:190
 msgid "Cybermaps could not acquire the content report lock."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:222
+#: src/Audit/AuditRunRepository.php:236
 msgid "Cybermaps could not renew the content report lock."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:369
+#: src/Audit/AuditRunRepository.php:383
 msgid "Cybermaps no longer owns the content report lock required for cleanup."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:423
+#: src/Audit/AuditRunRepository.php:437
 msgid "Cybermaps could not read incomplete content reports for cleanup."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:464
+#: src/Audit/AuditRunRepository.php:478
 msgid "Cybermaps could not remove incomplete content reports."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:568
+#: src/Audit/AuditRunRepository.php:582
 msgid "Cybermaps could not create the audit run."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:608
+#: src/Audit/AuditRunRepository.php:622
 msgid "Cybermaps could not store an audit resource."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:627
+#: src/Audit/AuditRunRepository.php:641
 msgid "Cybermaps could not store an audit finding."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:659
+#: src/Audit/AuditRunRepository.php:673
 msgid "Cybermaps could not finalize the content report."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:1009
+#: src/Audit/AuditRunRepository.php:1033
 msgid "Only a running Cybermaps content report can be modified."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:1021
+#: src/Audit/AuditRunRepository.php:1045
+#: src/Audit/AuditRunRepository.php:1062
 msgid "Cybermaps could not read the saved content report data."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:1028
+#: src/Audit/AuditRunRepository.php:1052
 msgid "Cybermaps could not update the content report lock."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:1056
+#: src/Audit/AuditRunRepository.php:1076
 msgid "Cybermaps could not encode the content report lock."
 msgstr ""
 
+#: src/Audit/AuditRuntimeBudget.php:41
+msgid "Cybermaps stopped this content report at its safety budget because the object cache cannot release runtime data. No partial report was completed. Use an object-cache implementation with runtime cleanup before retrying a larger report."
+msgstr ""
+
+#: src/Audit/ContentAuditEvaluator.php:110
+msgid "Stored content exceeded the bounded text analysis. Full word count, content hash, and thin-content findings are unavailable."
+msgstr ""
+
+#: src/Audit/ContentAuditEvaluator.php:115
+msgid "Review this resource directly; the saved text sample does not describe the complete content."
+msgstr ""
+
 #. translators: %d: visible word count.
-#: src/Audit/ContentAuditEvaluator.php:98
-#: src/Audit/ContentAuditEvaluator.php:103
+#: src/Audit/ContentAuditEvaluator.php:127
+#: src/Audit/ContentAuditEvaluator.php:132
 #, php-format
 msgid "%d word"
 msgid_plural "%d words"
@@ -8150,18 +8444,18 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: 1: localized measured word count, 2: localized minimum word count.
-#: src/Audit/ContentAuditEvaluator.php:111
+#: src/Audit/ContentAuditEvaluator.php:140
 #, php-format
 msgid "Visible text has %1$s; policy minimum is %2$s."
 msgstr ""
 
-#: src/Audit/ContentAuditEvaluator.php:120
+#: src/Audit/ContentAuditEvaluator.php:149
 msgid "Review whether this resource needs more useful visible information, consolidation, or intentional exclusion."
 msgstr ""
 
 #. translators: %d: day count.
-#: src/Audit/ContentAuditEvaluator.php:132
-#: src/Audit/ContentAuditEvaluator.php:137
+#: src/Audit/ContentAuditEvaluator.php:161
+#: src/Audit/ContentAuditEvaluator.php:166
 #, php-format
 msgid "%d day"
 msgid_plural "%d days"
@@ -8169,28 +8463,28 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: 1: localized content age, 2: localized review interval.
-#: src/Audit/ContentAuditEvaluator.php:145
+#: src/Audit/ContentAuditEvaluator.php:174
 #, php-format
 msgid "Last modified %1$s ago; review interval is %2$s."
 msgstr ""
 
-#: src/Audit/ContentAuditEvaluator.php:154
+#: src/Audit/ContentAuditEvaluator.php:183
 msgid "Confirm the information remains accurate; update the resource only when a substantive change is warranted."
 msgstr ""
 
-#: src/Audit/ContentAuditEvaluator.php:167
+#: src/Audit/ContentAuditEvaluator.php:196
 msgid "No featured image, attached image, or stored visual-media block or markup was detected."
 msgstr ""
 
-#: src/Audit/ContentAuditEvaluator.php:173
+#: src/Audit/ContentAuditEvaluator.php:202
 msgid "Add useful visual media only if it improves comprehension or delivery; decorative media is not required."
 msgstr ""
 
-#: src/Audit/ContentAuditService.php:258
+#: src/Audit/ContentAuditService.php:286
 msgid "Cybermaps could not encode the content report snapshot."
 msgstr ""
 
-#: src/Audit/ContentAuditService.php:305
+#: src/Audit/ContentAuditService.php:338
 msgid "The Content Intelligence Report lock expired or changed ownership, so this run stopped safely."
 msgstr ""
 
@@ -8226,45 +8520,41 @@ msgstr ""
 msgid "No discovery publications were registered when this report was generated."
 msgstr ""
 
-#: src/Audit/InternalLinkAnalyzer.php:684
+#: src/Audit/InternalLinkAnalyzer.php:794
 msgid "No stored page or assigned navigation item links to this resource."
 msgstr ""
 
-#: src/Audit/InternalLinkAnalyzer.php:686
+#: src/Audit/InternalLinkAnalyzer.php:796
 msgid "Add a useful contextual link from a related page or navigation area, or intentionally exclude the resource if it should not be discovered."
 msgstr ""
 
-#: src/Audit/InternalLinkAnalyzer.php:695
+#: src/Audit/InternalLinkAnalyzer.php:805
 msgid "Internal links exist, but no stored path from the homepage or assigned navigation reaches this resource."
 msgstr ""
 
-#: src/Audit/InternalLinkAnalyzer.php:697
+#: src/Audit/InternalLinkAnalyzer.php:807
 msgid "Connect this resource to a section that visitors and crawlers can reach from the homepage."
 msgstr ""
 
 #. translators: %d: shortest internal-link click depth from the homepage.
-#: src/Audit/InternalLinkAnalyzer.php:708
+#: src/Audit/InternalLinkAnalyzer.php:818
 #, php-format
 msgid "The shortest stored path is %d clicks from the homepage."
 msgstr ""
 
-#: src/Audit/InternalLinkAnalyzer.php:712
+#: src/Audit/InternalLinkAnalyzer.php:822
 msgid "Consider a direct contextual or navigation link when this resource is important to visitors."
 msgstr ""
 
-#: src/Audit/PublishedPostSource.php:73
-msgid "Cybermaps could not load a content report batch."
-msgstr ""
-
-#: src/Audit/PublishedPostSource.php:141
+#: src/Audit/PublishedPostSource.php:146
 msgid "Cybermaps could not load attached-image measurements for the content report."
 msgstr ""
 
-#: src/Audit/PublishedPostSource.php:172
+#: src/Audit/PublishedPostSource.php:177
 msgid "Cybermaps could not establish the content report boundary."
 msgstr ""
 
-#: src/Audit/PublishedPostSource.php:201
+#: src/Audit/PublishedPostSource.php:206
 msgid "Cybermaps could not read the next content report batch."
 msgstr ""
 
@@ -8310,43 +8600,43 @@ msgstr ""
 msgid "Regenerating sitemaps and static files..."
 msgstr ""
 
-#: src/CLI/Command.php:76
+#: src/CLI/Command.php:77
 msgid "Sitemap cache was cleared, but no static synchronization report was returned."
 msgstr ""
 
 #. translators: %s: static synchronization status.
-#: src/CLI/Command.php:91
+#: src/CLI/Command.php:92
 #, php-format
 msgid "Sitemap cache was cleared, but static synchronization finished with status: %s."
 msgstr ""
 
 #. translators: 1: desired files, 2: written files, 3: unchanged files, 4: deleted files, 5: conflicts, 6: failed files, 7: skipped files, 8: retained files.
-#: src/CLI/Command.php:101
+#: src/CLI/Command.php:102
 #, php-format
 msgid "Static sync: desired=%1$d written=%2$d unchanged=%3$d deleted=%4$d conflicts=%5$d failed=%6$d skipped=%7$d retained=%8$d"
 msgstr ""
 
-#: src/CLI/Command.php:127
+#: src/CLI/Command.php:128
 msgid "Sitemap cache cleared; dynamic mode is active and owned static files were reconciled."
 msgstr ""
 
-#: src/CLI/Command.php:128
+#: src/CLI/Command.php:129
 msgid "Sitemap cache cleared and the static publication inventory synced completely."
 msgstr ""
 
-#: src/CLI/Command.php:132
+#: src/CLI/Command.php:133
 msgid "Sitemap cache cleared; static publication is in progress and the remaining work was queued for background continuation."
 msgstr ""
 
-#: src/CLI/Command.php:136
+#: src/CLI/Command.php:137
 msgid "Sitemap cache cleared; static publication was intentionally skipped."
 msgstr ""
 
-#: src/CLI/Command.php:154
+#: src/CLI/Command.php:155
 msgid "CYBERMAPS Configuration Status:"
 msgstr ""
 
-#: src/CLI/Command.php:157
+#: src/CLI/Command.php:158
 msgid "[REDACTED]"
 msgstr ""
 
@@ -8372,6 +8662,11 @@ msgstr ""
 
 #: src/Core/CacheFill.php:51
 msgid "Cybermaps stopped publication because its build lock was lost. Please retry shortly."
+msgstr ""
+
+#: src/Core/ConfigurationStore.php:108
+#: src/Core/ConfigurationStore.php:113
+msgid "Cybermaps could not read publication settings safely. Please retry shortly."
 msgstr ""
 
 #. translators: %s: internal service identifier.
@@ -8700,276 +8995,286 @@ msgstr ""
 msgid "Used for link previews in Telegram conversations."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:905
+#: src/Core/EndpointRegistry.php:882
 msgid "AI Discovery Manifest"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:905
+#: src/Core/EndpointRegistry.php:882
 msgid "Primary machine-readable discovery manifest."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:906
+#: src/Core/EndpointRegistry.php:883
 msgid "ADP Discovery Manifest"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:906
+#: src/Core/EndpointRegistry.php:883
 msgid "AI Discovery Protocol 3.0 Level 3 manifest."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:907
+#: src/Core/EndpointRegistry.php:884
 msgid "Discovery Index"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:907
+#: src/Core/EndpointRegistry.php:884
 msgid "Index of Cybermaps discovery publications."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:908
+#: src/Core/EndpointRegistry.php:885
 msgid "LLMS Summary"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:908
+#: src/Core/EndpointRegistry.php:885
 msgid "Concise site summary for language models."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:909
+#: src/Core/EndpointRegistry.php:886
 msgid "Opt-in complete literal publication of eligible stored content."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:910
+#: src/Core/EndpointRegistry.php:887
 msgid "Experimental literal briefing with deterministic budget accounting."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:911
+#: src/Core/EndpointRegistry.php:888
 msgid "Schema.org identity and relationship graph."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:912
+#: src/Core/EndpointRegistry.php:889
 msgid "AI Activity Feed"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:912
+#: src/Core/EndpointRegistry.php:889
 msgid "JSON Feed publication of recent content."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:913
+#: src/Core/EndpointRegistry.php:890
 msgid "Recent Updates"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:913
+#: src/Core/EndpointRegistry.php:890
 msgid "Bounded seven-day ADP change stream for current public content."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:914
+#: src/Core/EndpointRegistry.php:891
 msgid "ADP News Context"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:914
+#: src/Core/EndpointRegistry.php:891
 msgid "Bounded Markdown context for recent eligible news content."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:915
+#: src/Core/EndpointRegistry.php:892
 msgid "ADP Speakable News"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:915
+#: src/Core/EndpointRegistry.php:892
 msgid "Schema.org speakable summaries for recent eligible content."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:916
+#: src/Core/EndpointRegistry.php:893
 msgid "ADP News Changelog"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:916
+#: src/Core/EndpointRegistry.php:893
 msgid "Version metadata for the Level 3 news publication surface."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:917
+#: src/Core/EndpointRegistry.php:894
 msgid "ADP News Archive"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:917
+#: src/Core/EndpointRegistry.php:894
 msgid "Bounded newline-delimited archive of eligible content."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:918
+#: src/Core/EndpointRegistry.php:895
 msgid "AI-oriented XML content inventory."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:919
+#: src/Core/EndpointRegistry.php:896
 msgid "AI Usage Policy"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:919
+#: src/Core/EndpointRegistry.php:896
 msgid "Machine-readable permissions for AI uses."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:920
+#: src/Core/EndpointRegistry.php:897
 msgid "Machine-readable action and capability inventory."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:921
+#: src/Core/EndpointRegistry.php:898
 msgid "Agent Skill Site Guide"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:921
+#: src/Core/EndpointRegistry.php:898
 msgid "Agent Skills-compatible guide to the site's public read-only resources."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:922
+#: src/Core/EndpointRegistry.php:899
 msgid "Agent Skills Index"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:922
+#: src/Core/EndpointRegistry.php:899
 msgid "Draft discovery index for the canonical Cybermaps site-guide skill."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:923
+#: src/Core/EndpointRegistry.php:900
 msgid "Dynamic Linkset catalog using the RFC 9727 media-type profile and api-catalog relation."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:924
+#: src/Core/EndpointRegistry.php:901
 msgid "Agentic Resource Catalog"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:924
+#: src/Core/EndpointRegistry.php:901
 msgid "Draft ARD catalog of active Cybermaps discovery resources."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:925
+#: src/Core/EndpointRegistry.php:902
 msgid "MCP Server Card Compatibility URL"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:925
+#: src/Core/EndpointRegistry.php:902
 msgid "Experimental well-known compatibility route for the current MCP Server Card draft."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:926
+#: src/Core/EndpointRegistry.php:903
 msgid "OpenAPI Description"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:926
+#: src/Core/EndpointRegistry.php:903
 msgid "Read-only public Cybermaps REST API contract."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:927
+#: src/Core/EndpointRegistry.php:904
 msgid "REST Discovery Index"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:927
+#: src/Core/EndpointRegistry.php:904
 msgid "REST API index of primary Cybermaps publications."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:928
+#: src/Core/EndpointRegistry.php:905
 msgid "Public Discovery Health"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:928
+#: src/Core/EndpointRegistry.php:905
 msgid "Bounded, non-sensitive health status for public Cybermaps discovery APIs."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:929
+#: src/Core/EndpointRegistry.php:906
 msgid "Optional dynamic Cybermaps MCP resource and tool endpoint."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:930
+#: src/Core/EndpointRegistry.php:907
 msgid "MCP Server Card"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:930
+#: src/Core/EndpointRegistry.php:907
 msgid "Current experimental MCP Server Card for the active Cybermaps MCP endpoint."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:931
+#: src/Core/EndpointRegistry.php:908
 msgid "Budgeted Site Briefing REST API"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:931
+#: src/Core/EndpointRegistry.php:908
 msgid "REST representation of the experimental budgeted site briefing."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:932
+#: src/Core/EndpointRegistry.php:909
 msgid "REST Search"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:932
+#: src/Core/EndpointRegistry.php:909
 msgid "Bounded public search over the configured, indexable AI publication inventory."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:933
+#: src/Core/EndpointRegistry.php:910
 msgid "Private Publication URLs"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:933
+#: src/Core/EndpointRegistry.php:910
 msgid "Secret-authenticated discovery and sitemap URL inventory."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:934
+#: src/Core/EndpointRegistry.php:911
 msgid "Private Publication Status"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:934
+#: src/Core/EndpointRegistry.php:911
 msgid "Secret-authenticated publication and static-sync status."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:935
+#: src/Core/EndpointRegistry.php:912
 msgid "Latest Content Report"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:935
+#: src/Core/EndpointRegistry.php:912
 msgid "Secret-authenticated latest completed content report with a bounded synchronous JSON snapshot."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:936
+#: src/Core/EndpointRegistry.php:913
 msgid "Content Report Run"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:936
+#: src/Core/EndpointRegistry.php:913
 msgid "Secret-authenticated saved content report by run ID with a bounded synchronous JSON snapshot."
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:937
+#: src/Core/EndpointRegistry.php:914
 msgid "Static Publication Purge"
 msgstr ""
 
-#: src/Core/EndpointRegistry.php:937
+#: src/Core/EndpointRegistry.php:914
 msgid "Administrator-only removal of owned static publication files."
 msgstr ""
 
-#: src/Core/RestAPI.php:113
+#: src/Core/RestAPI.php:106
 msgid "Search query string."
 msgstr ""
 
-#: src/Core/RestAPI.php:121
+#: src/Core/RestAPI.php:114
 msgid "Maximum number of results to return."
 msgstr ""
 
-#: src/Core/RestAPI.php:236
+#: src/Core/RestAPI.php:229
 msgid "The MCP Server Card is unavailable while MCP is disabled."
 msgstr ""
 
-#: src/Core/RestAPI.php:373
+#: src/Core/RestAPI.php:366
 msgid "The experimental budgeted site briefing is disabled."
 msgstr ""
 
-#: src/Core/RestAPI.php:623
+#: src/Core/RestAPI.php:631
 msgid "No completed content report run exists."
 msgstr ""
 
-#: src/Core/RestAPI.php:647
+#: src/Core/RestAPI.php:655
 msgid "The requested content report run was not found."
 msgstr ""
 
-#: src/Core/RestAPI.php:661
+#: src/Core/RestAPI.php:669
 msgid "The saved content report is too large for a synchronous JSON response. Use the bounded CSV export from Reports."
 msgstr ""
 
-#: src/Core/RestAPI.php:673
+#: src/Core/RestAPI.php:681
 msgid "The saved content report could not be loaded from the database."
 msgstr ""
 
+#. translators: 1: deleted files, 2: retained files, 3: remaining inventory lower bound or unknown.
+#: src/Core/Uninstaller.php:442
+#, php-format
+msgid "; deleted %1$d, retained %2$d, pending at least %3$s"
+msgstr ""
+
+#: src/Core/Uninstaller.php:445
+msgid "unknown"
+msgstr ""
+
 #. translators: %s: static cleanup status and retained relative paths.
-#: src/Core/Uninstaller.php:397
+#: src/Core/Uninstaller.php:451
 #, php-format
 msgid "Cybermaps removed its opted-in database data, but ownership-safe static cleanup did not finish (%s). Some generated public files may remain."
 msgstr ""
@@ -8994,12 +9299,18 @@ msgstr ""
 msgid "Static ownership migration did not verify its ownership schema and was deferred."
 msgstr ""
 
-#: src/Discovery/ADPNews.php:77
-msgid "An ADP news publication exceeded its safe output limit."
+#: src/Discovery/ADPNews.php:263
+msgid "An ADP news publication could not be encoded as JSON."
 msgstr ""
 
-#: src/Discovery/ADPNews.php:254
-msgid "An ADP news publication could not be encoded as JSON."
+#: src/Discovery/AIContentSelector.php:130
+#: src/Discovery/AIContentSelector.php:153
+msgid "Cybermaps content changed during AI publication selection. Please retry shortly."
+msgstr ""
+
+#: src/Discovery/AIContentSelector.php:631
+#: src/Discovery/AIContentSelector.php:639
+msgid "Cybermaps could not read the AI publication inventory. Please retry shortly."
 msgstr ""
 
 #: src/Discovery/BotCategory.php:30
@@ -9069,35 +9380,47 @@ msgstr ""
 msgid "The public IndexNow key URL responded correctly."
 msgstr ""
 
-#: src/Discovery/KnowledgeGraph.php:109
+#: src/Discovery/Integrity.php:66
+msgid "Cybermaps content changed during publication. Please retry shortly."
+msgstr ""
+
+#: src/Discovery/KnowledgeGraph.php:85
+msgid "Cybermaps content changed during knowledge graph publication. Please retry shortly."
+msgstr ""
+
+#: src/Discovery/KnowledgeGraph.php:121
 msgid "Informational Content Inventory"
 msgstr ""
 
-#: src/Discovery/KnowledgeGraph.php:110
+#: src/Discovery/KnowledgeGraph.php:122
 msgid "Public content types and taxonomies classified as informational by Cybermaps."
 msgstr ""
 
-#: src/Discovery/KnowledgeGraph.php:116
+#: src/Discovery/KnowledgeGraph.php:128
 msgid "Transactional Content Inventory"
 msgstr ""
 
-#: src/Discovery/KnowledgeGraph.php:117
+#: src/Discovery/KnowledgeGraph.php:129
 msgid "Public content types and taxonomies classified as transactional by Cybermaps."
 msgstr ""
 
 #. translators: %s: public post type label.
-#: src/Discovery/KnowledgeGraph.php:167
+#: src/Discovery/KnowledgeGraph.php:179
 #, php-format
 msgid "Public %s content type."
 msgstr ""
 
 #. translators: %s: public taxonomy label.
-#: src/Discovery/KnowledgeGraph.php:258
+#: src/Discovery/KnowledgeGraph.php:270
 #, php-format
 msgid "Public %s taxonomy."
 msgstr ""
 
-#: src/Discovery/LLMS.php:482
+#: src/Discovery/LLMS.php:142
+msgid "Cybermaps content changed during LLMS publication. Please retry shortly."
+msgstr ""
+
+#: src/Discovery/LLMS.php:515
 msgid "LLMS publication exceeds the safe output limit."
 msgstr ""
 
@@ -9169,7 +9492,13 @@ msgstr ""
 msgid "The WordPress home path cannot be represented safely in automatic rewrite rules."
 msgstr ""
 
-#: src/Discovery/MarkdownAlternate.php:202
+#: src/Discovery/MarkdownAlternate.php:82
+#: src/Discovery/MarkdownNegotiation.php:75
+#: src/Discovery/MarkdownResponder.php:55
+msgid "Cybermaps content changed during Markdown publication. Please retry shortly."
+msgstr ""
+
+#: src/Discovery/MarkdownAlternate.php:228
 #: src/Discovery/MarkdownCollection.php:94
 msgid "Untitled resource"
 msgstr ""
@@ -9186,7 +9515,7 @@ msgstr ""
 msgid "Content collection"
 msgstr ""
 
-#: src/Discovery/MarkdownResponder.php:73
+#: src/Discovery/MarkdownResponder.php:92
 msgid "Markdown representation exceeds the safe output limit."
 msgstr ""
 
@@ -9204,19 +9533,28 @@ msgstr ""
 msgid "Related eligible resources are listed in suggested_alternatives."
 msgstr ""
 
-#: src/Discovery/PublicationInventory.php:112
+#: src/Discovery/PublicationInventory.php:122
 msgid "Cybermaps stopped publication because content pagination did not advance. No complete publication was produced."
 msgstr ""
 
-#: src/Discovery/PublicationInventory.php:417
+#: src/Discovery/PublicationInventory.php:278
+#: src/Discovery/PublicationInventory.php:287
+msgid "Cybermaps could not read the publication inventory. No complete publication was produced."
+msgstr ""
+
+#: src/Discovery/PublicationInventory.php:467
 msgid "Static publication stopped because this request no longer owned its operation lock."
 msgstr ""
 
-#: src/Discovery/PublicationRouter.php:76
+#: src/Discovery/PublicationRequestGuard.php:19
+msgid "Publication exceeds the safe output limit."
+msgstr ""
+
+#: src/Discovery/PublicationRouter.php:82
 msgid "A registered discovery publication could not be served."
 msgstr ""
 
-#: src/Discovery/PublicationRouter.php:85
+#: src/Discovery/PublicationRouter.php:92
 msgid "This publication is temporarily unavailable."
 msgstr ""
 
@@ -9225,552 +9563,554 @@ msgid "Cybermaps stopped publication at its generation time limit. No partial pu
 msgstr ""
 
 #. translators: 1: publication filename, 2: maximum encoded bytes.
-#: src/Discovery/PublicationSizeLimitException.php:28
+#: src/Discovery/PublicationSizeLimitException.php:64
 #, php-format
 msgid "Cybermaps did not publish %1$s because its complete body exceeded the %2$s-byte safety limit. No partial output was returned or written."
 msgstr ""
 
-#: src/Discovery/RAGChunk.php:116
+#: src/Discovery/RAGChunk.php:126
+msgid "Cybermaps content changed during RAG publication. Please retry shortly."
+msgstr ""
+
+#: src/Discovery/RAGChunk.php:155
 msgid "A RAG chunk publication could not be encoded as JSON."
 msgstr ""
 
-#: src/Discovery/Search.php:43
+#: src/Discovery/Search.php:54
 msgid "Missing search query."
 msgstr ""
 
-#: src/Discovery/Search.php:52
+#: src/Discovery/Search.php:63
 msgid "Too many search requests. Please slow down."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:191
+#: src/Discovery/Search.php:101
+msgid "Cybermaps content changed during search. Please retry shortly."
+msgstr ""
+
+#: src/Discovery/StaticBridge.php:196
 msgid "Automatic recovery is blocked because a paused stale process could resume a filesystem mutation. Stop or quiesce every Cybermaps static worker before confirming recovery."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:222
+#: src/Discovery/StaticBridge.php:227
 msgid "You are not allowed to resolve static publication recovery state."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:225
+#: src/Discovery/StaticBridge.php:230
 msgid "The exact static-worker quiescence confirmation was not supplied."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:232
+#: src/Discovery/StaticBridge.php:237
 msgid "The static recovery authorization is invalid or expired."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:239
+#: src/Discovery/StaticBridge.php:244
 msgid "The pending static intent is malformed and was preserved for administrator review."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:242
+#: src/Discovery/StaticBridge.php:247
 msgid "The pending static intent is malformed and cannot be resolved automatically."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:248
+#: src/Discovery/StaticBridge.php:253
 msgid "The pending static intent changed before recovery could begin."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:254
+#: src/Discovery/StaticBridge.php:259
 msgid "The static operation fence is still active or recovery could not acquire it."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:259
+#: src/Discovery/StaticBridge.php:264
 msgid "The pending static intent was preserved because recovery could not prove a safe terminal state."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:262
+#: src/Discovery/StaticBridge.php:267
 msgid "The pending static intent was reconciled safely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:438
-#: src/Discovery/StaticBridge.php:1424
-#: src/Discovery/StaticBridge.php:1655
-#: src/Discovery/StaticBridge.php:3361
+#: src/Discovery/StaticBridge.php:443
+#: src/Discovery/StaticBridge.php:1429
+#: src/Discovery/StaticBridge.php:1660
+#: src/Discovery/StaticBridge.php:3422
 msgid "Another generated-file operation is already running."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:439
+#: src/Discovery/StaticBridge.php:444
 msgid "The generated-file ownership inventory could not be prepared safely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:525
-#: src/Discovery/StaticBridge.php:5355
+#: src/Discovery/StaticBridge.php:530
+#: src/Discovery/StaticBridge.php:5579
 msgid "The generated-file path is invalid."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:573
+#: src/Discovery/StaticBridge.php:578
 msgid "The WordPress filesystem API is unavailable."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:588
+#: src/Discovery/StaticBridge.php:593
 msgid "The physical publication root could not be resolved safely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:602
+#: src/Discovery/StaticBridge.php:607
 msgid "WordPress could not initialize the filesystem."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:668
+#: src/Discovery/StaticBridge.php:673
 msgid "The existing file could not be read, so it was not overwritten."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:683
+#: src/Discovery/StaticBridge.php:688
 msgid "An existing file is not proven to be owned by Cybermaps and was not overwritten."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:699
+#: src/Discovery/StaticBridge.php:704
 msgid "The file changed after Cybermaps wrote it and was not overwritten."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:738
+#: src/Discovery/StaticBridge.php:743
 msgid "The file is current, but its ownership checkpoint could not be persisted."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:749
+#: src/Discovery/StaticBridge.php:754
 msgid "The generated file is already current."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:776
+#: src/Discovery/StaticBridge.php:781
 msgid "The destination directory could not be created."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:790
+#: src/Discovery/StaticBridge.php:795
 msgid "The destination directory is not writable."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:804
+#: src/Discovery/StaticBridge.php:809
 msgid "A temporary file could not be created."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:818
+#: src/Discovery/StaticBridge.php:823
 msgid "The generated content could not be written to a temporary file."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:868
+#: src/Discovery/StaticBridge.php:873
 msgid "A file appeared at the destination during generation and was not overwritten."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:888
+#: src/Discovery/StaticBridge.php:893
 msgid "The destination became too large to verify safely during generation and was not overwritten."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:912
+#: src/Discovery/StaticBridge.php:917
 msgid "The destination changed during generation and was not overwritten."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:967
+#: src/Discovery/StaticBridge.php:972
 msgid "The generated write could not establish a durable recovery context."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:992
+#: src/Discovery/StaticBridge.php:997
 msgid "The generated write was stopped because its durable recovery intent could not be checkpointed."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1004
+#: src/Discovery/StaticBridge.php:1009
 msgid "The generated write was stopped after preparing its recovery intent because the operation lease was lost."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1013
+#: src/Discovery/StaticBridge.php:1018
 msgid "The generated write was stopped because its recovery intent does not belong to the active operation lease."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1022
+#: src/Discovery/StaticBridge.php:1027
 msgid "The generated write was stopped immediately before publication because the operation lease was lost."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1055
+#: src/Discovery/StaticBridge.php:1060
 msgid "The generated file could not be moved into place."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1082
+#: src/Discovery/StaticBridge.php:1087
 msgid "The generated file could not be verified after it was written, so the prior file state was restored."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1083
+#: src/Discovery/StaticBridge.php:1088
 msgid "The generated file could not be verified after it was written, and a safe rollback could not be proven."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1136
+#: src/Discovery/StaticBridge.php:1141
 msgid "The write was cancelled, but the prior file state could not be restored safely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1204
+#: src/Discovery/StaticBridge.php:1209
 msgid "The generated write was rolled back because its ownership checkpoint could not be persisted."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1205
+#: src/Discovery/StaticBridge.php:1210
 msgid "The ownership checkpoint failed, and the prior file state could not be restored completely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1267
+#: src/Discovery/StaticBridge.php:1272
 msgid "The write was cancelled, but its prior file and ownership checkpoint could not both be restored safely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1316
+#: src/Discovery/StaticBridge.php:1321
 msgid "The generated file and ownership checkpoint were written, but the recovery journal could not be cleared safely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1328
+#: src/Discovery/StaticBridge.php:1333
 msgid "The generated file was written successfully."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1412
+#: src/Discovery/StaticBridge.php:1417
 msgid "Static publication is disabled on WordPress multisite."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1425
+#: src/Discovery/StaticBridge.php:1430
 msgid "The generated-file ownership inventory could not be migrated safely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1445
+#: src/Discovery/StaticBridge.php:1450
 msgid "Configuration changed while static synchronization was starting; a fresh run was queued."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1462
+#: src/Discovery/StaticBridge.php:1467
 msgid "The static synchronization state could not be checkpointed safely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1522
-#: src/Discovery/StaticBridge.php:1730
+#: src/Discovery/StaticBridge.php:1527
+#: src/Discovery/StaticBridge.php:1735
 msgid "Settings changed during generation; obsolete owned files were reconciled."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1541
+#: src/Discovery/StaticBridge.php:1546
 msgid "Static synchronization paused because its operation lease was lost."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1647
-#: src/Discovery/StaticBridge.php:1686
+#: src/Discovery/StaticBridge.php:1652
+#: src/Discovery/StaticBridge.php:1691
 msgid "Time-sensitive refresh is needed only in full static mode."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1664
-#: src/Discovery/StaticBridge.php:1737
+#: src/Discovery/StaticBridge.php:1669
+#: src/Discovery/StaticBridge.php:1742
 msgid "The time-sensitive refresh paused because its operation lease was lost."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1664
+#: src/Discovery/StaticBridge.php:1669
 msgid "Configuration changed while the time-sensitive refresh was starting; a fresh run was queued."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1711
+#: src/Discovery/StaticBridge.php:1716
 msgid "No time-sensitive publication changed since the last refresh."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1762
+#: src/Discovery/StaticBridge.php:1767
 msgid "The time-sensitive refresh completed, but its monotonic checkpoint could not be persisted."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1809
+#: src/Discovery/StaticBridge.php:1814
 msgid "The sitemap index was not updated because the time-sensitive News sitemap refresh failed."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1832
+#: src/Discovery/StaticBridge.php:1837
 msgid "The AI content inventory was unavailable for its time-sensitive refresh."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1867
+#: src/Discovery/StaticBridge.php:1872
 #: src/Discovery/StaticSyncRunner.php:1304
 msgid "The selected post no longer has a publishable RAG chunk payload."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1888
+#: src/Discovery/StaticBridge.php:1893
 msgid "The AI sitemap static target is unavailable."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1911
+#: src/Discovery/StaticBridge.php:1916
 msgid "Time-sensitive files were published, but their post transition index could not be verified."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1924
+#: src/Discovery/StaticBridge.php:1929
 msgid "Unfinished time-sensitive work was preserved for a bounded retry."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:2240
+#: src/Discovery/StaticBridge.php:2256
 msgid "WordPress rejected the time-sensitive static refresh event."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:2383
+#: src/Discovery/StaticBridge.php:2436
 msgid "WordPress could not initialize the filesystem for stale-file reconciliation."
 msgstr ""
 
-#. translators: %d: zero-based ownership shard number.
-#: src/Discovery/StaticBridge.php:2398
-#, php-format
-msgid "Ownership shard %d is malformed and was preserved for administrator review."
+#: src/Discovery/StaticBridge.php:2449
+msgid "The ownership cursor could not be read safely; reconciliation was deferred."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:2493
+#: src/Discovery/StaticBridge.php:2547
 msgid "An invalid generated-file ownership record was retained."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:2519
-#: src/Discovery/StaticBridge.php:3806
+#: src/Discovery/StaticBridge.php:2579
+#: src/Discovery/StaticBridge.php:4041
 msgid "The stale file could not be proven unchanged and was retained."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:2539
+#: src/Discovery/StaticBridge.php:2599
 msgid "Stale-file reconciliation could not checkpoint its ownership shard."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:2702
+#: src/Discovery/StaticBridge.php:2762
 msgid "Multiple registry entries resolved to the same static filename."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:2779
+#: src/Discovery/StaticBridge.php:2839
 msgid "The publication generator did not return a string body."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3032
+#: src/Discovery/StaticBridge.php:3092
 msgid "Static reconciliation failed."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3118
+#: src/Discovery/StaticBridge.php:3178
 msgid "The full sync completed, but its monotonic freshness checkpoint could not be persisted."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3128
+#: src/Discovery/StaticBridge.php:3188
 msgid "The freshness checkpoint could not be read safely, so its next timer was deferred."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3421
-msgid "Static reconciliation stopped because an ownership checkpoint is still unresolved."
+#: src/Discovery/StaticBridge.php:3705
+msgid "Static purge could not verify its bounded ownership checkpoint."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3472
+#: src/Discovery/StaticBridge.php:3717
 msgid "Purge is only allowed on the main site."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3481
+#: src/Discovery/StaticBridge.php:3726
 msgid "The generated-file purge scope is invalid."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3490
-#: src/Discovery/StaticBridge.php:3715
+#: src/Discovery/StaticBridge.php:3735
+#: src/Discovery/StaticBridge.php:3950
 msgid "WP_Filesystem initialization failed."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3507
+#: src/Discovery/StaticBridge.php:3752
 msgid "An invalid generated-file inventory path was retained."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3530
-msgid "The generated-file inventory could not be checkpointed after reconciliation."
-msgstr ""
-
-#: src/Discovery/StaticBridge.php:3561
+#: src/Discovery/StaticBridge.php:3786
 msgid "The ownership record is invalid, so the file was retained."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3568
+#: src/Discovery/StaticBridge.php:3793
 msgid "The owned file could not be resolved safely for reconciliation."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3602
+#: src/Discovery/StaticBridge.php:3837
 msgid "The file could not be read, so it was retained during purge."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3615
+#: src/Discovery/StaticBridge.php:3850
 msgid "The file changed after Cybermaps wrote it and was retained during purge."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3637
+#: src/Discovery/StaticBridge.php:3872
 msgid "The owned generated file was retained with a durable deletion tombstone for recovery."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3641
+#: src/Discovery/StaticBridge.php:3876
 msgid "Static purge stopped with a pending deletion tombstone."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3676
-#: src/Discovery/StaticBridge.php:3772
+#: src/Discovery/StaticBridge.php:3911
+#: src/Discovery/StaticBridge.php:4007
 msgid "An existing file is not proven to be owned by Cybermaps and was retained after generation failed."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3818
+#: src/Discovery/StaticBridge.php:4053
 msgid "Targeted purge stopped with a pending deletion tombstone."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3842
+#: src/Discovery/StaticBridge.php:4077
 msgid "A malformed static publication intent is blocking stale-lease takeover and requires administrator review."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3857
+#: src/Discovery/StaticBridge.php:4092
 msgid "A pending static publication intent blocked automatic stale-lease takeover. Quiesce every static worker, then use the confirmed administrator recovery action."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3937
+#: src/Discovery/StaticBridge.php:4172
 msgid "An ownership checkpoint needs repair, but its durable retry marker could not be verified."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:4112
+#: src/Discovery/StaticBridge.php:4347
 msgid "WordPress rejected the background synchronization event."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:4507
+#: src/Discovery/StaticBridge.php:4745
 msgid "Static synchronization ended before it could publish a final report."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:4676
+#: src/Discovery/StaticBridge.php:4900
 msgid "A pending static write intent is malformed or could not be read safely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:4693
+#: src/Discovery/StaticBridge.php:4917
 msgid "A pending static write could not reconcile its ownership checkpoint safely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:4700
+#: src/Discovery/StaticBridge.php:4924
 msgid "A reconciled static write intent could not be cleared safely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:4720
-#: src/Discovery/StaticBridge.php:4728
+#: src/Discovery/StaticBridge.php:4944
+#: src/Discovery/StaticBridge.php:4952
 msgid "A pending static write intent could not resolve its publication path safely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:4741
+#: src/Discovery/StaticBridge.php:4965
 msgid "A pending static write target is too large or unreadable to reconcile safely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:4749
+#: src/Discovery/StaticBridge.php:4973
 msgid "A pending static write target could not be read safely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:4802
+#: src/Discovery/StaticBridge.php:5026
 msgid "A pending static write target changed independently and was preserved for manual review."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:4838
+#: src/Discovery/StaticBridge.php:5062
 msgid "The owned publication was retained because its durable deletion tombstone could not be checkpointed."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:4848
+#: src/Discovery/StaticBridge.php:5072
 msgid "The deletion tombstone was preserved because the operation lease was lost before filesystem deletion."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:4899
+#: src/Discovery/StaticBridge.php:5123
 msgid "The pending deletion tombstone could not initialize the WordPress filesystem API."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:4906
+#: src/Discovery/StaticBridge.php:5130
 msgid "The pending deletion tombstone was preserved because its database fence or exact journal row could not be revalidated."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:4916
+#: src/Discovery/StaticBridge.php:5140
 msgid "The pending deletion tombstone could not resolve its publication path safely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:4946
+#: src/Discovery/StaticBridge.php:5170
 msgid "The pending deletion target could not be verified safely and was preserved."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:4955
+#: src/Discovery/StaticBridge.php:5179
 msgid "The pending deletion target could not be read and was preserved."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:4976
+#: src/Discovery/StaticBridge.php:5200
 msgid "The deletion tombstone was preserved because its fence was lost immediately before filesystem deletion."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5014
+#: src/Discovery/StaticBridge.php:5238
 msgid "The owned publication could not be deleted; its tombstone was preserved for recovery."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5041
+#: src/Discovery/StaticBridge.php:5265
 msgid "The publication body is absent, but its ownership checkpoint or deletion tombstone could not be finalized."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5093
+#: src/Discovery/StaticBridge.php:5317
 msgid "A verified successor publication superseded the pending deletion and was preserved."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5101
+#: src/Discovery/StaticBridge.php:5325
 msgid "A third-party body replaced the pending deletion target and was preserved for administrator review."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5218
+#: src/Discovery/StaticBridge.php:5442
 msgid "Static root files are disabled on WordPress multisite; dynamic delivery remains active."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5219
+#: src/Discovery/StaticBridge.php:5443
 msgid "Static generation is suspended while the plugin is inactive or uninstalling."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5220
+#: src/Discovery/StaticBridge.php:5444
 msgid "Settings changed during generation, so the obsolete write was cancelled."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5221
+#: src/Discovery/StaticBridge.php:5445
 msgid "The Static File Engine is disabled."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5222
+#: src/Discovery/StaticBridge.php:5446
 msgid "The AI Publication Hub is disabled."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5223
+#: src/Discovery/StaticBridge.php:5447
 msgid "This file is outside the active Static File Engine mode."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5224
+#: src/Discovery/StaticBridge.php:5448
 msgid "The generated-file operation no longer owns its coordination lock and was stopped before another write."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5227
+#: src/Discovery/StaticBridge.php:5451
 msgid "The generated-file write was cancelled."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5392
+#: src/Discovery/StaticBridge.php:5616
 msgid "A remote or differently rooted frontend requires an explicit physical publication root."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5448
+#: src/Discovery/StaticBridge.php:5672
 msgid "The origin document root could not be derived safely from the WordPress home path."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5467
+#: src/Discovery/StaticBridge.php:5691
 msgid "The physical publication root is not an absolute path."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5476
+#: src/Discovery/StaticBridge.php:5700
 msgid "The physical publication root does not exist or is not a directory."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5490
+#: src/Discovery/StaticBridge.php:5714
 msgid "The generated path escapes the configured publication root."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5499
+#: src/Discovery/StaticBridge.php:5723
 msgid "A destination directory resolves outside the configured publication root."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5563
+#: src/Discovery/StaticBridge.php:5787
 msgid "WordPress could not initialize the filesystem for the configured publication root."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5571
+#: src/Discovery/StaticBridge.php:5795
 msgid "The configured physical publication root is not writable."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5812
-#: src/Discovery/StaticBridge.php:5821
+#: src/Discovery/StaticBridge.php:6036
+#: src/Discovery/StaticBridge.php:6045
 msgid "The existing complete LLMS file size could not be checked safely, so the file was retained."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5833
+#: src/Discovery/StaticBridge.php:6057
 msgid "The existing complete LLMS file exceeds the bounded ownership-verification limit and was retained rather than read or overwritten."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5852
+#: src/Discovery/StaticBridge.php:6076
 msgid "Static reconciliation stopped because this request no longer owned its operation lock."
 msgstr ""
 
-#: src/Discovery/StaticHeaderManifest.php:68
+#: src/Discovery/StaticHeaderManifest.php:71
 msgid "Static header policy conforms to the deployed response."
 msgstr ""
 
 #. translators: %s: missing or mismatched HTTP header names.
-#: src/Discovery/StaticHeaderManifest.php:78
+#: src/Discovery/StaticHeaderManifest.php:81
 #, php-format
 msgid "Static-server header policy is incomplete: %s."
 msgstr ""
@@ -9824,8 +10164,12 @@ msgid "The sitemap index was not updated because one or more child sitemaps fail
 msgstr ""
 
 #: src/Discovery/Throttler.php:100
-#: src/Discovery/Throttler.php:200
+#: src/Discovery/Throttler.php:201
 msgid "Rate limit exceeded. Please retry after 60 seconds."
+msgstr ""
+
+#: src/Discovery/Updates.php:93
+msgid "Cybermaps content changed while preparing recent updates. Please retry shortly."
 msgstr ""
 
 #: src/Discovery/WellKnownRoutingBridge.php:73
@@ -9856,6 +10200,14 @@ msgstr ""
 msgid "Read-only public Cybermaps discovery and search."
 msgstr ""
 
+#: src/Sitemap/EligibleContentRepository.php:271
+msgid "Cybermaps could not finish News eligibility selection within its request budget. No partial sitemap was produced."
+msgstr ""
+
+#: src/Sitemap/EligibleContentRepository.php:741
+msgid "Cybermaps could not select the complete archive inventory within its request budget. No partial sitemap was produced."
+msgstr ""
+
 #: src/Sitemap/MediaScanner.php:241
 msgid "YouTube Video"
 msgstr ""
@@ -9864,8 +10216,12 @@ msgstr ""
 msgid "Vimeo Video"
 msgstr ""
 
-#: src/Sitemap/Orchestrator.php:592
+#: src/Sitemap/Orchestrator.php:595
 msgid "Sitemap not found."
+msgstr ""
+
+#: src/Sitemap/Orchestrator.php:1304
+msgid "Cybermaps stopped sitemap publication because its content changed during selection. Please retry shortly."
 msgstr ""
 
 #: src/Sitemap/PageOccupancyBuilder.php:55
@@ -9888,13 +10244,57 @@ msgstr ""
 msgid "The sitemap occupancy background task returned an invalid scheduling error."
 msgstr ""
 
+#: src/Sitemap/PublicationQuery.php:108
+msgid "Cybermaps could not read publication candidates safely. Please retry later."
+msgstr ""
+
+#: src/Sitemap/Renderer/NetworkRenderer.php:67
+msgid "Network sitemap members must share the network publication origin and path scope. No partial network index was produced."
+msgstr ""
+
+#: src/Sitemap/Renderer/NetworkRenderer.php:71
+msgid "The complete network sitemap exceeds the single-index protocol limit. No partial network index was produced."
+msgstr ""
+
+#: src/Sitemap/Renderer/NetworkRenderer.php:100
+msgid "Network sitemap site inventory could not be read safely. Please retry later."
+msgstr ""
+
+#: src/Sitemap/Renderer/NetworkRenderer.php:116
+msgid "Network sitemap member inventory is still being prepared. Please retry later."
+msgstr ""
+
+#: src/Sitemap/Renderer/NetworkRenderer.php:122
+msgid "Network sitemap cannot verify configured external sitemap documents as leaf sitemaps. No partial network index was produced."
+msgstr ""
+
+#: src/Sitemap/Renderer/NetworkRenderer.php:126
+msgid "Network sitemap member inventory changed during selection. Please retry later."
+msgstr ""
+
+#: src/Sitemap/Renderer/NetworkRenderer.php:142
+msgid "Network sitemap selection exceeded its request time budget. No partial network index was produced."
+msgstr ""
+
+#: src/Sitemap/RSSProvider.php:98
+msgid "Cybermaps stopped RSS publication because its content changed during selection. Please retry shortly."
+msgstr ""
+
+#: src/Sitemap/RSSProvider.php:204
+msgid "Cybermaps could not finish RSS eligibility selection within its request budget. No partial feed was produced."
+msgstr ""
+
 #. translators: %s: site name
-#: src/Sitemap/RSSProvider.php:209
+#: src/Sitemap/RSSProvider.php:229
 #, php-format
 msgid "Latest content from %s"
 msgstr ""
 
-#: src/Sitemap/ShortcodeHandler.php:124
+#: src/Sitemap/ShortcodeHandler.php:130
+msgid "Sitemap selection is temporarily unavailable. Please retry later."
+msgstr ""
+
+#: src/Sitemap/ShortcodeHandler.php:134
 msgid "No pages found."
 msgstr ""
 
@@ -9961,7 +10361,7 @@ msgstr ""
 
 #: assets/js/admin-command-center.js:179
 #: assets/js/admin-command-center.js:734
-#: assets/js/admin-command-center.js:789
+#: assets/js/admin-command-center.js:802
 msgid "Cancel"
 msgstr ""
 
@@ -10264,16 +10664,16 @@ msgstr ""
 msgid "Apply Full Replace"
 msgstr ""
 
-#: assets/js/admin-command-center.js:756
+#: assets/js/admin-command-center.js:762
 msgid "Continue with this action?"
 msgstr ""
 
-#: assets/js/admin-command-center.js:784
+#: assets/js/admin-command-center.js:797
 msgid "Confirm Action"
 msgstr ""
 
-#: assets/js/admin-command-center.js:790
-#: assets/js/setup-wizard.js:732
+#: assets/js/admin-command-center.js:803
+#: assets/js/setup-wizard.js:735
 msgid "Continue"
 msgstr ""
 
@@ -10385,27 +10785,27 @@ msgstr ""
 msgid "Choose a public image"
 msgstr ""
 
-#: assets/js/setup-wizard.js:633
+#: assets/js/setup-wizard.js:636
 msgid "Quick Setup could not be loaded."
 msgstr ""
 
-#: assets/js/setup-wizard.js:665
+#: assets/js/setup-wizard.js:668
 msgid "of"
 msgstr ""
 
-#: assets/js/setup-wizard.js:701
+#: assets/js/setup-wizard.js:704
 msgid "Exit setup"
 msgstr ""
 
-#: assets/js/setup-wizard.js:716
+#: assets/js/setup-wizard.js:719
 msgid "Back"
 msgstr ""
 
-#: assets/js/setup-wizard.js:744
+#: assets/js/setup-wizard.js:747
 msgid "Applying your setup…"
 msgstr ""
 
-#: assets/js/setup-wizard.js:745
+#: assets/js/setup-wizard.js:748
 msgid "Finish setup"
 msgstr ""
 

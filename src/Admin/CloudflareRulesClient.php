@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class CloudflareRulesClient {
 	private const API_BASE = 'https://api.cloudflare.com/client/v4';
 
-	public function __construct( #[\SensitiveParameter] private string $token ) {}
+	public function __construct( #[\SensitiveParameter] private string $token, private ?\Closure $transport = null ) {}
 
 	/** @return array{id:string,name:string} */
 	public function zone_for_host( string $host ): array {
@@ -34,12 +34,28 @@ final class CloudflareRulesClient {
 					'status'   => 'active',
 				)
 			);
-			$zones    = array_merge( $zones, is_array( $response['result'] ?? null ) ? $response['result'] : array() );
-			$pages    = max( 1, (int) ( $response['result_info']['total_pages'] ?? 1 ) );
+			$pages    = self::complete_zone_page_count( $response, $page, $pages ?? null );
+			$zones    = array_merge( $zones, $response['result'] );
 			++$page;
-		} while ( $page <= $pages && $page <= 20 );
+		} while ( $page <= $pages );
 
 		return self::select_zone( $host, $zones );
+	}
+
+	/** Refuse a partial inventory before any zone can become a mutation target.
+	 *
+	 * @param array<string,mixed> $response Provider zone-list response.
+	 */
+	private static function complete_zone_page_count( array $response, int $page, ?int $expected ): int {
+		$pages = $response['result_info']['total_pages'] ?? null;
+		if ( ! is_int( $pages ) || $pages < 1 || $pages > 20
+			|| ( $response['result_info']['page'] ?? null ) !== $page
+			|| ( null !== $expected && $expected !== $pages )
+			|| ! is_array( $response['result'] ?? null )
+		) {
+			throw new \RuntimeException( esc_html__( 'The authorized Cloudflare zone inventory is incomplete or exceeds the safe lookup limit. Authorize only the intended zone and try again.', 'cybermaps' ) );
+		}
+		return $pages;
 	}
 
 	/** @param array<int,mixed> $zones @return array{id:string,name:string} */
@@ -89,19 +105,72 @@ final class CloudflareRulesClient {
 				'rules'       => array_values( $rules ),
 			)
 		);
-		return (array) ( $response['result'] ?? array() );
+		$result   = $response['result'] ?? null;
+		if ( ! is_array( $result ) || ! is_string( $result['id'] ?? null ) || '' === $result['id']
+			|| ( $result['phase'] ?? null ) !== $phase || ! is_array( $result['rules'] ?? null )
+			|| array() === $rules || count( $rules ) !== count( $result['rules'] )
+		) {
+			throw new \RuntimeException( esc_html__( 'Cloudflare did not return a complete created ruleset. Review the rules in Cloudflare before retrying.', 'cybermaps' ) );
+		}
+		$matched = array();
+		foreach ( $rules as $rule ) {
+			$matched[] = self::mutation_rule( $response, $rule );
+		}
+		if ( count( $matched ) !== count( array_unique( array_column( $matched, 'id' ) ) ) ) {
+			throw new \RuntimeException( esc_html__( 'Cloudflare returned duplicate rule identifiers. Review the rules in Cloudflare before retrying.', 'cybermaps' ) );
+		}
+		$result['rules'] = $matched;
+		return $result;
 	}
 
 	/** @param array<string,mixed> $rule @return array<string,mixed> */
 	public function create_rule( string $zone_id, string $ruleset_id, array $rule ): array {
 		$response = $this->request( 'POST', self::rules_path( $zone_id, $ruleset_id ), $rule );
-		return (array) ( $response['result'] ?? array() );
+		return self::mutation_rule( $response, $rule );
 	}
 
 	/** @param array<string,mixed> $rule @return array<string,mixed> */
 	public function update_rule( string $zone_id, string $ruleset_id, string $rule_id, array $rule ): array {
 		$response = $this->request( 'PATCH', self::rules_path( $zone_id, $ruleset_id ) . '/' . rawurlencode( $rule_id ), $rule );
-		return (array) ( $response['result'] ?? array() );
+		return self::mutation_rule( $response, $rule, $rule_id );
+	}
+
+	/** @param array<string,mixed> $response @param array<string,mixed> $desired @return array<string,mixed> */
+	private static function mutation_rule( array $response, array $desired, string $id = '' ): array {
+		$ref   = $desired['ref'] ?? '';
+		$rules = $response['result']['rules'] ?? null;
+		if ( '' === $ref || ! is_array( $rules ) ) {
+			throw new \RuntimeException( esc_html__( 'Cloudflare returned an invalid rule mutation result. Review the rules in Cloudflare before retrying.', 'cybermaps' ) );
+		}
+		$matches = array_values( array_filter( $rules, static fn( mixed $rule ): bool => is_array( $rule ) && ( $rule['ref'] ?? null ) === $ref ) );
+		if ( 1 !== count( $matches ) || ! is_string( $matches[0]['id'] ?? null ) || '' === $matches[0]['id'] ) {
+			throw new \RuntimeException( esc_html__( 'Cloudflare did not identify the changed rule. Review the rules in Cloudflare before retrying.', 'cybermaps' ) );
+		}
+		if ( '' !== $id && $id !== $matches[0]['id'] ) {
+			throw new \RuntimeException( esc_html__( 'Cloudflare returned an unexpected rule identifier. Review the rules in Cloudflare before retrying.', 'cybermaps' ) );
+		}
+		self::require_matching_fields( $matches[0], $desired );
+		return $matches[0];
+	}
+
+	/** @param array<string,mixed> $actual @param array<string,mixed> $desired */
+	private static function require_matching_fields( array $actual, array $desired ): void {
+		foreach ( $desired as $field => $value ) {
+			if ( self::ordered_fields( $value ) !== self::ordered_fields( $actual[ $field ] ?? null ) ) {
+				throw new \RuntimeException( esc_html__( 'Cloudflare returned a rule that does not match the requested configuration. Review the rules in Cloudflare before retrying.', 'cybermaps' ) );
+			}
+		}
+	}
+
+	/** Compare provider JSON objects without depending on property order. */
+	private static function ordered_fields( mixed $value ): mixed {
+		if ( ! is_array( $value ) ) {
+			return $value;
+		}
+		if ( ! array_is_list( $value ) ) {
+			ksort( $value, SORT_STRING );
+		}
+		return array_map( array( self::class, 'ordered_fields' ), $value );
 	}
 
 	public function delete_rule( string $zone_id, string $ruleset_id, string $rule_id ): void {
@@ -138,7 +207,7 @@ final class CloudflareRulesClient {
 			$args['body'] = $encoded;
 		}
 
-		$response = wp_safe_remote_request( $url, $args );
+		$response = null !== $this->transport ? ( $this->transport )( $url, $args ) : wp_safe_remote_request( $url, $args );
 		if ( is_wp_error( $response ) ) {
 			throw new \RuntimeException( esc_html__( 'Cloudflare could not be reached securely. Check outbound HTTPS connectivity and try again.', 'cybermaps' ) );
 		}
@@ -147,7 +216,7 @@ final class CloudflareRulesClient {
 			return array( 'not_found' => true );
 		}
 		$decoded = json_decode( (string) wp_remote_retrieve_body( $response ), true );
-		if ( $code < 200 || $code >= 300 || ! is_array( $decoded ) || empty( $decoded['success'] ) ) {
+		if ( $code < 200 || $code >= 300 || ! is_array( $decoded ) || true !== ( $decoded['success'] ?? null ) ) {
 			throw new \RuntimeException( esc_html( self::api_error( is_array( $decoded ) ? $decoded : array(), $code ) ) );
 		}
 		return $decoded;

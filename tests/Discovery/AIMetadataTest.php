@@ -111,6 +111,7 @@ namespace Cybermaps\Tests\Discovery {
 				'_snippet_enabled' => '1',
 			);
 			$GLOBALS['cybermaps_mock_post_meta'][15]['_cybermaps_ai_meta_ts'] = time();
+			$GLOBALS['cybermaps_mock_post_meta'][15]['_cybermaps_ai_meta_version'] = '2';
 
 			$calculated = AIMetadata::calculate( 15 );
 
@@ -133,6 +134,7 @@ namespace Cybermaps\Tests\Discovery {
 						'_snippet_enabled' => '1',
 					);
 					$GLOBALS['cybermaps_mock_post_meta'][15]['_cybermaps_ai_meta_ts'] = time();
+			$GLOBALS['cybermaps_mock_post_meta'][15]['_cybermaps_ai_meta_version'] = '2';
 
 					set_error_handler(
 						static function ( int $severity, string $message, string $file, int $line ): never {

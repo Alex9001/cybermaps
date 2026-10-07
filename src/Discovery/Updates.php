@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Publishes the bounded ADP 3.0 recent-update stream.
  */
 final class Updates {
-	private const CACHE_KEY        = 'cybermaps_adp_updates_v3';
+	private const CACHE_KEY        = 'cybermaps_adp_updates_v5';
 	private const QUERY_BATCH_SIZE = 250;
 	private const MAX_CANDIDATES   = 5000;
 	private const WINDOW_SECONDS   = 7 * DAY_IN_SECONDS;
@@ -26,8 +26,15 @@ final class Updates {
 			return;
 		}
 
-		$output = $this->get_json_content();
-		Integrity::send_headers( $output, 15 * MINUTE_IN_SECONDS );
+		$generation = \Cybermaps\Core\CacheManager::get_generation( 'discovery', true );
+		try {
+			self::require_current_generation( $generation );
+			$output = $this->get_json_content();
+			Integrity::send_headers( $output, 15 * MINUTE_IN_SECONDS, null, $generation );
+			self::require_current_generation( $generation );
+		} catch ( \Cybermaps\Core\BuildUnavailableException $error ) {
+			PublicationRequestGuard::serve_unavailable( $error );
+		}
 		header( 'Content-Type: application/json; charset=utf-8' );
 		header( 'X-Update-Frequency: daily' );
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
@@ -40,7 +47,10 @@ final class Updates {
 	 * Return the canonical JSON body used by dynamic and static delivery.
 	 */
 	public function get_json_content(): string {
-		return \Cybermaps\Core\ProtocolOutput::json( $this->get_updates_data() );
+		$generation = \Cybermaps\Core\CacheManager::get_generation( 'discovery', true );
+		$output     = \Cybermaps\Core\ProtocolOutput::json( $this->get_updates_data() );
+		self::require_current_generation( $generation );
+		return $output;
 	}
 
 	/**
@@ -52,26 +62,36 @@ final class Updates {
 	 * @return array<string,mixed>
 	 */
 	public function get_updates_data(): array {
-		$cached = \get_transient( self::CACHE_KEY );
-		if ( \is_array( $cached ) ) {
+		$generation = \Cybermaps\Core\CacheManager::get_generation( 'discovery', true );
+		$cached     = \Cybermaps\Core\CacheManager::get( self::CACHE_KEY, 'discovery', $found );
+		if ( $found && \is_array( $cached ) ) {
+			self::require_current_generation( $generation );
 			return $cached;
 		}
-		if ( false !== $cached ) {
-			\delete_transient( self::CACHE_KEY );
-		}
+		self::require_current_generation( $generation );
 
-		$settings = \Cybermaps\Core\ConfigurationStore::settings();
-		$limit    = PublicationConstraints::feed_limit(
+		$settings = \Cybermaps\Core\ConfigurationStore::publication_settings();
+		\Cybermaps\Core\ConfigurationStore::publication_discovery();
+		$limit = PublicationConstraints::feed_limit(
 			$settings['ai_feed_limit'] ?? PublicationConstraints::FEED_LIMIT_DEFAULT
 		);
-		$data     = array(
+		$data  = array(
 			'version'      => '3.0',
 			'generatedAt'  => \gmdate( 'c' ),
 			'updateWindow' => '7d',
 			'updates'      => $this->collect_updates( $settings, $limit ),
 		);
-		\Cybermaps\Core\CacheManager::set( self::CACHE_KEY, $data, 15 * MINUTE_IN_SECONDS, 'discovery' );
+		self::require_current_generation( $generation );
+		\Cybermaps\Core\CacheManager::set_if_current( self::CACHE_KEY, $data, 15 * MINUTE_IN_SECONDS, 'discovery', $generation );
+		self::require_current_generation( $generation );
 		return $data;
+	}
+
+	/** Never return or admit a body built across a privacy invalidation. */
+	private static function require_current_generation( int $generation ): void {
+		if ( $generation < 0 || \Cybermaps\Core\CacheManager::get_generation( 'discovery', true ) !== $generation ) {
+			throw new \Cybermaps\Core\BuildUnavailableException( esc_html__( 'Cybermaps content changed while preparing recent updates. Please retry shortly.', 'cybermaps' ) );
+		}
 	}
 
 	/**
@@ -89,7 +109,7 @@ final class Updates {
 
 		while ( ! empty( $post_types ) && $update_count < $limit && $scanned < self::MAX_CANDIDATES ) {
 			$batch_size = \min( self::QUERY_BATCH_SIZE, self::MAX_CANDIDATES - $scanned );
-			$query      = new \WP_Query(
+			$rows       = \Cybermaps\Sitemap\PublicationQuery::posts(
 				array(
 					'post_type'              => $post_types,
 					'posts_per_page'         => $batch_size,
@@ -113,7 +133,7 @@ final class Updates {
 					'update_post_term_cache' => true,
 				)
 			);
-			$posts      = \array_values( \array_filter( (array) $query->posts, 'is_object' ) );
+			$posts      = \array_values( \array_filter( $rows, 'is_object' ) );
 			$returned   = \count( $posts );
 			$scanned   += $returned;
 
@@ -151,7 +171,7 @@ final class Updates {
 		$is_created = $published_ts > 0 && $published_ts === $modified_ts;
 		return array(
 			'url'         => \Cybermaps\Core\URLManager::rewrite_url( (string) \get_permalink( $post_id ) ),
-			'title'       => (string) \get_the_title( $post_id ),
+			'title'       => wp_strip_all_tags( PublicationConstraints::bounded_text( (string) \get_the_title( $post_id ), PublicationConstraints::SEARCH_TITLE_MAX_LENGTH ) ),
 			'type'        => $is_created ? 'created' : 'modified',
 			'timestamp'   => \gmdate( 'c', $is_created ? $published_ts : $modified_ts ),
 			'contentType' => \sanitize_key( (string) ( $post->post_type ?? 'post' ) ),

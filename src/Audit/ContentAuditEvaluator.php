@@ -38,22 +38,20 @@ final class ContentAuditEvaluator {
 		?int $now = null,
 		?bool $has_attached_image = null
 	): array {
-		$now                = $now ?? time();
-		$post_id            = (int) ( $post->ID ?? 0 );
-		$post_type          = sanitize_key( (string) ( $post->post_type ?? 'post' ) );
-		$text               = $this->extractor->from_post( $post );
-		$words              = $this->extractor->word_count( $text );
-		$rules              = $policy->for_post_type( $post_type );
-		$modified           = (string) ( $post->post_modified_gmt ?? $post->post_date_gmt ?? '' );
-		$modified_timestamp = '' !== $modified ? strtotime( $modified . ' UTC' ) : false;
-		$age_days           = false === $modified_timestamp
-			? null
-			: max( 0, (int) floor( ( $now - $modified_timestamp ) / DAY_IN_SECONDS ) );
-		$has_media          = $this->has_media( $post, $has_attached_image );
-		$decision           = $this->eligibility->post( $post, PublicationEligibility::REPORT );
-		$findings           = array();
+		$now       = $now ?? time();
+		$post_id   = (int) ( $post->ID ?? 0 );
+		$post_type = sanitize_key( (string) ( $post->post_type ?? 'post' ) );
+		$analysis  = $this->extractor->analyze_post( $post );
+		$text      = $analysis['text'];
+		$words     = $this->extractor->word_count( $text );
+		$rules     = $policy->for_post_type( $post_type );
+		$modified  = (string) ( $post->post_modified_gmt ?? $post->post_date_gmt ?? '' );
+		$age_days  = $this->age_days( $modified, $now );
+		$has_media = $this->has_media( $post, $has_attached_image );
+		$decision  = $this->eligibility->post( $post, PublicationEligibility::REPORT );
+		$findings  = array();
 
-		$this->add_thin_finding( $findings, $decision->indexable, $words, $rules );
+		$this->add_text_findings( $findings, $analysis, $decision->indexable, $words, $rules );
 		$this->add_stale_finding( $findings, $decision->indexable, $age_days, $modified, $rules );
 		$this->add_media_finding( $findings, $decision->indexable, $has_media, $rules );
 
@@ -72,18 +70,49 @@ final class ContentAuditEvaluator {
 				'title'        => (string) ( $post->post_title ?? get_the_title( $post_id ) ),
 				'url'          => $url,
 				'modified_gmt' => $modified,
-				'word_count'   => $words,
+				'word_count'   => $analysis['complete'] ? $words : null,
 				'age_days'     => $age_days,
 				'has_media'    => $has_media,
 				'indexable'    => $decision->indexable,
 				'indexability' => $decision->to_array(),
-				'content_hash' => hash( 'sha256', $text ),
+				'content_hash' => $analysis['complete'] ? hash( 'sha256', $text ) : '',
 				'measurement'  => array(
-					'extractor' => 'literal-visible-text-v1',
-					'policy'    => $rules,
+					'extractor'     => 'literal-visible-text-v1',
+					'policy'        => $rules,
+					'text_complete' => $analysis['complete'],
+					'source_bytes'  => $analysis['source_bytes'],
+					'sample_words'  => $words,
 				),
 			),
 			'findings' => $findings,
+		);
+	}
+
+	private function age_days( string $modified, int $now ): ?int {
+		$timestamp = '' !== $modified ? strtotime( $modified . ' UTC' ) : false;
+		return false === $timestamp ? null : max( 0, (int) floor( ( $now - $timestamp ) / DAY_IN_SECONDS ) );
+	}
+
+	/** @param array<int,array<string,mixed>> $findings */
+	private function add_text_findings( array &$findings, array $analysis, bool $indexable, int $words, array $rules ): void {
+		if ( $analysis['complete'] ) {
+			$this->add_thin_finding( $findings, $indexable, $words, $rules );
+		} else {
+			$this->add_incomplete_finding( $findings, $analysis['source_bytes'] );
+		}
+	}
+
+	/** @param array<int,array<string,mixed>> $findings */
+	private function add_incomplete_finding( array &$findings, int $source_bytes ): void {
+		$findings[] = array(
+			'key'            => 'content_analysis_incomplete',
+			'severity'       => 'review',
+			'summary'        => __( 'Stored content exceeded the bounded text analysis. Full word count, content hash, and thin-content findings are unavailable.', 'cybermaps' ),
+			'evidence'       => array(
+				'text_complete' => false,
+				'source_bytes'  => $source_bytes,
+			),
+			'recommendation' => __( 'Review this resource directly; the saved text sample does not describe the complete content.', 'cybermaps' ),
 		);
 	}
 

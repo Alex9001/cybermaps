@@ -6,6 +6,24 @@ namespace Cybermaps\Tests\CLI;
 use Cybermaps\CLI\Command;
 
 final class CommandTest extends \WP_UnitTestCase {
+	public function test_regeneration_invalidates_completed_occupancy_before_sync(): void {
+		$process = proc_open(
+			array( PHP_BINARY, dirname( __DIR__ ) . '/fixtures/cli-regenerate.php' ),
+			array( 1 => array( 'pipe', 'w' ), 2 => array( 'pipe', 'w' ) ),
+			$pipes
+		);
+		$this->assertIsResource( $process );
+		$output = stream_get_contents( $pipes[1] );
+		$error = stream_get_contents( $pipes[2] );
+		fclose( $pipes[1] );
+		fclose( $pipes[2] );
+		$this->assertSame( 0, proc_close( $process ), $error );
+		$this->assertSame(
+			array( 'generation' => 5, 'manifest' => null, 'token_changed' => true, 'scheduled' => true ),
+			json_decode( $output, true, 512, JSON_THROW_ON_ERROR )
+		);
+	}
+
 	public function test_status_values_preserve_list_and_structured_content(): void {
 		$this->assertSame( '["12","45"]', Command::format_status_value( array( '12', '45' ) ) );
 		$this->assertSame(

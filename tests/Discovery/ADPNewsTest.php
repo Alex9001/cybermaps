@@ -44,9 +44,9 @@ final class ADPNewsTest extends \WP_UnitTestCase {
 			'adp_news_llms' => '/news/llms.txt', 'adp_news_speakable' => '/news/speakable.json',
 			'adp_news_changelog' => '/news/changelog.json', 'adp_news_archive' => '/news/archive.jsonl',
 		);
-		$this->assertCount( 8, $well_known );
-		$this->assertContains( '/ai-discovery', $well_known );
-		$this->assertContains( '/.well-known/api-catalog', $well_known );
+		$this->assertCount( 5, $well_known );
+		$this->assertNotContains( '/ai-discovery', $well_known );
+		$this->assertNotContains( '/.well-known/api-catalog', $well_known );
 		$this->assertContains( '/.well-known/agent-skills/index.json', $well_known );
 		foreach ( $expected as $id => $path ) {
 			$this->assertNotContains( $path, $well_known );

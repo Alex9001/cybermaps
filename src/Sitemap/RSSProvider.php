@@ -17,6 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * alternative to XML sitemaps.
  */
 class RSSProvider {
+	private const CACHE_KEY        = 'cybermaps_rss_sitemap_v2';
 	private const QUERY_BATCH_SIZE = 250;
 	private const MAX_SCAN_POSTS   = 5000;
 
@@ -43,7 +44,11 @@ class RSSProvider {
 			\ltrim( $path, '/' ),
 			'all'
 		);
-		$output = $this->generate();
+		try {
+			$output = $this->generate();
+		} catch ( \Cybermaps\Core\BuildUnavailableException $error ) {
+			\Cybermaps\Discovery\PublicationRequestGuard::serve_unavailable( $error );
+		}
 
 		\Cybermaps\Discovery\Integrity::send_headers( $output, 3600 );
 		header( 'Content-Type: application/rss+xml; charset=utf-8' );
@@ -57,11 +62,13 @@ class RSSProvider {
 	 * Generate the RSS 2.0 sitemap content.
 	 */
 	public function generate(): string {
-		$settings      = \Cybermaps\Core\ConfigurationStore::settings();
+		$generation = \Cybermaps\Core\CacheManager::get_generation( 'sitemap', true );
+		$settings   = \Cybermaps\Core\ConfigurationStore::publication_settings();
+		\Cybermaps\Core\ConfigurationStore::publication_discovery();
 		$cache_enabled = ! empty( $settings['enable_caching'] );
-		$generation    = \Cybermaps\Core\CacheManager::get_generation( 'sitemap' );
 		$cached        = $this->get_cached_sitemap( $cache_enabled );
 		if ( null !== $cached ) {
+			$this->assert_current_generation( $generation );
 			return $cached;
 		}
 
@@ -69,10 +76,11 @@ class RSSProvider {
 		$limit      = max( 1, min( 1000, isset( $settings['rss_sitemap_limit'] ) ? (int) $settings['rss_sitemap_limit'] : 100 ) );
 		$posts      = $this->get_posts( $post_types, $limit, $settings );
 		$xml        = $this->render_rss( $posts );
+		$this->assert_current_generation( $generation );
 
 		if ( $cache_enabled ) {
-			\Cybermaps\Core\CacheManager::set_compatible_if_current(
-				'cybermaps_rss_sitemap',
+			\Cybermaps\Core\CacheManager::set_if_current(
+				self::CACHE_KEY,
 				$xml,
 				12 * HOUR_IN_SECONDS,
 				'sitemap',
@@ -80,7 +88,15 @@ class RSSProvider {
 			);
 		}
 
+		$this->assert_current_generation( $generation );
 		return $xml;
+	}
+
+	/** Never return bytes selected before a publication/privacy invalidation. */
+	private function assert_current_generation( int $generation ): void {
+		if ( $generation < 0 || \Cybermaps\Core\CacheManager::get_generation( 'sitemap', true ) !== $generation ) {
+			throw new \Cybermaps\Core\BuildUnavailableException( esc_html__( 'Cybermaps stopped RSS publication because its content changed during selection. Please retry shortly.', 'cybermaps' ) );
+		}
 	}
 
 	/**
@@ -92,7 +108,7 @@ class RSSProvider {
 		}
 
 		$cached = \Cybermaps\Core\CacheManager::get(
-			'cybermaps_rss_sitemap',
+			self::CACHE_KEY,
 			'sitemap',
 			$cache_found
 		);
@@ -146,7 +162,7 @@ class RSSProvider {
 		while ( $post_count < $limit && $inspected < self::MAX_SCAN_POSTS ) {
 			$remaining_scan = self::MAX_SCAN_POSTS - $inspected;
 			$batch_size     = min( self::QUERY_BATCH_SIZE, $remaining_scan );
-			$query          = new \WP_Query(
+			$rows           = PublicationQuery::posts(
 				array(
 					'post_type'              => $post_types,
 					'posts_per_page'         => $batch_size,
@@ -163,7 +179,7 @@ class RSSProvider {
 					'update_post_meta_cache' => true,
 				)
 			);
-			$batch          = array_values( array_filter( (array) $query->posts, 'is_object' ) );
+			$batch          = array_values( array_filter( array_slice( $rows, 0, $batch_size ), 'is_object' ) );
 			$batch_count    = count( $batch );
 			$inspected     += $batch_count;
 
@@ -184,6 +200,10 @@ class RSSProvider {
 			++$page;
 		}
 
+		if ( $post_count < $limit && $inspected >= self::MAX_SCAN_POSTS && $batch_count === $batch_size ) {
+			throw new \Cybermaps\Core\BuildUnavailableException( esc_html__( 'Cybermaps could not finish RSS eligibility selection within its request budget. No partial feed was produced.', 'cybermaps' ) );
+		}
+
 		return $posts;
 	}
 
@@ -198,7 +218,7 @@ class RSSProvider {
 		$site_url   = \Cybermaps\Core\URLManager::get_home_url( '/' );
 		$rss_url    = \Cybermaps\Core\URLManager::get_home_url( '/' . Orchestrator::get_rss_sitemap_base() . '.xml' );
 		$build_date = ! empty( $posts )
-			? mysql2date( 'r', $posts[0]->post_modified_gmt, false )
+			? $this->utc_date( (string) ( $posts[0]->post_modified_gmt ?? '' ) )
 			: '';
 
 		$xml  = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
@@ -216,7 +236,6 @@ class RSSProvider {
 			foreach ( $posts as $post ) {
 				$xml .= $this->render_item( $post );
 			}
-			wp_reset_postdata();
 		}
 
 		$xml .= '</channel>' . "\n";
@@ -225,19 +244,24 @@ class RSSProvider {
 		return $xml;
 	}
 
+	/** Format a stored GMT value without applying the site's local timezone. */
+	private function utc_date( string $date ): string {
+		$timestamp = '' === trim( $date ) || '0000-00-00 00:00:00' === $date ? false : strtotime( $date . ' UTC' );
+		return false === $timestamp ? '' : gmdate( 'r', $timestamp );
+	}
+
 	/**
 	 * Render one RSS item.
 	 */
 	private function render_item( object $post ): string {
-		setup_postdata( $post );
-		$post_id    = get_the_ID();
+		$post_id    = (int) $post->ID;
 		$post_url   = \Cybermaps\Core\URLManager::rewrite_url( (string) get_permalink( $post_id ) );
 		$post_title = get_the_title( $post_id );
 		$modified   = isset( $post->post_modified_gmt ) && is_scalar( $post->post_modified_gmt )
 			? (string) $post->post_modified_gmt
 			: '';
 		$post_date  = '' !== $modified && '0000-00-00 00:00:00' !== $modified
-			? mysql2date( 'r', $modified, false )
+			? $this->utc_date( $modified )
 			: get_post_time( 'r', true, $post_id );
 		$excerpt    = has_excerpt( $post_id )
 			? get_the_excerpt( $post_id )

@@ -1,14 +1,6 @@
 <?php
 declare(strict_types=1);
 
-namespace {
-	if ( ! function_exists( 'wp_generate_uuid4' ) ) {
-		function wp_generate_uuid4(): string {
-			return '00000000-0000-4000-8000-000000000001';
-		}
-	}
-}
-
 namespace Cybermaps\Tests\Core {
 
 use Cybermaps\Core\Container;
@@ -16,9 +8,15 @@ use Cybermaps\Core\Lifecycle;
 use Cybermaps\Core\Plugin;
 use PHPUnit\Framework\TestCase;
 
+require_once dirname( __DIR__ ) . '/mocks/configuration-database.php';
+
 final class PluginTest extends TestCase {
+	private mixed $previous_database;
+
 	protected function setUp(): void {
 		parent::setUp();
+		$this->previous_database = $GLOBALS['wpdb'] ?? null;
+		$GLOBALS['wpdb'] = new \CybermapsConfigurationDatabase();
 
 		$GLOBALS['cybermaps_mock_is_multisite'] = false;
 		$GLOBALS['cybermaps_mock_options']      = array(
@@ -32,6 +30,7 @@ final class PluginTest extends TestCase {
 
 	protected function tearDown(): void {
 		$this->reset_runtime_state();
+		$GLOBALS['wpdb'] = $this->previous_database;
 		parent::tearDown();
 	}
 
@@ -60,6 +59,29 @@ final class PluginTest extends TestCase {
 		$this->assertGreaterThan( 0, (int) ( $history[0]['url_count'] ?? 0 ) );
 		$this->assertIsArray( $pending );
 		$this->assertCount( 1, $pending );
+	}
+
+	public function test_family_invalidation_does_not_claim_complete_url_inventory(): void {
+		$method = new \ReflectionMethod( Plugin::class, 'edge_invalidation_plan' );
+		foreach ( array( 'discovery', 'sitemap', 'chunks' ) as $family ) {
+			$plan = $method->invoke( null, $family );
+			$this->assertFalse( $plan['url_scope_complete'] );
+		}
+	}
+
+	public function test_production_invalidation_deduplication_is_scoped_to_blog_family_and_generation(): void {
+		$process = proc_open(
+			array( PHP_BINARY, dirname( __DIR__ ) . '/fixtures/plugin-blog-invalidation.php' ),
+			array( 1 => array( 'pipe', 'w' ), 2 => array( 'pipe', 'w' ) ),
+			$pipes
+		);
+		$this->assertIsResource( $process );
+		$output = stream_get_contents( $pipes[1] );
+		$error = stream_get_contents( $pipes[2] );
+		fclose( $pipes[1] );
+		fclose( $pipes[2] );
+		$this->assertSame( 0, proc_close( $process ), $error );
+		$this->assertSame( array( 1, 1, 1, 2, 3 ), json_decode( $output, true, 512, JSON_THROW_ON_ERROR ) );
 	}
 
 	private function hook_count( string $hook ): int {

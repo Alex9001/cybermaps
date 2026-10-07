@@ -11,6 +11,8 @@ class DiscoveryCenterSanitizerTest extends TestCase {
 
 	protected function setUp(): void {
 		parent::setUp();
+		CacheManager::reset_runtime();
+		$GLOBALS['cybermaps_mock_transients'] = array();
 		$GLOBALS['cybermaps_mock_options'] = array(
 			'cybermaps_settings' => array(
 				'static_engine_mode' => 'off',
@@ -76,59 +78,22 @@ class DiscoveryCenterSanitizerTest extends TestCase {
 		$this->assertSame( array( 'page' => true ), $result['disabled'] );
 	}
 
-	public function test_nested_values_are_sanitized_clamped_and_unknown_fields_are_removed(): void {
+	public function test_legacy_scalar_values_are_sanitized_and_clamped(): void {
 		$result = $this->sanitize(
 			array(
 				'archetype' => 'blog<script>',
-				'intents' => array(
-					'freshness',
-					'<script>alert(1)</script>',
-					'social_proof',
-					'freshness',
-					array( 'media_reach' ),
-				),
-				'overrides' => array(
-					'post<script>' => '9.7',
-					'page'         => '-4',
-					'bad value'    => 'not-numeric',
-					'array'        => array( 0.5 ),
-				),
-				'type_intents' => array(
-					'Page<script>' => 'transactional',
-					'post'         => '<script>',
-					'product'      => 'Commercial',
-				),
-				'blueprint' => array(
-					'post<script>' => '1.4',
-					'page'         => '-3',
-					'tpm'          => '99999',
-					'bad'          => array( 1 ),
-				),
-				'unknown_html' => '<script>alert(1)</script>',
-				'unknown_array' => array( 'unsafe' => '<img src=x onerror=alert(1)>' ),
+				'overrides' => array( 'post<script>' => '9.7', 'page' => '-4' ),
+				'type_intents' => array( 'Page<script>' => 'transactional', 'post' => '<script>', 'product' => 'Commercial' ),
 			)
 		);
 
 		$this->assertSame( 'medium-business', $result['archetype'] );
-		$this->assertArrayNotHasKey( 'intents', $result );
-		$this->assertSame(
-			array(
-				'postscript' => 1,
-			),
-			$result['overrides']
-		);
+		$this->assertSame( array( 'postscript' => 1 ), $result['overrides'] );
 		$this->assertSame( array( 'page' => true ), $result['disabled'] );
 		$this->assertSame(
-			array(
-				'pagescript' => 'transactional',
-				'post'       => 'informational',
-				'product'    => 'transactional',
-			),
+			array( 'pagescript' => 'transactional', 'post' => 'informational', 'product' => 'transactional' ),
 			$result['type_intents']
 		);
-		$this->assertArrayNotHasKey( 'blueprint', $result );
-		$this->assertArrayNotHasKey( 'unknown_html', $result );
-		$this->assertArrayNotHasKey( 'unknown_array', $result );
 	}
 
 	public function test_legacy_tag_key_is_normalized_to_wordpress_taxonomy_slug(): void {

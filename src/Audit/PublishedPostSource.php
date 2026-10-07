@@ -21,24 +21,34 @@ final class PublishedPostSource {
 	 * rows cannot shift a later page past an unprocessed ID.
 	 *
 	 * @param array<int,string> $post_types Public post types to inspect.
+	 * @param callable|null    $before_load Checkpoint before hydration, given the candidate count.
 	 * @return \Generator<int,array<int,object>>
 	 */
-	public function batches( array $post_types ): \Generator {
+	public function batches( array $post_types, ?callable $before_load = null ): \Generator {
 		global $wpdb;
 		$post_types = $this->normalize_post_types( $post_types );
 		if ( empty( $post_types ) ) {
 			return;
 		}
 
+		if ( null !== $before_load ) {
+			$before_load( 0 );
+		}
 		$maximum_id = $this->maximum_id( $post_types );
 		$last_id    = 0;
 
 		while ( $last_id < $maximum_id ) {
+			if ( null !== $before_load ) {
+				$before_load( 0 );
+			}
 			$ids = $this->next_ids( $post_types, $last_id, $maximum_id );
 			if ( empty( $ids ) ) {
 				break;
 			}
 
+			if ( null !== $before_load ) {
+				$before_load( count( $ids ) );
+			}
 			$last_id = max( $ids );
 				yield $this->load_batch( $post_types, $ids );
 
@@ -55,9 +65,7 @@ final class PublishedPostSource {
 
 	/** @param array<int,string> $post_types @param array<int,int> $ids @return array<int,object> */
 	private function load_batch( array $post_types, array $ids ): array {
-		global $wpdb;
-		$wpdb->last_error = '';
-		$posts            = get_posts(
+		$posts = \Cybermaps\Sitemap\PublicationQuery::posts(
 			array(
 				'post_type'              => $post_types,
 				'post_status'            => 'publish',
@@ -69,9 +77,6 @@ final class PublishedPostSource {
 				'update_post_term_cache' => true,
 			)
 		);
-		if ( ! empty( $wpdb->last_error ) ) {
-			throw new \RuntimeException( esc_html__( 'Cybermaps could not load a content report batch.', 'cybermaps' ) );
-		}
 
 		$by_id = array();
 		foreach ( is_array( $posts ) ? $posts : array() as $post ) {

@@ -5,6 +5,8 @@ import http.cookiejar
 import json
 import re
 import sys
+if sys.flags.optimize:
+    raise SystemExit('Validation refuses optimized Python; unset PYTHONOPTIMIZE and omit -O/-OO.')
 import time
 import urllib.error
 import urllib.parse

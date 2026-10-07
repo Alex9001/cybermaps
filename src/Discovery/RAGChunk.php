@@ -15,10 +15,12 @@ class RAGChunk {
 	private AIContentSelector $selector;
 
 	private Chunker $chunker;
+	private bool $default_selector;
 
 	public function __construct( ?AIContentSelector $selector = null, ?Chunker $chunker = null ) {
-		$this->selector = $selector ?? new AIContentSelector();
-		$this->chunker  = $chunker ?? new Chunker();
+		$this->default_selector = null === $selector;
+		$this->selector         = $selector ?? new AIContentSelector();
+		$this->chunker          = $chunker ?? new Chunker();
 	}
 
 	/**
@@ -30,7 +32,13 @@ class RAGChunk {
 			return;
 		}
 
-		$settings = \Cybermaps\Core\ConfigurationStore::settings();
+		$generation = \Cybermaps\Core\CacheManager::get_generation( 'discovery', true );
+		try {
+			$this->require_current_generation( $generation );
+			$settings = \Cybermaps\Core\ConfigurationStore::publication_settings();
+		} catch ( \Cybermaps\Core\BuildUnavailableException $error ) {
+			PublicationRequestGuard::serve_unavailable( $error );
+		}
 		if (
 			empty( $settings['enable_discovery_hub'] )
 			|| empty( $settings['enable_rag_chunks'] )
@@ -45,6 +53,11 @@ class RAGChunk {
 
 		try {
 			$output = $this->get_content( $post_id );
+			$this->require_current_generation( $generation );
+		} catch ( PublicationSizeLimitException $error ) {
+			PublicationRequestGuard::serve_size_limit_error( $error );
+		} catch ( \Cybermaps\Core\BuildUnavailableException $error ) {
+			PublicationRequestGuard::serve_unavailable( $error );
 		} catch ( \Throwable ) {
 			\status_header( 500 );
 			\nocache_headers();
@@ -58,7 +71,12 @@ class RAGChunk {
 
 		// The body also depends on chunk and publication settings, so the post's
 		// modification date alone is not an authoritative Last-Modified value.
-		Integrity::send_headers( $output, 3600 );
+		try {
+			Integrity::send_headers( $output, HOUR_IN_SECONDS, null, $generation );
+			$this->require_current_generation( $generation );
+		} catch ( \Cybermaps\Core\BuildUnavailableException $error ) {
+			PublicationRequestGuard::serve_unavailable( $error );
+		}
 		\header( 'Content-Type: application/json; charset=utf-8' );
 
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
@@ -73,11 +91,20 @@ class RAGChunk {
 	 * @return array<string, mixed>|null
 	 */
 	public function get_payload( int $post_id ): ?array {
+		$generation = \Cybermaps\Core\CacheManager::get_generation( 'discovery', true );
+		$this->require_current_generation( $generation );
+		$settings = \Cybermaps\Core\ConfigurationStore::publication_settings();
+		\Cybermaps\Core\ConfigurationStore::publication_discovery();
+		if ( $this->default_selector ) {
+			$this->selector = new AIContentSelector( $settings );
+		}
 		if ( ! $this->selector->contains( $post_id ) ) {
+			$this->require_current_generation( $generation );
 			return null;
 		}
 
 		$chunks = $this->chunker->get_chunks( $post_id );
+		$this->require_current_generation( $generation );
 		return \is_array( $chunks ) && ! empty( $chunks ) ? $chunks : null;
 	}
 
@@ -85,8 +112,19 @@ class RAGChunk {
 	 * Serialize the same payload used by dynamic and static delivery.
 	 */
 	public function get_content( int $post_id ): ?string {
+		$generation = \Cybermaps\Core\CacheManager::get_generation( 'discovery', true );
+		$this->require_current_generation( $generation );
 		$payload = $this->get_payload( $post_id );
-		return $this->encode_payload( $payload );
+		$output  = $this->encode_payload( $payload );
+		$this->require_current_generation( $generation );
+		return $output;
+	}
+
+	/** Authorization, chunk construction and serialization share one privacy fence. */
+	private function require_current_generation( int $generation ): void {
+		if ( $generation < 0 || \Cybermaps\Core\CacheManager::get_generation( 'discovery', true ) !== $generation ) {
+			throw new \Cybermaps\Core\BuildUnavailableException( esc_html__( 'Cybermaps content changed during RAG publication. Please retry shortly.', 'cybermaps' ) );
+		}
 	}
 
 	/**
@@ -110,6 +148,7 @@ class RAGChunk {
 			return null;
 		}
 
+		PublicationSizeLimitException::require_value_capacity( $payload, 'chunks.json', Chunker::MAX_OUTPUT_BYTES );
 		$output = \wp_json_encode( $payload );
 		if ( ! \is_string( $output ) ) {
 			throw new \RuntimeException(
@@ -117,6 +156,7 @@ class RAGChunk {
 			);
 		}
 
+		PublicationSizeLimitException::require_capacity( strlen( $output ), 'chunks.json', Chunker::MAX_OUTPUT_BYTES );
 		return $output;
 	}
 

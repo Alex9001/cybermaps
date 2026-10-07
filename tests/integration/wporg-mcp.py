@@ -3,6 +3,8 @@
 import base64
 import json
 import sys
+if sys.flags.optimize:
+    raise SystemExit('Validation refuses optimized Python; unset PYTHONOPTIMIZE and omit -O/-OO.')
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError
 

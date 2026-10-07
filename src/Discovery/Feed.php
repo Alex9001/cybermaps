@@ -3,6 +3,7 @@ declare(strict_types=1);
 namespace Cybermaps\Discovery;
 
 use Cybermaps\SEO\PublicationEligibility;
+use Cybermaps\Content\VisibleTextExtractor;
 use Cybermaps\Sitemap\PriorityEngine;
 use Cybermaps\Sitemap\ProviderIdentity;
 
@@ -16,6 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Handles requests for /feed.json (JSON Feed v1.1).
  */
 class Feed {
+	public const MAX_OUTPUT_BYTES = 4 * 1024 * 1024;
 	/**
 	 * Bound candidate scanning when early posts are excluded from AI output.
 	 */
@@ -38,7 +40,12 @@ class Feed {
 			return;
 		}
 
-		$output = $this->get_json_content();
+		PublicationRequestGuard::enforce_active_route();
+		try {
+			$output = $this->get_json_content();
+		} catch ( PublicationSizeLimitException $error ) {
+			PublicationRequestGuard::serve_size_limit_error( $error );
+		}
 
 		Integrity::send_headers( $output, 15 * MINUTE_IN_SECONDS );
 		header( 'Content-Type: application/feed+json; charset=utf-8' );
@@ -78,7 +85,10 @@ class Feed {
 		);
 		$this->append_hubs( $feed, $settings );
 		$feed = apply_filters( 'cybermaps_ai_feed_data', $feed );
-		return \Cybermaps\Core\ProtocolOutput::json( $feed );
+		PublicationSizeLimitException::require_value_capacity( $feed, 'feed.json', self::MAX_OUTPUT_BYTES );
+		$output = \Cybermaps\Core\ProtocolOutput::json( $feed );
+		PublicationSizeLimitException::require_capacity( strlen( $output ), 'feed.json', self::MAX_OUTPUT_BYTES );
+		return $output;
 	}
 
 	/**
@@ -90,6 +100,7 @@ class Feed {
 		$item_count  = 0;
 		$page        = 1;
 		$scanned     = 0;
+		$item_bytes  = 0;
 		$eligibility = new PublicationEligibility( null, $settings );
 
 		$posts_published = PriorityEngine::calculate( ProviderIdentity::post_type( 'post' ) ) > 0;
@@ -120,7 +131,16 @@ class Feed {
 					continue;
 				}
 
-				$items[] = $this->build_item( $post, $full_content, $include_authors );
+				try {
+					$item = $this->build_item( $post, $full_content, $include_authors );
+					PublicationSizeLimitException::require_value_capacity( $item, 'feed.json', self::MAX_OUTPUT_BYTES );
+					$item_bytes += strlen( \Cybermaps\Core\ProtocolOutput::json( $item ) ) + 1;
+					PublicationSizeLimitException::require_capacity( $item_bytes, 'feed.json', self::MAX_OUTPUT_BYTES );
+				} catch ( PublicationSizeLimitException $error ) {
+					wp_reset_postdata();
+					throw $error;
+				}
+				$items[] = $item;
 				++$item_count;
 				if ( $item_count >= $limit ) {
 					break;
@@ -140,6 +160,9 @@ class Feed {
 	 * @return array<string,mixed>
 	 */
 	private function build_item( object $post, bool $full_content, bool $include_authors ): array {
+		if ( $full_content ) {
+			PublicationSizeLimitException::require_capacity( strlen( (string) ( $post->post_content ?? '' ) ), 'feed.json', self::MAX_OUTPUT_BYTES );
+		}
 		$post_id = (int) $post->ID;
 		$item    = array(
 			'id'             => (string) $post_id,
@@ -151,7 +174,8 @@ class Feed {
 		if ( $full_content ) {
 			$item['content_html'] = get_the_content( null, false, $post );
 		} else {
-			$item['summary'] = get_the_excerpt( $post );
+			$item['content_text'] = ( new VisibleTextExtractor() )->summary( $post );
+			$item['summary']      = $item['content_text'];
 		}
 		if ( $include_authors ) {
 			$item['authors'] = array(

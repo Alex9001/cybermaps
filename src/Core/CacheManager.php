@@ -37,37 +37,41 @@ final class CacheManager {
 
 	/** @var array<string,string> */
 	private const FIXED_KEYS = array(
-		'cybermaps_recent_logs_widget'       => 'analytics',
-		'cybermaps_recent_logs_full'         => 'analytics',
-		'cybermaps_log_cat_stats'            => 'analytics',
-		'cybermaps_log_url_stats'            => 'analytics',
-		'cybermaps_logs_kpis'                => 'analytics',
-		'cybermaps_logs_top_endpoints'       => 'analytics',
-		'cybermaps_logs_velocity'            => 'analytics',
-		'cybermaps_analytics_overview_v1'    => 'analytics',
-		'cybermaps_analytics_activity_v1'    => 'analytics',
-		'cybermaps_analytics_overview_v2'    => 'analytics',
-		'cybermaps_analytics_activity_v2'    => 'analytics',
-		'cybermaps_endpoint_observations_v1' => 'analytics',
-		'cybermaps_adp_manifest_v3_sync'     => 'discovery',
-		'cybermaps_ai_manifest_v1'           => 'discovery',
-		'cybermaps_tldr_cache'               => 'discovery',
-		'cybermaps_ai_publication_inventory' => 'discovery',
-		'cybermaps_rss_sitemap'              => 'sitemap',
-		'cybermaps_archive_month_inventory'  => 'sitemap',
-		'cybermaps_llms_cache'               => 'discovery',
-		'cybermaps_llms_full_cache'          => 'discovery',
-		'cybermaps_discovery_health'         => 'discovery',
-		'cybermaps_logs_dirty'               => 'analytics',
-		'cybermaps_logs_schema_repair'       => 'schema',
-		'cybermaps_default_settings'         => 'settings',
-		'cybermaps_kg_cache'                 => 'legacy',
-		'cybermaps_health_stats'             => 'legacy',
-		'cybermaps_moat_stats'               => 'legacy',
-		'cybermaps_knowledge_saturation'     => 'legacy',
-		'cybermaps_llms_yaml_cache'          => 'legacy',
-		'cybermaps_llms_full_yaml_cache'     => 'legacy',
-		'cybermaps_last_modified_fallback'   => 'legacy',
+		'cybermaps_recent_logs_widget'           => 'analytics',
+		'cybermaps_recent_logs_full'             => 'analytics',
+		'cybermaps_log_cat_stats'                => 'analytics',
+		'cybermaps_log_url_stats'                => 'analytics',
+		'cybermaps_logs_kpis'                    => 'analytics',
+		'cybermaps_logs_top_endpoints'           => 'analytics',
+		'cybermaps_logs_velocity'                => 'analytics',
+		'cybermaps_analytics_overview_v1'        => 'analytics',
+		'cybermaps_analytics_activity_v1'        => 'analytics',
+		'cybermaps_analytics_overview_v2'        => 'analytics',
+		'cybermaps_analytics_activity_v2'        => 'analytics',
+		'cybermaps_endpoint_observations_v1'     => 'analytics',
+		'cybermaps_adp_manifest_v3_sync'         => 'discovery',
+		'cybermaps_ai_manifest_v1'               => 'discovery',
+		'cybermaps_tldr_cache'                   => 'discovery',
+		\Cybermaps\Discovery\LLMSTLDR::CACHE_KEY => 'discovery',
+		'cybermaps_adp_updates_v4'               => 'discovery',
+		'cybermaps_ai_publication_inventory'     => 'discovery',
+		'cybermaps_rss_sitemap'                  => 'sitemap',
+		'cybermaps_archive_month_inventory'      => 'sitemap',
+		'cybermaps_llms_cache'                   => 'discovery',
+		'cybermaps_llms_full_cache'              => 'discovery',
+		'cybermaps_llms_cache_v4'                => 'discovery',
+		'cybermaps_llms_full_cache_v4'           => 'discovery',
+		'cybermaps_discovery_health'             => 'discovery',
+		'cybermaps_logs_dirty'                   => 'analytics',
+		'cybermaps_logs_schema_repair'           => 'schema',
+		'cybermaps_default_settings'             => 'settings',
+		'cybermaps_kg_cache'                     => 'legacy',
+		'cybermaps_health_stats'                 => 'legacy',
+		'cybermaps_moat_stats'                   => 'legacy',
+		'cybermaps_knowledge_saturation'         => 'legacy',
+		'cybermaps_llms_yaml_cache'              => 'legacy',
+		'cybermaps_llms_full_yaml_cache'         => 'legacy',
+		'cybermaps_last_modified_fallback'       => 'legacy',
 	);
 
 	/** @var array<string,int> */
@@ -75,6 +79,9 @@ final class CacheManager {
 
 	/** @var array<string,bool> */
 	private static array $invalidated = array();
+
+	/** @var array<string,bool> */
+	private static array $failed_invalidations = array();
 
 	/** @var array<string,bool> */
 	private static array $apcu_request_keys = array();
@@ -127,7 +134,7 @@ final class CacheManager {
 		int $generation
 	): bool {
 		$family = self::normalize_family( $family );
-		if ( self::get_generation( $family, true ) !== $generation ) {
+		if ( $generation < 0 || self::get_generation( $family, true ) !== $generation ) {
 			return false;
 		}
 
@@ -177,9 +184,13 @@ final class CacheManager {
 	 * @return mixed
 	 */
 	public static function get( string $key, string $family, ?bool &$found = null ) {
-		$family      = self::normalize_family( $family );
-		$backend_key = self::backend_key( $key, $family, self::get_generation( $family ) );
-		$found       = false;
+		$family     = self::normalize_family( $family );
+		$generation = self::get_generation( $family );
+		$found      = false;
+		if ( $generation < 0 ) {
+			return false;
+		}
+		$backend_key = self::backend_key( $key, $family, $generation );
 		$wrapped     = isset( self::$apcu_request_keys[ $backend_key ] )
 			? self::apcu_get( $backend_key, $family, $apcu_found )
 			: false;
@@ -278,17 +289,22 @@ final class CacheManager {
 		return self::acquire_lease( $guard, $scope, max( 1, $expiration ) );
 	}
 
-	/** Return the durable generation for one family. */
+	/** Return the durable generation, or -1 when it cannot be trusted. */
 	public static function get_generation( string $family, bool $refresh = false ): int {
 		$family      = self::normalize_family( $family );
 		$runtime_key = self::runtime_family_key( $family );
+		if ( isset( self::$failed_invalidations[ $runtime_key ] ) ) {
+			return -1;
+		}
 		if ( ! $refresh && isset( self::$generations[ $runtime_key ] ) ) {
 			return self::$generations[ $runtime_key ];
 		}
 
-		$generation = max( 0, AtomicOptionSequence::current( self::generation_option( $family ) ) );
-
-		self::$generations[ $runtime_key ] = $generation;
+		$generation = AtomicOptionSequence::current( self::generation_option( $family ) );
+		unset( self::$generations[ $runtime_key ] );
+		if ( $generation >= 0 ) {
+			self::$generations[ $runtime_key ] = $generation;
+		}
 		return $generation;
 	}
 
@@ -302,9 +318,11 @@ final class CacheManager {
 		if ( ! isset( self::$invalidated[ $runtime_key ] ) ) {
 			$next_generation = AtomicOptionSequence::increment( self::generation_option( $family ) );
 			if ( $next_generation < 1 ) {
-				self::$generations[ $runtime_key ] = self::get_generation( $family, true );
+				self::$failed_invalidations[ $runtime_key ] = true;
+				unset( self::$generations[ $runtime_key ] );
 				\do_action( 'cybermaps_cache_family_invalidation_failed', $family );
 			} else {
+				unset( self::$failed_invalidations[ $runtime_key ] );
 				self::$generations[ $runtime_key ] = $next_generation;
 				self::$invalidated[ $runtime_key ] = true;
 				$generation                        = $next_generation;
@@ -375,10 +393,11 @@ final class CacheManager {
 
 	/** Reset request-local memoization for tests and long-running workers. */
 	public static function reset_runtime(): void {
-		self::$generations       = array();
-		self::$invalidated       = array();
-		self::$apcu_request_keys = array();
-		self::$site_namespaces   = array();
+		self::$generations          = array();
+		self::$invalidated          = array();
+		self::$apcu_request_keys    = array();
+		self::$failed_invalidations = array();
+		self::$site_namespaces      = array();
 	}
 
 	private static function store_backend( string $key, array $wrapped, int $expiration, string $family ): bool {
@@ -733,13 +752,13 @@ final class CacheManager {
 		string $family,
 		int $generation
 	): bool {
-		if ( self::get_generation( $family, true ) !== $generation ) {
+		if ( $generation < 0 || self::get_generation( $family, true ) !== $generation ) {
 			self::delete_matching_legacy_value( $key, $value );
 			return false;
 		}
 
 		$stored = \set_transient( $key, $value, $expiration );
-		if ( self::get_generation( $family, true ) !== $generation ) {
+		if ( $generation < 0 || self::get_generation( $family, true ) !== $generation ) {
 			self::delete_matching_legacy_value( $key, $value );
 			return false;
 		}

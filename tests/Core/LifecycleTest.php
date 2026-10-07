@@ -171,6 +171,7 @@ final class LifecycleTest extends TestCase {
 				'wp_7_cybermaps_logs',
 				'wp_7_cybermaps_runtime_counters',
 				'wp_7_cybermaps_indexnow_queue',
+				'wp_7_cybermaps_static_ownership',
 				'wp_7_cybermaps_audit_findings',
 				'wp_7_cybermaps_audit_resources',
 				'wp_7_cybermaps_audit_runs',
@@ -279,6 +280,7 @@ final class LifecycleTest extends TestCase {
  * Minimal wpdb surface used by activation.
  */
 final class LifecycleWpdbStub {
+	public array $last_result = array();
 	public string $prefix = 'wp_';
 	public string $base_prefix = 'wp_';
 	public string $options = 'wp_options';

@@ -478,4 +478,16 @@ final class ShortcodeHandlerTest extends TestCase {
 
 		return $matches[1] ?? array();
 	}
+	public function test_exhausted_post_selection_reports_unavailable_instead_of_empty(): void {
+		$post = (object) array( 'ID' => 1, 'post_type' => 'post', 'post_status' => 'publish', 'post_password' => '' );
+		$GLOBALS['cybermaps_mock_wp_query_callback'] = static fn( array $args ): array => array_fill( 0, 250, $post );
+		$GLOBALS['cybermaps_mock_filter_callbacks']['cybermaps_publication_eligibility'] = array(
+			static fn( $decision ) => $decision->with_reasons( array( 'test_exclusion' ) ),
+		);
+		$output = ( new ShortcodeHandler() )->render_shortcode( array( 'only' => 'post' ) );
+		$this->assertStringContainsString( 'temporarily unavailable', $output );
+		$this->assertStringNotContainsString( 'No pages found', $output );
+		$this->assertCount( 20, $GLOBALS['cybermaps_mock_wp_query_args'] );
+	}
+
 }

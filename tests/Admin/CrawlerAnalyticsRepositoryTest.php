@@ -9,6 +9,7 @@ final class CrawlerAnalyticsRepositoryTest extends \WP_UnitTestCase {
 
 	protected function setUp(): void {
 		parent::setUp();
+		cybermaps_mock_reset_cache_runtime();
 		$GLOBALS['cybermaps_mock_transients'] = array();
 		$GLOBALS['cybermaps_mock_options'] = array();
 		$GLOBALS['cybermaps_mock_current_time_mysql'] = '2026-07-26 12:00:00';
@@ -86,7 +87,7 @@ final class CrawlerAnalyticsRepositoryTest extends \WP_UnitTestCase {
 
 		$this->assertSame( 8, $overview['summary']['php_endpoint_requests'] );
 		$this->assertArrayHasKey( 'unknown_clients', $overview );
-		$this->assertArrayHasKey( 'cybermaps_analytics_overview_v2', $GLOBALS['cybermaps_mock_transients'] );
+		$this->assertIsArray( \Cybermaps\Core\CacheManager::get( 'cybermaps_analytics_overview_v3', 'analytics' ) );
 	}
 
 	public function test_recent_activity_balances_request_kinds_and_orders_them_together(): void {
@@ -133,6 +134,7 @@ final class CrawlerAnalyticsRepositoryTest extends \WP_UnitTestCase {
 
 final class AnalyticsRepositoryWpdbStub {
 	public string $prefix = 'wp_';
+	public string $last_error = '';
 
 	/** @var string[] */
 	public array $prepared_queries = array();

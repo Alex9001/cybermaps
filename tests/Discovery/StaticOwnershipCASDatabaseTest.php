@@ -191,7 +191,7 @@ final class StaticOwnershipCASDatabaseTest extends \WP_UnitTestCase {
 			$GLOBALS['cybermaps_test_static_ownership_use_sql'] = true;
 
 			$store = new StaticOwnershipStore( $lock );
-			( new \ReflectionProperty( StaticOwnershipStore::class, 'schema_cache' ) )->setValue( $store, StaticOwnershipStore::SCHEMA_VERSION );
+			( new \ReflectionProperty( StaticOwnershipStore::class, 'schema_cache' ) )->setValue( $store, StaticOwnershipStore::SHARD_SCHEMA_VERSION );
 			( new \ReflectionProperty( StaticOwnershipStore::class, 'loaded_shards' ) )->setValue( $store, array( $shard => array() ) );
 			( new \ReflectionProperty( StaticOwnershipStore::class, 'shard_observations' ) )->setValue(
 				$store,
@@ -224,7 +224,7 @@ final class StaticOwnershipCASDatabaseTest extends \WP_UnitTestCase {
 		$GLOBALS['wpdb']                      = $database;
 
 		$store = new StaticOwnershipStore();
-		( new \ReflectionProperty( StaticOwnershipStore::class, 'schema_cache' ) )->setValue( $store, StaticOwnershipStore::SCHEMA_VERSION );
+		( new \ReflectionProperty( StaticOwnershipStore::class, 'schema_cache' ) )->setValue( $store, StaticOwnershipStore::SHARD_SCHEMA_VERSION );
 		( new \ReflectionProperty( StaticOwnershipStore::class, 'loaded_shards' ) )->setValue( $store, array( $shard => $base ) );
 		( new \ReflectionProperty( StaticOwnershipStore::class, 'shard_observations' ) )->setValue(
 			$store,
@@ -314,6 +314,7 @@ final class StaticOwnershipCASDatabaseTest extends \WP_UnitTestCase {
 		return new class( $rows ) {
 			public string $options    = 'wp_options';
 			public string $last_error = '';
+			public array $last_result = array();
 			/** @var array<string,string> */
 			public array $rows;
 			/** @var string[] */
@@ -358,6 +359,11 @@ final class StaticOwnershipCASDatabaseTest extends \WP_UnitTestCase {
 				$this->queries[] = $query;
 				if ( ! $this->fence_allows( $prepared ) ) {
 					return 0;
+				}
+				if ( \str_starts_with( $query, 'SELECT option_value' ) ) {
+					$option = (string) ( $args[1] ?? '' );
+					$this->last_result = isset( $this->rows[ $option ] ) ? array( (object) array( 'option_value' => $this->rows[ $option ] ) ) : array();
+					return count( $this->last_result );
 				}
 				if ( \str_starts_with( $query, 'INSERT IGNORE' ) ) {
 					$option = (string) ( $args[1] ?? '' );

@@ -20,10 +20,11 @@ final class PluginSeoAdapter implements SeoCompatibilityAdapter {
 			return null;
 		}
 
-		$noindex   = false;
-		$canonical = '';
-		$sources   = array();
-		$id        = $context->object_id;
+		$noindex    = false;
+		$canonical  = '';
+		$sources    = array();
+		$canonicals = array();
+		$id         = $context->object_id;
 
 		if ( $this->yoast_active() ) {
 			$yoast = $this->yoast_signals( $id );
@@ -31,7 +32,7 @@ final class PluginSeoAdapter implements SeoCompatibilityAdapter {
 				$noindex   = true;
 				$sources[] = 'yoast';
 			}
-			$canonical = $this->first_url( $canonical, $yoast['canonical'] );
+			$canonicals['yoast'] = $yoast['canonical'];
 		}
 
 		if ( $this->rank_math_active() ) {
@@ -40,7 +41,7 @@ final class PluginSeoAdapter implements SeoCompatibilityAdapter {
 				$noindex   = true;
 				$sources[] = 'rank_math';
 			}
-			$canonical = $this->first_url( $canonical, $rank_math['canonical'] );
+			$canonicals['rank_math'] = $rank_math['canonical'];
 		}
 
 		if ( $this->aioseo_active() ) {
@@ -49,9 +50,11 @@ final class PluginSeoAdapter implements SeoCompatibilityAdapter {
 				$noindex   = true;
 				$sources[] = 'aioseo';
 			}
-			$canonical = $this->first_url( $canonical, $aioseo['canonical'] );
+			$canonicals['aioseo'] = $aioseo['canonical'];
 		}
 
+		$canonicals = array_filter( $canonicals, static fn( string $url ): bool => '' !== $url );
+		$canonical  = empty( $canonicals ) ? '' : (string) reset( $canonicals );
 		if ( ! $noindex && '' === $canonical ) {
 			return null;
 		}
@@ -65,7 +68,10 @@ final class PluginSeoAdapter implements SeoCompatibilityAdapter {
 			'',
 			'',
 			'',
-			array( 'noindex_sources' => $sources )
+			array(
+				'noindex_sources'   => $sources,
+				'canonical_sources' => $canonicals,
+			)
 		);
 	}
 
@@ -268,13 +274,5 @@ final class PluginSeoAdapter implements SeoCompatibilityAdapter {
 				)
 			)
 		);
-	}
-
-	private function first_url( string $current, mixed $candidate ): string {
-		if ( '' !== $current || ! is_scalar( $candidate ) ) {
-			return $current;
-		}
-
-		return trim( (string) $candidate );
 	}
 }

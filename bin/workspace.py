@@ -12,9 +12,13 @@ import re
 import shutil
 import stat
 import subprocess
+import sys
 import tempfile
 import uuid
 import zipfile
+
+if sys.flags.optimize:
+    raise SystemExit('Validation refuses optimized Python; unset PYTHONOPTIMIZE and omit -O/-OO.')
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / '.cybermaps-workspace.json'

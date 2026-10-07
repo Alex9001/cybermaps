@@ -1,9 +1,9 @@
 {
     "plugin": "CYBERMAPS: XML Sitemaps & llms.txt",
-    "version": "8.0.1",
+    "version": "8.0.2",
     "php_min": "8.2",
     "wp_min": "7.1",
-    "generated_at": "2026-10-06T09:06:31+00:00",
+    "generated_at": "2026-10-07T09:48:56+00:00",
     "discovery_endpoints": [
         {
             "id": "manifest",
@@ -57,7 +57,7 @@
             "enabled_setting": "",
             "advertised": false,
             "throttle_tier": "cheap",
-            "static_bucket": "well_known"
+            "static_bucket": ""
         },
         {
             "id": "llms",
@@ -363,7 +363,7 @@
             "enabled_setting": "",
             "advertised": true,
             "throttle_tier": "cheap",
-            "static_bucket": "well_known"
+            "static_bucket": ""
         },
         {
             "id": "api_catalog",
@@ -399,7 +399,7 @@
             "enabled_setting": "enable_discovery_hub",
             "advertised": true,
             "throttle_tier": "cheap",
-            "static_bucket": "well_known"
+            "static_bucket": ""
         },
         {
             "id": "ai_catalog",
@@ -435,7 +435,7 @@
             "enabled_setting": "",
             "advertised": false,
             "throttle_tier": "cheap",
-            "static_bucket": "well_known"
+            "static_bucket": ""
         },
         {
             "id": "openapi",
@@ -739,7 +739,6 @@
         "{language}/llms-tldr.txt",
         "discovery/chunks/{post_id}.json",
         "ai.json",
-        "ai-discovery",
         "llms.txt",
         "llms-full.txt",
         "llms-tldr.txt",
@@ -753,12 +752,9 @@
         "ai-usage.json",
         "ai-actions.json",
         ".well-known/agent-skills/cybermaps-site-guide/SKILL.md",
-        ".well-known/agent-skills/index.json",
-        ".well-known/api-catalog",
-        ".well-known/ai-catalog.json",
-        ".well-known/mcp/server-card.json"
+        ".well-known/agent-skills/index.json"
     ],
-    "static_file_count": 27,
+    "static_file_count": 23,
     "static_engine": {
         "default": "well_known",
         "modes": [
@@ -768,7 +764,7 @@
             },
             {
                 "mode": "well_known",
-                "label": "Publishes the 9 registered core compatibility files; all other supported routes remain dynamic. (Default)"
+                "label": "Publishes the 5 registered core compatibility files; all other supported routes remain dynamic. (Default)"
             },
             {
                 "mode": "all",
@@ -777,8 +773,8 @@
         ],
         "target_counts": {
             "off": 0,
-            "well_known": 9,
-            "all": 19
+            "well_known": 5,
+            "all": 15
         },
         "multisite": "Dynamic delivery only; physical root files are disabled because sites share a web root."
     },
@@ -1248,12 +1244,12 @@
             "api_secret",
             "delete_data_on_uninstall"
         ],
-        "catalog_hash": "69b8eb7d5ad2440a5d3328339f3aa5b2d174a6ef1d6a46afe548c0ac9b4a3e20",
-        "schema_hash": "996ff17c94e2ecf7fa3220749bea0bf5cb81286ca5244abca7dad23aa380d7c7",
+        "catalog_hash": "bd0bdf348e399bf97d6d4793a6e988c9b8e83d6239ca119883ceae48720372a7",
+        "schema_hash": "077ae7312a1cd93ba204cd589c7264768b739078e80d48696987ba128ecf1bf5",
         "guide_path": "docs/ai-configuration.md",
         "guide_url": "https://cybermaps.dev/docs/ai-configuration/",
-        "schema_url": "https://cybermaps.dev/specs/ai-configuration/8.0.1/schema.json",
-        "catalog_url": "https://cybermaps.dev/specs/ai-configuration/8.0.1/catalog.json",
+        "schema_url": "https://cybermaps.dev/specs/ai-configuration/8.0.2/schema.json",
+        "catalog_url": "https://cybermaps.dev/specs/ai-configuration/8.0.2/catalog.json",
         "compatibility": {
             "format_version": "exact",
             "plugin_version": "warning_on_mismatch",
@@ -1303,6 +1299,13 @@
         },
         {
             "namespace": "Cybermaps\\Admin",
+            "class": "CloudflareOptionStore",
+            "fqcn": "Cybermaps\\Admin\\CloudflareOptionStore",
+            "file": "src/Admin/CloudflareOptionStore.php",
+            "summary": "Authoritative owned-option state, fenced within each SQL mutation."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
             "class": "CloudflareRuleManager",
             "fqcn": "Cybermaps\\Admin\\CloudflareRuleManager",
             "file": "src/Admin/CloudflareRuleManager.php",
@@ -1321,6 +1324,13 @@
             "fqcn": "Cybermaps\\Admin\\CompetingSeoPlugin",
             "file": "src/Admin/CompetingSeoPlugin.php",
             "summary": "Detects common SEO plugins that may publish competing XML sitemaps."
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "ConfigurationMutationStore",
+            "fqcn": "Cybermaps\\Admin\\ConfigurationMutationStore",
+            "file": "src/Admin/ConfigurationMutationStore.php",
+            "summary": "Conflict-detecting import persistence; deliberately not a multi-root lock."
         },
         {
             "namespace": "Cybermaps\\Admin",
@@ -1412,6 +1422,13 @@
             "fqcn": "Cybermaps\\Admin\\IdentityHub",
             "file": "src/Admin/IdentityHub.php",
             "summary": "Identity Hub for Managing Business Metadata"
+        },
+        {
+            "namespace": "Cybermaps\\Admin",
+            "class": "IdentityPageSelector",
+            "fqcn": "Cybermaps\\Admin\\IdentityPageSelector",
+            "file": "src/Admin/IdentityPageSelector.php",
+            "summary": "Bounded public-page selection for automatic identity catalogs."
         },
         {
             "namespace": "Cybermaps\\Admin",
@@ -1527,6 +1544,13 @@
         },
         {
             "namespace": "Cybermaps\\Admin\\Settings\\Sanitizers",
+            "class": "IdentitySubmission",
+            "fqcn": "Cybermaps\\Admin\\Settings\\Sanitizers\\IdentitySubmission",
+            "file": "src/Admin/Settings/Sanitizers/IdentitySubmission.php",
+            "summary": "Exact bounded identity transport, separate from legacy read normalization."
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\Settings\\Sanitizers",
             "class": "RobotsManagerSanitizer",
             "fqcn": "Cybermaps\\Admin\\Settings\\Sanitizers\\RobotsManagerSanitizer",
             "file": "src/Admin/Settings/Sanitizers/RobotsManagerSanitizer.php",
@@ -1566,6 +1590,13 @@
             "fqcn": "Cybermaps\\Admin\\Settings\\Sanitizers\\SettingsSitemapNormalizer",
             "file": "src/Admin/Settings/Sanitizers/SettingsSitemapNormalizer.php",
             "summary": ""
+        },
+        {
+            "namespace": "Cybermaps\\Admin\\Settings\\Sanitizers",
+            "class": "SettingsSubmission",
+            "fqcn": "Cybermaps\\Admin\\Settings\\Sanitizers\\SettingsSubmission",
+            "file": "src/Admin/Settings/Sanitizers/SettingsSubmission.php",
+            "summary": "Bounded transport validation for the schemas owned by option sanitizers."
         },
         {
             "namespace": "Cybermaps\\Admin\\Settings",
@@ -1786,6 +1817,13 @@
         },
         {
             "namespace": "Cybermaps\\Audit",
+            "class": "AuditRuntimeBudget",
+            "fqcn": "Cybermaps\\Audit\\AuditRuntimeBudget",
+            "file": "src/Audit/AuditRuntimeBudget.php",
+            "summary": "Cooperative fallback when a cache drop-in cannot release request-local data."
+        },
+        {
+            "namespace": "Cybermaps\\Audit",
             "class": "ContentAuditEvaluator",
             "fqcn": "Cybermaps\\Audit\\ContentAuditEvaluator",
             "file": "src/Audit/ContentAuditEvaluator.php",
@@ -1825,6 +1863,13 @@
             "fqcn": "Cybermaps\\Audit\\ReportPresentation",
             "file": "src/Audit/ReportPresentation.php",
             "summary": "Shared branding and visual themes for client-facing reports."
+        },
+        {
+            "namespace": "Cybermaps\\Audit",
+            "class": "StoredTemplateSource",
+            "fqcn": "Cybermaps\\Audit\\StoredTemplateSource",
+            "file": "src/Audit/StoredTemplateSource.php",
+            "summary": "Bounded raw template inventory; never builds or renders WordPress blocks."
         },
         {
             "namespace": "Cybermaps",
@@ -1867,13 +1912,6 @@
             "fqcn": "Cybermaps\\Core\\AtomicMinuteCounter",
             "file": "src/Core/AtomicMinuteCounter.php",
             "summary": "Shared atomic per-minute counter with production-safe backends."
-        },
-        {
-            "namespace": "Cybermaps\\Core",
-            "class": "AtomicOneTimeStateStore",
-            "fqcn": "Cybermaps\\Core\\AtomicOneTimeStateStore",
-            "file": "src/Core/AtomicOneTimeStateStore.php",
-            "summary": "DB-authoritative, single-consume state records stored in non-autoloaded options."
         },
         {
             "namespace": "Cybermaps\\Core",
@@ -2035,6 +2073,13 @@
             "fqcn": "Cybermaps\\Core\\PublicationPostTypes",
             "file": "src/Core/PublicationPostTypes.php",
             "summary": "Canonical inventory of public post types that represent publishable pages."
+        },
+        {
+            "namespace": "Cybermaps\\Core",
+            "class": "RawOptionStore",
+            "fqcn": "Cybermaps\\Core\\RawOptionStore",
+            "file": "src/Core/RawOptionStore.php",
+            "summary": "Internal exact-byte option primitives. No option filters or cache reads."
         },
         {
             "namespace": "Cybermaps\\Core",
@@ -2395,6 +2440,13 @@
         },
         {
             "namespace": "Cybermaps\\Discovery",
+            "class": "PublicationCacheLease",
+            "fqcn": "Cybermaps\\Discovery\\PublicationCacheLease",
+            "file": "src/Discovery/PublicationCacheLease.php",
+            "summary": "Preserves caller entries and never deletes from a persistent backend."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
             "class": "PublicationCachePolicy",
             "fqcn": "Cybermaps\\Discovery\\PublicationCachePolicy",
             "file": "src/Discovery/PublicationCachePolicy.php",
@@ -2496,21 +2548,42 @@
             "class": "StaticHeaderManifest",
             "fqcn": "Cybermaps\\Discovery\\StaticHeaderManifest",
             "file": "src/Discovery/StaticHeaderManifest.php",
-            "summary": "Describes headers a deployment must attach when it serves a Cybermaps static"
+            "summary": "Observes header expectations for enabled static publication candidates."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "StaticOwnershipLegacyReader",
+            "fqcn": "Cybermaps\\Discovery\\StaticOwnershipLegacyReader",
+            "file": "src/Discovery/StaticOwnershipLegacyReader.php",
+            "summary": "Bounded decoder for the retired ownership option's serialized array contract."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "StaticOwnershipMigration",
+            "fqcn": "Cybermaps\\Discovery\\StaticOwnershipMigration",
+            "file": "src/Discovery/StaticOwnershipMigration.php",
+            "summary": "Bounded, restartable copy of schema-zero/two options into ownership rows."
         },
         {
             "namespace": "Cybermaps\\Discovery",
             "class": "StaticOwnershipStore",
             "fqcn": "Cybermaps\\Discovery\\StaticOwnershipStore",
             "file": "src/Discovery/StaticOwnershipStore.php",
-            "summary": "Sharded ownership inventory for generated static files."
+            "summary": "Per-path ownership inventory with bounded legacy shard migration."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
+            "class": "StaticOwnershipTable",
+            "fqcn": "Cybermaps\\Discovery\\StaticOwnershipTable",
+            "file": "src/Discovery/StaticOwnershipTable.php",
+            "summary": "Exact per-path ownership rows behind the store's prepared, fenced SQL sink."
         },
         {
             "namespace": "Cybermaps\\Discovery",
             "class": "StaticSyncRunner",
             "fqcn": "Cybermaps\\Discovery\\StaticSyncRunner",
             "file": "src/Discovery/StaticSyncRunner.php",
-            "summary": "Phase-and-cursor static synchronization runner (schema 4)."
+            "summary": "Phase-and-cursor static synchronization runner (schema 6)."
         },
         {
             "namespace": "Cybermaps\\Discovery",
@@ -2773,6 +2846,13 @@
         },
         {
             "namespace": "Cybermaps\\Sitemap",
+            "class": "PublicationQuery",
+            "fqcn": "Cybermaps\\Sitemap\\PublicationQuery",
+            "file": "src/Sitemap/PublicationQuery.php",
+            "summary": "Authoritative publication reads must distinguish SQL failure from empty data."
+        },
+        {
+            "namespace": "Cybermaps\\Sitemap",
             "class": "PublicationRouteSlugs",
             "fqcn": "Cybermaps\\Sitemap\\PublicationRouteSlugs",
             "file": "src/Sitemap/PublicationRouteSlugs.php",
@@ -2856,7 +2936,7 @@
             "summary": "Small sitemap XML writer with a native XMLWriter fast path."
         }
     ],
-    "class_count": 227,
+    "class_count": 239,
     "publication_limits": {
         "llms_summary_bytes": 4194303,
         "llms_full_bytes": 33554431,
@@ -2899,7 +2979,7 @@
             "media_type": "application/json",
             "label": "Agentic Resource Catalog",
             "condition": "enable_discovery_hub",
-            "static_mode": "well_known"
+            "static_mode": "dynamic"
         },
         {
             "path": "/.well-known/api-catalog",
@@ -2907,7 +2987,7 @@
             "media_type": "application/linkset+json",
             "label": "API Catalog",
             "condition": "Publication Hub and publication configuration",
-            "static_mode": "well_known"
+            "static_mode": "dynamic"
         },
         {
             "path": "/.well-known/mcp/server-card.json",
@@ -2915,7 +2995,7 @@
             "media_type": "application/mcp-server-card+json",
             "label": "MCP Server Card Compatibility URL",
             "condition": "Publication Hub and publication configuration",
-            "static_mode": "well_known"
+            "static_mode": "dynamic"
         },
         {
             "path": "/ai-actions.json",
@@ -2939,7 +3019,7 @@
             "media_type": "application/json",
             "label": "Discovery Index",
             "condition": "Publication Hub and publication configuration",
-            "static_mode": "well_known"
+            "static_mode": "dynamic"
         },
         {
             "path": "/ai-discovery.json",

@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Cybermaps\Core;
 
+use Cybermaps\SEO\PublicationEligibility;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -27,9 +29,10 @@ final class IdentityEntityBuilder {
 	 * @param array<string, mixed> $data          Sanitized identity settings.
 	 * @param bool                 $fallback_name Use the site title when no
 	 *                                            operator-authored name exists.
+	 * @param string               $channel       Eligibility channel for derived page catalogs.
 	 * @return array<string, mixed>
 	 */
-	public static function build( array $data, bool $fallback_name = false ): array {
+	public static function build( array $data, bool $fallback_name = false, string $channel = PublicationEligibility::SCHEMA ): array {
 		$type        = SchemaRegistry::get_entity_type( $data );
 		$name        = self::text_value( $data['name'] ?? '' );
 		$description = self::textarea_value( $data['description'] ?? '' );
@@ -54,7 +57,7 @@ final class IdentityEntityBuilder {
 		}
 		self::add_social_profiles( $entity, $data );
 		self::add_contact_points( $entity, $data );
-		self::add_catalogs( $entity, $data );
+		self::add_catalogs( $entity, $data, $channel );
 
 		return $entity;
 	}
@@ -193,7 +196,7 @@ final class IdentityEntityBuilder {
 		}
 	}
 
-	private static function add_catalogs( array &$entity, array $data ): void {
+	private static function add_catalogs( array &$entity, array $data, string $channel ): void {
 		$catalogs        = array();
 		$offer_count     = 0;
 		$stored_catalogs = $data['catalogs'] ?? array();
@@ -212,7 +215,7 @@ final class IdentityEntityBuilder {
 				self::MAX_OFFERS_PER_CATALOG,
 				self::MAX_OFFERS_TOTAL - $offer_count
 			);
-			$items       = self::catalog_items( $catalog, $mode, $item_type, $offer_limit );
+			$items       = self::catalog_items( $catalog, $mode, $item_type, $offer_limit, $channel );
 
 			if ( empty( $items ) ) {
 				continue;
@@ -264,14 +267,14 @@ final class IdentityEntityBuilder {
 		return $abbreviation . ' ' . $open . '-' . $close;
 	}
 
-	private static function catalog_items( array $catalog, string $mode, string $item_type, int $limit ): array {
-		return 'auto' === $mode ? self::automatic_catalog_items( $catalog, $item_type, $limit ) : self::manual_catalog_items( $catalog, $mode, $item_type, $limit );
+	private static function catalog_items( array $catalog, string $mode, string $item_type, int $limit, string $channel ): array {
+		return 'auto' === $mode ? self::automatic_catalog_items( $catalog, $item_type, $limit, $channel ) : self::manual_catalog_items( $catalog, $mode, $item_type, $limit );
 	}
 
-	private static function automatic_catalog_items( array $catalog, string $item_type, int $limit ): array {
+	private static function automatic_catalog_items( array $catalog, string $item_type, int $limit, string $channel ): array {
 		$parent_id = self::positive_id( $catalog['parent_id'] ?? 0 );
 		$parent    = $parent_id > 0 ? get_post( $parent_id ) : null;
-		if ( ! self::is_public_page( $parent ) ) {
+		if ( ! self::is_public_page( $parent, $channel ) ) {
 			return array();
 		}
 		$children = get_pages(
@@ -285,7 +288,7 @@ final class IdentityEntityBuilder {
 		);
 		$items    = array();
 		foreach ( is_array( $children ) ? array_slice( $children, 0, $limit ) : array() as $child ) {
-			$offer = self::catalog_offer( $child, $item_type );
+			$offer = self::catalog_offer( $child, $item_type, $channel );
 			if ( null !== $offer ) {
 				$items[] = $offer;
 			}
@@ -293,8 +296,8 @@ final class IdentityEntityBuilder {
 		return $items;
 	}
 
-	private static function catalog_offer( mixed $child, string $item_type ): ?array {
-		if ( ! self::is_public_page( $child ) ) {
+	private static function catalog_offer( mixed $child, string $item_type, string $channel ): ?array {
+		if ( ! self::is_public_page( $child, $channel ) ) {
 			return null;
 		}
 		$name      = self::text_value( $child->post_title ?? '' );
@@ -402,11 +405,13 @@ final class IdentityEntityBuilder {
 		);
 	}
 
-	private static function is_public_page( mixed $post ): bool {
+	private static function is_public_page( mixed $post, string $channel ): bool {
 		return is_object( $post )
 			&& ! empty( $post->ID )
 			&& 'page' === (string) ( $post->post_type ?? '' )
 			&& 'publish' === (string) ( $post->post_status ?? '' )
-			&& '' === (string) ( $post->post_password ?? '' );
+			&& '' === (string) ( $post->post_password ?? '' )
+			&& in_array( $channel, array( PublicationEligibility::AI, PublicationEligibility::SCHEMA ), true )
+			&& ( new PublicationEligibility() )->post( $post, $channel )->indexable;
 	}
 }

@@ -682,6 +682,8 @@ class SchemaTest extends \WP_UnitTestCase {
 	}
 
 	public function test_automated_catalog_emits_only_published_public_child_pages_with_real_urls(): void {
+		$GLOBALS['cybermaps_mock_post_types'] = array( 'page' );
+		$GLOBALS['cybermaps_mock_post_type_objects']['page'] = (object) array( 'name' => 'page', 'public' => true, 'publicly_queryable' => true );
 		$parent = (object) array(
 			'ID'            => 100,
 			'post_type'     => 'page',

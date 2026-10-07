@@ -310,6 +310,7 @@ final class OrchestratorInventoryTest extends \WP_UnitTestCase {
 	 * @param array<string, ProviderInterface> $providers
 	 */
 	private function inject_providers( Orchestrator $orchestrator, array $providers ): void {
+		( new \ReflectionMethod( Orchestrator::class, 'begin_publication' ) )->invoke( $orchestrator );
 		$property = new \ReflectionProperty( Orchestrator::class, 'providers' );
 		$property->setValue( $orchestrator, $providers );
 	}

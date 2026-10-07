@@ -24,6 +24,7 @@ class DiscoveryStatus {
 	private const MAX_CONSECUTIVE_TRANSPORT_FAILURES = 2;
 	private const API_CATALOG_PROFILE                = 'https://www.rfc-editor.org/info/rfc9727';
 	private const MAX_PROTOCOL_PROBES                = 3;
+	private const MAX_PROTOCOL_RESPONSE_BYTES        = 1024;
 
 	private int $protocol_probes = 0;
 
@@ -826,8 +827,10 @@ class DiscoveryStatus {
 				'timeout'     => self::REQUEST_TIMEOUT,
 				'redirection' => 3,
 				'headers'     => array(
-					'Accept' => $accept,
+					'Accept'                 => $accept,
+					'X-Cybermaps-Diagnostic' => '1',
 				),
+				'user-agent'  => 'Cybermaps/' . CYBERMAPS_VERSION . ' public-endpoint-health',
 			)
 		);
 		$diagnostics['head'] = is_wp_error( $head ) ? 'unverified' : (int) wp_remote_retrieve_response_code( $head );
@@ -850,19 +853,22 @@ class DiscoveryStatus {
 	}
 
 	private function probe_options_status( string $url ): int|string {
-		if ( ! function_exists( 'wp_remote_request' ) ) {
+		if ( ! function_exists( 'wp_safe_remote_request' ) ) {
 			return 'unverified';
 		}
-		$options = wp_remote_request(
+		$options = wp_safe_remote_request(
 			$url,
 			array(
-				'method'      => 'OPTIONS',
-				'timeout'     => self::REQUEST_TIMEOUT,
-				'redirection' => 3,
-				'headers'     => array(
+				'method'              => 'OPTIONS',
+				'timeout'             => self::REQUEST_TIMEOUT,
+				'redirection'         => 3,
+				'limit_response_size' => self::MAX_PROTOCOL_RESPONSE_BYTES,
+				'headers'             => array(
 					'Origin'                        => home_url(),
 					'Access-Control-Request-Method' => 'GET',
+					'X-Cybermaps-Diagnostic'        => '1',
 				),
+				'user-agent'          => 'Cybermaps/' . CYBERMAPS_VERSION . ' public-endpoint-health',
 			)
 		);
 		return is_wp_error( $options ) ? 'unverified' : (int) wp_remote_retrieve_response_code( $options );
@@ -875,12 +881,15 @@ class DiscoveryStatus {
 		$conditional = wp_safe_remote_get(
 			$url,
 			array(
-				'timeout'     => self::REQUEST_TIMEOUT,
-				'redirection' => 3,
-				'headers'     => array(
-					'If-None-Match' => $etag,
-					'Accept'        => $accept,
+				'timeout'             => self::REQUEST_TIMEOUT,
+				'redirection'         => 3,
+				'limit_response_size' => self::MAX_PROTOCOL_RESPONSE_BYTES,
+				'headers'             => array(
+					'If-None-Match'          => $etag,
+					'Accept'                 => $accept,
+					'X-Cybermaps-Diagnostic' => '1',
 				),
+				'user-agent'          => 'Cybermaps/' . CYBERMAPS_VERSION . ' public-endpoint-health',
 			)
 		);
 		return is_wp_error( $conditional ) ? 'unverified' : (int) wp_remote_retrieve_response_code( $conditional );
@@ -1188,10 +1197,16 @@ class DiscoveryStatus {
 	 * Check a Link header for a relation token.
 	 */
 	private function has_link_relation( string $header, string $relation ): bool {
-		return 1 === preg_match(
-			'/(?:^|[;,]\s*)rel\s*=\s*(?:"[^"]*\b' . preg_quote( $relation, '/' ) . '\b[^"]*"|' . preg_quote( $relation, '/' ) . '(?:\s*;|\s*,|\s*$))/i',
-			$header
-		);
+		$matches = array();
+		preg_match_all( '/(?:^|[;,])\s*rel\s*=\s*(?:"([^"]*)"|([^\s;,]+))(?=\s*(?:;|,|$))/i', $header, $matches, PREG_SET_ORDER );
+		foreach ( $matches as $match ) {
+			$value  = '' !== $match[1] ? $match[1] : ( $match[2] ?? '' );
+			$tokens = preg_split( '/\s+/', strtolower( trim( $value ) ) );
+			if ( is_array( $tokens ) && in_array( strtolower( $relation ), $tokens, true ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -1270,7 +1285,7 @@ class DiscoveryStatus {
 
 		$notices[] = array(
 			'level'   => 'info',
-			'message' => __( 'Cybermaps materializes enabled canonical discovery fallback bodies in compatibility mode. Dynamic delivery remains preferred, while Debugging and optional edge rules report or repair headers when a server serves physical files before WordPress.', 'cybermaps' ),
+			'message' => __( 'Core discovery mode publishes five files: /ai.json, /ai-usage.json, /ai-actions.json, the canonical Site Guide SKILL.md, and its Agent Skills index. API Catalog, AI Catalog, MCP Server Card, and /ai-discovery remain dynamic in every mode and must reach WordPress. Debugging checks delivery and headers; Advanced offers optional scoped Cloudflare response rules.', 'cybermaps' ),
 		);
 
 		return $notices;

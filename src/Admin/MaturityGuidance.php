@@ -95,7 +95,7 @@ final class MaturityGuidance {
 			),
 			'deployment'         => array(
 				'badge' => __( 'Deployment required', 'cybermaps' ),
-				'text'  => __( 'Cybermaps materializes ownership-safe canonical fallback bodies when the origin bypasses WordPress. Debugging reports header conformance, and Advanced can optionally install scoped Cloudflare response rules.', 'cybermaps' ),
+				'text'  => __( 'Core discovery mode publishes five files: /ai.json, /ai-usage.json, /ai-actions.json, the canonical Site Guide SKILL.md, and its Agent Skills index. API Catalog, AI Catalog, MCP Server Card, and /ai-discovery remain dynamic in every mode and must reach WordPress. Debugging checks delivery and headers; Advanced offers optional scoped Cloudflare response rules.', 'cybermaps' ),
 				'links' => array(),
 			),
 		);

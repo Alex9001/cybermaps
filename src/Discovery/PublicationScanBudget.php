@@ -50,6 +50,7 @@ final class PublicationScanBudget {
 		if ( ( hrtime( true ) / 1e9 ) - $this->started >= self::MAX_SECONDS ) {
 			throw new BuildUnavailableException( esc_html__( 'Cybermaps stopped publication at its generation time limit. No partial publication was produced.', 'cybermaps' ) );
 		}
+		PublicationSizeLimitException::require_capacity( 2097152, 'publication-inventory', 2097152 );
 		CacheFill::heartbeat();
 	}
 }

@@ -124,6 +124,8 @@ class SettingsAssets {
 					'failed'                => __( 'The optimization request did not complete.', 'cybermaps' ),
 					'verifying'             => __( 'Cloudflare rules were updated. Verifying each public resource from this browser…', 'cybermaps' ),
 					'network'               => __( 'The browser could not reach this resource.', 'cybermaps' ),
+					'verificationTimeout'   => __( 'The public response timed out.', 'cybermaps' ),
+					'responseLimit'         => __( 'The public response cannot be read within the safe size limit.', 'cybermaps' ),
 					'cloudflareDetected'    => __( 'Cloudflare proxy traffic was detected. Cloudflare rule tools are available.', 'cybermaps' ),
 					'cloudflareConfirmed'   => __( 'Manual Cloudflare confirmation accepted for this page. Authorization and public verification are still required.', 'cybermaps' ),
 					'cloudflareMissing'     => __( 'Cloudflare proxy traffic was not detected. These controls remain disabled unless you explicitly confirm that this hostname is orange-cloud proxied.', 'cybermaps' ),

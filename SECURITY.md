@@ -7,8 +7,8 @@ latest available Cybermaps release and a supported WordPress and PHP version.
 
 | Version | Supported |
 |---|---|
-| 6.x | Yes |
-| 5.x and earlier | No |
+| 8.x | Yes |
+| 7.x and earlier | No |
 
 ## Reporting a vulnerability
 

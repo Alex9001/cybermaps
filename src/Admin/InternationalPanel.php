@@ -126,7 +126,7 @@ class InternationalPanel {
 			return new \WP_Error( 'cybermaps_translation_forbidden', __( 'This post cannot be updated through the translation panel.', 'cybermaps' ), array( 'status' => 403 ) );
 		}
 		if ( ! $this->apply_relationship_action( $post_id, $action, $group_id ) ) {
-			return new \WP_Error( 'cybermaps_translation_invalid', __( 'The translation relationship action could not be applied.', 'cybermaps' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'cybermaps_translation_invalid', self::action_failure_message(), array( 'status' => 400 ) );
 		}
 
 		return new \WP_REST_Response( $this->get_editor_state( $post_id ) );
@@ -191,7 +191,16 @@ class InternationalPanel {
 		$lang   = self::configured_language( $settings );
 		$action = self::relationship_action( $group_id, $unlink, $create, $resume );
 
-		$this->apply_relationship_action( (int) $post_id, $action, $group_id, $lang );
+		if ( '' !== $action && ! $this->apply_relationship_action( (int) $post_id, $action, $group_id, $lang ) ) {
+			wp_die(
+				esc_html( self::action_failure_message() ),
+				'',
+				array(
+					'response'  => 500,
+					'back_link' => true,
+				)
+			);
+		}
 	}
 
 	/**
@@ -262,41 +271,67 @@ class InternationalPanel {
 	 */
 	private function apply_relationship_action( int $post_id, string $action, int $group_id = 0, string $lang = '' ): bool {
 		if ( '' === $lang ) {
-			$settings            = \Cybermaps\Core\ConfigurationStore::settings();
-			$configured_language = $settings['site_language'] ?? '';
-			$lang                = \Cybermaps\Core\TranslationHelper::normalize_hreflang(
-				is_scalar( $configured_language ) ? (string) $configured_language : ''
-			);
-			if ( '' === $lang ) {
-				$lang = \Cybermaps\Core\TranslationHelper::normalize_hreflang( (string) get_bloginfo( 'language' ) );
-			}
+			$lang = self::configured_language( \Cybermaps\Core\ConfigurationStore::settings() );
 		}
 
 		if ( 'unlink' === $action ) {
-			update_post_meta(
-				$post_id,
-				\Cybermaps\Integration\TranslationManager::SYNC_DISABLED_META,
-				'1'
-			);
-			$this->registry->delete_relationship( get_current_blog_id(), $post_id, 'post' );
-			return true;
+			if ( ! self::set_sync_paused( $post_id, true ) ) {
+				return false;
+			}
+			// Keep the verified pause if unlink fails; never undo another writer.
+			return $this->registry->delete_relationship( get_current_blog_id(), $post_id, 'post' );
 		}
 		if ( in_array( $action, array( 'assign', 'create' ), true ) && '' !== $lang && ( 'create' === $action || $group_id > 0 ) ) {
-			delete_post_meta(
-				$post_id,
-				\Cybermaps\Integration\TranslationManager::SYNC_DISABLED_META
-			);
-			$this->registry->update_relationship( $group_id, get_current_blog_id(), $post_id, $lang, 'post' );
-			return true;
+			if ( $this->registry->update_relationship( $group_id, get_current_blog_id(), $post_id, $lang, 'post' ) < 1 ) {
+				return false;
+			}
+			return self::set_sync_paused( $post_id, false );
 		}
 		if ( 'resume' === $action ) {
-			delete_post_meta(
-				$post_id,
-				\Cybermaps\Integration\TranslationManager::SYNC_DISABLED_META
-			);
-			return true;
+			return self::set_sync_paused( $post_id, false );
 		}
 
 		return false;
+	}
+
+	/** Verify the requested metadata state, including legitimate no-change writes. */
+	private static function set_sync_paused( int $post_id, bool $paused ): bool {
+		$before = self::read_sync_pause( $post_id );
+		if ( null === $before ) {
+			return false;
+		}
+		if ( self::sync_pause_matches( $before, $paused ) ) {
+			return true;
+		}
+		$key = \Cybermaps\Integration\TranslationManager::SYNC_DISABLED_META;
+		if ( $paused ) {
+			update_post_meta( $post_id, $key, '1' );
+		} else {
+			delete_post_meta( $post_id, $key );
+		}
+		$after = self::read_sync_pause( $post_id );
+		return null !== $after && self::sync_pause_matches( $after, $paused );
+	}
+
+	/** @return array<mixed>|null Fresh metadata values, or null on a failed read. */
+	private static function read_sync_pause( int $post_id ): ?array {
+		global $wpdb;
+		if ( ! is_object( $wpdb ) || ! property_exists( $wpdb, 'last_error' ) ) {
+			return null;
+		}
+		wp_cache_delete( $post_id, 'post_meta' );
+		$wpdb->last_error = '';
+		$values           = get_post_meta( $post_id, \Cybermaps\Integration\TranslationManager::SYNC_DISABLED_META, false );
+		return '' === $wpdb->last_error && is_array( $values ) ? $values : null;
+	}
+
+	/** @param array<mixed> $values Stored metadata values. */
+	private static function sync_pause_matches( array $values, bool $paused ): bool {
+		return $paused ? isset( $values[0] ) && '1' === $values[0] : array() === $values;
+	}
+
+	/** Describe partial persistence without promising rollback of saved changes. */
+	private static function action_failure_message(): string {
+		return __( 'The translation action did not complete. The post, relationship, or sync-pause changes may already have been saved. Reload this post to check its current state before retrying.', 'cybermaps' );
 	}
 }

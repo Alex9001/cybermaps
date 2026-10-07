@@ -16,6 +16,22 @@ final class OrchestratorRequestContractTest extends TestCase {
 		);
 	}
 
+	public function test_sitemap_type_rejects_non_string_and_oversized_query_values(): void {
+		$orchestrator = new Orchestrator();
+		$method = new \ReflectionMethod( Orchestrator::class, 'requested_sitemap_type' );
+		set_error_handler( static function ( int $severity, string $message ): never {
+			throw new \ErrorException( $message, 0, $severity );
+		} );
+		try {
+			foreach ( array( array( 'post' ), new \stdClass(), null, false, 42, str_repeat( 'a', 129 ) ) as $value ) {
+				self::assertSame( '', $method->invoke( $orchestrator, array( 'cybermaps_sitemap' => $value ) ) );
+			}
+			self::assertSame( 'post', $method->invoke( $orchestrator, array( 'cybermaps_sitemap' => 'post' ) ) );
+		} finally {
+			restore_error_handler();
+		}
+	}
+
 	public function test_network_index_never_uses_a_site_local_response_cache(): void {
 		$orchestrator = new Orchestrator();
 		$method       = new \ReflectionMethod( Orchestrator::class, 'is_response_cache_enabled' );

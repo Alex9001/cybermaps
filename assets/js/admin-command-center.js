@@ -747,12 +747,18 @@ const ConfirmationController = () => {
 	useEffect( () => {
 		const requestConfirmation = ( event ) => {
 			if ( ! ( event.target instanceof window.Element ) ) return;
-			const target = event.target.closest( '[data-cybermaps-confirm]' );
-			if ( ! target || target.dataset.cybermapsConfirmBypass === '1' ) return;
+			const submitter = event.type === 'submit' ? event.submitter : null;
+			const target = submitter?.closest( '[data-cybermaps-confirm]' ) || event.target.closest( '[data-cybermaps-confirm]' );
+			if ( ! target || ( event.type === 'click' && target instanceof window.HTMLFormElement ) ) return;
+			if ( target.dataset.cybermapsConfirmBypass === '1' ) {
+				delete target.dataset.cybermapsConfirmBypass;
+				return;
+			}
 
 			event.preventDefault();
 			setPending( {
 				target,
+				submitter,
 				message: target.dataset.cybermapsConfirm || __( 'Continue with this action?', 'cybermaps' ),
 			} );
 		};
@@ -772,7 +778,14 @@ const ConfirmationController = () => {
 		setPending( null );
 		if ( target instanceof window.HTMLFormElement ) {
 			target.dataset.cybermapsConfirmBypass = '1';
-			target.requestSubmit();
+			try { target.requestSubmit( pending.submitter || undefined ); }
+			finally { delete target.dataset.cybermapsConfirmBypass; }
+			return;
+		}
+		if ( target instanceof window.HTMLButtonElement && target.form ) {
+			target.dataset.cybermapsConfirmBypass = '1';
+			try { target.form.requestSubmit( target ); }
+			finally { delete target.dataset.cybermapsConfirmBypass; }
 			return;
 		}
 		if ( target instanceof window.HTMLAnchorElement ) {

@@ -404,12 +404,7 @@ final class EndpointRegistry {
 				'maturity'      => 'vendor-extension',
 				'adoption'      => 'reference-only',
 				'advertise'     => false,
-				'static_targets' => array(
-					array(
-						'path'   => '/ai-discovery',
-						'bucket' => 'well_known',
-					),
-				),
+				'delivery_requirement' => 'runtime_headers_required',
 			),
 			'llms'            => array(
 				'path'           => '/llms.txt',
@@ -644,12 +639,6 @@ final class EndpointRegistry {
 				'maturity'             => 'formal-standard',
 				'adoption'             => 'independent-producers',
 				'delivery_requirement' => 'runtime_headers_required',
-				'static_targets'       => array(
-					array(
-						'path'   => '/.well-known/api-catalog',
-						'bucket' => 'well_known',
-					),
-				),
 			),
 			'ai_catalog'      => array(
 				'path'                 => \Cybermaps\Discovery\AICatalog::PATH,
@@ -662,12 +651,6 @@ final class EndpointRegistry {
 				'adoption'             => 'reference-only',
 				'enabled_setting'      => 'enable_discovery_hub',
 				'delivery_requirement' => 'runtime_headers_required',
-				'static_targets'       => array(
-					array(
-						'path'   => \Cybermaps\Discovery\AICatalog::PATH,
-						'bucket' => 'well_known',
-					),
-				),
 			),
 			'mcp_server_card' => array(
 				'path'                 => \Cybermaps\Discovery\MCPServerCard::WELL_KNOWN_PATH,
@@ -680,12 +663,6 @@ final class EndpointRegistry {
 				'group'                => 'experimental',
 				'advertise'            => false,
 				'delivery_requirement' => 'runtime_headers_required',
-				'static_targets'       => array(
-					array(
-						'path'   => \Cybermaps\Discovery\MCPServerCard::WELL_KNOWN_PATH,
-						'bucket' => 'well_known',
-					),
-				),
 			),
 			'openapi'         => array(
 				'path'          => '/cybermaps-openapi.json',
@@ -1146,6 +1123,9 @@ final class EndpointRegistry {
 
 	private function should_include_static_target( string $id, mixed $target, string $mode, ?array $settings, bool $include_disabled ): bool {
 		if ( ! is_array( $target ) || ( ! $include_disabled && ! $this->is_enabled( $id, $settings ) ) ) {
+			return false;
+		}
+		if ( 'runtime_headers_required' === ( $this->endpoints[ $id ]['delivery_requirement'] ?? '' ) ) {
 			return false;
 		}
 		$bucket = (string) ( $target['bucket'] ?? '' );

@@ -117,7 +117,34 @@ release. Temporary environment variables are passed to subprocesses, including
 website imports and test fixtures, so staging stays inside the plugin source.
 
 For an interrupted draft, rerun `composer release` with the same channel and
-candidate. A conflicting draft or tag stops without replacement. If publication
+candidate. Expired validation reruns all checks against the retained ZIP and
+artifact tree, without rebuilding or replacing those bytes. Recovery requires
+unchanged source, policy and dependency identity, clean pushed main, matching
+local and remote tags, exact unpublished draft metadata, and matching downloaded
+existing assets. A missing draft or conflicting bytes, draft or tag stops without
+replacement. Agent review and website preparation must still be current.
+
+The candidate gate also runs the relay security tests, the WebMCP security
+browser fixture with pinned Playwright/Chromium, admin UI contract tests using
+Node with a mocked DOM, and performance harness self-tests. The matrix's
+separate admin browser checks use real browser interactions. Each WordPress
+matrix case runs the RSS
+ambient-post and local-month sitemap regressions, native REST serialization,
+configuration and upgrade compare-and-swap, Cloudflare persistence, audit lease,
+static ownership migration and state cutover fixtures. Every required runtime
+flag must be present and true; a partial fixture cannot satisfy the gate.
+Optimized Python (`-O`, `-OO` or `PYTHONOPTIMIZE`) is rejected so mandatory runtime
+assertions cannot disappear.
+
+Large-corpus performance measurements use the separate disposable harness in
+`tests/performance/`. Its self-tests are a routine release gate; executing the
+full workload is separate evidence, not implied by those tests. Comparisons
+must bind both exact ZIP hashes, workload, images and cache modes. Preserve
+timeouts, unavailable responses and partial audit/static outcomes as failures
+to complete, and suppress group percentiles when requested samples are invalid.
+Do not run another native or load workload alongside a controlled comparison.
+
+If publication
 succeeded but its response or later website step was interrupted, use
 `composer release:resume -- --tag vX.Y.Z`. Resume refuses drafts, downloads both
 published assets, verifies their checksum and exact file parity with the tag,

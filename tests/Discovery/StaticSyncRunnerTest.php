@@ -32,9 +32,11 @@ final class StaticSyncRunnerTest extends \WP_UnitTestCase {
 		);
 		ConfigurationStore::reset_memo();
 		$this->reset_bridge_state();
+		\cybermaps_mock_enable_static_ownership_database( true );
 	}
 
 	protected function tearDown(): void {
+		\cybermaps_mock_disable_static_ownership_database();
 		unset(
 			$GLOBALS['cybermaps_mock_get_option_observer'],
 			$GLOBALS['cybermaps_mock_update_option_behavior']
@@ -48,6 +50,55 @@ final class StaticSyncRunnerTest extends \WP_UnitTestCase {
 		ConfigurationStore::reset_memo();
 
 		parent::tearDown();
+	}
+
+	public function test_rag_phase_materializes_exact_selected_ids_across_partial_batches(): void {
+		foreach ( array( 1, 26, 99 ) as $limit ) {
+			$this->assert_rag_materialization_limit( $limit );
+		}
+	}
+
+	private function assert_rag_materialization_limit( int $limit ): void {
+		StaticOwnershipStore::delete_all();
+		$this->reset_bridge_state();
+		$settings = array_merge( $this->all_phase_settings(), array( 'ai_sitemap_types' => array( 'post' ), 'ai_sitemap_limit' => $limit ) );
+		$GLOBALS['cybermaps_mock_options']['cybermaps_settings'] = $settings;
+		$GLOBALS['cybermaps_mock_options']['cybermaps_discovery_center'] = '{"archetype":"blog"}';
+		$GLOBALS['cybermaps_mock_post_types'] = array( 'post' );
+		$GLOBALS['cybermaps_mock_post_meta'] = array();
+		$GLOBALS['cybermaps_mock_posts'] = array();
+		$posts = array();
+		foreach ( range( 1, 150 ) as $id ) {
+			$post = (object) array( 'ID' => $id, 'post_type' => 'post', 'post_status' => 'publish', 'post_password' => '', 'post_title' => 'Post ' . $id, 'post_content' => 'Public body ' . $id, 'post_excerpt' => '', 'post_author' => 1, 'post_modified_gmt' => '2026-09-01 00:00:00', 'post_date_gmt' => '2026-08-01 00:00:00' );
+			$posts[] = $post;
+			$GLOBALS['cybermaps_mock_posts'][ $id ] = $post;
+		}
+		$query = static fn( array $args ): array => array_slice( $posts, ( $args['paged'] - 1 ) * $args['posts_per_page'], $args['posts_per_page'] );
+		$selector = new \Cybermaps\Discovery\AIContentSelector( $settings, $query );
+		$bridge = StaticBridge::get_instance();
+		$runner = new StaticSyncRunner( $bridge );
+		$report = ( new \ReflectionMethod( $bridge, 'new_sync_report' ) )->invoke( $bridge, 'all' );
+		$cursor = array();
+		$phase = new \ReflectionMethod( $runner, 'run_rag_phase' );
+		$slices = 0;
+		try {
+			do {
+				$done = $phase->invokeArgs( $runner, array( &$report, $selector, &$cursor ) );
+				$this->assertLessThanOrEqual( 5, ++$slices, 'RAG continuation must make bounded progress.' );
+			} while ( ! $done );
+			$actual = array();
+			foreach ( $report['written'] as $filename ) {
+				$body = json_decode( (string) file_get_contents( ABSPATH . $filename ), true, 512, JSON_THROW_ON_ERROR );
+				$actual[] = $body['post_id'];
+			}
+			sort( $actual );
+			$this->assertSame( range( 1, $limit ), $actual );
+			$this->assertSame( array(), $report['failed'] );
+		} finally {
+			foreach ( $report['written'] as $filename ) {
+				unlink( ABSPATH . $filename );
+			}
+		}
 	}
 
 	public function test_same_request_collision_preflight_stops_before_any_publication(): void {
@@ -416,6 +467,59 @@ final class StaticSyncRunnerTest extends \WP_UnitTestCase {
 		$this->assertSame( array(), $final['failed'] );
 		$this->assertSame( 'failed', $final['status'] );
 		$this->assertFalse( $final['success'] );
+	}
+
+	public function test_full_finalization_preserves_large_totals_and_unsampled_failure(): void {
+		$report = $this->empty_report();
+		$report['written'] = $this->list_samples( 'written', 100 );
+		$report['_aggregate_counts'] = array( 'written' => 150, 'desired' => 150, 'failed' => 1 );
+		$final = ( new \ReflectionMethod( StaticBridge::class, 'finish_full_sync_report' ) )->invoke(
+			StaticBridge::get_instance(), $report, array()
+		);
+		$this->assertSame( 'partial', $final['status'] );
+		$this->assertFalse( $final['success'] );
+		$this->assertSame( 150, $final['counts']['written'] );
+		$this->assertSame( 150, $final['counts']['desired'] );
+		$this->assertSame( 1, $final['counts']['failed'] );
+		$this->assertArrayNotHasKey( '_aggregate_counts', $final );
+		$stored = get_option( 'cybermaps_last_static_sync_report' );
+		$this->assertSame( $final['counts'], $stored['counts'] );
+		$this->assertSame( 50, $stored['truncated']['written'] );
+		$this->assertFalse( get_option( 'cybermaps_last_static_sync', false ) );
+	}
+
+	public function test_stale_transition_query_skips_zero_sentinels_and_drains_later_rows(): void {
+		$transitions = array_fill( 1, 25, 0 );
+		$transitions[26] = 50;
+		$GLOBALS['cybermaps_mock_get_posts_callback'] = static function ( array $args ) use ( &$transitions ): array {
+			$rows = array();
+			foreach ( $transitions as $id => $transition ) {
+				$value = $args['meta_value'];
+				$matches = 'BETWEEN' === $args['meta_compare']
+					? $transition >= $value[0] && $transition <= $value[1]
+					: $transition < $value;
+				if ( $matches ) {
+					$rows[] = (object) array( 'ID' => $id );
+				}
+			}
+			return array_slice( $rows, 0, $args['posts_per_page'] );
+		};
+		try {
+			$method = new \ReflectionMethod( StaticBridge::class, 'collect_stale_transition_posts' );
+			$posts = array();
+			$backlog = false;
+			$args = array( array( 'post' ), 100, 10, &$posts, &$backlog );
+			$method->invokeArgs( StaticBridge::get_instance(), $args );
+			$this->assertSame( array( 26 ), array_keys( $posts ) );
+			$this->assertFalse( $backlog );
+			$transitions[26] = 0;
+			$posts = array();
+			$method->invokeArgs( StaticBridge::get_instance(), $args );
+			$this->assertSame( array(), $posts );
+			$this->assertFalse( $backlog );
+		} finally {
+			unset( $GLOBALS['cybermaps_mock_get_posts_callback'] );
+		}
 	}
 
 	public function test_large_prior_aggregate_counts_include_final_purge_and_omitted_totals_exactly(): void {

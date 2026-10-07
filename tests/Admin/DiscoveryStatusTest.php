@@ -46,6 +46,43 @@ namespace Cybermaps\Tests\Admin {
 	use PHPUnit\Framework\TestCase;
 
 	class DiscoveryStatusTest extends TestCase {
+		public function test_secondary_protocol_probes_bound_bodies_even_when_conditional_get_returns_200(): void {
+			$process = proc_open( array( PHP_BINARY, __DIR__ . '/fixtures/status-protocol.php' ), array( 1 => array( 'pipe', 'w' ), 2 => array( 'pipe', 'w' ) ), $pipes );
+			$this->assertIsResource( $process );
+			$output = stream_get_contents( $pipes[1] );
+			$error = stream_get_contents( $pipes[2] );
+			fclose( $pipes[1] );
+			fclose( $pipes[2] );
+			$this->assertSame( 0, proc_close( $process ), $error );
+			$evidence = json_decode( $output, true, 512, JSON_THROW_ON_ERROR );
+			$this->assertSame( array( 200, 304 ), array_column( $evidence['results'], 'not_modified' ) );
+			$this->assertSame( array( 200, 200 ), array_column( $evidence['results'], 'options' ) );
+			$this->assertCount( 2, $evidence['head'] );
+			foreach ( array_merge( $evidence['conditional'], $evidence['head'], $evidence['options'] ) as $call ) {
+				$this->assertSame( '1', $call['args']['headers']['X-Cybermaps-Diagnostic'] ?? null );
+				$this->assertSame( 'Cybermaps/' . CYBERMAPS_VERSION . ' public-endpoint-health', $call['args']['user-agent'] ?? null );
+			}
+			foreach ( array_merge( $evidence['conditional'], $evidence['options'] ) as $call ) {
+				$this->assertSame( 1024, $call['args']['limit_response_size'] );
+				$this->assertSame( 2, $call['args']['timeout'] );
+				$this->assertSame( 3, $call['args']['redirection'] );
+			}
+			$this->assertSame( '"ordinary"', $evidence['conditional'][0]['args']['headers']['If-None-Match'] );
+			$this->assertSame( 'OPTIONS', $evidence['options'][0]['args']['method'] );
+			$this->assertSame( 'unverified', $evidence['rejected'] );
+			$this->assertSame( home_url(), $evidence['options'][0]['args']['headers']['Origin'] );
+			$this->assertSame( 'GET', $evidence['options'][0]['args']['headers']['Access-Control-Request-Method'] );
+		}
+
+		public function test_link_relations_are_exact_whitespace_separated_tokens(): void {
+			$method = new \ReflectionMethod( DiscoveryStatus::class, 'has_link_relation' );
+			foreach ( array( 'rel="not-api-catalog-v2"', 'rel="api-catalog-v2"', 'rel="https://example.com/api-catalog"', 'rel="api-catalog,alternate"', 'rel=""' ) as $relation ) {
+				self::assertFalse( $method->invoke( new DiscoveryStatus(), '<https://example.com/catalog>; ' . $relation, 'api-catalog' ) );
+			}
+			foreach ( array( 'rel="api-catalog"', 'rel=api-catalog', 'rel="alternate api-catalog"', 'rel="API-CATALOG alternate"', "rel=\"alternate\tapi-catalog\"" ) as $relation ) {
+				self::assertTrue( $method->invoke( new DiscoveryStatus(), '<https://example.com/catalog>; ' . $relation, 'api-catalog' ) );
+			}
+		}
 
 		/** @var array<string, mixed> */
 		private array $prior_options = array();
@@ -149,10 +186,9 @@ namespace Cybermaps\Tests\Admin {
 			$this->assertSame( count( $paths ) - 1, $status['active_count'] );
 			$this->assertSame( 0, $status['error_count'] );
 			$this->assertNotEmpty( $GLOBALS['cybermaps_mock_safe_remote_get_calls'] );
-			$this->assertSame(
-				'1',
-				$GLOBALS['cybermaps_mock_safe_remote_get_calls'][0]['args']['headers']['X-Cybermaps-Diagnostic']
-			);
+			foreach ( array_merge( $GLOBALS['cybermaps_mock_safe_remote_get_calls'], $GLOBALS['cybermaps_mock_safe_remote_head_calls'] ) as $call ) {
+				$this->assertSame( '1', $call['args']['headers']['X-Cybermaps-Diagnostic'] ?? null );
+			}
 		}
 
 		public function test_public_validation_reports_dynamic_delivery_and_accepts_text_xml(): void {
@@ -284,8 +320,9 @@ namespace Cybermaps\Tests\Admin {
 			$notices = $method->invoke( new DiscoveryStatus(), array(), 0 );
 			$message = implode( ' ', array_column( $notices, 'message' ) );
 
-			$this->assertStringContainsString( 'canonical discovery fallback bodies', $message );
-			$this->assertStringContainsString( 'optional edge rules report or repair headers', $message );
+			$this->assertStringContainsString( 'Core discovery mode publishes five files', $message );
+			$this->assertStringContainsString( 'optional scoped Cloudflare response rules', $message );
+			$this->assertStringContainsString( 'remain dynamic in every mode and must reach WordPress', $message );
 			$this->assertStringNotContainsString( 'extensionless static files require', $message );
 		}
 

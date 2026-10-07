@@ -137,7 +137,7 @@ final class AIMetadata {
 		$last_calc       = self::last_calculated_timestamp( $raw_last_calc );
 		$modified        = self::modified_timestamp( $post );
 
-		if ( self::cache_is_current( $cached, $last_calc, $modified, $snippet_config ) ) {
+		if ( '2' === get_post_meta( $post_id, '_cybermaps_ai_meta_version', true ) && self::cache_is_current( $cached, $last_calc, $modified, $snippet_config ) ) {
 			// Freshness is relative to the current time, not just to the last
 			// content write. Recompute it on every read so a valid save-time
 			// content cache cannot leave a post labeled "new" indefinitely.
@@ -145,17 +145,21 @@ final class AIMetadata {
 			return $cached;
 		}
 
-		$meta = array(
+		$source = (string) ( $post->post_content ?? '' );
+		PublicationSizeLimitException::require_capacity( strlen( $source ), 'ai-metadata', 33554431 );
+		$visible = ( new ContentAnalyzer( false ) )->visible_text( $source );
+		$meta    = array(
 			'content_type'     => self::get_content_type( $post ),
-			'length_band'      => self::get_length_band( $post ),
+			'length_band'      => self::get_length_band( $visible ),
 			'freshness'        => self::get_freshness( $post ),
-			'snippet'          => $enable_snippets ? self::generate_metadata_excerpt( $post ) : '',
+			'snippet'          => $enable_snippets ? self::generate_metadata_excerpt( $visible ) : '',
 			'_snippet_enabled' => $snippet_config,
 		);
 
 		if ( $persist ) {
 			update_post_meta( $post_id, '_cybermaps_ai_meta', $meta );
 			update_post_meta( $post_id, '_cybermaps_ai_meta_ts', time() );
+			update_post_meta( $post_id, '_cybermaps_ai_meta_version', '2' );
 		}
 
 		return $meta;
@@ -238,25 +242,18 @@ final class AIMetadata {
 	/**
 	 * Generate a regex- and excerpt-based metadata string.
 	 */
-	private static function generate_metadata_excerpt( \WP_Post $post ): string {
-		$visible = (string) ( new ContentAnalyzer() )->analyze_post( $post )['text'];
+	private static function generate_metadata_excerpt( string $visible ): string {
 		$content = (string) preg_replace( '/\s+/', ' ', $visible );
 
-		// Surface capitalized tokens. These are candidates, not entity recognition.
-		preg_match_all( '/\b(?<!\. )[A-Z][a-z]{3,}\b/', $content, $matches );
-		$entities = array_slice( array_unique( $matches[0] ), 0, 8 );
+		// Retain only the bounded distinct candidates needed by the public hint.
+		$entities = self::distinct_candidates( '/\\b(?<!\\. )[A-Z][a-z]{3,}\\b/', $content, 8 );
+		$stats    = self::distinct_candidates( '/\\b\\d+(?:\\.\\d+)?%?|\\$\\d+(?:\\.\\d+)?\\b/', $content, 5 );
 
-		// Surface literal numeric tokens.
-		preg_match_all( '/\b\d+(?:\.\d+)?%?|\$\d+(?:\.\d+)?\b/', $content, $matches_nums );
-		$stats = array_slice( array_unique( $matches_nums[0] ), 0, 5 );
-
-		// Use the final stored paragraph as a possible closing excerpt.
-		$conclusion = '';
-		$paragraphs = array_filter( explode( "\n", $visible ) );
-		if ( ! empty( $paragraphs ) ) {
-			$last_paragraph = (string) end( $paragraphs );
-			$conclusion     = wp_trim_words( $last_paragraph, 30 );
-		}
+		// Locate the final nonempty paragraph without allocating every paragraph.
+		$visible        = rtrim( $visible );
+		$last_newline   = strrpos( $visible, "\n" );
+		$last_paragraph = self::excerpt_source( $visible, false === $last_newline ? 0 : $last_newline + 1 );
+		$conclusion     = wp_trim_words( $last_paragraph, 30 );
 
 		$snippet = '';
 		if ( ! empty( $entities ) ) {
@@ -270,13 +267,35 @@ final class AIMetadata {
 		}
 
 		if ( strlen( $snippet ) < 50 ) {
-			$snippet = wp_trim_words( $content, 40 );
+			$snippet = wp_trim_words( self::excerpt_source( $content ), 40 );
 		}
 
 		return PublicationConstraints::bounded_text(
 			trim( $snippet ),
 			PublicationConstraints::AI_SNIPPET_MAX_LENGTH
 		);
+	}
+
+	/** @return string[] */
+	private static function distinct_candidates( string $pattern, string $content, int $limit ): array {
+		$candidates = array();
+		$offset     = 0;
+		$count      = 0;
+		while ( $count < $limit && 1 === preg_match( $pattern, $content, $match, PREG_OFFSET_CAPTURE, $offset ) ) {
+			$offset = $match[0][1] + strlen( $match[0][0] );
+			$token  = PublicationConstraints::bounded_text( $match[0][0], PublicationConstraints::AI_SNIPPET_MAX_LENGTH );
+			if ( ! in_array( $token, $candidates, true ) ) {
+				$candidates[] = $token;
+				++$count;
+			}
+		}
+		return $candidates;
+	}
+
+	private static function excerpt_source( string $content, int $offset = 0 ): string {
+		return function_exists( 'mb_strcut' )
+			? (string) mb_strcut( $content, $offset, VisibleTextExtractor::SUMMARY_SOURCE_MAX_BYTES, 'UTF-8' )
+			: substr( $content, $offset, VisibleTextExtractor::SUMMARY_SOURCE_MAX_BYTES );
 	}
 
 	/**
@@ -306,8 +325,7 @@ final class AIMetadata {
 	/**
 	 * Determine a literal length band using Unicode-aware stored-text tokens.
 	 */
-	private static function get_length_band( \WP_Post $post ): string {
-		$content    = (string) ( new ContentAnalyzer() )->analyze_post( $post )['text'];
+	private static function get_length_band( string $content ): string {
 		$word_count = ( new VisibleTextExtractor() )->word_count( $content );
 
 		if ( $word_count > 1000 ) {

@@ -12,10 +12,21 @@ namespace Cybermaps\Tests\Core;
 use Cybermaps\Core\DiagnosticLogger;
 use PHPUnit\Framework\TestCase;
 
+require_once dirname( __DIR__ ) . '/mocks/configuration-database.php';
+
 final class DiagnosticLoggerTest extends TestCase {
+	private mixed $previous_database;
+
 	protected function setUp(): void {
 		parent::setUp();
+		$this->previous_database = $GLOBALS['wpdb'] ?? null;
+		$GLOBALS['wpdb'] = new \CybermapsConfigurationDatabase();
 		$GLOBALS['cybermaps_mock_options'] = array();
+	}
+
+	protected function tearDown(): void {
+		$GLOBALS['wpdb'] = $this->previous_database;
+		parent::tearDown();
 	}
 
 	public function test_logging_is_off_by_default(): void {
@@ -60,6 +71,63 @@ final class DiagnosticLoggerTest extends TestCase {
 
 		$state = DiagnosticLogger::clear();
 		$this->assertSame( 0, $state['entry_count'] );
+	}
+
+	public function test_demonstrated_private_message_is_redacted_for_new_and_retained_events(): void {
+		$message = 'Connection from 2001:db8::42 failed for password=short-secret at /srv/private/credential.json';
+		DiagnosticLogger::enable();
+		DiagnosticLogger::log( 'test.failure', array( 'error_summary' => $message ) );
+		$stored = $GLOBALS['cybermaps_mock_options'][ DiagnosticLogger::ENTRIES_OPTION ];
+		$this->assertSame( 'Connection from [ip] failed for password=[redacted] at [path]', end( $stored )['context']['error_summary'] );
+		$GLOBALS['cybermaps_mock_options'][ DiagnosticLogger::ENTRIES_OPTION ] = array(
+			array( 'time' => gmdate( 'c' ), 'level' => 'error', 'event' => 'legacy.failure', 'context' => array( 'error_summary' => $message, 'token' => 'legacy-private-value' ) ),
+		);
+		$bundle = DiagnosticLogger::support_bundle( array() );
+		$this->assertSame( 'Connection from [ip] failed for password=[redacted] at [path]', $bundle['debugging']['entries'][0]['context']['error_summary'] );
+		$this->assertStringNotContainsString( 'short-secret', wp_json_encode( $GLOBALS['cybermaps_mock_options'][ DiagnosticLogger::ENTRIES_OPTION ] ) );
+		$this->assertArrayNotHasKey( 'token', $bundle['debugging']['entries'][0]['context'] );
+		$this->assertArrayNotHasKey( 'omitted_data', $bundle );
+		$this->assertSame( 'best_effort', $bundle['redaction']['mode'] );
+		$this->assertTrue( $bundle['redaction']['review_before_sharing'] );
+	}
+
+	/** @dataProvider common_private_strings */
+	public function test_common_private_values_are_masked_without_claiming_universal_redaction( string $message, string $private ): void {
+		DiagnosticLogger::enable();
+		DiagnosticLogger::log( 'test.failure', array( 'error_summary' => $message ) );
+		$entries = DiagnosticLogger::support_bundle( array() )['debugging']['entries'];
+		$this->assertStringNotContainsString( $private, end( $entries )['context']['error_summary'] );
+	}
+
+	public static function common_private_strings(): array {
+		return array(
+			'quoted password' => array( 'password="short secret with spaces" failed', 'short secret' ),
+			'quoted key' => array( '{"api_key":"tiny-key"}', 'tiny-key' ),
+			'single quoted secret' => array( "client_secret='tiny secret'", 'tiny secret' ),
+			'IPv6 brackets' => array( 'Host [2001:db8::1] failed', '2001:db8' ),
+			'IPv6 sentence' => array( 'Host 2001:db8::42.', '2001:db8' ),
+			'IPv6 mapped' => array( 'Host ::ffff:192.0.2.5', 'ffff' ),
+			'IPv6 scope' => array( 'Host fe80::1%eth0', 'eth0' ),
+			'Windows drive' => array( 'Cannot open C:\\private\\secret.pem', 'secret.pem' ),
+			'UNC path' => array( 'Cannot open \\\\server\\private\\secret.pem', 'server' ),
+			'quoted path spaces' => array( 'Cannot open "/srv/private directory/secret.pem"', 'private directory' ),
+		);
+	}
+
+	public function test_redaction_input_is_bounded_before_processing_and_retained_shape_is_revalidated(): void {
+		DiagnosticLogger::enable();
+		DiagnosticLogger::log( 'test.failure', array( 'error_summary' => str_repeat( ' ', 4096 ) . 'beyond-input-limit' ) );
+		$entries = DiagnosticLogger::support_bundle( array() )['debugging']['entries'];
+		$this->assertSame( '', end( $entries )['context']['error_summary'] );
+		$GLOBALS['cybermaps_mock_options'][ DiagnosticLogger::ENTRIES_OPTION ] = array(
+			array( 'time' => array( 'invalid' ), 'context' => array() ),
+			array( 'time' => gmdate( 'c', time() - 8 * DAY_IN_SECONDS ), 'context' => array() ),
+			array( 'time' => gmdate( 'c' ), 'level' => array(), 'event' => array(), 'context' => 'invalid' ),
+		);
+		$entries = DiagnosticLogger::support_bundle( array() )['debugging']['entries'];
+		$this->assertCount( 1, $entries );
+		$this->assertSame( 'info', $entries[0]['level'] );
+		$this->assertSame( array(), $entries[0]['context'] );
 	}
 
 	public function test_event_ring_is_limited_to_two_hundred_entries(): void {

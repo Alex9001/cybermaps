@@ -22,6 +22,7 @@ final class DiagnosticLogger {
 	private const MAX_ENTRIES      = 200;
 	private const MAX_CONTEXT      = 20;
 	private const MAX_STRING       = 256;
+	private const MAX_INPUT_STRING = 4096;
 	private const RETENTION        = 7 * DAY_IN_SECONDS;
 
 	/** @var string[] */
@@ -120,9 +121,20 @@ final class DiagnosticLogger {
 
 	/** Delete all collected diagnostic events. */
 	public static function clear(): array {
+		global $wpdb;
 		\delete_option( self::ENTRIES_OPTION );
+		// False also means an absent option; verify the stored bytes without cache.
+		$remaining = RawOptionStore::read( $wpdb, self::ENTRIES_OPTION );
+		if ( null !== $remaining && \maybe_serialize( array() ) !== $remaining ) {
+			throw new \RuntimeException( \esc_html__( 'Diagnostic events could not be cleared. Reload and try again.', 'cybermaps' ) );
+		}
+		RawOptionStore::invalidate( self::ENTRIES_OPTION );
+		$state = self::state_summary();
+		if ( 0 !== $state['entry_count'] ) {
+			throw new \RuntimeException( \esc_html__( 'Diagnostic events could not be cleared. Reload and try again.', 'cybermaps' ) );
+		}
 
-		return self::state_summary();
+		return $state;
 	}
 
 	/** Whether the time-bounded diagnostic session is active. */
@@ -229,20 +241,23 @@ final class DiagnosticLogger {
 	/** Build the bounded diagnostic portion of a support bundle. */
 	public static function support_bundle( array $status_report ): array {
 		return array(
-			'schema_version' => 1,
-			'generated_at'   => \gmdate( 'c' ),
-			'status'         => $status_report,
-			'debugging'      => array(
+			'schema_version'  => 2,
+			'generated_at'    => \gmdate( 'c' ),
+			'status'          => $status_report,
+			'debugging'       => array(
 				'state'   => self::state_summary(),
 				'entries' => self::load_entries(),
 			),
-			'omitted_data'   => array(
-				'credentials',
-				'cookies_and_headers',
+			'omitted_sources' => array(
+				'credential_options',
+				'request_cookies_and_headers',
 				'request_bodies',
-				'ip_and_email_addresses',
-				'urls_and_filesystem_paths',
 				'crawler_analytics',
+			),
+			'redaction'       => array(
+				'mode'                  => 'best_effort',
+				'review_before_sharing' => true,
+				'limitations'           => 'Free-form diagnostic messages and supplied status data may still contain private information. Review before sharing.',
 			),
 		);
 	}
@@ -256,23 +271,37 @@ final class DiagnosticLogger {
 
 	/** @return array<int, array<string, mixed>> */
 	private static function load_entries(): array {
-		$stored         = \get_option( self::ENTRIES_OPTION, array() );
-		$entries        = \is_array( $stored ) ? $stored : array();
-		$original_count = \count( $entries );
-		$cutoff         = \time() - self::RETENTION;
-
-		$entries = \array_filter(
-			$entries,
-			static fn( mixed $entry ): bool => \is_array( $entry )
-				&& (int) \strtotime( (string) ( $entry['time'] ?? '' ) ) >= $cutoff
-		);
-
-		$entries = \array_slice( \array_values( $entries ), -self::MAX_ENTRIES );
-		if ( \count( $entries ) !== $original_count ) {
+		$stored  = \get_option( self::ENTRIES_OPTION, array() );
+		$entries = array();
+		$cutoff  = \time() - self::RETENTION;
+		foreach ( \is_array( $stored ) ? \array_slice( $stored, -self::MAX_ENTRIES ) : array() as $entry ) {
+			$entry = self::sanitize_entry( $entry, $cutoff );
+			if ( null !== $entry ) {
+				$entries[] = $entry;
+			}
+		}
+		if ( $entries !== $stored ) {
 			\update_option( self::ENTRIES_OPTION, $entries, false );
 		}
 
 		return $entries;
+	}
+
+	/** Reapply current bounded redaction to retained events before any export. */
+	private static function sanitize_entry( mixed $entry, int $cutoff ): ?array {
+		if ( ! \is_array( $entry ) || ! \is_string( $entry['time'] ?? null ) ) {
+			return null;
+		}
+		$time = \strtotime( \substr( $entry['time'], 0, 64 ) );
+		if ( false === $time || $time < $cutoff ) {
+			return null;
+		}
+		return array(
+			'time'    => \gmdate( 'c', $time ),
+			'level'   => \in_array( $entry['level'] ?? null, self::LEVELS, true ) ? $entry['level'] : 'info',
+			'event'   => self::normalize_identifier( \is_string( $entry['event'] ?? null ) ? $entry['event'] : '' ),
+			'context' => self::sanitize_context( \is_array( $entry['context'] ?? null ) ? $entry['context'] : array() ),
+		);
 	}
 
 	/** @return array<string, bool|float|int|string> */
@@ -293,17 +322,42 @@ final class DiagnosticLogger {
 	}
 
 	private static function sanitize_string( string $value ): string {
-		$value = \wp_strip_all_tags( $value );
+		$value = \wp_strip_all_tags( \substr( $value, 0, self::MAX_INPUT_STRING ) );
 		$value = \str_replace( array( "\r", "\n", "\t" ), ' ', $value );
+		$value = self::redact_credential_assignments( $value );
 		$value = \preg_replace( '/\bBearer\s+\S+/i', '[redacted]', $value ) ?? '[redacted]';
 		$value = \preg_replace( '/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i', '[email]', $value ) ?? '[redacted]';
+		$value = self::redact_ipv6( $value );
 		$value = \preg_replace( '/\b(?:\d{1,3}\.){3}\d{1,3}\b/', '[ip]', $value ) ?? '[redacted]';
 		$value = \preg_replace( '#https?://[^\s]+#i', '[url]', $value ) ?? '[redacted]';
 		$value = \preg_replace( '/\b[A-Za-z0-9_-]{32,}\b/', '[redacted]', $value ) ?? '[redacted]';
+		$value = self::redact_absolute_paths( $value );
 		$value = \str_replace( self::known_paths(), '[path]', $value );
 		$value = \preg_replace( '/\s+/', ' ', $value ) ?? '';
 
 		return \substr( \trim( $value ), 0, self::MAX_STRING );
+	}
+
+	/** Common assignments only: free text cannot be guaranteed secret-free. */
+	private static function redact_credential_assignments( string $value ): string {
+		return \preg_replace( '/\b(password|passwd|pwd|(?:client[_-]?)?secret|api[_-]?key|access[_-]?token|refresh[_-]?token|token|authorization|code[_-]?verifier|consume[_-]?secret)\b["\']?\s*[:=]\s*(?:"[^"]*(?:"|$)|\'[^\']*(?:\'|$)|[^\s,;]+)/i', '$1=[redacted]', $value ) ?? '[redacted]';
+	}
+
+	private static function redact_ipv6( string $value ): string {
+		return \preg_replace_callback(
+			'/(?<![A-Za-z0-9:])[0-9A-Fa-f]*:[0-9A-Fa-f:.]+(?:%[A-Za-z0-9_.-]+)?(?![A-Za-z0-9:])/',
+			static function ( array $candidate_match ): string {
+				$candidate = \rtrim( $candidate_match[0], '.' );
+				$address   = \explode( '%', $candidate, 2 )[0];
+				return false !== \filter_var( $address, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 ) ? '[ip]' . \substr( $candidate_match[0], \strlen( $candidate ) ) : $candidate_match[0];
+			},
+			$value
+		) ?? '[redacted]';
+	}
+
+	private static function redact_absolute_paths( string $value ): string {
+		$value = \preg_replace( '~(["\'])(?:[A-Za-z]:[\\\\/]|/|\\\\\\\\)[^\r\n]*?\1~', '[path]', $value ) ?? '[redacted]';
+		return \preg_replace( '~(?<![A-Za-z0-9])(?:[A-Za-z]:[\\\\/]|\\\\\\\\)[^\s<>"\']+|(?<![A-Za-z0-9:])/(?:[^\s/<>"\']+/)*[^\s<>"\']+~', '[path]', $value ) ?? '[redacted]';
 	}
 
 	/** @return string[] */
@@ -319,7 +373,7 @@ final class DiagnosticLogger {
 	}
 
 	private static function normalize_identifier( string $value ): string {
-		$value = \strtolower( $value );
+		$value = \strtolower( \substr( $value, 0, self::MAX_INPUT_STRING ) );
 		$value = \preg_replace( '/[^a-z0-9_.-]+/', '_', $value ) ?? '';
 
 		return \substr( \trim( $value, '._-' ), 0, 64 );

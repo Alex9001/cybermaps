@@ -122,7 +122,7 @@ class ExtensionAPITest extends TestCase {
 
 		$this->assertContains( 'ai-actions.json', $well_known );
 		$this->assertContains( 'ai-usage.json', $well_known );
-		$this->assertContains( 'ai-discovery', $well_known );
+		$this->assertNotContains( 'ai-discovery', $well_known );
 		$this->assertNotContains( '.well-known/ai-actions.json', $well_known );
 		$this->assertContains( 'ai-actions.json', $all );
 		$this->assertContains( 'ai-sitemap.xml', $all );

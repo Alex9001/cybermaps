@@ -25,6 +25,7 @@ Copy wrangler.toml.example to wrangler.toml. In the oreshkin account, set:
     wrangler secret put CLOUDFLARE_OAUTH_CLIENT_ID
     wrangler secret put CLOUDFLARE_OAUTH_SCOPES
     wrangler secret put CLOUDFLARE_OAUTH_REDIRECT_URI
+    wrangler secret put RATE_LIMIT_SECRET
     wrangler deploy
 
 Set CLOUDFLARE_OAUTH_SCOPES to the exact space-delimited dot-form scope names
@@ -32,9 +33,15 @@ returned by Cloudflare. Set the redirect value to the exact callback above.
 Before production use, configure a rate-limiting rule for POST
 /v1/cloudflare/, starting at ten requests per minute per source IP.
 
+The example includes all five required rate-limiter bindings. Missing bindings
+make health checks degraded and stateful requests fail with HTTP 503.
+
 Do not enable CORS or request logging that records callback query strings.
+Keep `observability.logs.invocation_logs = false`; default invocation logs
+include request URLs. Do not attach tail or Logpush sinks that retain callback
+URLs or authorization headers.
 Monitor only aggregate status codes, latency, Durable Object errors, and
-rate-limit events. Run dependency-free contract tests with npm test.
+rate-limit events. Run dependency-free contract and state-machine tests with npm test.
 
 ## Capacity and abuse controls
 

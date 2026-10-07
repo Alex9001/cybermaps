@@ -12,6 +12,19 @@ final class PublicationCachePolicyTest extends TestCase {
 		parent::tearDown();
 	}
 
+	public function test_wildcard_vary_cannot_be_narrowed_by_negotiation(): void {
+		$this->assertSame( '*', PublicationCachePolicy::merge_vary( '*', array( 'Accept' ) ) );
+		$this->assertSame( '*', PublicationCachePolicy::merge_vary( 'Accept-Encoding, *', array( 'Accept' ) ) );
+		$this->assertSame( '*', PublicationCachePolicy::merge_vary( 'Accept', array( '*' ) ) );
+		$this->assertSame( 'accept, Accept-Encoding', PublicationCachePolicy::merge_vary( 'Accept', array( 'accept', 'Accept-Encoding' ) ) );
+	}
+
+	public function test_diagnostic_no_store_overrides_public_ttls(): void {
+		$policy = PublicationCachePolicy::for_publication( 'sitemap', 'index' );
+		$policy['no_store'] = true;
+		$this->assertSame( 'no-store, no-cache, must-revalidate, max-age=0', PublicationCachePolicy::cache_control( $policy ) );
+	}
+
 	public function test_default_policy_is_public_but_requires_revalidation(): void {
 		update_option( 'cybermaps_static_generation', 12 );
 		$policy = PublicationCachePolicy::for_publication( 'sitemap', 'post_type:post' );

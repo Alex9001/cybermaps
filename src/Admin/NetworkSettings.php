@@ -40,10 +40,11 @@ class NetworkSettings {
 		<div class="wrap">
 			<h1><?php esc_html_e( 'Cybermaps Network Settings', 'cybermaps' ); ?></h1>
 			<?php
-            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			if ( isset( $_GET['updated'] ) ) :
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Presence-only notice flags cannot perform an action or supply message text.
+			$notice = isset( $_GET['cybermaps_network_save_error'] ) ? 'error' : ( isset( $_GET['updated'] ) ? 'saved' : '' );
+			if ( '' !== $notice ) :
 				?>
-				<div class="updated notice is-dismissible"><p><?php esc_html_e( 'Settings saved.', 'cybermaps' ); ?></p></div>
+				<div class="notice is-dismissible <?php echo esc_attr( 'error' === $notice ? 'notice-error' : 'updated' ); ?>"><p><?php echo 'error' === $notice ? esc_html__( 'Settings could not be saved. Please retry.', 'cybermaps' ) : esc_html__( 'Settings saved.', 'cybermaps' ); ?></p></div>
 			<?php endif; ?>
 
 			<form method="post" action="edit.php?action=cybermaps_save_network_settings">
@@ -105,17 +106,24 @@ class NetworkSettings {
 			'enable_master_index' => '1' === $enable_master_index ? '1' : '0',
 		);
 
-		update_site_option( 'cybermaps_network_settings', $sanitized );
-
-		wp_safe_redirect(
-			add_query_arg(
-				array(
-					'page'    => 'cybermaps-network',
-					'updated' => 'true',
-				),
-				network_admin_url( 'admin.php' )
-			)
-		);
+		$saved = $this->persist_network_settings( $sanitized );
+		wp_safe_redirect( $this->save_result_url( $saved ) );
 		exit;
+	}
+
+	/** WordPress returns false for both unchanged data and database failures. */
+	private function persist_network_settings( array $settings ): bool {
+		return update_site_option( 'cybermaps_network_settings', $settings )
+			|| get_site_option( 'cybermaps_network_settings', false ) === $settings;
+	}
+
+	private function save_result_url( bool $saved ): string {
+		return add_query_arg(
+			array(
+				'page' => 'cybermaps-network',
+				$saved ? 'updated' : 'cybermaps_network_save_error' => 'true',
+			),
+			network_admin_url( 'admin.php' )
+		);
 	}
 }

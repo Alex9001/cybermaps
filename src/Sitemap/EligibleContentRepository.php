@@ -28,7 +28,7 @@ final class EligibleContentRepository {
 	private const WINDOW_SCAN_BATCH    = 1000;
 	private const WINDOW_SCAN_LIMIT    = 10000;
 	private const ARCHIVE_MONTH_LIMIT  = 2400;
-	private const ARCHIVE_CACHE_KEY    = 'cybermaps_archive_month_inventory';
+	private const ARCHIVE_CACHE_KEY    = 'cybermaps_archive_month_inventory_v2';
 
 	private array $settings;
 	private PublicationEligibility $eligibility;
@@ -144,6 +144,7 @@ final class EligibleContentRepository {
 		}
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching -- This exact candidate count is request-cached below.
+		PublicationQuery::reset_database_error();
 		$count = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*)
@@ -156,6 +157,7 @@ final class EligibleContentRepository {
 			)
 		);
 		// phpcs:enable
+		PublicationQuery::assert_database_result( $count );
 
 		$this->post_counts[ $post_type ] = max( 0, (int) $count );
 		return $this->post_counts[ $post_type ];
@@ -265,6 +267,10 @@ final class EligibleContentRepository {
 			++$page;
 		}
 
+		if ( $eligible_count < $limit && $scanned >= self::WINDOW_SCAN_LIMIT && count( $rows ) === $batch_size ) {
+			throw new \Cybermaps\Core\BuildUnavailableException( esc_html__( 'Cybermaps could not finish News eligibility selection within its request budget. No partial sitemap was produced.', 'cybermaps' ) );
+		}
+
 		$this->recent_post_rows[ $cache_key ] = array_slice( $eligible, 0, $limit );
 		return $this->recent_post_rows[ $cache_key ];
 	}
@@ -322,7 +328,9 @@ final class EligibleContentRepository {
 			++$page;
 		}
 
-		return false;
+		// Exhaustion is unknown, so invalidate conservatively rather than miss
+		// an expiration just beyond the candidate-work budget.
+		return $scanned >= self::WINDOW_SCAN_LIMIT && count( $rows ) === $batch_size;
 	}
 
 	/**
@@ -339,7 +347,7 @@ final class EligibleContentRepository {
 			return $this->term_pages[ $cache_key ];
 		}
 
-		$rows = get_terms(
+		$rows = PublicationQuery::terms(
 			array(
 				'taxonomy'   => $taxonomy,
 				'hide_empty' => ! $include_empty,
@@ -349,10 +357,6 @@ final class EligibleContentRepository {
 				'order'      => 'DESC',
 			)
 		);
-		if ( is_wp_error( $rows ) || ! is_array( $rows ) ) {
-			$this->term_pages[ $cache_key ] = array();
-			return array();
-		}
 
 		$eligible = array();
 		foreach ( array_slice( $rows, 0, $per_page ) as $row ) {
@@ -375,15 +379,12 @@ final class EligibleContentRepository {
 			return $this->term_counts[ $cache_key ];
 		}
 
-		$count = wp_count_terms(
+		$count = PublicationQuery::count_terms(
 			array(
 				'taxonomy'   => $taxonomy,
 				'hide_empty' => ! $include_empty,
 			)
 		);
-		if ( is_wp_error( $count ) ) {
-			$count = 0;
-		}
 
 		$this->term_counts[ $cache_key ] = max( 0, (int) $count );
 		return $this->term_counts[ $cache_key ];
@@ -442,8 +443,10 @@ final class EligibleContentRepository {
 		$placeholders = implode( ', ', array_fill( 0, count( $missing ), '%d' ) );
 		$query        = "SELECT tt.term_id, MAX(p.post_modified_gmt) AS lastmod FROM %i tt INNER JOIN %i tr ON tt.term_taxonomy_id = tr.term_taxonomy_id INNER JOIN %i p ON tr.object_id = p.ID WHERE tt.taxonomy = %s AND tt.term_id IN ({$placeholders}) AND p.post_status = 'publish' AND p.post_password = '' GROUP BY tt.term_id";
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		PublicationQuery::reset_database_error();
 		$rows = $wpdb->get_results( $wpdb->prepare( $query, $wpdb->term_taxonomy, $wpdb->term_relationships, $wpdb->posts, $taxonomy, ...$missing ) );
 		// phpcs:enable
+		PublicationQuery::assert_database_result( $rows );
 		foreach ( (array) $rows as $row ) {
 			$id = (int) ( $row->term_id ?? 0 );
 			if ( in_array( $id, $missing, true ) ) {
@@ -474,6 +477,7 @@ final class EligibleContentRepository {
 		}
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching -- This exact linked-content aggregate is request-cached below.
+		PublicationQuery::reset_database_error();
 		$lastmod = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT MAX(p.post_modified_gmt)
@@ -490,6 +494,7 @@ final class EligibleContentRepository {
 			)
 		);
 		// phpcs:enable
+		PublicationQuery::assert_database_result( $lastmod, true );
 
 		$this->taxonomy_lastmods[ $taxonomy ] = $this->format_lastmod( (string) $lastmod );
 		return $this->taxonomy_lastmods[ $taxonomy ];
@@ -536,8 +541,10 @@ final class EligibleContentRepository {
 		);
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- The variadic list supplies the Core identifier, one value per post type, and pagination values; results are request-cached.
+		PublicationQuery::reset_database_error();
 		$rows = $wpdb->get_results( $wpdb->prepare( $query, ...$args ) );
 		// phpcs:enable
+		PublicationQuery::assert_database_result( $rows );
 
 		$authors = array();
 		foreach ( (array) $rows as $row ) {
@@ -587,8 +594,11 @@ final class EligibleContentRepository {
 				AND post_author > 0";
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- The variadic list supplies the Core identifier and one value per post type; the result is request-cached.
-		$this->author_count = max( 0, (int) $wpdb->get_var( $wpdb->prepare( $query, $wpdb->posts, ...$post_types ) ) );
+		PublicationQuery::reset_database_error();
+		$count = $wpdb->get_var( $wpdb->prepare( $query, $wpdb->posts, ...$post_types ) );
 		// phpcs:enable
+		PublicationQuery::assert_database_result( $count );
+		$this->author_count = max( 0, (int) $count );
 		return $this->author_count;
 	}
 
@@ -684,7 +694,7 @@ final class EligibleContentRepository {
 	}
 
 	/**
-	 * Load every possible WordPress monthly archive with one bounded aggregate.
+	 * Load a complete bounded monthly inventory, refusing an overflowing result.
 	 *
 	 * @return array<int,array{year:int,month:int,lastmod:string}>
 	 */
@@ -707,24 +717,29 @@ final class EligibleContentRepository {
 		}
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching -- One bounded aggregate is cached and invalidated with the sitemap family.
+		PublicationQuery::reset_database_error();
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT YEAR(post_date_gmt) AS archive_year,
-					MONTH(post_date_gmt) AS archive_month,
+				"SELECT YEAR(post_date) AS archive_year,
+					MONTH(post_date) AS archive_month,
 					MAX(post_modified_gmt) AS lastmod
 				FROM %i
 				WHERE post_type = 'post'
 					AND post_status = 'publish'
 					AND post_password = ''
-					AND post_date_gmt > '0000-00-00 00:00:00'
-				GROUP BY YEAR(post_date_gmt), MONTH(post_date_gmt)
+					AND post_date > '0000-00-00 00:00:00'
+				GROUP BY YEAR(post_date), MONTH(post_date)
 				ORDER BY archive_year DESC, archive_month DESC
 				LIMIT %d",
 				$wpdb->posts,
-				self::ARCHIVE_MONTH_LIMIT
+				self::ARCHIVE_MONTH_LIMIT + 1
 			)
 		);
 		// phpcs:enable
+		PublicationQuery::assert_database_result( $rows );
+		if ( count( $rows ) > self::ARCHIVE_MONTH_LIMIT ) {
+			throw new \Cybermaps\Core\BuildUnavailableException( esc_html__( 'Cybermaps could not select the complete archive inventory within its request budget. No partial sitemap was produced.', 'cybermaps' ) );
+		}
 
 		$archives = array();
 		foreach ( (array) $rows as $row ) {
@@ -783,10 +798,10 @@ final class EligibleContentRepository {
 			array( 'posts_per_page' => $per_page )
 		);
 
-		$query = new \WP_Query( $args );
+		$rows = PublicationQuery::posts( $args );
 		return array_values(
 			array_filter(
-				array_slice( (array) $query->posts, 0, $per_page ),
+				array_slice( $rows, 0, $per_page ),
 				'is_object'
 			)
 		);

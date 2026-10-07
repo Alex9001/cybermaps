@@ -53,7 +53,7 @@ final class DeploymentGuidance {
 		?>
 		<section class="cm-card-sm cm-mt-20 cm-deployment-guidance" aria-describedby="deployment-guidance-maturity">
 			<h2><?php esc_html_e( 'Generated server and edge rules', 'cybermaps' ); ?></h2>
-			<p><?php esc_html_e( 'Cybermaps never writes server, cache, reverse-proxy, or CDN configuration. Review and apply only the rule for your deployment, then refresh public validation.', 'cybermaps' ); ?></p>
+			<p><?php esc_html_e( 'These generated snippets are advisory and are not applied automatically. Review and apply the rule for your deployment, then refresh public validation. Optional Cloudflare actions apply only the changes you authorize.', 'cybermaps' ); ?></p>
 			<?php MaturityGuidance::render( 'deployment-guidance', 'deployment' ); ?>
 			<div class="cm-deployment-state-grid">
 				<?php self::render_state( __( 'Configured', 'cybermaps' ), $summary['configured'], __( 'A Cybermaps setting enables the canonical publication.', 'cybermaps' ) ); ?>

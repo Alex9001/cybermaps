@@ -17,8 +17,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Reconciles publications when an upstream SEO decision changes.
  */
 final class IndexabilityInvalidator {
-	private bool $content_invalidated = false;
-	private bool $global_invalidated  = false;
+	/** @var array<int,bool> */
+	private array $content_invalidated = array();
+	/** @var array<int,bool> */
+	private array $global_invalidated = array();
 
 	private const POST_META_KEYS = array(
 		'_genesis_noindex',
@@ -125,11 +127,12 @@ final class IndexabilityInvalidator {
 	}
 
 	public function invalidate(): void {
-		if ( $this->global_invalidated ) {
+		$site_id = (int) get_current_blog_id();
+		if ( isset( $this->global_invalidated[ $site_id ] ) ) {
 			return;
 		}
-		$this->global_invalidated  = true;
-		$this->content_invalidated = true;
+		$this->global_invalidated[ $site_id ]  = true;
+		$this->content_invalidated[ $site_id ] = true;
 
 		CacheManager::clear_family( 'sitemap' );
 		CacheManager::clear_family( 'discovery' );
@@ -148,10 +151,11 @@ final class IndexabilityInvalidator {
 	 * site-policy bucket, which contains no content inventory.
 	 */
 	public function invalidate_content(): void {
-		if ( $this->global_invalidated || $this->content_invalidated ) {
+		$site_id = (int) get_current_blog_id();
+		if ( isset( $this->global_invalidated[ $site_id ] ) || isset( $this->content_invalidated[ $site_id ] ) ) {
 			return;
 		}
-		$this->content_invalidated = true;
+		$this->content_invalidated[ $site_id ] = true;
 
 		CacheManager::clear_family( 'sitemap' );
 		CacheManager::clear_family( 'discovery' );

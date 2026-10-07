@@ -23,6 +23,10 @@ def validate_result(result, wp, php, multisite, archive_hash, commit):
             and result.get('lifecycle_passed') is True and result.get('multisite') is multisite,
             'Runtime coverage incomplete')
     require(result.get('mcp_read_only_passed') is True and result.get('mcp_adapter_version') == json.loads((ROOT / 'docs/dev/release-policy.json').read_text())['mcp_adapter_version'], 'Read-only MCP runtime coverage incomplete')
+    require(result.get('sitemap_regressions_passed') is True, 'Sitemap runtime regressions incomplete')
+    require(result.get('rest_representation_passed') is True, 'Native REST representation regressions incomplete')
+    for key in ('configuration_persistence', 'cloudflare_persistence', 'audit_run_lock', 'static_ownership', 'state_cutover'):
+        require(result.get(key + '_passed') is True, f'Native {key} regressions incomplete')
     require(result.get('stable_findings') == [] and result.get('experimental_findings') == [], 'Runtime findings remain')
 
 

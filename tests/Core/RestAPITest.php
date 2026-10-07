@@ -49,7 +49,7 @@ class RestAPITest extends \WP_UnitTestCase {
 			$api = new RestAPI();
 			$response = $api->get_llms_tldr();
 			$request = new class { public function get_route(): string { return '/cybermaps/v1/llms-tldr'; } };
-			$response = $api->add_public_cache_validators( $response, null, $request );
+			$response = $api->add_public_cache_headers( $response, null, $request );
 			self::assertSame( 503, $response->get_status() );
 			self::assertSame( 'cybermaps_publication_unavailable', $response->get_data()['code'] );
 			self::assertSame( '5', (string) $response->get_headers()['Retry-After'] );
@@ -60,7 +60,7 @@ class RestAPITest extends \WP_UnitTestCase {
 		}
 	}
 
-	public function test_public_discovery_response_gets_cache_validators(): void {
+	public function test_public_discovery_response_gets_cache_policy_without_premature_byte_claims(): void {
 		$request = new class() {
 			public function get_route(): string {
 				return '/cybermaps/v1/discovery';
@@ -68,18 +68,19 @@ class RestAPITest extends \WP_UnitTestCase {
 		};
 		$response = rest_ensure_response( array( 'ok' => true ) );
 
-		$result  = ( new RestAPI() )->add_public_cache_validators( $response, null, $request );
+		$result  = ( new RestAPI() )->add_public_cache_headers( $response, null, $request );
 		$headers = $result->get_headers();
 
 		$this->assertSame( 200, $result->get_status() );
-		$this->assertMatchesRegularExpression( '/^"[a-f0-9]{32}"$/', $headers['ETag'] );
+		$this->assertArrayNotHasKey( 'ETag', $headers );
 		$this->assertSame( 'public, max-age=300, must-revalidate', $headers['Cache-Control'] );
 		$this->assertSame( 'Accept', $headers['Vary'] );
 		$this->assertSame( '6.0.0', $headers['X-Cybermaps-Version'] );
-		$this->assertStringStartsWith( 'sha-256=:', $headers['Content-Digest'] );
+		$this->assertArrayNotHasKey( 'Content-Digest', $headers );
+		$this->assertArrayNotHasKey( 'Repr-Digest', $headers );
 	}
 
-	public function test_public_health_and_mcp_card_responses_get_cache_validators(): void {
+	public function test_public_health_and_mcp_card_responses_get_cache_policy(): void {
 		$api = new RestAPI();
 		foreach ( array( '/cybermaps/v1/health', '/cybermaps/v1/mcp/server-card' ) as $route ) {
 			$request = new class( $route ) {
@@ -89,11 +90,19 @@ class RestAPITest extends \WP_UnitTestCase {
 					return $this->route;
 				}
 			};
-			$response = $api->add_public_cache_validators( rest_ensure_response( array( 'ok' => true ) ), null, $request );
+			$response = $api->add_public_cache_headers( rest_ensure_response( array( 'ok' => true ) ), null, $request );
 
-			$this->assertArrayHasKey( 'ETag', $response->get_headers() );
+			$this->assertArrayNotHasKey( 'ETag', $response->get_headers() );
 			$this->assertSame( 'public, max-age=300, must-revalidate', $response->get_headers()['Cache-Control'] );
 		}
+	}
+
+	public function test_public_cache_headers_preserve_existing_wildcard_vary(): void {
+		$request = new class { public function get_route(): string { return '/cybermaps/v1/discovery'; } };
+		$response = rest_ensure_response( array( 'ok' => true ) );
+		$response->header( 'vary', '*' );
+		$result = ( new RestAPI() )->add_public_cache_headers( $response, null, $request );
+		$this->assertSame( '*', $result->get_headers()['Vary'] );
 	}
 
 	public function test_public_metadata_callbacks_set_cors_and_media_type(): void {
@@ -109,20 +118,19 @@ class RestAPITest extends \WP_UnitTestCase {
 		$this->assertSame( '*', $card->get_headers()['Access-Control-Allow-Origin'] );
 	}
 
-	public function test_public_discovery_response_honors_if_none_match(): void {
+	public function test_public_discovery_response_leaves_conditional_requests_to_final_serving_layer(): void {
 		$request = new class() {
 			public function get_route(): string {
 				return '/cybermaps/v1/discovery';
 			}
 		};
 		$api      = new RestAPI();
-		$initial  = $api->add_public_cache_validators( rest_ensure_response( array( 'ok' => true ) ), null, $request );
-		$_SERVER['HTTP_IF_NONE_MATCH'] = $initial->get_headers()['ETag'];
+		$_SERVER['HTTP_IF_NONE_MATCH'] = '"' . md5( wp_json_encode( array( 'ok' => true ) ) ) . '"';
 
-		$validated = $api->add_public_cache_validators( rest_ensure_response( array( 'ok' => true ) ), null, $request );
+		$validated = $api->add_public_cache_headers( rest_ensure_response( array( 'ok' => true ) ), null, $request );
 
-		$this->assertSame( 304, $validated->get_status() );
-		$this->assertNull( $validated->get_data() );
+		$this->assertSame( 200, $validated->get_status() );
+		$this->assertSame( array( 'ok' => true ), $validated->get_data() );
 	}
 
 	public function test_private_rest_response_does_not_get_public_validators(): void {
@@ -134,7 +142,7 @@ class RestAPITest extends \WP_UnitTestCase {
 		$response = new \WP_REST_Response( array( 'private' => true ) );
 		$response->header( 'Cache-Control', 'no-store, private' );
 
-		$result = ( new RestAPI() )->add_public_cache_validators( $response, null, $request );
+		$result = ( new RestAPI() )->add_public_cache_headers( $response, null, $request );
 
 		$this->assertSame( array( 'Cache-Control' => 'no-store, private' ), $result->get_headers() );
 	}
@@ -298,6 +306,42 @@ class RestAPITest extends \WP_UnitTestCase {
 		$this->assertSame( array(), $data['findings'] );
 		$this->assertSame( 0, $data['diff']['baseline_run_id'] );
 		$this->assertPrivateNoStoreHeaders( $response );
+	}
+
+	public function test_edge_scope_metadata_is_preserved_with_bounded_scalar_types(): void {
+		$method = new \ReflectionMethod( RestAPI::class, 'sanitize_edge_status_row' );
+		$row = $method->invoke( new RestAPI(), array(
+			'status' => 'incomplete',
+			'requested_url_count' => '60',
+			'truncated_url_count' => '10',
+			'url_scope_complete' => false,
+			'adapters' => array( array(
+				'adapter' => 'varnish', 'status' => 'incomplete_scope',
+				'count' => 50, 'failed' => 0, 'requested_url_count' => 60,
+				'truncated_url_count' => 10, 'url_scope_complete' => false,
+				'urls' => array( 'https://example.com/private' ), 'token' => 'secret',
+			) ),
+		) );
+		$this->assertSame( 60, $row['requested_url_count'] );
+		$this->assertSame( 10, $row['truncated_url_count'] );
+		$this->assertFalse( $row['url_scope_complete'] );
+		$this->assertSame( 'incomplete_scope', $row['adapters'][0]['status'] );
+		$this->assertSame( 50, $row['adapters'][0]['count'] );
+		$this->assertSame( 10, $row['adapters'][0]['truncated_url_count'] );
+		$this->assertArrayNotHasKey( 'urls', $row['adapters'][0] );
+		$this->assertArrayNotHasKey( 'token', $row['adapters'][0] );
+
+		$row = $method->invoke( new RestAPI(), array(
+			'requested_url_count' => array( 60 ), 'truncated_url_count' => new \stdClass(),
+			'url_scope_complete' => array( true ),
+			'adapters' => array( array( 'count' => array( 50 ), 'failed' => -5, 'url_scope_complete' => array( true ) ) ),
+		) );
+		$this->assertSame( 0, $row['requested_url_count'] );
+		$this->assertSame( 0, $row['truncated_url_count'] );
+		$this->assertFalse( $row['url_scope_complete'] );
+		$this->assertFalse( $row['adapters'][0]['url_scope_complete'] );
+		$this->assertSame( 0, $row['adapters'][0]['failed'] );
+		$this->assertArrayNotHasKey( 'count', $row['adapters'][0] );
 	}
 
 	public function test_latest_audit_not_found_error_is_private_and_non_cacheable(): void {

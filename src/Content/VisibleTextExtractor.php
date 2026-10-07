@@ -27,6 +27,20 @@ final class VisibleTextExtractor {
 	}
 
 	/**
+	 * Preserve bounded-analysis evidence for callers making full-content claims.
+	 *
+	 * @return array{text:string,complete:bool,source_bytes:int}
+	 */
+	public function analyze_post( object|int $post ): array {
+		$result = $this->analyzer->analyze_post( $post );
+		return array(
+			'text'         => (string) $result['text'],
+			'complete'     => true === $result['complete'],
+			'source_bytes' => (int) $result['source_bytes'],
+		);
+	}
+
+	/**
 	 * Normalize arbitrary stored content without rendering dynamic WordPress data.
 	 */
 	public function normalize( string $content ): string {
@@ -106,14 +120,11 @@ final class VisibleTextExtractor {
 			return $text;
 		}
 
-		if ( function_exists( 'mb_strcut' ) ) {
-			return (string) mb_strcut( $text, 0, self::SUMMARY_SOURCE_MAX_BYTES, 'UTF-8' );
+		$maximum = self::SUMMARY_SOURCE_MAX_BYTES;
+		while ( $maximum > self::SUMMARY_SOURCE_MAX_BYTES - 3 && 0x80 === ( ord( $text[ $maximum ] ) & 0xC0 ) ) {
+			--$maximum;
 		}
-
-		$text = substr( $text, 0, self::SUMMARY_SOURCE_MAX_BYTES );
-		while ( '' !== $text && 1 !== preg_match( '//u', $text ) ) {
-			$text = substr( $text, 0, -1 );
-		}
-		return $text;
+		$prefix = substr( $text, 0, $maximum );
+		return 1 === preg_match( '//u', $prefix ) ? $prefix : '';
 	}
 }

@@ -15,7 +15,13 @@ use Cybermaps\Admin\CloudflareRuleManager;
 use Cybermaps\Admin\EdgeOptimizationController;
 use PHPUnit\Framework\TestCase;
 
+require_once dirname( __DIR__ ) . '/mocks/cloudflare-database.php';
+
 final class CloudflareCustomOAuthTest extends TestCase {
+	use \CybermapsCloudflareDatabaseFixture;
+	protected function tearDown(): void { $this->restore_cloudflare_database(); parent::tearDown(); }
+
+	protected function setUp(): void { parent::setUp(); $this->install_cloudflare_database(); }
 	public function test_direct_transaction_uses_exact_callback_scopes_and_pkce(): void {
 		$client      = new CloudflareOAuthClient();
 		$verifier    = CloudflareOAuthClient::generate_verifier();
@@ -36,7 +42,7 @@ final class CloudflareCustomOAuthTest extends TestCase {
 	}
 
 	public function test_direct_callback_state_is_single_use(): void {
-		$store       = new CloudflareOAuthTransactionStore( 92814 );
+		$store       = new CloudflareOAuthTransactionStore( 92814, null, $this->cloudflare_lock() );
 		$transaction = array(
 			'transaction_id' => str_repeat( 'a', 32 ),
 			'consume_secret' => str_repeat( 'b', 64 ),
@@ -46,13 +52,13 @@ final class CloudflareCustomOAuthTest extends TestCase {
 		);
 		$store->begin( $transaction, str_repeat( 'e', 64 ), 'install', 'custom' );
 
-		self::assertFalse( $store->authorize_direct( str_repeat( 'f', 64 ), 'wrong-state-code' ) );
-		self::assertTrue( $store->authorize_direct( str_repeat( 'c', 64 ), 'authorized-code' ) );
-		self::assertFalse( $store->authorize_direct( str_repeat( 'c', 64 ), 'second-code' ) );
+		self::assertFalse( $store->authorize_direct( str_repeat( 'f', 64 ), 'wrong-state-code', $transaction['transaction_id'] ) );
+		self::assertTrue( $store->authorize_direct( str_repeat( 'c', 64 ), 'authorized-code', $transaction['transaction_id'] ) );
+		self::assertFalse( $store->authorize_direct( str_repeat( 'c', 64 ), 'second-code', $transaction['transaction_id'] ) );
 		self::assertSame( 'authorized', $store->current()['status'] ?? null );
 		self::assertSame( 'authorized-code', $store->current()['code'] ?? null );
 		self::assertSame( CloudflareRuleManager::public_host(), $store->current()['environment_host'] ?? null );
-		$store->clear();
+		$store->clear( $store->current()['transaction_id'] );
 	}
 
 	public function test_client_id_validation_rejects_secrets_and_whitespace(): void {
@@ -63,16 +69,20 @@ final class CloudflareCustomOAuthTest extends TestCase {
 	}
 
 	public function test_finished_result_remains_available_for_a_resume_poll(): void {
-		$store  = new CloudflareOAuthTransactionStore( 92815 );
+		$store  = new CloudflareOAuthTransactionStore( 92815, null, $this->cloudflare_lock() );
 		$result = array(
 			'status'  => 'complete',
 			'message' => 'Rules installed.',
 		);
-		$store->finish( $result );
+		$store->begin( array( 'transaction_id' => 'finished', 'consume_secret' => 'secret', 'state' => 'state', 'client_id' => 'client', 'redirect_uri' => 'https://example.com/callback' ), 'verifier', 'install' );
+		$store->finish( $result, 'finished' );
+		$poll = new \ReflectionMethod( EdgeOptimizationController::class, 'poll_current_transaction' );
+		self::assertSame( $result, $poll->invoke( new EdgeOptimizationController(), $store ) );
+		self::assertSame( $result, $poll->invoke( new EdgeOptimizationController(), $store ) );
 
 		self::assertSame( 'finished', $store->current()['status'] ?? null );
 		self::assertSame( $result, $store->current()['result'] ?? null );
-		$store->clear();
+		$store->clear( $store->current()['transaction_id'] );
 	}
 
 	public function test_request_detection_is_bound_to_the_public_host(): void {

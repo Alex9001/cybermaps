@@ -20,6 +20,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * it with the shutdown state prevents stale exclusion decisions.
  */
 final class PublicationNotifier {
+	private const MAX_PENDING_POSTS = 1000;
+	private int $pending_count      = 0;
+	private int $overflow_count     = 0;
 	/**
 	 * Metadata capable of moving a post into or out of a public inventory.
 	 *
@@ -42,19 +45,20 @@ final class PublicationNotifier {
 	/**
 	 * First observed inventory state per post.
 	 *
-	 * @var array<int, array{url:string,sitemap:bool,feed:bool}>
+	 * @var array<int, array<int, array{url:string,sitemap:bool,feed:bool}>>
 	 */
 	private array $pending = array();
 
 	public function __construct(
-		private readonly IndexNow $indexnow,
-		private readonly WebSub $websub
+		private readonly ?IndexNow $indexnow = null,
+		private readonly ?WebSub $websub = null
 	) {}
 
 	/**
 	 * Register capture and post-commit delivery hooks.
 	 */
 	public function register_hooks(): void {
+		add_action( 'pre_post_update', array( $this, 'capture_before_post_write' ), 10, 2 );
 		add_action( 'transition_post_status', array( $this, 'queue_transition' ), 10, 3 );
 		add_action( 'before_delete_post', array( $this, 'queue_deletion' ), 10, 2 );
 		foreach ( array( 'add_post_metadata', 'update_post_metadata', 'delete_post_metadata' ) as $hook ) {
@@ -66,6 +70,12 @@ final class PublicationNotifier {
 		add_action( 'add_term_relationship', array( $this, 'capture_before_term_write' ), 10, 3 );
 		add_action( 'delete_term_relationships', array( $this, 'capture_before_term_write' ), 10, 3 );
 		add_action( 'shutdown', array( $this, 'flush' ), PHP_INT_MAX );
+	}
+
+	/** Capture the original row and permalink before a slug/date/type update. */
+	public function capture_before_post_write( int $post_id, array $data = array() ): void {
+		unset( $data );
+		$this->capture( get_post( $post_id ) );
 	}
 
 	/**
@@ -149,38 +159,70 @@ final class PublicationNotifier {
 
 		$pending       = $this->pending;
 		$this->pending = array();
-		$notify_feed   = false;
-
-		foreach ( $pending as $post_id => $before ) {
-			if ( $this->flush_post( $post_id, $before ) ) {
-				$notify_feed = true;
-			}
+		if ( $this->overflow_count > 0 ) {
+			\Cybermaps\Core\DiagnosticLogger::log(
+				'publication.notifications.incomplete',
+				array(
+					'status'      => 'incomplete',
+					'retained'    => $this->pending_count,
+					'skipped'     => $this->overflow_count,
+					'reason_code' => 'snapshot_limit',
+				),
+				'warning'
+			);
 		}
+		$this->pending_count  = 0;
+		$this->overflow_count = 0;
+		foreach ( $pending as $blog_id => $posts ) {
+			$this->flush_site( $blog_id, $posts );
+		}
+	}
 
-		if ( $notify_feed ) {
-			$this->websub->notify_change();
+	/** Resolve settings and durable queues only while the origin blog is active. */
+	private function flush_site( int $blog_id, array $posts ): void {
+		$switched = get_current_blog_id() !== $blog_id;
+		if ( $switched ) {
+			switch_to_blog( $blog_id );
+		}
+		try {
+			\Cybermaps\Core\ConfigurationStore::reset_memo();
+			$services    = array( $this->indexnow ?? new IndexNow(), $this->websub ?? new WebSub() );
+			$notify_feed = false;
+			foreach ( $posts as $post_id => $before ) {
+				$notify_feed = $this->flush_post( $post_id, $before, $services[0] ) || $notify_feed;
+			}
+			if ( $notify_feed ) {
+				$services[1]->notify_change();
+			}
+		} finally {
+			if ( $switched ) {
+				restore_current_blog();
+			}
+			\Cybermaps\Core\ConfigurationStore::reset_memo();
 		}
 	}
 
 	/**
 	 * @param array{url:string,sitemap:bool,feed:bool} $before Captured state.
 	 */
-	private function flush_post( int $post_id, array $before ): bool {
+	private function flush_post( int $post_id, array $before, IndexNow $indexnow ): bool {
 		$post = get_post( $post_id );
 		if ( ! is_object( $post ) ) {
 			if ( $before['sitemap'] ) {
-				$this->indexnow->notify_url( $before['url'] );
+				$indexnow->notify_url( $before['url'] );
 			}
 			return $before['feed'];
-		}
-		if ( ! PublicationPostTypes::contains( (string) ( $post->post_type ?? '' ) ) ) {
-			return false;
 		}
 		$after_sitemap = $this->is_eligible( $post, PublicationEligibility::SITEMAP );
 		$after_feed    = $this->is_feed_eligible( $post );
 		if ( $before['sitemap'] || $after_sitemap ) {
 			$url = URLManager::rewrite_url( (string) get_permalink( $post_id ) );
-			$this->indexnow->notify_url( '' !== $url ? $url : $before['url'] );
+			if ( $before['sitemap'] && '' !== $before['url'] && $before['url'] !== $url ) {
+				$indexnow->notify_url( $before['url'] );
+			}
+			if ( $after_sitemap || ( $before['sitemap'] && $before['url'] === $url ) ) {
+				$indexnow->notify_url( '' !== $url ? $url : $before['url'] );
+			}
 		}
 		return $before['feed'] || $after_feed;
 	}
@@ -198,11 +240,17 @@ final class PublicationNotifier {
 		}
 
 		$post_id = (int) $post->ID;
-		if ( $post_id < 1 || isset( $this->pending[ $post_id ] ) ) {
+		$blog_id = max( 1, (int) get_current_blog_id() );
+		if ( $post_id < 1 || isset( $this->pending[ $blog_id ][ $post_id ] ) ) {
 			return;
 		}
+		if ( $this->pending_count >= self::MAX_PENDING_POSTS ) {
+			++$this->overflow_count;
+			return;
+		}
+		++$this->pending_count;
 
-		$this->pending[ $post_id ] = array(
+		$this->pending[ $blog_id ][ $post_id ] = array(
 			'url'     => URLManager::rewrite_url( (string) get_permalink( $post_id ) ),
 			'sitemap' => $this->is_eligible( $post, PublicationEligibility::SITEMAP ),
 			'feed'    => $this->is_feed_eligible( $post ),

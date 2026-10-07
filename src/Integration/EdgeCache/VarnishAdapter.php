@@ -25,12 +25,39 @@ final class VarnishAdapter implements AdapterInterface {
 	private const MAX_URLS      = 50;
 
 	/**
+	 * Inspect configuration without sending a purge or asserting event-independent enablement.
+	 * Filters receive a documented diagnostic context, never a fabricated invalidation.
+	 *
+	 * @return array{enabled_for_probe:bool,configured:bool,valid:bool}
+	 */
+	public function configuration_status(): array {
+		$event    = array(
+			'reason'     => 'configuration_status',
+			'diagnostic' => true,
+			'urls'       => array(),
+		);
+		$endpoint = $this->endpoint( $event );
+		$token    = $this->token( $event );
+		return array(
+			'enabled_for_probe' => $this->is_enabled( $event ),
+			'configured'        => '' !== $endpoint || '' !== $token,
+			'valid'             => '' !== $endpoint && '' !== $token && $this->is_allowed_endpoint( $endpoint, $event ),
+		);
+	}
+
+	/**
 	 * @param array<string,mixed> $event Invalidation event.
 	 * @return array<string,mixed>
 	 */
 	public function purge( array $event ): array {
 		if ( ! $this->is_enabled( $event ) ) {
 			return $this->result( 'disabled' );
+		}
+		$urls     = isset( $event['urls'] ) && is_array( $event['urls'] ) ? $event['urls'] : array();
+		$targets  = Coordinator::normalize_purge_urls( $urls, $event );
+		$coverage = $this->coverage( $event, $urls, $targets );
+		if ( empty( $targets ) ) {
+			return $this->delivery_summary( array(), $coverage );
 		}
 
 		$endpoint = $this->endpoint( $event );
@@ -42,12 +69,8 @@ final class VarnishAdapter implements AdapterInterface {
 			return $this->result( 'transport_unavailable' );
 		}
 
-		$urls    = isset( $event['urls'] ) && is_array( $event['urls'] ) ? $event['urls'] : array();
 		$results = array();
-		foreach ( array_slice( array_values( array_unique( $urls ) ), 0, self::MAX_URLS ) as $url ) {
-			if ( ! is_string( $url ) || ! Coordinator::is_allowed_purge_url( $url, $event ) ) {
-				continue;
-			}
+		foreach ( $targets as $url ) {
 			$target = $this->target_for_public_url( $endpoint, $url );
 			if ( '' === $target ) {
 				$results[] = array(
@@ -60,6 +83,23 @@ final class VarnishAdapter implements AdapterInterface {
 			$results[] = $this->purge_url( $target, $url, $token, $event );
 		}
 
+		return $this->delivery_summary( $results, $coverage );
+	}
+
+	/** @param array<string,mixed> $event @param string[] $urls @param string[] $targets */
+	private function coverage( array $event, array $urls, array $targets ): array {
+		$requested = max( count( $urls ), (int) filter_var( $event['requested_url_count'] ?? 0, FILTER_VALIDATE_INT ) );
+		$truncated = max( 0, count( $urls ) - self::MAX_URLS, (int) filter_var( $event['truncated_url_count'] ?? 0, FILTER_VALIDATE_INT ) );
+		$complete  = ! array_key_exists( 'url_scope_complete', $event ) || true === $event['url_scope_complete'];
+		return array(
+			'requested_url_count' => $requested,
+			'truncated_url_count' => $truncated,
+			'url_scope_complete'  => $complete && 0 === $truncated && count( $targets ) === $requested,
+		);
+	}
+
+	/** @param array<int,array<string,mixed>> $results @param array<string,mixed> $coverage */
+	private function delivery_summary( array $results, array $coverage ): array {
 		$failed = count(
 			array_filter(
 				$results,
@@ -67,13 +107,27 @@ final class VarnishAdapter implements AdapterInterface {
 			)
 		);
 
-		return array(
-			'adapter' => 'varnish',
-			'status'  => 0 === $failed ? 'sent' : 'partial',
-			'count'   => count( $results ),
-			'failed'  => $failed,
-			'results' => array_slice( $results, 0, 20 ),
+		return array_merge(
+			$coverage,
+			array(
+				'adapter' => 'varnish',
+				'status'  => $this->delivery_status( count( $results ), $failed, $coverage ),
+				'count'   => count( $results ),
+				'failed'  => $failed,
+				'results' => array_slice( $results, 0, 20 ),
+			)
 		);
+	}
+
+	/** @param array<string,mixed> $coverage */
+	private function delivery_status( int $count, int $failed, array $coverage ): string {
+		if ( $count < 1 ) {
+			return 'unsupported_scope';
+		}
+		if ( $failed > 0 ) {
+			return 'partial';
+		}
+		return ! empty( $coverage['url_scope_complete'] ) ? 'sent' : 'incomplete_scope';
 	}
 
 	/** @return array<string,mixed> */

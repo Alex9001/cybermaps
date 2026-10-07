@@ -171,6 +171,29 @@ final class IndexabilityInvalidatorTest extends \WP_UnitTestCase {
 		$this->assertArrayHasKey( 'cybermaps_bg_sync_static_files', $GLOBALS['cybermaps_mock_scheduled'] );
 	}
 
+	public function test_one_invalidator_invalidates_each_blog_for_content_and_global_changes(): void {
+		$GLOBALS['cybermaps_mock_is_multisite'] = true;
+		$GLOBALS['cybermaps_mock_options_by_blog'] = array();
+		foreach ( array( 'invalidate_content', 'invalidate' ) as $method ) {
+			$invalidator = new IndexabilityInvalidator();
+			foreach ( array( 1, 2 ) as $blog ) {
+				switch_to_blog( $blog );
+				try {
+					CacheManager::put( 'publication', 'old', 3600, 'discovery' );
+					$before = CacheManager::get_generation( 'discovery' );
+					$invalidator->$method();
+					self::assertSame( $before + 1, CacheManager::get_generation( 'discovery', true ) );
+					self::assertFalse( CacheManager::get( 'publication', 'discovery', $found ) );
+					self::assertFalse( $found );
+					$invalidator->$method();
+					self::assertSame( $before + 1, CacheManager::get_generation( 'discovery', true ) );
+				} finally {
+					restore_current_blog();
+				}
+			}
+		}
+	}
+
 	private function seed_caches(): void {
 		CacheManager::set( 'cybermaps_test_sitemap', '<xml/>', HOUR_IN_SECONDS, 'sitemap' );
 		CacheManager::set( 'cybermaps_test_discovery', '{}', HOUR_IN_SECONDS, 'discovery' );

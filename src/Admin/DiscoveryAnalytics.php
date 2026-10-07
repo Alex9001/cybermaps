@@ -90,6 +90,7 @@ final class DiscoveryAnalytics {
 			<?php self::render_admin_notices( $db_error ); ?>
 			<?php self::render_recording_notice( $analytics_enabled ); ?>
 
+			<?php if ( $this->get_repository()->is_available() ) : ?>
 			<section id="overview" class="cm-analytics-section">
 				<div class="cm-analytics-section-heading">
 					<div>
@@ -147,6 +148,10 @@ final class DiscoveryAnalytics {
 			<section id="request-log" class="cm-analytics-section">
 				<?php $this->render_request_log( $activity ); ?>
 			</section>
+
+			<?php else : ?>
+				<p><?php esc_html_e( 'Analytics are unavailable while database reads are failing.', 'cybermaps' ); ?></p>
+			<?php endif; ?>
 
 			<section id="data-controls" class="cm-analytics-section">
 				<?php $this->render_data_controls( $analytics_enabled, $anonymize_ips, $retention_days ); ?>

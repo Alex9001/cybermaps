@@ -39,6 +39,7 @@ final class PublicationNotifierTest extends \WP_UnitTestCase {
 	public function test_hook_contract_captures_pre_write_state_and_flushes_at_shutdown(): void {
 		$this->notifier->register_hooks();
 
+		$this->assertHook( 'pre_post_update', 'action', 2 );
 		$this->assertHook( 'transition_post_status', 'action', 3 );
 		$this->assertHook( 'before_delete_post', 'action', 2 );
 		$this->assertHook( 'add_post_metadata', 'filter', 5 );
@@ -138,6 +139,31 @@ final class PublicationNotifierTest extends \WP_UnitTestCase {
 
 		$this->assertSame( array( 'https://frontend.example/?p=46' ), $this->indexnow->urls );
 		$this->assertSame( 1, $this->websub->notifications );
+	}
+
+	public function test_pre_write_permalink_capture_announces_both_distinct_public_urls_once(): void {
+		$post = $this->post( 91, 'post', 'publish' );
+		$GLOBALS['cybermaps_mock_permalinks'][91] = 'https://example.com/old/';
+		$this->notifier->capture_before_post_write( 91 );
+		$GLOBALS['cybermaps_mock_permalinks'][91] = 'https://example.com/new/';
+		$this->notifier->queue_transition( 'publish', 'publish', $post );
+		$this->notifier->flush();
+		$this->notifier->flush();
+		self::assertSame( array( 'https://frontend.example/old/', 'https://frontend.example/new/' ), $this->indexnow->urls );
+		self::assertSame( 1, $this->websub->notifications );
+		unset( $GLOBALS['cybermaps_mock_permalinks'][91] );
+	}
+
+	public function test_changing_to_unpublished_type_still_announces_prior_public_url(): void {
+		$post = $this->post( 92, 'post', 'publish' );
+		$GLOBALS['cybermaps_mock_permalinks'][92] = 'https://example.com/old-public/';
+		$this->notifier->capture_before_post_write( 92 );
+		$post->post_type = 'attachment';
+		$GLOBALS['cybermaps_mock_permalinks'][92] = 'https://example.com/private/';
+		$this->notifier->queue_transition( 'publish', 'publish', $post );
+		$this->notifier->flush();
+		self::assertSame( array( 'https://frontend.example/old-public/' ), $this->indexnow->urls );
+		unset( $GLOBALS['cybermaps_mock_permalinks'][92] );
 	}
 
 	private function post( int $id, string $post_type, string $status ): object {

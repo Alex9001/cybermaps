@@ -35,7 +35,7 @@ final class IndexabilityDecision {
 		$merged = array_values( array_unique( array_filter( array_merge( $this->reasons, $reasons ) ) ) );
 
 		return new self(
-			empty( $merged ),
+			$this->indexable && empty( $merged ),
 			$merged,
 			$this->canonical_url,
 			$this->redirect_url,

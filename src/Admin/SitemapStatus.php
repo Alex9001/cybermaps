@@ -425,8 +425,8 @@ class SitemapStatus {
 
 	private static function render_well_known_mode_notice( bool $hub_enabled ): void {
 		$message = $hub_enabled
-			? __( 'Cybermaps does not publish sitemap files in this mode. Sitemap requests use the dynamic WordPress handlers when the web server routes them to PHP; the registered origin-root /.well-known/ compatibility targets are materialized.', 'cybermaps' )
-			: __( 'Cybermaps does not publish sitemap files in this mode. Sitemap requests use the dynamic WordPress handlers when the web server routes them to PHP. The Discovery Hub is disabled, so no /.well-known/ compatibility files are materialized.', 'cybermaps' );
+			? __( 'Cybermaps does not publish sitemap files in this mode. Sitemap requests use the dynamic WordPress handlers when the web server routes them to PHP; only the registered small compatibility publications are materialized. API Catalog and Discovery Index remain dynamic.', 'cybermaps' )
+			: __( 'Cybermaps does not publish sitemap files in this mode. Sitemap requests use the dynamic WordPress handlers when the web server routes them to PHP. The Discovery Hub is disabled, so no compatibility publications are materialized. API Catalog and Discovery Index are not static files.', 'cybermaps' );
 		?>
 		<div class="cm-card-sm cm-mb-20" style="background: #fffbeb; border-color: #fde68a;">
 			<strong><?php esc_html_e( 'Compatibility publication mode selected', 'cybermaps' ); ?></strong>
@@ -542,17 +542,18 @@ class SitemapStatus {
 	 * Convert the internal reconciliation state into a translated admin label.
 	 */
 	private static function reconciliation_status_label( string $status ): string {
-		return match ( sanitize_key( $status ) ) {
+		$labels = array(
 			'complete' => __( 'Complete', 'cybermaps' ),
 			'partial'  => __( 'Partial', 'cybermaps' ),
 			'failed'   => __( 'Failed', 'cybermaps' ),
 			'error'    => __( 'Error', 'cybermaps' ),
 			'busy'     => __( 'Busy', 'cybermaps' ),
 			'running'  => __( 'Running', 'cybermaps' ),
+			'pending'  => __( 'Continuation queued', 'cybermaps' ),
 			'skipped'  => __( 'Skipped', 'cybermaps' ),
 			'not-run'  => __( 'Not run', 'cybermaps' ),
-			default    => __( 'Unknown', 'cybermaps' ),
-		};
+		);
+		return $labels[ sanitize_key( $status ) ] ?? __( 'Unknown', 'cybermaps' );
 	}
 
 	/**
@@ -561,7 +562,7 @@ class SitemapStatus {
 	private static function reconciliation_status_tone( string $status ): string {
 		return match ( sanitize_key( $status ) ) {
 			'complete'                    => 'good',
-			'partial', 'busy', 'running' => 'warning',
+			'partial', 'busy', 'running', 'pending' => 'warning',
 			'failed', 'error'            => 'error',
 			default                      => 'neutral',
 		};
@@ -616,6 +617,9 @@ class SitemapStatus {
 	 * Run a nonce-protected dynamic sitemap index probe with a diagnostic header.
 	 */
 	public function handle_php_path_diagnostic(): void {
+		if ( 'POST' !== \Cybermaps\Core\ReadOnlyRequest::method() ) {
+			wp_die( esc_html__( 'POST is required.', 'cybermaps' ), '', array( 'response' => 405 ) );
+		}
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'You do not have permission to access this page.', 'cybermaps' ) );
 		}
@@ -653,6 +657,7 @@ class SitemapStatus {
 					'Cache-Control'                    => 'no-cache, no-store',
 					'Pragma'                           => 'no-cache',
 					'X-Cybermaps-Diagnostic-Challenge' => $challenge,
+					'X-Cybermaps-Diagnostic'           => '1',
 				),
 			),
 		);

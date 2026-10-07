@@ -45,6 +45,7 @@ final class LLMSTLDRGenerator {
 	 * }
 	 */
 	public function generate_publication( array $settings, string $site_name ): array {
+		$site_name      = \Cybermaps\Discovery\PublicationConstraints::bounded_text( $site_name, \Cybermaps\Discovery\PublicationConstraints::PUBLICATION_NAME_MAX_LENGTH );
 		$stored_budget  = $settings['llms_tldr_token_budget'] ?? null;
 		$budget         = is_scalar( $stored_budget ) && is_numeric( $stored_budget )
 			? max(
@@ -64,6 +65,11 @@ final class LLMSTLDRGenerator {
 		$scan_metadata = $this->render_scan_metadata( min( $eligible_upper, $scan_limit ), $eligible_upper, $eligible_upper > $scan_limit );
 		$body          = '';
 		$scan          = new PublicationScanBudget( $scan_limit );
+		\Cybermaps\Discovery\PublicationSizeLimitException::require_capacity(
+			strlen( $this->render_header( $settings, $site_name, $budget, $eligible_upper, 0, $eligible_upper ) . $scan_metadata ),
+			'llms-tldr.txt',
+			$budget * 4
+		);
 
 		foreach ( $this->ordered_posts( $pinned_ids, $scan ) as $post ) {
 			++$eligible_count;
@@ -112,6 +118,7 @@ final class LLMSTLDRGenerator {
 		}
 
 		$output = $header . $body;
+		\Cybermaps\Discovery\PublicationSizeLimitException::require_capacity( strlen( $output ), 'llms-tldr.txt', $budget * 4 );
 
 		return array(
 			'output'                => $output,

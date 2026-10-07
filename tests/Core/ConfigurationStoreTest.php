@@ -12,6 +12,24 @@ final class ConfigurationStoreTest extends TestCase {
 		$GLOBALS['cybermaps_mock_options'] = array();
 	}
 
+	public function test_production_memos_reset_when_switching_and_restoring_sites(): void {
+		$process = proc_open(
+			array( PHP_BINARY, dirname( __DIR__ ) . '/fixtures/configuration-blog-memo.php' ),
+			array( 1 => array( 'pipe', 'w' ), 2 => array( 'pipe', 'w' ) ),
+			$pipes
+		);
+		$this->assertIsResource( $process );
+		$output = stream_get_contents( $pipes[1] );
+		$error = stream_get_contents( $pipes[2] );
+		fclose( $pipes[1] );
+		fclose( $pipes[2] );
+		$this->assertSame( 0, proc_close( $process ), $error );
+		$this->assertSame(
+			array( array_fill( 0, 4, array( 'site' => 1 ) ), array_fill( 0, 4, array( 'site' => 2 ) ), array_fill( 0, 4, array( 'site' => 1 ) ) ),
+			json_decode( $output, true, 512, JSON_THROW_ON_ERROR )
+		);
+	}
+
 	public function test_each_array_configuration_root_fails_closed_on_malformed_storage(): void {
 		$GLOBALS['cybermaps_mock_options'] = array(
 			'cybermaps_settings'       => 'not-an-array',

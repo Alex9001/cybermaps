@@ -44,6 +44,45 @@ final class SettingsLifecycleTest extends \WP_UnitTestCase {
 		$this->assertCount( 1, $shutdown );
 	}
 
+	public function test_site_guide_only_change_invalidates_and_schedules_static_publications(): void {
+		$old = array( 'static_engine_mode' => 'well_known', 'site_guide_instructions' => 'Old guidance' );
+		$new = array( 'static_engine_mode' => 'well_known', 'site_guide_instructions' => 'New guidance' );
+		$GLOBALS['cybermaps_mock_options']['cybermaps_settings'] = $new;
+		( new Settings() )->on_settings_updated( $old, $new );
+		$this->assertArrayHasKey( 'cybermaps_static_generation', $GLOBALS['cybermaps_mock_options'] );
+		$this->assertArrayHasKey( 'cybermaps_bg_sync_static_files', $GLOBALS['cybermaps_mock_scheduled'] );
+	}
+
+	public function test_feed_limit_change_refreshes_cached_updates_and_schedules_static_publications(): void {
+		$old = array( 'static_engine_mode' => 'all', 'enable_discovery_hub' => '1', 'ai_feed_limit' => 2 );
+		$GLOBALS['cybermaps_mock_options']['cybermaps_settings'] = $old;
+		$GLOBALS['cybermaps_mock_options']['blog_public'] = '1';
+		$GLOBALS['cybermaps_mock_post_types'] = array( 'post' );
+		$GLOBALS['cybermaps_mock_post_type_objects'] = array( 'post' => (object) array( 'name' => 'post', 'public' => true ) );
+		$previous_posts = $GLOBALS['cybermaps_mock_posts'] ?? array();
+		$previous_query = $GLOBALS['cybermaps_mock_wp_query_callback'] ?? null;
+		try {
+			$GLOBALS['cybermaps_mock_posts'] = array();
+			foreach ( range( 1, 3 ) as $id ) {
+				$GLOBALS['cybermaps_mock_posts'][ $id ] = (object) array( 'ID' => $id, 'post_type' => 'post', 'post_status' => 'publish', 'post_password' => '', 'post_title' => 'Public ' . $id, 'post_content' => 'Literal text', 'post_modified_gmt' => gmdate( 'Y-m-d H:i:s' ), 'post_date_gmt' => gmdate( 'Y-m-d H:i:s' ) );
+			}
+			$GLOBALS['cybermaps_mock_wp_query_callback'] = static fn(): array => array_values( $GLOBALS['cybermaps_mock_posts'] );
+			$updates = new \Cybermaps\Discovery\Updates();
+			$this->assertCount( 2, $updates->get_updates_data()['updates'] );
+			$generation = CacheManager::get_generation( 'discovery', true );
+			$new = array_replace( $old, array( 'ai_feed_limit' => 1 ) );
+			update_option( 'cybermaps_settings', $new );
+			( new Settings() )->on_settings_updated( $old, $new );
+			$this->assertGreaterThan( $generation, CacheManager::get_generation( 'discovery', true ) );
+			$this->assertCount( 1, $updates->get_updates_data()['updates'] );
+			$this->assertArrayHasKey( 'cybermaps_static_generation', $GLOBALS['cybermaps_mock_options'] );
+			$this->assertArrayHasKey( 'cybermaps_bg_sync_static_files', $GLOBALS['cybermaps_mock_scheduled'] );
+		} finally {
+			$GLOBALS['cybermaps_mock_posts'] = $previous_posts;
+			$GLOBALS['cybermaps_mock_wp_query_callback'] = $previous_query;
+		}
+	}
+
 	public function test_first_creation_adapters_use_type_correct_empty_old_values(): void {
 		$settings = new class() extends Settings {
 			/** @var array<string, array{mixed, mixed}> */
@@ -199,7 +238,6 @@ final class SettingsLifecycleTest extends \WP_UnitTestCase {
 			'api_secret',
 			'ai_feed_full_content',
 			'ai_feed_include_authors',
-			'ai_feed_limit',
 			'audit_post_min_words',
 			'agency_name',
 			'delete_data_on_uninstall',
@@ -211,7 +249,6 @@ final class SettingsLifecycleTest extends \WP_UnitTestCase {
 			'inject_robots',
 			'redirect_wp_sitemap',
 			'report_theme',
-			'site_guide_instructions',
 			'update_comment_post',
 			'websub_hubs',
 		);

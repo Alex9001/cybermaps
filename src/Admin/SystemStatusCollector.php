@@ -176,21 +176,29 @@ final class SystemStatusCollector {
 	}
 
 	private static function cloudflare_item(): array {
-		$detected = CloudflareRuleManager::request_is_cloudflare();
-		$state    = CloudflareRuleManager::state();
+		$detected    = CloudflareRuleManager::request_is_cloudflare();
+		$observation = CloudflareRuleManager::state_observation();
+		if ( ! $observation['available'] ) {
+			return self::cloudflare_unknown_item( 'cloudflare', 'Cloudflare' );
+		}
+		$state    = $observation['state'];
 		$has_rule = ! empty( $state['header_rules'] ) || ! empty( $state['cache_rule'] );
 		if ( $has_rule ) {
-			return self::item( 'cloudflare', 'Cloudflare', $detected ? __( 'Detected', 'cybermaps' ) : __( 'Configured', 'cybermaps' ), __( 'Cybermaps-managed rules recorded', 'cybermaps' ), 'active', __( 'Use public verification to confirm that the active zone applies the recorded rules.', 'cybermaps' ) );
+			return self::item( 'cloudflare', 'Cloudflare', $detected ? __( 'Detected', 'cybermaps' ) : __( 'Configured', 'cybermaps' ), __( 'Cybermaps-managed profiles recorded', 'cybermaps' ), 'available', __( 'Use public verification to confirm that the active zone applies the recorded rules.', 'cybermaps' ) );
 		}
 		if ( $detected ) {
-			return self::item( 'cloudflare', 'Cloudflare', __( 'Detected', 'cybermaps' ), __( 'Available but unused', 'cybermaps' ), 'available', __( 'Cloudflare can repair static discovery media types and protect negotiated responses.', 'cybermaps' ), self::advanced_url( 'cybermaps-edge-optimization' ) );
+			return self::item( 'cloudflare', 'Cloudflare', __( 'Detected', 'cybermaps' ), __( 'Available but unused', 'cybermaps' ), 'available', __( 'Cloudflare can supply missing static media types and protect negotiated responses. Incorrect origin media types require origin repair.', 'cybermaps' ), self::advanced_url( 'cybermaps-edge-optimization' ) );
 		}
 
 		return self::item( 'cloudflare', 'Cloudflare', __( 'Not detected', 'cybermaps' ), __( 'Not configured', 'cybermaps' ), 'not_applicable', __( 'Cloudflare automation is optional and does not affect Core publication.', 'cybermaps' ) );
 	}
 
 	private static function cloudflare_rules_item(): array {
-		$state       = CloudflareRuleManager::state();
+		$observation = CloudflareRuleManager::state_observation();
+		if ( ! $observation['available'] ) {
+			return self::cloudflare_unknown_item( 'cloudflare_rules', __( 'Cloudflare discovery rules', 'cybermaps' ) );
+		}
+		$state       = $observation['state'];
 		$installed   = ! empty( $state['header_rules'] ) || ! empty( $state['cache_rule'] );
 		$fingerprint = CloudflareRuleManager::expected_fingerprint();
 		$drifted     = $installed && ( '' === $fingerprint || ! hash_equals( (string) ( $state['fingerprint'] ?? '' ), $fingerprint ) );
@@ -199,14 +207,18 @@ final class SystemStatusCollector {
 			return self::item( 'cloudflare_rules', __( 'Cloudflare discovery rules', 'cybermaps' ), __( 'Installed state found', 'cybermaps' ), __( 'Repair required', 'cybermaps' ), 'attention', __( 'The hostname, endpoint inventory, or expected headers changed after the last installation.', 'cybermaps' ), self::advanced_url( 'cybermaps-edge-optimization' ) );
 		}
 		if ( $installed ) {
-			return self::item( 'cloudflare_rules', __( 'Cloudflare discovery rules', 'cybermaps' ), __( 'Configured', 'cybermaps' ), __( 'Active configuration recorded', 'cybermaps' ), 'active', __( 'Run public delivery checks to verify the observed edge response.', 'cybermaps' ) );
+			return self::item( 'cloudflare_rules', __( 'Cloudflare discovery rules', 'cybermaps' ), __( 'Configured', 'cybermaps' ), __( 'Verified rule configuration recorded', 'cybermaps' ), 'available', __( 'Profiles without eligible static targets are disabled. Enabled profiles only supply absent static MIME; origin headers and dynamic endpoint policy remain authoritative. Run public checks to observe delivery.', 'cybermaps' ) );
 		}
 
 		return self::item( 'cloudflare_rules', __( 'Cloudflare discovery rules', 'cybermaps' ), __( 'Optional', 'cybermaps' ), __( 'Not installed', 'cybermaps' ), 'not_applicable', __( 'Core remains functional without Cloudflare. One-click OAuth can install both rule families without saving a credential.', 'cybermaps' ) );
 	}
 
 	private static function cloudflare_credentials_item(): array {
-		$state       = CloudflareRuleManager::state();
+		$observation = CloudflareRuleManager::state_observation();
+		if ( ! $observation['available'] ) {
+			return self::cloudflare_unknown_item( 'cloudflare_credentials', __( 'Cloudflare credentials', 'cybermaps' ) );
+		}
+		$state       = $observation['state'];
 		$method      = sanitize_key( (string) ( $state['credential_method'] ?? '' ) );
 		$disposition = sanitize_key( (string) ( $state['credential_disposition'] ?? '' ) );
 		if ( 'revoke_failed' === $disposition ) {
@@ -221,19 +233,20 @@ final class SystemStatusCollector {
 		return self::item( 'cloudflare_credentials', __( 'Cloudflare credentials', 'cybermaps' ), __( 'Not stored', 'cybermaps' ), __( 'No authorization performed', 'cybermaps' ), 'not_applicable', __( 'Cybermaps does not maintain a persistent Cloudflare connection.', 'cybermaps' ) );
 	}
 
-	private static function varnish_item(): array {
-		$constant = defined( VarnishAdapter::URL_CONSTANT ) && '' !== trim( (string) constant( VarnishAdapter::URL_CONSTANT ) );
-		$filtered = function_exists( 'has_filter' ) && false !== has_filter( 'cybermaps_varnish_purge_enabled' );
-		$active   = $constant || $filtered;
+	/** Do not turn an unreadable operation history into a known absence. */
+	private static function cloudflare_unknown_item( string $id, string $label ): array {
+		return self::item( $id, $label, __( 'Unavailable', 'cybermaps' ), __( 'Unknown', 'cybermaps' ), 'unknown', __( 'Saved Cloudflare operation history could not be read. Rule installation and credential disposition are unknown. Retry when database access is restored.', 'cybermaps' ) );
+	}
 
-		return self::item(
-			'varnish',
-			'Varnish',
-			$active ? __( 'Configured', 'cybermaps' ) : __( 'Not detected', 'cybermaps' ),
-			$active ? __( 'Exact-URL PURGE integration available', 'cybermaps' ) : __( 'Not configured', 'cybermaps' ),
-			$active ? 'active' : 'not_applicable',
-			$active ? __( 'Cybermaps sends bounded exact-path invalidations through the opt-in adapter.', 'cybermaps' ) : __( 'Varnish remains opt-in because its PURGE ACL and secret belong to the deployment.', 'cybermaps' )
-		);
+	private static function varnish_item(): array {
+		$config = ( new VarnishAdapter() )->configuration_status();
+		if ( ! $config['enabled_for_probe'] ) {
+			return self::item( 'varnish', 'Varnish', $config['configured'] ? __( 'Configuration found', 'cybermaps' ) : __( 'Not configured', 'cybermaps' ), __( 'Not enabled for diagnostic context', 'cybermaps' ), 'not_applicable', __( 'The opt-in policy did not enable this diagnostic context. Eligibility is evaluated separately for each invalidation event; no PURGE was sent.', 'cybermaps' ) );
+		}
+		if ( ! $config['valid'] ) {
+			return self::item( 'varnish', 'Varnish', __( 'Opt-in found', 'cybermaps' ), __( 'Configuration incomplete or invalid', 'cybermaps' ), 'attention', __( 'Provide an allowed PURGE endpoint and a secret. This read-only check sends no PURGE request.', 'cybermaps' ) );
+		}
+		return self::item( 'varnish', 'Varnish', __( 'Configured', 'cybermaps' ), __( 'Enabled for diagnostic context', 'cybermaps' ), 'available', __( 'Configuration passed the read-only check. Enablement and target eligibility are checked for every invalidation event; delivery has not been tested.', 'cybermaps' ) );
 	}
 
 	private static function opcache_item(): array {

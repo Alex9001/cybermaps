@@ -9,6 +9,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class Chunker {
+	public const MAX_SOURCE_BYTES    = 2 * 1024 * 1024;
+	public const MAX_OUTPUT_BYTES    = 4 * 1024 * 1024;
+	public const MAX_CHUNKS          = 4096;
 	public const DEFAULT_WINDOW_SIZE = 800;
 	public const MIN_WINDOW_SIZE     = 100;
 	public const MAX_WINDOW_SIZE     = 12000;
@@ -38,6 +41,8 @@ class Chunker {
 			return array();
 		}
 
+		PublicationSizeLimitException::require_capacity( strlen( (string) ( $post->post_content ?? '' ) ), 'chunks.json', self::MAX_SOURCE_BYTES );
+
 		$settings  = \Cybermaps\Core\ConfigurationStore::settings();
 		$config    = self::normalize_configuration( $settings );
 		$ai_meta   = \Cybermaps\Discovery\AIMetadata::calculate( (int) $post_id );
@@ -49,7 +54,7 @@ class Chunker {
 		$config_hash      = substr(
 			hash(
 				'sha256',
-				$config['window_size'] . ':' . $config['overlap'] . ':' . $freshness . ':' . $intent
+				'bounded-v4:' . $config['window_size'] . ':' . $config['overlap'] . ':' . $freshness . ':' . $intent
 			),
 			0,
 			16
@@ -63,11 +68,13 @@ class Chunker {
 			}
 		}
 
-		$text        = (string) ( new ContentAnalyzer( $this->cache_enabled ) )->analyze_post( $post )['markdown'];
-		$chunks_text = $this->split_text( $text, $config['window_size'], $config['overlap'] );
-
-		$chunks = array();
-		foreach ( $chunks_text as $index => $chunk_text ) {
+		$analysis = $this->complete_analysis( $post );
+		$text     = (string) $analysis['markdown'];
+		$chunks   = array();
+		$bytes    = 0;
+		foreach ( $this->iterate_segments( $text, $config['window_size'], $config['overlap'] ) as $index => $chunk_text ) {
+			$bytes += strlen( (string) wp_json_encode( $chunk_text ) ) + 32;
+			PublicationSizeLimitException::require_capacity( $bytes, 'chunks.json', self::MAX_OUTPUT_BYTES );
 			$chunks[] = array(
 				'index' => $index,
 				'text'  => $chunk_text,
@@ -85,6 +92,9 @@ class Chunker {
 			'chunks'   => $chunks,
 		);
 
+		PublicationSizeLimitException::require_value_capacity( $result, 'chunks.json', self::MAX_OUTPUT_BYTES );
+		PublicationSizeLimitException::require_capacity( strlen( (string) wp_json_encode( $result ) ), 'chunks.json', self::MAX_OUTPUT_BYTES );
+
 		// Cache for 24 hours — invalidated automatically when post is modified (cache key includes post_modified_gmt hash)
 		if ( $this->cache_enabled ) {
 			\Cybermaps\Core\CacheManager::set_if_current(
@@ -97,6 +107,16 @@ class Chunker {
 		}
 
 		return $result;
+	}
+
+	/** Reject oversized sources and incomplete structure before metadata/chunk work. */
+	private function complete_analysis( object $post ): array {
+		PublicationSizeLimitException::require_capacity( strlen( (string) ( $post->post_content ?? '' ) ), 'chunks.json', self::MAX_SOURCE_BYTES, 64 );
+		$analysis = ( new ContentAnalyzer( $this->cache_enabled ) )->analyze_post( $post );
+		if ( empty( $analysis['complete'] ) ) {
+			PublicationSizeLimitException::require_capacity( self::MAX_OUTPUT_BYTES + 1, 'chunks.json', self::MAX_OUTPUT_BYTES );
+		}
+		return $analysis;
 	}
 
 	/**
@@ -139,35 +159,57 @@ class Chunker {
 		$text        = is_scalar( $text ) ? (string) $text : '';
 		$window_size = (int) $window_size;
 		$overlap     = (int) $overlap;
-		$chunks      = array();
-		$length      = $this->text_length( $text );
-
-		if ( $length <= $window_size ) {
-			return array( $text );
-		}
-
-		// Sanity check to prevent infinite loops
-		if ( $window_size <= $overlap ) {
-			$overlap = round( $window_size / 2 );
-		}
 		if ( $window_size <= 0 ) {
 			return array( $text );
 		}
+		$overlap = $window_size <= $overlap ? (int) round( $window_size / 2 ) : max( 0, $overlap );
+		return iterator_to_array( $this->iterate_segments( $text, $window_size, $overlap ), false );
+	}
 
-		$start = 0;
-		while ( $start < $length ) {
-			$chunks[] = $this->text_slice( $text, $start, $window_size );
-
-			$next_start = $start + ( $window_size - $overlap );
-			if ( $next_start <= $start ) {
-				// Prevent stall
-				$start += $window_size;
-			} else {
-				$start = $next_start;
-			}
+	/** Generate each segment once instead of retaining a second complete list. */
+	private function iterate_segments( string $text, int $window_size, int $overlap ): \Generator {
+		$length = $this->text_length( $text );
+		$step   = max( 1, $window_size - $overlap );
+		$count  = $length <= $window_size ? 1 : (int) ceil( $length / $step );
+		if ( $count > self::MAX_CHUNKS ) {
+			PublicationSizeLimitException::require_capacity( self::MAX_OUTPUT_BYTES + 1, 'chunks.json', self::MAX_OUTPUT_BYTES );
+		}
+		PublicationSizeLimitException::require_capacity( strlen( $text ) * 2 + $count * 128, 'chunks.json', self::MAX_OUTPUT_BYTES );
+		if ( $length <= $window_size ) {
+			yield $text;
+			return;
 		}
 
-		return $chunks;
+		$start = 0;
+		$bytes = strlen( $text );
+		while ( $start < $bytes ) {
+			if ( $this->multibyte_enabled ) {
+				$end  = $this->advance_characters( $text, $start, $window_size );
+				$next = $this->advance_characters( $text, $start, $step );
+			} else {
+				$end  = $this->previous_utf8_boundary( $text, min( $bytes, $start + $window_size ), $start );
+				$next = 0 === $overlap ? $end : $this->next_utf8_boundary( $text, min( $bytes, $start + $step ) );
+			}
+			yield substr( $text, $start, $end - $start );
+			$start = max( $start + 1, $next );
+		}
+	}
+
+	/** Move through UTF-8 once per window; avoid rescanning every prior character. */
+	private function advance_characters( string $text, int $offset, int $count ): int {
+		$length = strlen( $text );
+		for ( $index = 0; $index < $count && $offset < $length; ++$index ) {
+			$offset = $this->next_utf8_boundary( $text, $offset + 1 );
+		}
+		return $offset;
+	}
+
+	private function previous_utf8_boundary( string $text, int $end, int $start ): int {
+		$length = strlen( $text );
+		while ( $end > $start && $end < $length && $this->is_utf8_continuation( $text[ $end ] ) ) {
+			--$end;
+		}
+		return $end > $start ? $end : $this->next_utf8_boundary( $text, min( $length, $start + 1 ) );
 	}
 
 	/**
@@ -177,31 +219,6 @@ class Chunker {
 		return $this->multibyte_enabled
 			? (int) \mb_strlen( $text, 'UTF-8' )
 			: \strlen( $text );
-	}
-
-	/**
-	 * Slice text without requiring mbstring.
-	 *
-	 * The extension-free path treats the configured window as bytes and moves
-	 * boundaries away from UTF-8 continuation bytes. ASCII behavior is
-	 * identical, while non-ASCII chunks remain valid UTF-8 and bounded.
-	 */
-	private function text_slice( string $text, int $start, int $length ): string {
-		if ( $this->multibyte_enabled ) {
-			return (string) \mb_substr( $text, $start, $length, 'UTF-8' );
-		}
-
-		$byte_length = \strlen( $text );
-		$start       = $this->next_utf8_boundary( $text, max( 0, min( $byte_length, $start ) ) );
-		$end         = min( $byte_length, $start + max( 0, $length ) );
-		while ( $end > $start && $end < $byte_length && $this->is_utf8_continuation( $text[ $end ] ) ) {
-			--$end;
-		}
-		if ( $end === $start && $end < $byte_length ) {
-			$end = $this->next_utf8_boundary( $text, min( $byte_length, $start + 1 ) );
-		}
-
-		return \substr( $text, $start, max( 0, $end - $start ) );
 	}
 
 	private function next_utf8_boundary( string $text, int $offset ): int {
@@ -223,6 +240,6 @@ class Chunker {
 	 * @return string
 	 */
 	public function extract_headers_to_markdown( $content ) {
-		return (string) ( new ContentAnalyzer() )->analyze_content( (string) $content )['markdown'];
+		return (string) $this->complete_analysis( (object) array( 'post_content' => (string) $content ) )['markdown'];
 	}
 }

@@ -1,4 +1,7 @@
 """Render both public stylesheet variants; source text alone cannot prove consent."""
+import sys
+if sys.flags.optimize:
+    raise SystemExit('Validation refuses optimized Python; unset PYTHONOPTIMIZE and omit -O/-OO.')
 from pathlib import Path
 from lxml import etree
 

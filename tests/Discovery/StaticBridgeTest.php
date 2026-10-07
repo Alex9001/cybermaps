@@ -19,6 +19,12 @@ class StaticBridgeTest extends \WP_UnitTestCase {
 		);
 		$GLOBALS['cybermaps_mock_filter_callbacks'] = array();
 		$GLOBALS['cybermaps_mock_scheduled']        = array();
+		\cybermaps_mock_enable_static_ownership_database( true );
+	}
+
+	protected function tearDown(): void {
+		\cybermaps_mock_disable_static_ownership_database();
+		parent::tearDown();
 	}
 
 	public function test_get_instance() {
@@ -223,7 +229,7 @@ class StaticBridgeTest extends \WP_UnitTestCase {
 		$bridge = \Cybermaps\Discovery\StaticBridge::get_instance();
 
 		// Create some dummy files to purge
-		$base = \Cybermaps\Sitemap\Orchestrator::get_sitemap_base();
+		$base = 'ownership-purge-fixture';
 		$bridge->write_file( $base . '.xml', '<xml></xml>' );
 		$bridge->write_file( 'ai.json', '{}' );
 		$bridge->write_file( 'discovery/chunks/1.json', '{}' );

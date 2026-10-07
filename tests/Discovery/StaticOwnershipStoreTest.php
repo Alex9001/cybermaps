@@ -32,9 +32,11 @@ final class StaticOwnershipStoreTest extends \WP_UnitTestCase {
 
 		\Cybermaps\Core\ConfigurationStore::reset_memo();
 		$this->reset_bridge_state();
+		\cybermaps_mock_enable_static_ownership_database( true );
 	}
 
 	protected function tearDown(): void {
+		\cybermaps_mock_disable_static_ownership_database();
 		unset(
 			$GLOBALS['cybermaps_mock_update_option_behavior'],
 			$GLOBALS['cybermaps_mock_get_option_observer'],
@@ -65,12 +67,7 @@ final class StaticOwnershipStoreTest extends \WP_UnitTestCase {
 
 		\update_option( StaticOwnershipStore::LEGACY_OPTION, array( $legacy_path => $hash ), false );
 		\update_option( 'cybermaps_static_sync_epoch', 7, false );
-		$GLOBALS['cybermaps_mock_update_option_behavior'] = static function ( string $option, mixed $value, string $stage ) use ( $shard_name ): void {
-			unset( $value );
-			if ( $shard_name === $option && 'after' === $stage ) {
-				unset( $GLOBALS['cybermaps_mock_options'][ $option ] );
-			}
-		};
+		$GLOBALS['wpdb']->failure = static fn( $db, array $query ): bool => str_starts_with( $query['query'], 'INSERT IGNORE INTO %i (path_key' );
 
 		$store = new StaticOwnershipStore();
 		$this->assertFalse( $store->migrate_if_needed() );
@@ -78,19 +75,13 @@ final class StaticOwnershipStoreTest extends \WP_UnitTestCase {
 		$this->assertSame( array( $legacy_path => $hash ), $GLOBALS['cybermaps_mock_options'][ StaticOwnershipStore::LEGACY_OPTION ] );
 		$this->assertArrayNotHasKey( StaticOwnershipStore::SCHEMA_OPTION, $GLOBALS['cybermaps_mock_options'] );
 
-		unset( $GLOBALS['cybermaps_mock_update_option_behavior'] );
+		$GLOBALS['wpdb']->failure = null;
 		$this->assertTrue( $store->migrate_if_needed() );
 		$this->assertSame( StaticOwnershipStore::SCHEMA_VERSION, StaticOwnershipStore::current_schema() );
 		$this->assertArrayNotHasKey( StaticOwnershipStore::LEGACY_OPTION, $GLOBALS['cybermaps_mock_options'] );
-		$this->assertSame(
-			array(
-				$normalized => array(
-					'hash'       => $hash,
-					'generation' => 7,
-				),
-			),
-			$GLOBALS['cybermaps_mock_options'][ $shard_name ]
-		);
+		$this->assertSame( $hash, $store->get_hash( $normalized ) );
+		$this->assertSame( 7, $store->get_generation( $normalized ) );
+		$this->assertFalse( get_option( $shard_name ) );
 	}
 
 	public function test_migration_rejects_ambiguous_normalized_path_collision(): void {
@@ -254,7 +245,7 @@ final class StaticOwnershipStoreTest extends \WP_UnitTestCase {
 		$path  = 'authoritative.txt';
 		$hash  = \str_repeat( 'e', 32 );
 		$shard = StaticOwnershipStore::shard_for_path( $path );
-		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SCHEMA_VERSION, false );
+		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SHARD_SCHEMA_VERSION, false );
 		\update_option(
 			StaticOwnershipStore::shard_option_name( $shard ),
 			array(
@@ -277,7 +268,7 @@ final class StaticOwnershipStoreTest extends \WP_UnitTestCase {
 		$content  = 'still owned';
 		$path     = $this->create_file( $filename, $content );
 		$shard    = StaticOwnershipStore::shard_for_path( $filename );
-		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SCHEMA_VERSION, false );
+		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SHARD_SCHEMA_VERSION, false );
 		\update_option( 'cybermaps_static_sync_epoch', 5, false );
 		\update_option(
 			StaticOwnershipStore::shard_option_name( $shard ),
@@ -289,12 +280,7 @@ final class StaticOwnershipStoreTest extends \WP_UnitTestCase {
 			),
 			false
 		);
-		$GLOBALS['cybermaps_mock_update_option_behavior'] = static function ( string $option, mixed $value, string $stage ): void {
-			unset( $value );
-			if ( 'cybermaps_static_sync_epoch' === $option && 'after' === $stage ) {
-				unset( $GLOBALS['cybermaps_mock_options'][ $option ] );
-			}
-		};
+		$GLOBALS['wpdb']->failure = static fn( $db, array $query ): bool => str_starts_with( $query['query'], 'INSERT INTO %i (option_name' ) && 'cybermaps_static_sync_epoch' === ( $query['args'][1] ?? '' );
 
 		$report = StaticBridge::get_instance()->sync_all();
 
@@ -321,7 +307,7 @@ final class StaticOwnershipStoreTest extends \WP_UnitTestCase {
 			'phase'      => StaticSyncRunner::PHASE_STALE_RECONCILIATION,
 			'cursor'     => array(
 				'shard' => 4,
-				'path'  => 'last-owned.txt',
+				'path'  => hash( 'sha256', 'last-owned.txt' ),
 			),
 			'context'    => array(
 				'topology' => ( new StaticSyncRunner( StaticBridge::get_instance() ) )->topology_fingerprint( $settings, 'all' ),
@@ -479,7 +465,7 @@ final class StaticOwnershipStoreTest extends \WP_UnitTestCase {
 		$content               = 'new body awaiting ownership';
 		$path                  = ABSPATH . $filename;
 		$this->created_files[] = $path;
-		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SCHEMA_VERSION, false );
+		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SHARD_SCHEMA_VERSION, false );
 		$this->steal_lease_after_next_move();
 
 		$bridge = StaticBridge::get_instance();
@@ -509,7 +495,7 @@ final class StaticOwnershipStoreTest extends \WP_UnitTestCase {
 		$third_party           = 'independent third-party body';
 		$path                  = ABSPATH . $filename;
 		$this->created_files[] = $path;
-		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SCHEMA_VERSION, false );
+		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SHARD_SCHEMA_VERSION, false );
 		$this->steal_lease_after_next_move();
 
 		$bridge = StaticBridge::get_instance();
@@ -533,11 +519,13 @@ final class StaticOwnershipStoreTest extends \WP_UnitTestCase {
 		$this->created_files[] = $path;
 		$move_attempted        = false;
 		$lease_stolen          = false;
-		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SCHEMA_VERSION, false );
+		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SHARD_SCHEMA_VERSION, false );
 		$GLOBALS['cybermaps_mock_wp_filesystem_move_observer'] = static function () use ( &$move_attempted ): void {
 			$move_attempted = true;
 		};
-		$GLOBALS['cybermaps_mock_get_option_observer']         = static function ( string $option ) use ( &$lease_stolen ): void {
+		$GLOBALS['wpdb']->before_query = static function ( $database, array $query ) use ( &$lease_stolen ): void {
+			$option = $query['args'][1] ?? '';
+			if ( ! str_starts_with( $query['query'], 'SELECT option_value' ) ) { return; }
 			if (
 				$lease_stolen
 				|| StaticWriteIntentStore::OPTION !== $option
@@ -546,7 +534,7 @@ final class StaticOwnershipStoreTest extends \WP_UnitTestCase {
 				return;
 			}
 			$lease_stolen = true;
-			unset( $GLOBALS['cybermaps_mock_get_option_observer'] );
+			$database->before_query = null;
 			\update_option(
 				StaticBridge::OPERATION_LOCK_OPTION,
 				array(
@@ -578,12 +566,7 @@ final class StaticOwnershipStoreTest extends \WP_UnitTestCase {
 		$this->assertTrue( $this->invoke_private( $bridge, 'acquire_operation_lock' ) );
 		$before = (int) \get_option( 'cybermaps_static_ownership_revision', 0 );
 		$this->set_bridge_property( 'ownership_revision_pending', true );
-		$GLOBALS['cybermaps_mock_update_option_behavior'] = static function ( string $option, mixed $value, string $stage ) use ( $before ): void {
-			unset( $value );
-			if ( 'cybermaps_static_ownership_revision' === $option && 'after' === $stage ) {
-				$GLOBALS['cybermaps_mock_options'][ $option ] = $before;
-			}
-		};
+		$GLOBALS['wpdb']->failure = static fn( $db, array $query ): bool => str_starts_with( $query['query'], 'INSERT INTO %i (option_name' ) && 'cybermaps_static_ownership_revision' === ( $query['args'][1] ?? '' );
 
 		$this->invoke_private( $bridge, 'release_operation_lock' );
 
@@ -592,12 +575,12 @@ final class StaticOwnershipStoreTest extends \WP_UnitTestCase {
 		$this->assertSame( 0, (int) \get_option( StaticOwnershipStore::REPAIR_ACK_OPTION, 0 ) );
 		$this->assertNotFalse( \wp_next_scheduled( 'cybermaps_bg_sync_static_files' ) );
 
-		$interleaved                                      = false;
-		$GLOBALS['cybermaps_mock_update_option_behavior'] = static function ( string $option, mixed $value, string $stage ) use ( &$interleaved ): void {
-			unset( $value );
-			if ( ! $interleaved && 'cybermaps_static_ownership_revision' === $option && 'after' === $stage ) {
+		$GLOBALS['wpdb']->failure = null;
+		$interleaved = false;
+		$GLOBALS['wpdb']->after_query = static function ( $database, array $query ) use ( &$interleaved ): void {
+			if ( ! $interleaved && str_starts_with( $query['query'], 'INSERT INTO %i (option_name' ) && 'cybermaps_static_ownership_revision' === ( $query['args'][1] ?? '' ) ) {
 				$interleaved = true;
-				\update_option( StaticOwnershipStore::REPAIR_OPTION, 2, false );
+				update_option( StaticOwnershipStore::REPAIR_OPTION, 2, false );
 			}
 		};
 		$this->assertTrue( $this->invoke_private( $bridge, 'acquire_operation_lock' ) );
@@ -647,7 +630,7 @@ final class StaticOwnershipStoreTest extends \WP_UnitTestCase {
 				'generation' => 1,
 			),
 		);
-		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SCHEMA_VERSION, false );
+		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SHARD_SCHEMA_VERSION, false );
 		\update_option( StaticOwnershipStore::shard_option_name( 0 ), $first, false );
 		\update_option( StaticOwnershipStore::shard_option_name( StaticOwnershipStore::SHARD_COUNT - 1 ), $last, false );
 
@@ -676,7 +659,7 @@ final class StaticOwnershipStoreTest extends \WP_UnitTestCase {
 				'generation' => 1,
 			),
 		);
-		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SCHEMA_VERSION, false );
+		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SHARD_SCHEMA_VERSION, false );
 		\update_option( $option, $old, false );
 
 		$store = new StaticOwnershipStore();
@@ -710,7 +693,7 @@ final class StaticOwnershipStoreTest extends \WP_UnitTestCase {
 				'generation' => 1,
 			),
 		);
-		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SCHEMA_VERSION, false );
+		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SHARD_SCHEMA_VERSION, false );
 		\update_option( $option, $old, false );
 
 		$store = new StaticOwnershipStore();
@@ -776,13 +759,8 @@ final class StaticOwnershipStoreTest extends \WP_UnitTestCase {
 				'generation' => 7,
 			),
 		);
-		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SCHEMA_VERSION, false );
-		$GLOBALS['cybermaps_mock_update_option_behavior'] = static function ( string $option, mixed $value, string $stage ) use ( $second_option ): void {
-			unset( $value );
-			if ( $second_option === $option && 'after' === $stage ) {
-				unset( $GLOBALS['cybermaps_mock_options'][ $option ] );
-			}
-		};
+		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SHARD_SCHEMA_VERSION, false );
+		$GLOBALS['wpdb']->failure = static fn( $db, array $query ): bool => str_starts_with( $query['query'], 'INSERT IGNORE INTO %i (option_name' ) && $second_option === ( $query['args'][1] ?? '' );
 
 		$store = new StaticOwnershipStore();
 		$this->assertTrue( $store->set_hash( $first_path, \str_repeat( '3', 32 ), 7 ) );
@@ -792,7 +770,7 @@ final class StaticOwnershipStoreTest extends \WP_UnitTestCase {
 		$this->assertArrayNotHasKey( $second_option, $GLOBALS['cybermaps_mock_options'] );
 		$this->assertSame( 1, (int) \get_option( 'cybermaps_static_ownership_revision', 0 ) );
 
-		unset( $GLOBALS['cybermaps_mock_update_option_behavior'] );
+		$GLOBALS['wpdb']->failure = null;
 		$this->assertTrue( $store->flush( 7 ) );
 		$this->assertSame( $first_record, \get_option( $first_option ) );
 		$this->assertSame( $second_record, \get_option( $second_option ) );
@@ -805,7 +783,7 @@ final class StaticOwnershipStoreTest extends \WP_UnitTestCase {
 		$first_path  = $paths[0];
 		$second_path = $paths[1];
 		$option      = StaticOwnershipStore::shard_option_name( $shard );
-		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SCHEMA_VERSION, false );
+		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SHARD_SCHEMA_VERSION, false );
 
 		$first_writer = new StaticOwnershipStore();
 		$stale_writer = new StaticOwnershipStore();
@@ -835,7 +813,7 @@ final class StaticOwnershipStoreTest extends \WP_UnitTestCase {
 				'generation' => 9,
 			),
 		);
-		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SCHEMA_VERSION, false );
+		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SHARD_SCHEMA_VERSION, false );
 		\update_option( $option, $base, false );
 
 		$successor_writer = new StaticOwnershipStore();
@@ -873,7 +851,7 @@ final class StaticOwnershipStoreTest extends \WP_UnitTestCase {
 			'hash'       => 'not-an-md5',
 			'generation' => 8,
 		);
-		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SCHEMA_VERSION, false );
+		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SHARD_SCHEMA_VERSION, false );
 		$GLOBALS['cybermaps_mock_update_option_behavior'] = static function ( string $written_option, mixed $value, string $stage ) use ( $option, $malformed_path ): void {
 			unset( $value );
 			if ( $option === $written_option && 'after' === $stage ) {
@@ -910,7 +888,7 @@ final class StaticOwnershipStoreTest extends \WP_UnitTestCase {
 				'generation' => 2,
 			),
 		);
-		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SCHEMA_VERSION, false );
+		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SHARD_SCHEMA_VERSION, false );
 		\update_option( $option, $malformed, false );
 
 		$store = new StaticOwnershipStore();
@@ -929,7 +907,7 @@ final class StaticOwnershipStoreTest extends \WP_UnitTestCase {
 				'generation' => 1,
 			),
 		);
-		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SCHEMA_VERSION, false );
+		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SHARD_SCHEMA_VERSION, false );
 		\update_option( $option, $misplaced, false );
 
 		$store = new StaticOwnershipStore();
@@ -950,10 +928,10 @@ final class StaticOwnershipStoreTest extends \WP_UnitTestCase {
 				'generation' => 1,
 			),
 		);
-		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SCHEMA_VERSION, false );
+		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SHARD_SCHEMA_VERSION, false );
 		$bridge = StaticBridge::get_instance();
 		$this->assertTrue( $this->invoke_private( $bridge, 'acquire_operation_lock' ) );
-		\update_option( $option, $misplaced, false );
+		$GLOBALS['wpdb']->tables['wp_cybermaps_static_ownership'][ hash( 'sha256', $misplaced_path ) ] = array( 'path_key' => hash( 'sha256', $misplaced_path ), 'path' => $misplaced_path, 'body_hash' => md5( $content ), 'generation' => '1', 'shard' => '0' );
 		$store = ( new \ReflectionProperty( StaticBridge::class, 'ownership_store' ) )->getValue( $bridge );
 		$store->clear_local_cache();
 		$this->set_bridge_property( 'sync_active', true );
@@ -970,7 +948,7 @@ final class StaticOwnershipStoreTest extends \WP_UnitTestCase {
 		);
 
 		try {
-			$this->assertTrue( $bridge->runner_reconcile_stale_slice( $report, $cursor ) );
+			$this->assertFalse( $bridge->runner_reconcile_stale_slice( $report, $cursor ) );
 			$this->assertArrayHasKey( 'stale_reconciliation', $report['failed'] );
 			$this->assertSame( 'invalid_ownership_shard', $report['failed']['stale_reconciliation']['code'] );
 			$this->assertSame(
@@ -980,8 +958,8 @@ final class StaticOwnershipStoreTest extends \WP_UnitTestCase {
 				),
 				$cursor
 			);
-			$this->assertFalse( ( new \ReflectionProperty( StaticBridge::class, 'sync_deferred' ) )->getValue( $bridge ) );
-			$this->assertSame( $misplaced, \get_option( $option ) );
+			$this->assertTrue( ( new \ReflectionProperty( StaticBridge::class, 'sync_deferred' ) )->getValue( $bridge ) );
+			$this->assertSame( '0', $GLOBALS['wpdb']->tables['wp_cybermaps_static_ownership'][ hash( 'sha256', $misplaced_path ) ]['shard'] );
 			$this->assertFileExists( $file );
 			$this->assertSame( array(), $report['deleted'] );
 		} finally {
@@ -1005,7 +983,7 @@ final class StaticOwnershipStoreTest extends \WP_UnitTestCase {
 		$second_content = 'stale:' . $second_shard_file;
 		$this->create_file( $second_shard_file, $second_content );
 
-		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SCHEMA_VERSION, false );
+		\update_option( StaticOwnershipStore::SCHEMA_OPTION, StaticOwnershipStore::SHARD_SCHEMA_VERSION, false );
 		\update_option( 'cybermaps_static_sync_epoch', 2, false );
 		\update_option( StaticOwnershipStore::shard_option_name( 0 ), $records, false );
 		\update_option(

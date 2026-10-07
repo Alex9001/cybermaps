@@ -454,7 +454,8 @@ final class Upgrade {
 	}
 
 	private static function normalize_settings(): bool {
-		$settings = self::settings_array();
+		$before   = \Cybermaps\Admin\ConfigurationMutationStore::read( 'cybermaps_settings' );
+		$settings = is_array( $before['value'] ) ? $before['value'] : array();
 		self::migrate_media_discovery_intensity( $settings );
 		self::migrate_rss_sitemap_types( $settings );
 		self::migrate_sitemap_exclusions( $settings );
@@ -462,12 +463,7 @@ final class Upgrade {
 			unset( $settings[ $retired_key ] );
 		}
 		self::normalize_setting_defaults( $settings );
-		return self::save_and_verify_option( 'cybermaps_settings', $settings );
-	}
-
-	private static function settings_array(): array {
-		$value = get_option( 'cybermaps_settings', array() );
-		return is_array( $value ) ? $value : array();
+		return self::save_and_verify_option( 'cybermaps_settings', $settings, $before );
 	}
 
 	private static function migrate_media_discovery_intensity( array &$settings ): void {
@@ -1011,22 +1007,14 @@ final class Upgrade {
 			&& method_exists( $database, 'query' );
 	}
 
-	private static function read_raw_database_option( string $option ): ?string {
+	private static function read_raw_database_option( string $option ): string|null|false {
 		global $wpdb;
-		$raw = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Raw bytes are required for the exact lease/state CAS.
-			$wpdb->prepare(
-				'SELECT option_value FROM %i WHERE option_name = %s LIMIT 1',
-				$wpdb->options,
-				$option
-			)
-		);
-
-		return is_string( $raw ) ? $raw : null;
+		return RawOptionStore::read( $wpdb, $option );
 	}
 
-	private static function raw_lease_belongs_to_current_owner( ?string $raw ): bool {
+	private static function raw_lease_belongs_to_current_owner( string|null|false $raw ): bool {
 		$token = self::get_lock()->get_token();
-		$value = null === $raw ? null : maybe_unserialize( $raw );
+		$value = is_string( $raw ) ? maybe_unserialize( $raw ) : null;
 		return null !== $token
 			&& is_array( $value )
 			&& is_scalar( $value['token'] ?? null )
@@ -1069,36 +1057,67 @@ final class Upgrade {
 	 * Reduce the strategy option to the fields owned by the current matrix.
 	 */
 	private static function normalize_discovery_center(): bool {
-		$raw  = get_option( 'cybermaps_discovery_center', '' );
-		$data = is_string( $raw ) ? json_decode( $raw, true ) : $raw;
-		if ( ! is_array( $data ) ) {
-			return true;
-		}
-
-		$encoded = wp_json_encode( $data );
-		if ( ! is_string( $encoded ) ) {
+		$before = \Cybermaps\Admin\ConfigurationMutationStore::read( 'cybermaps_discovery_center' );
+		$raw    = $before['exists'] ? $before['value'] : '';
+		if ( is_string( $raw ) && strlen( $raw ) > \Cybermaps\Admin\Settings\Sanitizers\SettingsSubmission::MAX_BYTES ) {
 			return false;
 		}
-		$encoded = \Cybermaps\Admin\Settings\Sanitizers\DiscoveryCenterSanitizer::sanitize( $encoded );
+		$data = is_string( $raw ) ? json_decode( $raw, true, 8 ) : $raw;
+		if ( ! is_array( $data ) ) {
+			return '' === $raw && self::configuration_snapshot_matches( 'cybermaps_discovery_center', $before );
+		}
+
+		$encoded = \Cybermaps\Admin\Settings\Sanitizers\DiscoveryCenterSanitizer::migrate_saved( $data );
 		if ( ! is_string( $encoded ) || '' === $encoded ) {
 			return false;
 		}
 
-		return self::save_and_verify_option( 'cybermaps_discovery_center', $encoded );
+		return self::save_and_verify_option( 'cybermaps_discovery_center', $encoded, $before );
 	}
 
 	/**
-	 * Persist a canonical migration value and confirm that WordPress retained it.
-	 *
-	 * update_option() legitimately returns false when a value is unchanged, so
-	 * the stored value is the only reliable completion signal for a retry-safe
-	 * migration.
+	 * Persist only the exact snapshot normalized by this worker. The existing
+	 * lease-bound SQL also fences upgrade takeover; UI/import writers need not
+	 * participate in that lease. A conflict remains intact and retries later.
+	 * Pre-update mutation filters are bypassed; verified writes notify the native
+	 * post-option observers once. Observer failure never rolls back another writer.
 	 */
-	private static function save_and_verify_option( string $option, mixed $value ): bool {
-		update_option( $option, $value, false );
-		$missing = new \stdClass();
+	private static function save_and_verify_option( string $option, mixed $value, array $before ): bool {
+		$after = \Cybermaps\Admin\ConfigurationMutationStore::target( $value );
+		if ( $before === $after ) {
+			return self::configuration_snapshot_matches( $option, $before );
+		}
+		if ( ! self::replace_configuration_snapshot( $option, $before, $after ) ) {
+			return false;
+		}
+		if ( ! self::configuration_snapshot_matches( $option, $after ) ) {
+			return false;
+		}
+		\Cybermaps\Admin\ConfigurationMutationStore::notify( $option, $before, $after );
+		return self::configuration_snapshot_matches( $option, $after );
+	}
 
-		return get_option( $option, $missing ) === $value;
+	private static function configuration_snapshot_matches( string $option, array $state ): bool {
+		return self::maintain_lock() && \Cybermaps\Admin\ConfigurationMutationStore::read( $option ) === $state;
+	}
+
+	private static function replace_configuration_snapshot( string $option, array $before, array $after ): bool {
+		if ( ! self::maintain_lock() ) {
+			return false;
+		}
+		$lease = self::read_raw_database_option( self::LOCK_OPTION );
+		if ( ! self::raw_lease_belongs_to_current_owner( $lease ) ) {
+			return false;
+		}
+		global $wpdb;
+		try {
+			$result = $before['exists']
+				? self::update_direct_option( $wpdb, $option, $after['raw'], $before['raw'], $lease )
+				: self::insert_direct_option( $wpdb, $option, $after['raw'], $lease );
+			return 1 === $result && empty( $wpdb->last_error );
+		} finally {
+			RawOptionStore::invalidate( $option );
+		}
 	}
 
 	/**

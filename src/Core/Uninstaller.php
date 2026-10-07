@@ -26,6 +26,9 @@ final class Uninstaller {
 		'cybermaps_discovery_center',
 		'cybermaps_robots_manager',
 		'cybermaps_identity_data',
+		'cybermaps_cloudflare_rule_state',
+		'cybermaps_managed_htaccess',
+		'cybermaps_managed_htaccess_lock',
 		'cybermaps_fatal_errors',
 		'cybermaps_health_history',
 		DiagnosticLogger::STATE_OPTION,
@@ -112,8 +115,10 @@ final class Uninstaller {
 	private const SCHEDULED_HOOKS = array(
 		'cybermaps_cleanup_logs_event',
 		Lifecycle::RUNTIME_COUNTER_CLEANUP_HOOK,
+		RuntimeCounterStore::CLEANUP_CONTINUATION_HOOK,
 		'cybermaps_continue_logs_cleanup_event',
 		'cybermaps_bg_sync_static_files',
+		\Cybermaps\Discovery\StaticBridge::PURGE_CONTINUATION_HOOK,
 		'cybermaps_refresh_time_sensitive_static_files',
 		'cybermaps_daily_health_snapshot',
 		'cybermaps_weekly_health_snapshot',
@@ -189,6 +194,7 @@ final class Uninstaller {
 		if ( ! \is_multisite() || \is_main_site() ) {
 			$purge_result = \Cybermaps\Discovery\StaticBridge::get_instance()
 				->cancel_and_purge( 'all', true, true );
+			\wp_clear_scheduled_hook( \Cybermaps\Discovery\StaticBridge::PURGE_CONTINUATION_HOOK );
 		}
 
 		if (
@@ -214,6 +220,7 @@ final class Uninstaller {
 			$wpdb->prefix . 'cybermaps_logs',
 			$wpdb->prefix . 'cybermaps_runtime_counters',
 			$wpdb->prefix . 'cybermaps_indexnow_queue',
+			$wpdb->prefix . 'cybermaps_static_ownership',
 			$wpdb->prefix . 'cybermaps_audit_findings',
 			$wpdb->prefix . 'cybermaps_audit_resources',
 			$wpdb->prefix . 'cybermaps_audit_runs',
@@ -271,8 +278,9 @@ final class Uninstaller {
 			\delete_option( $option_name );
 		}
 
-		$options_removed = self::options_were_removed();
-		return $tables_removed && $post_meta_removed && $options_removed;
+		$pointers_removed = self::remove_oauth_pointers();
+		$options_removed  = self::options_were_removed();
+		return $tables_removed && $post_meta_removed && $options_removed && $pointers_removed;
 	}
 
 	/**
@@ -289,22 +297,8 @@ final class Uninstaller {
 		$pattern = \method_exists( $wpdb, 'esc_like' )
 			? $wpdb->esc_like( $table_name )
 			: \addcslashes( $table_name, '_%\\' );
-		if ( \property_exists( $wpdb, 'last_error' ) ) {
-			$wpdb->last_error = '';
-		}
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$rows = $wpdb->get_results(
-			$wpdb->prepare( 'SHOW TABLES LIKE %s', $pattern ),
-			ARRAY_A
-		);
-		if (
-			! \is_array( $rows )
-			|| ( \property_exists( $wpdb, 'last_error' ) && '' !== (string) $wpdb->last_error )
-		) {
-			return false;
-		}
-
-		return empty( $rows );
+		$rows    = self::read_cleanup_rows( $wpdb->prepare( 'SHOW TABLES LIKE %s', $pattern ) );
+		return is_array( $rows ) && empty( $rows );
 	}
 
 	/**
@@ -320,9 +314,6 @@ final class Uninstaller {
 		}
 
 		$placeholders = \implode( ',', \array_fill( 0, \count( self::POST_META_KEYS ), '%s' ) );
-		if ( \property_exists( $wpdb, 'last_error' ) ) {
-			$wpdb->last_error = '';
-		}
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The fixed Core-owned key list supplies exactly one string value per generated placeholder in this single statement.
 		$query = $wpdb->prepare(
 			"SELECT meta_key FROM %i
@@ -331,19 +322,74 @@ final class Uninstaller {
 			...array_merge( array( $wpdb->postmeta ), self::POST_META_KEYS )
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Uninstall must verify that no Core-owned post metadata remains.
-		$rows = $wpdb->get_results(
-			$query, // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- The complete fixed-key query is prepared immediately above.
-			ARRAY_A
-		);
-		if (
-			! \is_array( $rows )
-			|| ( \property_exists( $wpdb, 'last_error' ) && '' !== (string) $wpdb->last_error )
-		) {
+		$rows = self::read_cleanup_rows( $query );
+		return is_array( $rows ) && empty( $rows );
+	}
+
+	/** Execute only fully prepared, bounded cleanup inventory queries. */
+	private static function read_cleanup_rows( string $query ): array|false {
+		global $wpdb;
+		if ( ! is_object( $wpdb ) || ! method_exists( $wpdb, 'get_results' ) ) {
 			return false;
 		}
+		$wpdb->last_error = '';
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Prepared cleanup queries inspect only the fixed owned table, post-meta and numeric OAuth-pointer inventories; callers bound results to at most100 rows.
+		$rows = $wpdb->get_results(
+			$query, // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Every caller prepares its fixed cleanup template and typed values before entering this private reader.
+			ARRAY_A
+		);
+		return is_array( $rows ) && count( $rows ) <= 100 && '' === (string) $wpdb->last_error ? $rows : false;
+	}
 
-		return empty( $rows );
+	/** Delete only owned per-user ID pointers, including pointers for deleted users. */
+	private static function remove_oauth_pointers(): bool {
+		$deadline = microtime( true ) + 10;
+		$after    = '';
+		do {
+			$rows = self::oauth_pointer_rows( $after, 100 );
+			if ( false === $rows ) {
+				return false;
+			}
+			foreach ( $rows as $row ) {
+				$name = $row['option_name'] ?? '';
+				if ( ! self::remove_oauth_pointer( $name ) ) {
+					return false;
+				}
+				$after = $name;
+			}
+			$full_page = 100 === count( $rows );
+		} while ( $full_page && microtime( true ) < $deadline );
+		return array() === self::oauth_pointer_rows( '', 1 );
+	}
+
+	private static function remove_oauth_pointer( mixed $name ): bool {
+		if ( ! is_string( $name ) || 1 !== preg_match( '/^cybermaps_cf_oauth_pointer_[0-9]+$/D', $name ) ) {
+			return false;
+		}
+		delete_option( $name );
+		$missing = new \stdClass();
+		return get_option( $name, $missing ) === $missing;
+	}
+
+	private static function oauth_pointer_rows( string $after, int $limit ): array|false {
+		global $wpdb;
+		if ( empty( $wpdb->options ) || ! method_exists( $wpdb, 'prepare' ) ) {
+			return false;
+		}
+		return self::read_cleanup_rows(
+			$wpdb->prepare(
+				'SELECT option_name FROM %i WHERE option_name LIKE %s AND BINARY LEFT(option_name,%d) = BINARY %s AND LENGTH(option_name) > %d AND SUBSTRING(option_name,%d) NOT REGEXP %s AND option_name > %s ORDER BY option_name LIMIT %d',
+				$wpdb->options,
+				'cybermaps\\_cf\\_oauth\\_pointer\\_%',
+				27,
+				'cybermaps_cf_oauth_pointer_',
+				27,
+				28,
+				'[^0-9]',
+				$after,
+				$limit
+			)
+		);
 	}
 
 	/**
@@ -390,6 +436,14 @@ final class Uninstaller {
 		$detail   = empty( $retained )
 			? $status
 			: $status . ': ' . \implode( ', ', $retained );
+		$counts   = (array) ( $result['counts'] ?? array() );
+		$detail  .= sprintf(
+			/* translators: 1: deleted files, 2: retained files, 3: remaining inventory lower bound or unknown. */
+			__( '; deleted %1$d, retained %2$d, pending at least %3$s', 'cybermaps' ),
+			max( 0, (int) ( $counts['deleted'] ?? 0 ) ),
+			max( 0, (int) ( $counts['retained'] ?? 0 ) ),
+			isset( $result['pending_lower_bound'] ) ? (string) $result['pending_lower_bound'] : __( 'unknown', 'cybermaps' )
+		);
 		\wp_trigger_error(
 			__METHOD__,
 			\sprintf(

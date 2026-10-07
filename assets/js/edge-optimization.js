@@ -16,6 +16,11 @@
 	const cloudflareConfirm = document.getElementById( 'cybermaps-cloudflare-confirm' );
 	const cloudflareConfirmRow = document.getElementById( 'cybermaps-cloudflare-confirm-row' );
 	const publicResources = Array.isArray( config.publicResources ) ? config.publicResources : [];
+	const originalButtonDisabled = new Map( buttons.map( ( button ) => [ button, button.disabled ] ) );
+	const originalLinkDisabled = new Map( oauthLinks.map( ( link ) => [ link, link.getAttribute( 'aria-disabled' ) === 'true' ] ) );
+	const activeOperations = new Set();
+	const maxResponseBytes = 4194304;
+	const verificationTimeout = 15000;
 	let cloudflareConfirmed = config.cloudflareDetected === true;
 	let busyState = false;
 	let oauthPolling = false;
@@ -31,17 +36,29 @@
 	};
 
 	const updateControlState = () => {
-		buttons.forEach( ( button ) => { button.disabled = busyState || ( button.dataset.cloudflareRequired === '1' && ! cloudflareConfirmed ); } );
+		buttons.forEach( ( button ) => { button.disabled = originalButtonDisabled.get( button ) || busyState || ( button.dataset.cloudflareRequired === '1' && ! cloudflareConfirmed ); } );
 		oauthLinks.forEach( ( link ) => {
-			const disabled = busyState || ( link.dataset.cloudflareRequired === '1' && ! cloudflareConfirmed );
+			const disabled = originalLinkDisabled.get( link ) || busyState || ( link.dataset.cloudflareRequired === '1' && ! cloudflareConfirmed );
 			link.setAttribute( 'aria-disabled', disabled ? 'true' : 'false' );
 		} );
 	};
 
-	const setBusy = ( busy ) => {
-		busyState = busy;
+	const syncBusyState = () => {
+		busyState = activeOperations.size > 0 || oauthPolling;
 		updateControlState();
 		root.setAttribute( 'aria-busy', busyState ? 'true' : 'false' );
+	};
+
+	const beginOperation = () => {
+		const operation = Symbol();
+		activeOperations.add( operation );
+		syncBusyState();
+		return operation;
+	};
+
+	const endOperation = ( operation ) => {
+		activeOperations.delete( operation );
+		syncBusyState();
 	};
 
 	const confirmCloudflare = ( manual = false ) => {
@@ -115,32 +132,78 @@
 		if ( resource.profile === 'markdown' ) return true;
 		try {
 			const decoded = JSON.parse( body );
-			return ! resource.requires_linkset || Array.isArray( decoded?.linkset );
+			return decoded !== null && typeof decoded === 'object' && ( resource.profile !== 'api_catalog' || Array.isArray( decoded.linkset ) );
 		} catch ( error ) {
 			return false;
 		}
 	};
 
+	const readBoundedBody = async ( response, stream, signal ) => {
+		stream.body = response.body;
+		if ( signal.aborted ) throw new Error( config.strings?.verificationTimeout || 'The public response timed out.' );
+		const length = Number( response.headers.get( 'content-length' ) || 0 );
+		if ( length > maxResponseBytes || ! response.body?.getReader ) {
+			throw new Error( config.strings?.responseLimit || 'The public response cannot be read within the safe size limit.' );
+		}
+		stream.reader = response.body.getReader();
+		const decoder = new TextDecoder( 'utf-8', { fatal: true } );
+		let size = 0;
+		let output = '';
+		while ( true ) {
+			const part = await stream.reader.read();
+			if ( signal.aborted ) throw new Error( config.strings?.verificationTimeout || 'The public response timed out.' );
+			if ( part.done ) return output + decoder.decode();
+			size += part.value.byteLength;
+			if ( size > maxResponseBytes ) {
+				throw new Error( config.strings?.responseLimit || 'The public response exceeds the safe size limit.' );
+			}
+			output += decoder.decode( part.value, { stream: true } );
+		}
+	};
+
+	const observeDelivery = ( response, body, resource ) => {
+		const type = ( response.headers.get( 'content-type' ) || '' ).split( ';' )[ 0 ].trim().toLowerCase();
+		const cache = ( response.headers.get( 'cache-control' ) || '' ).toLowerCase();
+		const marker = ( response.headers.get( 'x-cybermaps-cloudflare-rule' ) || '' ).trim().toLowerCase();
+		const originPolicyPreserved = /(?:^|,)\s*(?:private|no-store)\b/.test( cache );
+		const bodyOk = response.status === 200 && bodyIsValid( body, resource );
+		const headersOk = type === resource.expected_type;
+		const ok = bodyOk && headersOk;
+		return {
+			path: resource.path, ok, status: response.status, body: bodyOk, headers: headersOk,
+			origin_policy_preserved: originPolicyPreserved,
+			mime_fallback_observed: ok && marker === 'v2-missing-mime' && ! originPolicyPreserved && ! response.headers.get( 'set-cookie' ),
+		};
+	};
+
 	const verifyResourceInBrowser = async ( resource ) => {
-		const url = new URL( resource.url, window.location.href );
-		url.searchParams.set( 'cybermaps_verify', window.crypto?.randomUUID?.() || String( Date.now() ) );
+		const controller = new AbortController();
+		const stream = { reader: null, body: null };
+		let timeout;
+		const deadline = new Promise( ( resolve, reject ) => {
+			timeout = window.setTimeout( () => {
+				controller.abort();
+				reject( new Error( config.strings?.verificationTimeout || 'The public response timed out.' ) );
+			}, verificationTimeout );
+		} );
 		try {
-			const response = await fetch( url.toString(), {
-				method: 'GET',
-				cache: 'no-store',
-				credentials: 'omit',
-			} );
-			const body = await response.text();
-			const type = ( response.headers.get( 'content-type' ) || '' ).toLowerCase();
-			const cache = ( response.headers.get( 'cache-control' ) || '' ).toLowerCase();
-			const link = ( response.headers.get( 'link' ) || '' ).toLowerCase();
-			const marker = ( response.headers.get( 'x-cybermaps-cloudflare-rule' ) || '' ).toLowerCase();
-			const linkOk = ! resource.requires_linkset || url.origin !== window.location.origin || link.includes( 'rel="api-catalog"' );
-			const bodyOk = response.status === 200 && bodyIsValid( body, resource );
-			const headersOk = type.startsWith( resource.expected_type ) && cache.includes( resource.expected_cache ) && linkOk && marker === 'v1';
-			return { path: resource.path, ok: bodyOk && headersOk, status: response.status, body: bodyOk, headers: headersOk };
+			const url = new URL( resource.url, window.location.href );
+			const read = async () => {
+				const response = await fetch( url.toString(), {
+					method: 'GET', cache: 'no-store', credentials: 'omit',
+					signal: controller.signal,
+				} );
+				return observeDelivery( response, await readBoundedBody( response, stream, controller.signal ), resource );
+			};
+			return await Promise.race( [ read(), deadline ] );
 		} catch ( error ) {
-			return { path: resource.path, ok: false, status: 0, body: false, headers: false, message: config.strings?.network || 'The browser could not reach this resource.' };
+			return { path: resource.path, ok: false, status: 0, body: false, headers: false, mime_fallback_observed: false, message: error.message || config.strings?.network || 'The browser could not reach this resource.' };
+		} finally {
+			window.clearTimeout( timeout );
+			controller.abort();
+			// Cancellation must not hold the deadline open when a reader stalls.
+			if ( stream.reader ) void stream.reader.cancel().catch( () => {} );
+			else if ( stream.body?.cancel ) void stream.body.cancel().catch( () => {} );
 		}
 	};
 
@@ -200,7 +263,7 @@
 	const finishOAuth = ( message, error = false ) => {
 		oauthPolling = false;
 		oauthPollAttempt = 0;
-		setBusy( false );
+		syncBusyState();
 		announce( message, error );
 	};
 
@@ -213,6 +276,7 @@
 
 	const pollOAuth = async ( resume = false ) => {
 		if ( oauthPolling && resume ) return;
+		if ( ! resume && ! oauthPolling ) return;
 		try {
 			const data = await request( config.oauthPollAction || 'cybermaps_edge_oauth_poll' );
 			const status = data.status || 'failed';
@@ -223,12 +287,14 @@
 			}
 			if ( status === 'pending' || status === 'processing' ) {
 				oauthPolling = true;
-				setBusy( true );
+				syncBusyState();
 				announce( data.message || config.strings?.pending || 'Waiting for Cloudflare authorization…' );
 				scheduleOAuthPoll( data.retry_after );
 				return;
 			}
 			if ( status === 'complete' || status === 'partial' ) {
+				oauthPolling = true;
+				syncBusyState();
 				announce( config.strings?.verifying || 'Cloudflare rules were updated. Verifying public resources…' );
 				const verification = await verifyPublic();
 				const verificationFailed = verification.failed > 0;
@@ -245,7 +311,7 @@
 
 	oauthLinks.forEach( ( link ) => {
 		link.addEventListener( 'click', ( event ) => {
-			if ( oauthPolling || ( link.dataset.cloudflareRequired === '1' && ! cloudflareConfirmed ) ) {
+			if ( busyState || oauthPolling || originalLinkDisabled.get( link ) || ( link.dataset.cloudflareRequired === '1' && ! cloudflareConfirmed ) ) {
 				event.preventDefault();
 				if ( ! cloudflareConfirmed ) announce( config.strings?.cloudflareMissing || 'Cloudflare proxy traffic was not detected.', true );
 				return;
@@ -253,7 +319,7 @@
 			oauthPolling = true;
 			oauthStartedAt = Date.now();
 			oauthPollAttempt = 0;
-			setBusy( true );
+			syncBusyState();
 			announce( config.strings?.waiting || 'Cloudflare opened in a new tab.' );
 			scheduleOAuthPoll();
 		} );
@@ -261,9 +327,10 @@
 
 	buttons.forEach( ( button ) => {
 		button.addEventListener( 'click', async () => {
+			if ( busyState || button.disabled ) return;
 			const action = button.dataset.cybermapsEdgeAction;
 			const requiresToken = button.dataset.requiresToken === '1';
-			setBusy( true );
+			const operation = beginOperation();
 			announce( config.strings?.working || 'Working…' );
 			try {
 				const data = action === 'cybermaps_edge_verify' && publicResources.length
@@ -272,12 +339,12 @@
 				const message = data.verification
 					? summarizeVerification( data.verification )
 					: data.message || config.strings?.complete || 'Operation complete.';
-				announce( message );
+				announce( message, Boolean( data.verification?.failed || data.result?.retained_legacy?.length ) );
 			} catch ( error ) {
 				announce( error.message || config.strings?.failed || 'Request failed.', true );
 			} finally {
 				if ( token ) token.value = '';
-				setBusy( false );
+				endOperation( operation );
 			}
 		} );
 	} );

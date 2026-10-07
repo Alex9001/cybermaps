@@ -242,6 +242,27 @@ final class IndexabilityResolverTest extends TestCase {
 		self::assertSame( 'https://example.com/rank-preferred/', $decision->canonical_url );
 	}
 
+	public function test_simultaneous_providers_cannot_hide_a_different_canonical(): void {
+		if ( ! defined( 'WPSEO_VERSION' ) ) { define( 'WPSEO_VERSION', 'fixture' ); }
+		if ( ! defined( 'RANK_MATH_VERSION' ) ) { define( 'RANK_MATH_VERSION', 'fixture' ); }
+		$post = $this->post( 95 );
+		$GLOBALS['cybermaps_mock_post_meta'][95]['_yoast_wpseo_canonical'] = 'https://example.com/?p=95';
+		$GLOBALS['cybermaps_mock_post_meta'][95]['rank_math_canonical_url'] = 'https://example.com/other/';
+		$resolver = new IndexabilityResolver( array( new PluginSeoAdapter() ) );
+		$decision = $resolver->resolve( SeoContext::post( $post ) );
+		self::assertFalse( $decision->indexable );
+		self::assertContains( 'canonical_other:rank_math', $decision->reasons );
+		self::assertContains( 'canonical_conflict', $decision->reasons );
+		self::assertSame( 'https://example.com/other/', $decision->canonical_url );
+		$GLOBALS['cybermaps_mock_post_meta'][95]['_yoast_wpseo_canonical'] = 'https://example.com/another/';
+		self::assertContains( 'canonical_conflict', $resolver->resolve( SeoContext::post( $post ) )->reasons );
+		$GLOBALS['cybermaps_mock_post_meta'][95]['_yoast_wpseo_canonical'] = 'https://EXAMPLE.com:443/?p=95';
+		$GLOBALS['cybermaps_mock_post_meta'][95]['rank_math_canonical_url'] = 'https://example.com/?p=95';
+		$matching = $resolver->resolve( SeoContext::post( $post ) );
+		self::assertTrue( $matching->indexable );
+		self::assertNotContains( 'canonical_conflict', $matching->reasons );
+	}
+
 	private function resolver(): IndexabilityResolver {
 		return new IndexabilityResolver( array( new GenesisMaiAdapter() ) );
 	}

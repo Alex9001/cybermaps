@@ -171,32 +171,37 @@ final class AuditExporter {
 	 */
 	public static function finding_catalog(): array {
 		return array(
-			'thin_content'     => array(
+			'content_analysis_incomplete' => array(
+				'label'        => __( 'Incomplete text analysis', 'cybermaps' ),
+				'description'  => __( 'Full text measurements are unavailable within the analysis limits.', 'cybermaps' ),
+				'report_title' => __( 'Incomplete Content Analysis Report', 'cybermaps' ),
+			),
+			'thin_content'                => array(
 				'label'        => __( 'Thin content', 'cybermaps' ),
 				'description'  => __( 'Visible text below the configured policy minimum.', 'cybermaps' ),
 				'report_title' => __( 'Thin Content Action Report', 'cybermaps' ),
 			),
-			'stale_content'    => array(
+			'stale_content'               => array(
 				'label'        => __( 'Freshness review', 'cybermaps' ),
 				'description'  => __( 'Content beyond its configured review interval.', 'cybermaps' ),
 				'report_title' => __( 'Content Freshness Action Report', 'cybermaps' ),
 			),
-			'missing_media'    => array(
+			'missing_media'               => array(
 				'label'        => __( 'Media review', 'cybermaps' ),
 				'description'  => __( 'Content without detected stored media where policy requests review.', 'cybermaps' ),
 				'report_title' => __( 'Media Opportunity Action Report', 'cybermaps' ),
 			),
-			'potential_orphan' => array(
+			'potential_orphan'            => array(
 				'label'        => __( 'Potential orphan', 'cybermaps' ),
 				'description'  => __( 'No stored page or assigned navigation item links to the resource.', 'cybermaps' ),
 				'report_title' => __( 'Potential Orphan Content Action Report', 'cybermaps' ),
 			),
-			'no_homepage_path' => array(
+			'no_homepage_path'            => array(
 				'label'        => __( 'No homepage path', 'cybermaps' ),
 				'description'  => __( 'Links exist, but the local graph has no path from the homepage or assigned navigation.', 'cybermaps' ),
 				'report_title' => __( 'Homepage Reachability Action Report', 'cybermaps' ),
 			),
-			'deeply_linked'    => array(
+			'deeply_linked'               => array(
 				'label'        => __( 'Three-plus clicks deep', 'cybermaps' ),
 				'description'  => __( 'The shortest stored path is at least three clicks from the homepage.', 'cybermaps' ),
 				'report_title' => __( 'Internal Link Depth Action Report', 'cybermaps' ),
@@ -224,7 +229,16 @@ final class AuditExporter {
 			$message .= ' ' . __( 'Homepage click depth could not be established from local WordPress data.', 'cybermaps' );
 		}
 
+		$message .= $this->text_comparison_notice( $run );
 		return '<p class="notice">' . esc_html( $message ) . '</p>';
+	}
+
+	/** @param array<string,mixed> $run Saved comparison. */
+	private function text_comparison_notice( array $run ): string {
+		if ( false === ( $run['diff']['text_comparable'] ?? null ) ) {
+			return ' ' . __( 'Text analysis was incomplete in one of the compared reports, so thin-content changes are excluded from comparison counts.', 'cybermaps' );
+		}
+		return '';
 	}
 
 	/**

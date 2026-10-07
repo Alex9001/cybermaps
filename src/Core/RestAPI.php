@@ -18,42 +18,35 @@ class RestAPI {
 	 */
 	public function register_hooks() {
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
-		add_filter( 'rest_post_dispatch', array( $this, 'add_public_cache_validators' ), 10, 3 );
+		add_filter( 'rest_post_dispatch', array( $this, 'add_public_cache_headers' ), 10, 3 );
 	}
 
 	/**
-	 * Add validators only to successful public Cybermaps discovery responses.
+	 * Add cache policy only to successful public Cybermaps discovery responses.
 	 *
 	 * @param mixed $response REST response after callback dispatch.
 	 * @param mixed $server   REST server instance.
 	 * @param mixed $request  REST request instance.
 	 * @return mixed
 	 */
-	public function add_public_cache_validators( $response, $server, $request ) {
+	public function add_public_cache_headers( $response, $server, $request ) {
 		unset( $server );
 		if ( ! $this->is_public_cache_response( $response, $request ) ) {
 			return $response;
 		}
 
-		$body = wp_json_encode( $response->get_data() );
-		if ( ! is_string( $body ) ) {
-			return $response;
-		}
-		$etag = '"' . md5( $body ) . '"';
-		$response->header( 'ETag', $etag );
+		// WordPress owns final REST bytes: _fields, links/embedding, envelope,
+		// pre-echo filters, JSON options, and JSONP can all change this data.
+		// No byte digest, ETag, or conditional 304 is valid at this hook.
 		$response->header( 'Cache-Control', 'public, max-age=300, must-revalidate' );
-		$response->header( 'Vary', 'Accept' );
-		$response->header( 'X-Cybermaps-Version', CYBERMAPS_VERSION );
-		$response->header( 'Content-Digest', 'sha-256=:' . base64_encode( hash( 'sha256', $body, true ) ) . ':' ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- RFC Content-Digest requires Base64.
-
-		if ( \Cybermaps\Discovery\Integrity::is_not_modified( $etag, null ) ) {
-			if ( method_exists( $response, 'set_status' ) ) {
-				$response->set_status( 304 );
-			}
-			if ( method_exists( $response, 'set_data' ) ) {
-				$response->set_data( null );
+		$vary = '';
+		foreach ( $response->get_headers() as $name => $value ) {
+			if ( 'vary' === strtolower( $name ) ) {
+				$vary = \Cybermaps\Discovery\PublicationCachePolicy::merge_vary( $vary, explode( ',', (string) $value ) );
 			}
 		}
+		$response->header( 'Vary', \Cybermaps\Discovery\PublicationCachePolicy::merge_vary( $vary, array( 'Accept' ) ) );
+		$response->header( 'X-Cybermaps-Version', CYBERMAPS_VERSION );
 
 		return $response;
 	}
@@ -498,7 +491,10 @@ class RestAPI {
 		if ( array_key_exists( 'supported', $adapter ) ) {
 			$row['supported'] = ! empty( $adapter['supported'] );
 		}
-		foreach ( array( 'purged', 'code' ) as $key ) {
+		if ( array_key_exists( 'url_scope_complete', $adapter ) ) {
+			$row['url_scope_complete'] = true === $adapter['url_scope_complete'];
+		}
+		foreach ( array( 'purged', 'code', 'count', 'failed', 'requested_url_count', 'truncated_url_count' ) as $key ) {
 			if ( is_scalar( $adapter[ $key ] ?? null ) && is_numeric( $adapter[ $key ] ) ) {
 				$row[ $key ] = max( 0, (int) $adapter[ $key ] );
 			}
@@ -594,15 +590,27 @@ class RestAPI {
 
 	/** @return array<string,mixed> */
 	private function sanitize_edge_status_row( array $row ): array {
+		return array_merge(
+			$this->sanitize_edge_url_coverage( $row ),
+			array(
+				'id'         => is_scalar( $row['id'] ?? null ) ? sanitize_text_field( (string) $row['id'] ) : '',
+				'time'       => self::positive_number( $row['time'] ?? 0 ),
+				'family'     => self::status_key( $row['family'] ?? '' ),
+				'generation' => self::positive_number( $row['generation'] ?? 0 ),
+				'tag_count'  => self::positive_number( $row['tag_count'] ?? 0 ),
+				'url_count'  => self::positive_number( $row['url_count'] ?? 0 ),
+				'status'     => self::status_key( $row['status'] ?? '' ),
+				'adapters'   => $this->sanitize_edge_adapter_status( $row['adapters'] ?? array() ),
+			)
+		);
+	}
+
+	/** @param array<string,mixed> $row Stored event. @return array<string,int|bool> */
+	private function sanitize_edge_url_coverage( array $row ): array {
 		return array(
-			'id'         => is_scalar( $row['id'] ?? null ) ? sanitize_text_field( (string) $row['id'] ) : '',
-			'time'       => self::positive_number( $row['time'] ?? 0 ),
-			'family'     => self::status_key( $row['family'] ?? '' ),
-			'generation' => self::positive_number( $row['generation'] ?? 0 ),
-			'tag_count'  => self::positive_number( $row['tag_count'] ?? 0 ),
-			'url_count'  => self::positive_number( $row['url_count'] ?? 0 ),
-			'status'     => self::status_key( $row['status'] ?? '' ),
-			'adapters'   => $this->sanitize_edge_adapter_status( $row['adapters'] ?? array() ),
+			'requested_url_count' => self::positive_number( $row['requested_url_count'] ?? 0 ),
+			'truncated_url_count' => self::positive_number( $row['truncated_url_count'] ?? 0 ),
+			'url_scope_complete'  => true === ( $row['url_scope_complete'] ?? false ),
 		);
 	}
 

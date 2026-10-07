@@ -84,21 +84,31 @@ final class PublicationInventory {
 			$args['posts_per_page'] = $batch_size;
 			$candidates             = $this->get_inventory_posts( $args );
 			$budget->checkpoint();
-			$this->prime_candidates( array_slice( $candidates, 0, $budget->remaining() ), $post_type );
-			foreach ( $candidates as $candidate ) {
-				$state = $this->candidate_state( $candidate );
-				$this->require_cursor_progress( $after_modified, $after_id, $state['modified'], $state['id'] );
-				$after_modified = $state['modified'];
-				$after_id       = $state['id'];
-				if ( isset( $skip[ $after_id ] ) ) {
-					continue;
+			$lease = new PublicationCacheLease();
+			try {
+				$this->prime_candidates( array_slice( $candidates, 0, $budget->remaining() ), $post_type );
+				$lease->capture();
+				foreach ( $candidates as $candidate ) {
+					$state = $this->candidate_state( $candidate );
+					$this->require_cursor_progress( $after_modified, $after_id, $state['modified'], $state['id'] );
+					$after_modified = $state['modified'];
+					$after_id       = $state['id'];
+					if ( isset( $skip[ $after_id ] ) ) {
+						continue;
+					}
+					if ( ! $budget->claim() ) {
+						return;
+					}
+					if ( $this->eligibility->post( $state['post'], PublicationEligibility::AI )->indexable ) {
+						$lease->suspend();
+						yield $state['post'];
+						$lease->resume();
+					}
+					$lease->capture();
 				}
-				if ( ! $budget->claim() ) {
-					return;
-				}
-				if ( $this->eligibility->post( $state['post'], PublicationEligibility::AI )->indexable ) {
-					yield $state['post'];
-				}
+			} finally {
+				$lease->capture();
+				$lease->release();
 			}
 			$budget->checkpoint();
 			$this->heartbeat_static_operation();
@@ -178,7 +188,7 @@ final class PublicationInventory {
 	 * long-running publication while keyset batches are being consumed.
 	 */
 	private function snapshot_max_id( string $post_type ): int {
-		$ids = get_posts(
+		$ids = $this->query_posts(
 			$this->get_query_args(
 				array(
 					'post_type'              => array( $post_type ),
@@ -239,13 +249,43 @@ final class PublicationInventory {
 			is_object( $query ) && method_exists( $query, 'get' ) && $marker === $query->get( 'cybermaps_inventory_query' ) ? false : $split;
 		\add_filter( 'split_the_query', $split_filter, PHP_INT_MAX, 2 );
 		\add_filter( 'posts_where', $filter, 10, 2 );
+		$result_filter = function ( array $posts, $query ) use ( $marker ): array {
+			if ( is_object( $query ) && method_exists( $query, 'get' ) && $marker === $query->get( 'cybermaps_inventory_query' ) ) {
+				$this->require_query_success();
+			}
+			return $posts;
+		};
+		\add_filter( 'posts_results', $result_filter, PHP_INT_MIN, 2 );
 		try {
-			$candidates = get_posts( $args );
+			$candidates = $this->query_posts( $args );
 		} finally {
 			\remove_filter( 'posts_where', $filter, 10 );
 			\remove_filter( 'split_the_query', $split_filter, PHP_INT_MAX );
+			\remove_filter( 'posts_results', $result_filter, PHP_INT_MIN );
 		}
-		return \is_array( $candidates ) ? \array_values( $candidates ) : array();
+		return \array_values( $candidates );
+	}
+
+	/** WordPress returns an empty array for both SQL failure and exhaustion. */
+	private function query_posts( array $args ): array {
+		global $wpdb;
+		if ( is_object( $wpdb ) ) {
+			$wpdb->last_error = '';
+		}
+		$posts = get_posts( $args );
+		$this->require_query_success();
+		if ( ! is_array( $posts ) ) {
+			throw new BuildUnavailableException( esc_html__( 'Cybermaps could not read the publication inventory. No complete publication was produced.', 'cybermaps' ) );
+		}
+		return $posts;
+	}
+
+	/** Check before downstream result filters can issue another SQL query. */
+	private function require_query_success(): void {
+		global $wpdb;
+		if ( is_object( $wpdb ) && ! empty( $wpdb->last_error ) ) {
+			throw new BuildUnavailableException( esc_html__( 'Cybermaps could not read the publication inventory. No complete publication was produced.', 'cybermaps' ) );
+		}
 	}
 
 	/**
@@ -297,7 +337,7 @@ final class PublicationInventory {
 
 		foreach ( array_chunk( $ids, self::QUERY_BATCH_SIZE ) as $batch_ids ) {
 			$budget->checkpoint();
-			$args       = $this->get_query_args(
+			$args  = $this->get_query_args(
 				array(
 					'post__in'               => $batch_ids,
 					'posts_per_page'         => count( $batch_ids ),
@@ -307,25 +347,35 @@ final class PublicationInventory {
 					'update_post_term_cache' => false,
 				)
 			);
-			$candidates = $this->get_inventory_posts( $args );
-			$by_id      = array();
-			foreach ( $candidates as $candidate ) {
-				$state = $this->candidate_state( $candidate );
-				if ( $state['id'] > 0 ) {
-					$by_id[ $state['id'] ] = $state['post'];
+			$lease = new PublicationCacheLease();
+			try {
+				$candidates = $this->get_inventory_posts( $args );
+				$by_id      = array();
+				foreach ( $candidates as $candidate ) {
+					$state = $this->candidate_state( $candidate );
+					if ( $state['id'] > 0 ) {
+						$by_id[ $state['id'] ] = $state['post'];
+					}
 				}
-			}
-			// Reorder before priming and evaluating, including when filters reorder rows.
-			$ordered = array_intersect_key( array_flip( $batch_ids ), $by_id );
-			$ordered = array_replace( $ordered, array_intersect_key( $by_id, $ordered ) );
-			$this->prime_candidates( array_slice( array_values( $ordered ), 0, $budget->remaining() ), $this->post_types() );
-			foreach ( $ordered as $post ) {
-				if ( ! $budget->claim() ) {
-					return;
+				// Reorder before priming and evaluating, including when filters reorder rows.
+				$ordered = array_intersect_key( array_flip( $batch_ids ), $by_id );
+				$ordered = array_replace( $ordered, array_intersect_key( $by_id, $ordered ) );
+				$this->prime_candidates( array_slice( array_values( $ordered ), 0, $budget->remaining() ), $this->post_types() );
+				$lease->capture();
+				foreach ( $ordered as $post ) {
+					if ( ! $budget->claim() ) {
+						return;
+					}
+					if ( $this->eligibility->post( $post, PublicationEligibility::AI )->indexable ) {
+						$lease->suspend();
+						yield $post;
+						$lease->resume();
+					}
+					$lease->capture();
 				}
-				if ( $this->eligibility->post( $post, PublicationEligibility::AI )->indexable ) {
-					yield $post;
-				}
+			} finally {
+				$lease->capture();
+				$lease->release();
 			}
 			$budget->checkpoint();
 			$this->heartbeat_static_operation();

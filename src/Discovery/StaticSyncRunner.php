@@ -14,10 +14,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Phase-and-cursor static synchronization runner (schema 4).
+ * Phase-and-cursor static synchronization runner (schema 6).
  */
 final class StaticSyncRunner {
-	public const STATE_SCHEMA         = 5;
+	public const STATE_SCHEMA         = 6;
 	private const REPORT_SAMPLE_LIMIT = 100;
 	private const MAX_STATE_TEXT      = 4096;
 	private const MAX_DIAGNOSTIC_KEYS = 32;
@@ -1922,7 +1922,7 @@ final class StaticSyncRunner {
 			return true;
 		}
 
-		return \is_string( $cursor['path'] ) && \strlen( $cursor['path'] ) <= StaticOwnershipStore::MAX_PATH_LENGTH;
+		return \is_string( $cursor['path'] ) && ( '' === $cursor['path'] || 1 === preg_match( '/^[a-f0-9]{64}$/D', $cursor['path'] ) );
 	}
 
 	/** @param array<string,mixed> $cursor */

@@ -1184,14 +1184,13 @@ class SettingsSanitizerTest extends TestCase {
         );
     }
 
-    public function test_robots_manager_omits_unpublished_and_invalid_content_signals(): void {
+    public function test_robots_manager_omits_unpublished_content_signals(): void {
         $result = RobotsManagerSanitizer::sanitize(
             array(
                 'content_signals' => array(
                     'ai-train'  => '',
                     'search'    => 'no',
                     'ai-input'  => 'yes',
-                    'invented'  => 'yes',
                 ),
             )
         );

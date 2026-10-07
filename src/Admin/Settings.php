@@ -16,11 +16,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Settings {
 
 	/**
-	 * Settings that do not affect a cached or materialized publication.
+	 * Settings that do not require a materialized publication reconciliation.
 	 *
-	 * Some alter admin/runtime behavior; the feed and Site Guide controls alter
-	 * uncached, dynamic-only responses. None requires a whole-site static-file
-	 * reconciliation.
+	 * Some alter admin/runtime behavior; the feed body controls alter uncached,
+	 * dynamic-only responses. None requires a whole-site static-file reconciliation.
 	 *
 	 * @var string[]
 	 */
@@ -28,7 +27,6 @@ class Settings {
 		'api_secret',
 		'ai_feed_full_content',
 		'ai_feed_include_authors',
-		'ai_feed_limit',
 		'audit_page_max_age_days',
 		'audit_page_min_words',
 		'audit_page_require_media',
@@ -53,7 +51,6 @@ class Settings {
 		'redirect_wp_sitemap',
 		'report_theme',
 		'site_name_override',
-		'site_guide_instructions',
 		'update_comment_page',
 		'update_comment_post',
 		'websub_hubs',
@@ -175,9 +172,7 @@ class Settings {
 
 	/** Remove owned XML publications immediately when public credit is revoked. */
 	private static function purge_credited_xml( \Cybermaps\Discovery\StaticBridge $bridge ): void {
-		$hashes = ( new \Cybermaps\Discovery\StaticOwnershipStore() )->read_flat_hashes();
-		$paths  = array_values( array_filter( array_keys( $hashes ), static fn ( string $path ): bool => str_ends_with( $path, '.xml' ) ) );
-		$bridge->purge_all( '', '', 'failed_publication', $paths );
+		$bridge->purge_all( '', '', 'xml' );
 	}
 
 	/**
@@ -435,8 +430,14 @@ class Settings {
 	 * Run a cached remote IndexNow key verification for headless frontends.
 	 */
 	public function handle_verify_indexnow_key(): void {
+		$request_method = isset( $_SERVER['REQUEST_METHOD'] ) && is_string( $_SERVER['REQUEST_METHOD'] )
+			? strtoupper( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) )
+			: '';
+		if ( 'POST' !== $request_method ) {
+			wp_die( esc_html__( 'Invalid request method.', 'cybermaps' ), '', array( 'response' => 405 ) );
+		}
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have permission to access this page.', 'cybermaps' ) );
+			wp_die( esc_html__( 'You do not have permission to access this page.', 'cybermaps' ), '', array( 'response' => 403 ) );
 		}
 		check_admin_referer( 'cybermaps_verify_indexnow_key' );
 

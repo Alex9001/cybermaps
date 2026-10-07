@@ -117,7 +117,8 @@
 
 	document.getElementById( 'cybermaps-status-refresh' )?.addEventListener( 'click', () => window.location.reload() );
 	document.getElementById( 'cybermaps-status-verify' )?.addEventListener( 'click', async ( event ) => {
-		event.currentTarget.disabled = true;
+		const button = event.currentTarget;
+		button.disabled = true;
 		announce( config.strings?.checking || 'Checking...' );
 		try {
 			const data = await post( 'cybermaps_edge_verify', config.nonce );
@@ -131,7 +132,7 @@
 		} catch ( error ) {
 			announce( error.message || config.strings?.failed );
 		} finally {
-			event.currentTarget.disabled = false;
+			button.disabled = false;
 		}
 	} );
 

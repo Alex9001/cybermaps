@@ -1,8 +1,8 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://cybermaps.dev/specs/ai-configuration/8.0.1/schema.json",
+    "$id": "https://cybermaps.dev/specs/ai-configuration/8.0.2/schema.json",
     "format_version": 2,
-    "plugin_version": "8.0.1",
+    "plugin_version": "8.0.2",
     "title": "Cybermaps AI configuration changes",
     "description": "A merge-only set of reviewed Cybermaps configuration changes. Null and omitted values preserve the destination.",
     "type": "object",
@@ -21,7 +21,7 @@
         },
         "plugin_version": {
             "type": "string",
-            "const": "8.0.1"
+            "const": "8.0.2"
         },
         "changes": {
             "type": "object",
@@ -879,7 +879,7 @@
                         },
                         "enable_shortcode": {
                             "title": "HTML sitemap shortcode",
-                            "description": "Registers the cybermaps_sitemap shortcode for front-end HTML sitemap output. Set null or omit the field to preserve the destination.",
+                            "description": "Enables the cybermap shortcode for front-end HTML sitemap output. Set null or omit the field to preserve the destination.",
                             "anyOf": [
                                 {
                                     "type": "boolean",

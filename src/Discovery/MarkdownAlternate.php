@@ -33,7 +33,14 @@ final class MarkdownAlternate {
 			return;
 		}
 
-		$settings = \Cybermaps\Core\ConfigurationStore::settings();
+		$generation = \Cybermaps\Core\CacheManager::get_generation( 'discovery', true );
+		try {
+			self::require_current_generation( $generation );
+			$settings = \Cybermaps\Core\ConfigurationStore::publication_settings();
+			\Cybermaps\Core\ConfigurationStore::publication_discovery();
+		} catch ( \Cybermaps\Core\BuildUnavailableException $error ) {
+			PublicationRequestGuard::serve_unavailable( $error );
+		}
 		if ( empty( $settings['enable_discovery_hub'] ) ) {
 			return;
 		}
@@ -51,16 +58,29 @@ final class MarkdownAlternate {
 
 		try {
 			$output = $this->get_content( $post );
+			$links  = $this->get_markdown_response_links( $post );
+			self::require_current_generation( $generation );
+		} catch ( \Cybermaps\Core\BuildUnavailableException $error ) {
+			PublicationRequestGuard::serve_unavailable( $error );
 		} catch ( PublicationSizeLimitException $error ) {
 			( new MarkdownResponder() )->send_size_limit_error( $error, false );
 		}
 
 		( new MarkdownResponder() )->send(
 			$output,
-			MarkdownResponder::modified_timestamp( $post ),
-			$this->get_markdown_response_links( $post ),
-			false
+			// Locale and public URL settings can change without a post modification.
+			null,
+			$links,
+			false,
+			$generation
 		);
+	}
+
+	/** Reject observed privacy movement before conditional headers or body delivery. */
+	private static function require_current_generation( int $generation ): void {
+		if ( $generation < 0 || \Cybermaps\Core\CacheManager::get_generation( 'discovery', true ) !== $generation ) {
+			throw new \Cybermaps\Core\BuildUnavailableException( esc_html__( 'Cybermaps content changed during Markdown publication. Please retry shortly.', 'cybermaps' ) );
+		}
 	}
 
 	/**
@@ -184,7 +204,11 @@ final class MarkdownAlternate {
 		if ( \strlen( $raw_content ) > LLMS::OUTPUT_MAX_BYTES ) {
 			throw new PublicationSizeLimitException( 'markdown-alternate', LLMS::OUTPUT_MAX_BYTES ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Protocol error data is encoded before output.
 		}
-		$markdown = (string) ( new ContentAnalyzer() )->analyze_post( $object )['markdown'];
+		$analysis = ( new ContentAnalyzer() )->analyze_post( $object );
+		if ( empty( $analysis['complete'] ) ) {
+			PublicationSizeLimitException::require_capacity( LLMS::OUTPUT_MAX_BYTES + 1, 'markdown-alternate', LLMS::OUTPUT_MAX_BYTES );
+		}
+		$markdown = (string) $analysis['markdown'];
 		$output  .= '' !== $markdown ? $markdown . "\n" : "[No visible stored text]\n";
 		if ( \strlen( $output ) > LLMS::OUTPUT_MAX_BYTES ) {
 			throw new PublicationSizeLimitException( 'markdown-alternate', LLMS::OUTPUT_MAX_BYTES ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Protocol error data is encoded before output.
@@ -195,13 +219,15 @@ final class MarkdownAlternate {
 
 	private function content_header( object $post ): string {
 		$post_id   = (int) $post->ID;
-		$title     = $this->markdown_text( (string) \get_the_title( $post_id ) );
+		$raw_title = (string) \get_the_title( $post_id );
 		$canonical = URLManager::rewrite_url( (string) \get_permalink( $post_id ) );
-		$language  = TranslationHelper::normalize_hreflang( (string) \get_locale() );
-		$modified  = MarkdownResponder::modified_timestamp( $post );
-		$output    = '# ' . ( '' !== $title ? $title : __( 'Untitled resource', 'cybermaps' ) ) . "\n\n";
-		$output   .= '- Source: ' . $canonical . "\n";
-		$output   .= '- Content-Type: ' . \sanitize_key( (string) ( $post->post_type ?? 'post' ) ) . "\n";
+		PublicationSizeLimitException::require_capacity( strlen( $raw_title ) * 2 + strlen( $canonical ) + 1024, 'markdown-alternate', LLMS::OUTPUT_MAX_BYTES );
+		$title    = $this->markdown_text( $raw_title );
+		$language = TranslationHelper::normalize_hreflang( (string) \get_locale() );
+		$modified = MarkdownResponder::modified_timestamp( $post );
+		$output   = '# ' . ( '' !== $title ? $title : __( 'Untitled resource', 'cybermaps' ) ) . "\n\n";
+		$output  .= '- Source: ' . $canonical . "\n";
+		$output  .= '- Content-Type: ' . \sanitize_key( (string) ( $post->post_type ?? 'post' ) ) . "\n";
 		if ( '' !== $language ) {
 			$output .= '- Language: ' . $language . "\n";
 		}

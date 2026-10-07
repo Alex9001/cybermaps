@@ -16,11 +16,11 @@ final class RequestInput {
 		if ( ! isset( $_SERVER['REQUEST_URI'] ) || ! is_scalar( $_SERVER['REQUEST_URI'] ) ) {
 			return '';
 		}
-		$request_uri = sanitize_text_field( wp_unslash( (string) $_SERVER['REQUEST_URI'] ) );
-		if ( strlen( $request_uri ) > 8192 ) {
+		$matches = array();
+		if ( 1 !== preg_match( '/\A[\x21-\x7E]{1,8192}\z/D', wp_unslash( (string) $_SERVER['REQUEST_URI'] ), $matches ) ) {
 			return '';
 		}
-		$query = wp_parse_url( $request_uri, PHP_URL_QUERY );
+		$query = wp_parse_url( $matches[0], PHP_URL_QUERY );
 		if ( ! is_string( $query ) || strlen( $query ) > 4096 ) {
 			return '';
 		}
@@ -30,8 +30,8 @@ final class RequestInput {
 		if ( ! is_scalar( $value ) ) {
 			return '';
 		}
-		$value = wp_unslash( (string) $value );
-		if ( strlen( $value ) > max( 0, $max_bytes ) ) {
+		$value = (string) $value;
+		if ( strlen( $value ) > max( 0, $max_bytes ) || 1 === preg_match( '/[\x00-\x1F\x7F]/', $value ) ) {
 			return '';
 		}
 		return sanitize_text_field( $value );
@@ -50,10 +50,10 @@ final class RequestInput {
 		if ( ! isset( $_SERVER[ $key ] ) || ! is_scalar( $_SERVER[ $key ] ) ) {
 			return '';
 		}
-		$value = sanitize_text_field( wp_unslash( (string) $_SERVER[ $key ] ) );
-		if ( strlen( $value ) > max( 0, $max_bytes ) || 1 === preg_match( '/[\x00-\x1F\x7F]/', $value ) ) {
+		$matches = array();
+		if ( 1 !== preg_match( '/\A[\x20-\x7E]{0,4096}\z/D', wp_unslash( (string) $_SERVER[ $key ] ), $matches ) ) {
 			return '';
 		}
-		return $value;
+		return strlen( $matches[0] ) <= max( 0, $max_bytes ) ? $matches[0] : '';
 	}
 }

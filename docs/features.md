@@ -1,6 +1,6 @@
-# Cybermaps 8.0.1 Feature Reference
+# Cybermaps 8.0.2 Feature Reference
 
-This reference describes Cybermaps 8.0.1 using the
+This reference describes Cybermaps 8.0.2 using the
 [generated source inventory](./dev/manifest.json). Cloudflare automation,
 Debugging, compatibility publication, and independent LiteSpeed/APCu controls
 are included; availability and public delivery depend on the configuration.
@@ -233,16 +233,16 @@ their expected structures.
 | Mode | Result |
 |---|---|
 | `off` | Dynamic WordPress delivery; no generated files |
-| `well_known` (default) | Up to eleven ownership-safe Core, discovery-index, Agent Skills, and protocol targets while their capabilities are enabled |
+| `well_known` (default) | Five ownership-safe targets: `/ai.json`, `/ai-usage.json`, `/ai-actions.json`, and the canonical Agent Skills document and index |
 | `all` | Sitemap index and internal children, enabled RSS, discovery, localized LLMS, and eligible chunk files |
 
 Static publishing provides:
 
 - registered compatibility files for origins that serve paths before PHP,
   with public media-type and header verification still required;
-- canonical `/ai-discovery` and `/.well-known/api-catalog` protocol endpoints,
-  with ownership-safe physical fallbacks for origins that bypass WordPress;
-  existing proxy cache entries can still need separate invalidation;
+- dynamic `/ai-discovery`, API Catalog, AI Catalog, and MCP server-card
+  endpoints, with routing guidance for origins that intercept these paths
+  before WordPress;
 - dynamic `/feed.json` delivery in every mode for its JSON Feed media type and
   WebSub discovery headers;
 - dynamic `/skill.md` compatibility delivery plus a materializable canonical
@@ -255,6 +255,7 @@ Static publishing provides:
 - deterministic per-run write/runtime ceilings with generation-bound,
   ownership-revalidated continuation progress;
 - content-hash ownership records;
+- per-path database ownership rows with bounded migration and cleanup pages;
 - conflict-safe handling of pre-existing or edited files;
 - children-before-index ordering;
 - exact reconciliation counts;
@@ -372,6 +373,11 @@ do not execute PHP and therefore cannot appear in PHP-side analytics.
   findings for public search-indexable resources.
 - Explicit coverage metadata with 10,000-resource and 100,000-edge bounds;
   incomplete scans suppress link findings instead of claiming absence.
+- Incomplete text analysis has no full word count or fingerprint and cannot
+  falsely resolve a prior thin-content finding.
+- Synchronous report generation with a shared safety budget when an
+  object-cache implementation cannot release runtime data; a stopped run is
+  recorded as failed, without completing a partial report.
 - Exact added, resolved, and persisting findings against the prior report.
 - Focused action lists for each finding category.
 - Five printable themes plus optional agency identity and site-name override.
@@ -403,7 +409,7 @@ translation relationships.
 
 The separate AI Configuration Brief is a credential-excluding, site-aware
 Markdown handoff with current non-secret context, 121 editable fields in the
-8.0.1 generated contract, field guidance,
+8.0.2 generated contract, field guidance,
 dependencies, examples, risk levels, and an initially null JSON changes
 envelope. Imports are merge-only and require a server-generated preview that
 shows canonical sanitized values. Unknown or malformed input is rejected;
@@ -426,8 +432,9 @@ still instructed to review user-authored business details before sharing.
 - Sitemap Status, AI Discovery Status, Discovery Analytics, and Debugging submenus.
 - Local API secret for private read-only integrations.
 - Administrator-authenticated REST action for ownership-safe static-file purge.
-- ETag, Content-Digest, and conditional `304` validators on successful public
-  Cybermaps REST discovery responses.
+- Public cache policy on successful public Cybermaps REST discovery responses.
+  WordPress controls their final serialization; Cybermaps does not attach byte
+  digests, entity tags, or conditional `304` responses to these native REST routes.
 - WP-CLI: `status`, `clear_cache`, `flush_rules`, and `regenerate`.
 - Versioned machine-readable public-surface manifest.
 - Extension API 2.0 for endpoint registration, read-only publication

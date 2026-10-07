@@ -1312,7 +1312,7 @@ final class MigrationHub {
 			$targets['cybermaps_settings'] = $this->merge_touched_fields( $current['cybermaps_settings'], $sanitized, array_keys( $touched_fields['cybermaps_settings'] ) );
 		}
 		if ( isset( $touched_fields['cybermaps_discovery_center'] ) ) {
-			$sanitized                             = DiscoveryCenterSanitizer::sanitize( $this->encode_json( $candidates['cybermaps_discovery_center'] ) );
+			$sanitized                             = DiscoveryCenterSanitizer::sanitize_import( $candidates['cybermaps_discovery_center'] );
 			$decoded                               = json_decode( $sanitized, true );
 			$decoded                               = is_array( $decoded ) ? $decoded : array();
 			$merged                                = $this->merge_touched_fields( $current['cybermaps_discovery_center'], $decoded, array_keys( $touched_fields['cybermaps_discovery_center'] ) );
@@ -1323,11 +1323,11 @@ final class MigrationHub {
 				: $this->encode_json( $merged );
 		}
 		if ( isset( $touched_fields['cybermaps_robots_manager'] ) ) {
-			$sanitized                           = RobotsManagerSanitizer::sanitize( $candidates['cybermaps_robots_manager'] );
+			$sanitized                           = RobotsManagerSanitizer::sanitize_import( $candidates['cybermaps_robots_manager'] );
 			$targets['cybermaps_robots_manager'] = $this->merge_touched_fields( $current['cybermaps_robots_manager'], $sanitized, array_keys( $touched_fields['cybermaps_robots_manager'] ) );
 		}
 		if ( isset( $touched_fields['cybermaps_identity_data'] ) ) {
-			$sanitized                          = ( new IdentityHub() )->sanitize_identity_data( $candidates['cybermaps_identity_data'] );
+			$sanitized                          = ( new IdentityHub() )->sanitize_import( $candidates['cybermaps_identity_data'] );
 			$targets['cybermaps_identity_data'] = $this->merge_touched_fields( $current['cybermaps_identity_data'], $sanitized, array_keys( $touched_fields['cybermaps_identity_data'] ) );
 		}
 		return $targets;
@@ -2088,9 +2088,8 @@ final class MigrationHub {
 	/**
 	 * Read the complete configuration boundary twice and reject a torn snapshot.
 	 *
-	 * Dynamic option filters and update hooks can change another Cybermaps root
-	 * while a plan is being prepared. A double, exact raw read ensures every
-	 * generated target and destination fingerprint has one coherent base.
+	 * Reads bypass option caches and filters. Repetition detects observed drift;
+	 * exact-byte conditional writes, not this read, guard later persistence.
 	 *
 	 * @return array{configuration:array<string,mixed>,raw_options:array<string,array{exists:bool,value:mixed}>}
 	 */
@@ -2113,14 +2112,9 @@ final class MigrationHub {
 	 * @return array<string,array{exists:bool,value:mixed}>
 	 */
 	private function read_raw_configuration_options(): array {
-		$missing = new \stdClass();
-		$raw     = array();
+		$raw = array();
 		foreach ( self::CONFIGURATION_OPTIONS as $option_name ) {
-			$value               = get_option( $option_name, $missing );
-			$raw[ $option_name ] = array(
-				'exists' => $missing !== $value,
-				'value'  => $missing !== $value ? $value : null,
-			);
+			$raw[ $option_name ] = ConfigurationMutationStore::read( $option_name );
 		}
 
 		return $raw;
@@ -2172,6 +2166,7 @@ final class MigrationHub {
 		$payload       = $this->resolve_backup_payload( $content, $payload );
 		$configuration = $this->validated_backup_configuration( $payload );
 		$this->validate_backup_checksum( $payload, $configuration );
+		$configuration = $this->validate_backup_domains( $configuration );
 
 		$current = isset( $base_state['configuration'] ) && is_array( $base_state['configuration'] )
 			? $base_state['configuration']
@@ -2483,7 +2478,7 @@ final class MigrationHub {
 			return $state['current']['cybermaps_discovery_center'];
 		}
 
-		$sanitized = DiscoveryCenterSanitizer::sanitize( $this->encode_json( $state['cybermaps_discovery_center'] ) );
+		$sanitized = DiscoveryCenterSanitizer::sanitize_import( $state['cybermaps_discovery_center'] );
 		$decoded   = json_decode( $sanitized, true );
 		return is_array( $decoded ) ? $decoded : array();
 	}
@@ -2500,7 +2495,7 @@ final class MigrationHub {
 			return $state['current']['cybermaps_robots_manager'];
 		}
 
-		return RobotsManagerSanitizer::sanitize( $state['cybermaps_robots_manager'] );
+		return RobotsManagerSanitizer::sanitize_import( $state['cybermaps_robots_manager'] );
 	}
 
 	/**
@@ -2515,7 +2510,24 @@ final class MigrationHub {
 			return $state['current']['cybermaps_identity_data'];
 		}
 
-		return ( new IdentityHub() )->sanitize_identity_data( $state['cybermaps_identity_data'] );
+		return ( new IdentityHub() )->sanitize_import( $state['cybermaps_identity_data'] );
+	}
+
+	/** Validate source domains before merging; carry only derived legacy fields. */
+	private function validate_backup_domains( array $configuration ): array {
+		$discovery = $configuration['cybermaps_discovery_center'];
+		DiscoveryCenterSanitizer::sanitize_import( $discovery );
+		$migrated = json_decode( DiscoveryCenterSanitizer::sanitize_import( array( 'overrides' => $discovery['overrides'] ?? array() ) ), true );
+		RobotsManagerSanitizer::sanitize_import( $configuration['cybermaps_robots_manager'] );
+		( new IdentityHub() )->sanitize_import( $configuration['cybermaps_identity_data'] );
+		// A legacy zero priority is one exclusion expressed across two canonical
+		// maps. Carry that derived field into touched-field selection and preview,
+		// but do not materialize unrelated defaults for a Smart Merge source.
+		if ( ! empty( $migrated['disabled'] ) ) {
+			$discovery['disabled'] = array_merge( $discovery['disabled'] ?? array(), $migrated['disabled'] );
+		}
+		$configuration['cybermaps_discovery_center'] = $discovery;
+		return $configuration;
 	}
 
 	/**
@@ -2641,23 +2653,30 @@ final class MigrationHub {
 	 * @return array{changed:string[],unchanged:string[]}
 	 */
 	private function apply_targets( array $targets, array $expected_raw = array() ): array {
-		$expected_raw = $this->validate_apply_target_guards( $targets, $expected_raw );
-		$transaction  = $this->new_apply_transaction();
-		$failure      = null;
+		$expected_raw      = $this->validate_apply_target_guards( $targets, $expected_raw );
+		$transaction       = $this->new_apply_transaction();
+		$failure           = null;
+		$rollback_failures = array();
 
 		self::$applying_prepared_import = true;
 		try {
 			try {
 				$this->execute_apply_transaction( $targets, $expected_raw, $transaction );
 			} catch ( \Throwable $error ) {
-				$failure = $error;
-			}
-
-			if ( null !== $failure ) {
-				$this->throw_apply_transaction_failure( $transaction, $failure );
+				$failure           = $error;
+				$rollback_failures = $this->rollback_targets( $transaction );
 			}
 		} finally {
 			self::$applying_prepared_import = false;
+		}
+		if ( null !== $failure ) {
+			try {
+				$this->reconcile_failed_configuration( $transaction );
+			} catch ( \Throwable $reconciliation_failure ) {
+				unset( $reconciliation_failure );
+				throw new \RuntimeException( esc_html__( 'The import failed and Cybermaps could not reconcile the remaining configuration. Conflicting values were preserved. Review configuration and publication status before retrying.', 'cybermaps' ) );
+			}
+			$this->throw_apply_transaction_failure( $transaction, $failure, $rollback_failures );
 		}
 
 		// Core hooks were deliberately silent during the transaction. Apply their
@@ -2739,11 +2758,11 @@ final class MigrationHub {
 	 * @param array<string,mixed> $transaction Mutable transaction state.
 	 */
 	private function execute_apply_transaction( array $targets, array $expected_raw, array &$transaction ): void {
-		// Re-read every owned root immediately before the first write. This closes
-		// the gap between destination fingerprint validation and persistence.
+		// Re-read before planning. Each following write independently compares its
+		// expected bytes at the database boundary, including against ordinary WP writers.
+		$transaction['previous'] = $expected_raw;
 		$state                   = $this->capture_configuration_state();
-		$transaction['previous'] = $state['raw_options'];
-		if ( $expected_raw !== $transaction['previous'] ) {
+		if ( $expected_raw !== $state['raw_options'] ) {
 			throw new \RuntimeException(
 				esc_html__( 'The destination configuration changed after preparation. Preview the file again before importing.', 'cybermaps' )
 			);
@@ -2775,10 +2794,7 @@ final class MigrationHub {
 			}
 
 			$transaction['pending'][ $option_name ]        = $target;
-			$transaction['expected_after'][ $option_name ] = array(
-				'exists' => true,
-				'value'  => $target,
-			);
+			$transaction['expected_after'][ $option_name ] = ConfigurationMutationStore::target( $target );
 		}
 	}
 
@@ -2789,9 +2805,14 @@ final class MigrationHub {
 	 */
 	private function write_apply_transaction( array &$transaction ): void {
 		foreach ( $transaction['pending'] as $option_name => $target ) {
+			$before = $transaction['previous'][ $option_name ];
+			$after  = $transaction['expected_after'][ $option_name ];
+			if ( ! ConfigurationMutationStore::write( $option_name, $before, $after ) ) {
+				throw new \RuntimeException( esc_html__( 'The configuration changed during import or the database write failed. Preview again before retrying.', 'cybermaps' ) );
+			}
 			$transaction['writes_started'] = true;
-			update_option( $option_name, $target, false );
-			$transaction['changed'][] = $option_name;
+			$transaction['changed'][]      = $option_name;
+			ConfigurationMutationStore::notify( $option_name, $before, $after );
 		}
 	}
 
@@ -2801,7 +2822,7 @@ final class MigrationHub {
 	 * @param array<string,mixed> $transaction Transaction state.
 	 * @param \Throwable          $failure Transaction failure.
 	 */
-	private function throw_apply_transaction_failure( array $transaction, \Throwable $failure ): never {
+	private function throw_apply_transaction_failure( array $transaction, \Throwable $failure, array $rollback_failures ): never {
 		if ( ! $transaction['writes_started'] ) {
 			throw new \RuntimeException(
 				esc_html__( 'The import failed before any configuration values were written.', 'cybermaps' ),
@@ -2810,12 +2831,11 @@ final class MigrationHub {
 			);
 		}
 
-		$rollback_failures = $this->rollback_targets( $transaction['previous'] );
 		if ( ! empty( $rollback_failures ) ) {
 			throw new \RuntimeException(
 				sprintf(
 					/* translators: %s: comma-separated configuration group names. */
-					esc_html__( 'The import failed and Cybermaps could not fully restore these configuration groups: %s. Review the settings before retrying.', 'cybermaps' ),
+					esc_html__( 'The import failed and Cybermaps could not fully restore these configuration groups: %s. Conflicting values were preserved. Review the settings before retrying.', 'cybermaps' ),
 					esc_html( implode( ', ', $rollback_failures ) )
 				),
 				0,
@@ -2831,22 +2851,18 @@ final class MigrationHub {
 	}
 
 	/**
-	 * Restore every option touched by a failed import and verify the final state.
+	 * Restore only proven writes still containing our target bytes.
 	 *
-	 * @param array<string,array{exists:bool,value:mixed}> $previous Previous raw option states.
+	 * @param array<string,mixed> $transaction Exact observations and proven writes.
 	 * @return string[] Option names that could not be restored.
 	 */
-	private function rollback_targets( array $previous ): array {
-		foreach ( array_reverse( $previous, true ) as $option_name => $state ) {
+	private function rollback_targets( array $transaction ): array {
+		$previous = $transaction['previous'];
+		foreach ( array_reverse( $transaction['changed'] ) as $option_name ) {
 			try {
-				if ( empty( $state['exists'] ) ) {
-					delete_option( $option_name );
-				} else {
-					update_option( $option_name, $state['value'], false );
-				}
+				ConfigurationMutationStore::restore( $option_name, $transaction['expected_after'][ $option_name ], $previous[ $option_name ] );
 			} catch ( \Throwable $error ) {
-				// Verification below determines whether an after-update hook
-				// threw after WordPress had already restored the stored value.
+				// Verification below reports storage errors and retained conflicts.
 				unset( $error );
 			}
 		}
@@ -2865,6 +2881,29 @@ final class MigrationHub {
 		}
 
 		return $failures;
+	}
+
+	/** Reconcile effects against values that survived a failed import. */
+	private function reconcile_failed_configuration( array $transaction ): void {
+		if ( empty( $transaction['previous'] ) ) {
+			return;
+		}
+		try {
+			$after   = $this->read_raw_configuration_options();
+			$changed = array();
+			foreach ( $transaction['previous'] as $option => $before ) {
+				if ( $before !== $after[ $option ] ) {
+					$changed[] = $option;
+				}
+			}
+			$this->reconcile_committed_configuration( $transaction['previous'], $after, $changed );
+		} finally {
+			// Also invalidate locally memoized/cache-backed readers after failed
+			// restoration; never publish a cached pre-import configuration.
+			foreach ( self::CONFIGURATION_OPTIONS as $option ) {
+				\Cybermaps\Core\RawOptionStore::invalidate( $option );
+			}
+		}
 	}
 
 	/**

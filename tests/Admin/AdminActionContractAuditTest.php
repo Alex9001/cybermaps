@@ -167,11 +167,93 @@ final class AdminActionContractAuditTest extends TestCase {
 		$this->assertStringContainsString( 'self::send_database_error();', $media_batch );
 		$this->assertStringContainsString( '405', $media_access );
 		$this->assertStringContainsString( 'The media audit database query failed.', $media_source );
-		$this->assertStringNotContainsString( '$wpdb->last_error', $media_source );
 
 		$blueprint = $this->method_source( $this->source( 'src/Admin/DiscoveryAuditor.php' ), 'ajax_scan_blueprint' );
 		$this->assertStringContainsString( "'POST' !== \$request_method", $blueprint );
 		$this->assertStringContainsString( "check_ajax_referer( 'cybermaps_discovery_center', 'nonce' )", $blueprint );
+	}
+
+	public function test_media_ajax_access_rejections_do_not_query_the_database(): void {
+		foreach ( array( 'get_sync_stats', 'process_sync_batch' ) as $handler ) {
+			foreach (
+				array(
+					array( 'GET', true, true, 405, array() ),
+					array( 'POST', false, true, 403, array( 'nonce', 'capability' ) ),
+					array( 'POST', true, false, 403, array( 'nonce' ) ),
+				) as list( $method, $capability, $nonce, $status, $reads )
+			) {
+				$result = $this->invoke_media_ajax( $handler, $method, $capability, $nonce );
+				$this->assertSame( $status, $result['status'] );
+				$this->assertSame( $reads, $result['boundary_reads'] );
+				$this->assertSame( 0, $result['database_queries'] );
+			}
+		}
+	}
+
+	public function test_media_database_errors_cannot_be_reported_as_empty_success_or_leak_details(): void {
+		foreach ( array( 'get_sync_stats', 'process_sync_batch' ) as $handler ) {
+			$result = $this->invoke_media_ajax( $handler, 'POST', true, true );
+			$this->assertSame( 500, $result['status'] );
+			$this->assertSame( 1, $result['database_queries'] );
+			$this->assertSame( array( 'nonce', 'capability' ), $result['boundary_reads'] );
+			$this->assertSame(
+				array( 'message' => 'The media audit database query failed. Check database health and try again.' ),
+				$result['payload']
+			);
+			$this->assertStringNotContainsString( 'private database detail', json_encode( $result['payload'] ) );
+		}
+	}
+
+	private function invoke_media_ajax( string $handler, string $method, bool $capability, bool $nonce ): array {
+		$script = <<<'PHP'
+namespace Cybermaps\Admin {
+	function current_user_can( $capability ) { $GLOBALS['boundary_reads'][] = 'capability'; return $GLOBALS['allowed']; }
+	function check_ajax_referer( $action, $field ) {
+		$GLOBALS['boundary_reads'][] = 'nonce';
+		if ( ! $GLOBALS['nonce_valid'] ) { wp_send_json_error( array( 'message' => 'Invalid nonce.' ), 403 ); }
+	}
+	function wp_send_json_error( $payload, $status = 400 ) { $GLOBALS['boundary_payload'] = $payload; throw new \RuntimeException( 'boundary', $status ); }
+	function wp_send_json_success( $payload ) { $GLOBALS['boundary_payload'] = $payload; throw new \RuntimeException( 'success', 200 ); }
+}
+namespace {
+	require $argv[1];
+	$GLOBALS['boundary_reads'] = array();
+	$GLOBALS['allowed'] = '1' === $argv[4];
+	$GLOBALS['nonce_valid'] = '1' === $argv[5];
+	$GLOBALS['cybermaps_mock_options'] = array(
+		'cybermaps_settings' => array( 'media_discovery_intensity' => 'standard' ),
+		'cybermaps_discovery_center' => array( 'overrides' => array( 'post_type:post' => 1 ) ),
+	);
+	$GLOBALS['cybermaps_mock_post_types'] = array( 'post' );
+	$GLOBALS['wpdb'] = new class() {
+		public string $posts = 'wp_posts';
+		public string $last_error = '';
+		public int $queries = 0;
+		public function prepare( string $query, mixed ...$args ): string { return $query; }
+		public function get_var( string $query ): int { ++$this->queries; $this->last_error = 'private database detail'; return 0; }
+		public function get_col( string $query ): array { ++$this->queries; $this->last_error = 'private database detail'; return array(); }
+	};
+	$_SERVER['REQUEST_METHOD'] = $argv[3];
+	$_POST = array( 'cursor' => array( 'untrusted selector' ) );
+	$status = 0;
+	try { ( new \Cybermaps\Admin\MediaAuditor() )->{$argv[2]}(); }
+	catch ( \RuntimeException $error ) { $status = $error->getCode(); }
+	echo json_encode( array( 'status' => $status, 'boundary_reads' => $GLOBALS['boundary_reads'], 'database_queries' => $GLOBALS['wpdb']->queries, 'payload' => $GLOBALS['boundary_payload'] ?? null ) );
+}
+PHP;
+		$process = proc_open(
+			array( PHP_BINARY, '-r', $script, dirname( __DIR__ ) . '/bootstrap.php', $handler, $method, $capability ? '1' : '0', $nonce ? '1' : '0' ),
+			array( 1 => array( 'pipe', 'w' ), 2 => array( 'pipe', 'w' ) ),
+			$pipes
+		);
+		$this->assertIsResource( $process );
+		$output = stream_get_contents( $pipes[1] );
+		$error  = stream_get_contents( $pipes[2] );
+		fclose( $pipes[1] );
+		fclose( $pipes[2] );
+		$this->assertSame( 0, proc_close( $process ), $error );
+		$this->assertSame( '', $error );
+		return json_decode( $output, true, 512, JSON_THROW_ON_ERROR );
 	}
 
 	public function test_media_rescan_cannot_silently_use_an_unsaved_discovery_mode(): void {

@@ -168,13 +168,19 @@ final class XmlWriter {
 	}
 
 	private function scalar( mixed $value ): string {
-		return \is_scalar( $value ) ? (string) $value : '';
+		$value = \is_scalar( $value ) ? (string) $value : '';
+		// Encode to normalize malformed UTF-8 and forbidden XML 1.0 scalars,
+		// then decode once so both writers still receive raw text.
+		return \htmlspecialchars_decode(
+			\htmlspecialchars( $value, ENT_QUOTES | ENT_XML1 | ENT_SUBSTITUTE | ENT_DISALLOWED, 'UTF-8' ),
+			ENT_QUOTES | ENT_XML1
+		);
 	}
 
 	private function attribute( string $value ): string {
 		return \htmlspecialchars(
 			$value,
-			ENT_QUOTES | ENT_XML1 | ENT_SUBSTITUTE,
+			ENT_QUOTES | ENT_XML1 | ENT_SUBSTITUTE | ENT_DISALLOWED,
 			'UTF-8'
 		);
 	}
@@ -182,7 +188,7 @@ final class XmlWriter {
 	private function text( string $value ): string {
 		return \htmlspecialchars(
 			$value,
-			ENT_XML1 | ENT_SUBSTITUTE,
+			ENT_XML1 | ENT_SUBSTITUTE | ENT_DISALLOWED,
 			'UTF-8'
 		);
 	}

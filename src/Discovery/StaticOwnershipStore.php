@@ -11,16 +11,26 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Sharded ownership inventory for generated static files.
+ * Per-path ownership inventory with bounded legacy shard migration.
  */
 final class StaticOwnershipStore {
-	public const LEGACY_OPTION     = 'cybermaps_static_hashes';
-	public const SCHEMA_OPTION     = 'cybermaps_static_hashes_schema';
-	public const SCHEMA_VERSION    = 2;
-	public const SHARD_COUNT       = 64;
-	public const MAX_PATH_LENGTH   = 4096;
-	public const REPAIR_OPTION     = 'cybermaps_static_ownership_repair_pending';
-	public const REPAIR_ACK_OPTION = 'cybermaps_static_ownership_repair_ack';
+	public const LEGACY_OPTION        = 'cybermaps_static_hashes';
+	public const SCHEMA_OPTION        = 'cybermaps_static_hashes_schema';
+	public const SCHEMA_VERSION       = 3;
+	public const SHARD_SCHEMA_VERSION = 2;
+	public const PURGE_SCOPES         = array( 'all', 'web_root', 'discovery', 'sitemaps', 'stale', 'stale_generation', 'legacy_publications', 'failed_publication', 'xml' );
+	public const MIGRATION_OPTION     = 'cybermaps_static_ownership_migration';
+	private array $row_changes        = array();
+	private array $row_observations   = array();
+	public const SHARD_COUNT          = 64;
+	public const MAX_PATH_LENGTH      = 4096;
+	public const REPAIR_OPTION        = 'cybermaps_static_ownership_repair_pending';
+	public const REPAIR_ACK_OPTION    = 'cybermaps_static_ownership_repair_ack';
+
+	private bool $migration_pending  = false;
+	private ?int $cutover_connection = null;
+	private ?array $cutover_fence    = null;
+	private ?int $cutover_lock_wait  = null;
 
 	private const HEARTBEAT_BATCH = 250;
 
@@ -114,7 +124,7 @@ final class StaticOwnershipStore {
 			return $pre_option;
 		}
 
-		if ( self::SCHEMA_VERSION !== self::current_schema() ) {
+		if ( ! in_array( self::current_schema(), array( self::SHARD_SCHEMA_VERSION, self::SCHEMA_VERSION ), true ) ) {
 			return $pre_option;
 		}
 
@@ -170,6 +180,10 @@ final class StaticOwnershipStore {
 	 * @return array<string,string>
 	 */
 	public function read_flat_hashes(): array {
+		return self::SCHEMA_VERSION === $this->schema() ? $this->read_table_hashes() : $this->read_legacy_hashes();
+	}
+
+	private function read_legacy_hashes(): array {
 		if ( null !== $this->local_hashes ) {
 			return $this->local_hashes;
 		}
@@ -185,7 +199,7 @@ final class StaticOwnershipStore {
 			$this->local_hashes       = $this->invalid_legacy ? array() : $this->flatten_legacy_hashes( $legacy );
 			return $this->local_hashes;
 		}
-		if ( self::SCHEMA_VERSION !== $schema ) {
+		if ( self::SHARD_SCHEMA_VERSION !== $schema ) {
 			$this->local_hashes = array();
 			return $this->local_hashes;
 		}
@@ -235,6 +249,21 @@ final class StaticOwnershipStore {
 			return false;
 		}
 
+		if ( self::SCHEMA_VERSION === $this->schema() ) {
+			return $this->stage_row(
+				$path,
+				array(
+					'hash'       => $hash,
+					'generation' => max( 0, $generation ),
+				),
+				$force_flush,
+				$bump_revision
+			);
+		}
+		return $this->stage_legacy_record( $path, $hash, $generation, $force_flush, $bump_revision );
+	}
+
+	private function stage_legacy_record( string $path, string $hash, int $generation, bool $force_flush, bool $bump_revision ): bool {
 		$schema = $this->schema();
 		if ( 0 === $schema ) {
 			$hashes = $this->read_flat_hashes();
@@ -252,7 +281,7 @@ final class StaticOwnershipStore {
 			}
 			return true;
 		}
-		if ( self::SCHEMA_VERSION !== $schema ) {
+		if ( self::SHARD_SCHEMA_VERSION !== $schema ) {
 			return false;
 		}
 
@@ -300,6 +329,9 @@ final class StaticOwnershipStore {
 		if ( '' === $path || \strlen( $path ) > self::MAX_PATH_LENGTH ) {
 			return false;
 		}
+		if ( self::SCHEMA_VERSION === $this->schema() ) {
+			return $this->stage_row( $path, null, $force_flush, $bump_revision );
+		}
 		$schema = $this->schema();
 		if ( 0 === $schema ) {
 			$hashes = $this->read_flat_hashes();
@@ -314,7 +346,7 @@ final class StaticOwnershipStore {
 			$this->local_dirty  = true;
 			return ! $force_flush || $this->flush( 0, true, $bump_revision );
 		}
-		if ( self::SCHEMA_VERSION !== $schema ) {
+		if ( self::SHARD_SCHEMA_VERSION !== $schema ) {
 			return false;
 		}
 
@@ -343,7 +375,7 @@ final class StaticOwnershipStore {
 	 */
 	public function stage_hashes( array $hashes, int $generation, bool $force_flush = false ): bool {
 		$schema = $this->schema();
-		if ( ! \in_array( $schema, array( 0, self::SCHEMA_VERSION ), true ) ) {
+		if ( ! \in_array( $schema, array( 0, self::SHARD_SCHEMA_VERSION, self::SCHEMA_VERSION ), true ) ) {
 			return false;
 		}
 		$normalized = self::normalize_staged_hashes( $hashes );
@@ -401,6 +433,9 @@ final class StaticOwnershipStore {
 	}
 
 	public function flush( int $generation = 0, bool $standalone_write = false, bool $bump_revision = true ): bool {
+		if ( self::SCHEMA_VERSION === $this->schema() ) {
+			return ! $this->local_dirty || $this->flush_rows( $bump_revision );
+		}
 		if ( ! $this->local_dirty ) {
 			return true;
 		}
@@ -450,7 +485,7 @@ final class StaticOwnershipStore {
 	}
 
 	private function flush_sharded_hashes( bool $bump_revision ): bool {
-		if ( self::SCHEMA_VERSION !== $this->schema() ) {
+		if ( self::SHARD_SCHEMA_VERSION !== $this->schema() ) {
 			return false;
 		}
 		foreach ( \array_keys( $this->dirty_shards ) as $shard ) {
@@ -467,6 +502,8 @@ final class StaticOwnershipStore {
 	}
 
 	public function clear_local_cache(): void {
+		$this->row_changes        = array();
+		$this->row_observations   = array();
 		$this->local_hashes       = null;
 		$this->loaded_shards      = array();
 		$this->shard_observations = array();
@@ -483,6 +520,8 @@ final class StaticOwnershipStore {
 	 * Migrate legacy storage to schema 2 shards under an active static lease.
 	 */
 	public function migrate_if_needed( ?callable $heartbeat = null, bool $validate_current_schema = false ): bool {
+		unset( $validate_current_schema );
+		$this->migration_pending = false;
 		if ( false === $this->mutation_fence() ) {
 			return false;
 		}
@@ -493,14 +532,12 @@ final class StaticOwnershipStore {
 		$current_schema     = self::observed_schema( $schema_observation );
 		$this->schema_cache = $current_schema;
 		if ( self::SCHEMA_VERSION === $current_schema ) {
-			return $this->finish_current_schema_migration( $heartbeat, $validate_current_schema );
+			return false !== $this->table_store()->page( -1, '', 1 ) && $this->cleanup_table_migration( $heartbeat );
 		}
-		// Never reinterpret a newer or unknown persisted contract as the legacy
-		// monolithic map. A downgraded plugin must leave future ownership intact.
-		if ( 0 !== $current_schema ) {
+		if ( ! in_array( $current_schema, array( 0, self::SHARD_SCHEMA_VERSION ), true ) ) {
 			return false;
 		}
-		return $this->migrate_legacy_schema( $schema_observation, $heartbeat );
+		return $this->migrate_table( $schema_observation, $current_schema, $heartbeat );
 	}
 
 	private static function observed_schema( array $observation ): int {
@@ -515,166 +552,6 @@ final class StaticOwnershipStore {
 		return null === $heartbeat || (bool) $heartbeat();
 	}
 
-	private function finish_current_schema_migration( ?callable $heartbeat, bool $validate ): bool {
-		if ( $validate && ! $this->all_persisted_shards_valid( $heartbeat ) ) {
-			return false;
-		}
-		$legacy = self::read_uncached_observation( self::LEGACY_OPTION );
-		if ( $legacy['failed'] || ! $legacy['exists'] ) {
-			return ! $legacy['failed'];
-		}
-		if ( ! self::heartbeat_is_healthy( $heartbeat ) || false === $this->mutation_fence() || ! $this->bump_revision() ) {
-			return false;
-		}
-		$fence = $this->mutation_fence();
-		return false !== $fence && self::compare_and_swap_option( self::LEGACY_OPTION, $legacy, array(), $fence ) && ! self::read_uncached_observation( self::LEGACY_OPTION )['exists'];
-	}
-
-	/** @param array{exists:bool,value:mixed,raw:string|null,direct:bool,failed:bool} $schema_observation */
-	private function migrate_legacy_schema( array $schema_observation, ?callable $heartbeat ): bool {
-		if ( ! self::heartbeat_is_healthy( $heartbeat ) ) {
-			return false;
-		}
-		$legacy_observation = self::read_uncached_observation( self::LEGACY_OPTION );
-		$legacy             = $legacy_observation['exists'] ? $legacy_observation['value'] : array();
-		if ( $legacy_observation['failed'] || ! \is_array( $legacy ) || ( empty( $legacy ) && $this->has_persisted_shard_data( $heartbeat ) ) ) {
-			return false;
-		}
-		$generation = AtomicOptionSequence::current( self::SYNC_EPOCH_OPTION );
-		$shards     = $generation < 0 ? null : $this->migration_shards( $legacy, $generation, $heartbeat );
-		if ( null === $shards || ! $this->write_migration_shards( $shards, $heartbeat ) || ! self::verify_migration( $shards, $heartbeat ) ) {
-			return false;
-		}
-		return $this->complete_legacy_migration( $schema_observation, $legacy, $heartbeat );
-	}
-
-	/** @return array<int,array<string,array{hash:string,generation:int}>>|null */
-	private function migration_shards( array $legacy, int $generation, ?callable $heartbeat ): ?array {
-		$shards    = array_fill( 0, self::SHARD_COUNT, array() );
-		$processed = 0;
-		foreach ( $legacy as $path => $hash ) {
-			if ( 0 === $processed % self::HEARTBEAT_BATCH && ! self::heartbeat_is_healthy( $heartbeat ) ) {
-				return null;
-			}
-			++$processed;
-			$record = self::migration_record( $path, $hash, $generation );
-			if ( null === $record || ! self::add_migration_record( $shards, $record ) ) {
-				return null;
-			}
-		}
-		return $shards;
-	}
-
-	/** @return array{path:string,hash:string,generation:int,shard:int}|null */
-	private static function migration_record( mixed $path, mixed $hash, int $generation ): ?array {
-		if ( ! \is_string( $path ) || '' === $path || \strlen( $path ) > self::MAX_PATH_LENGTH || ! \is_string( $hash ) || 1 !== \preg_match( '/^[a-f0-9]{32}$/i', $hash ) ) {
-			return null;
-		}
-		$path = self::normalize_path( $path );
-		return array(
-			'path'       => $path,
-			'hash'       => \strtolower( $hash ),
-			'generation' => $generation,
-			'shard'      => self::shard_for_path( $path ),
-		);
-	}
-
-	/** @param array<int,array<string,array{hash:string,generation:int}>> $shards @param array{path:string,hash:string,generation:int,shard:int} $record */
-	private static function add_migration_record( array &$shards, array $record ): bool {
-		$existing = $shards[ $record['shard'] ][ $record['path'] ]['hash'] ?? null;
-		if ( \is_string( $existing ) && ! \hash_equals( $record['hash'], $existing ) ) {
-			return false;
-		}
-		$shards[ $record['shard'] ][ $record['path'] ] = array(
-			'hash'       => $record['hash'],
-			'generation' => $record['generation'],
-		);
-		return true;
-	}
-
-	/** @param array<int,array<string,array{hash:string,generation:int}>> $shards */
-	private function write_migration_shards( array $shards, ?callable $heartbeat ): bool {
-		for ( $shard = 0; $shard < self::SHARD_COUNT; ++$shard ) {
-			if ( ! self::heartbeat_is_healthy( $heartbeat ) || ! $this->write_migration_shard( $shard, $shards[ $shard ] ) ) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	private function write_migration_shard( int $shard, array $records ): bool {
-		$fence = $this->mutation_fence();
-		if ( false === $fence ) {
-			return false;
-		}
-		$option      = self::shard_option_name( $shard );
-		$observation = self::read_uncached_observation( $option );
-		$stored      = $observation['exists'] ? $observation['value'] : array();
-		if ( $observation['failed'] || ! self::validate_shard_storage( $stored, $shard ) ) {
-			return false;
-		}
-		$current = self::normalize_records( $stored );
-		return ( empty( $current ) || $current === $records ) && self::compare_and_swap_option( $option, $observation, $records, $fence );
-	}
-
-	/** @param array{exists:bool,value:mixed,raw:string|null,direct:bool,failed:bool} $schema_observation */
-	private function complete_legacy_migration( array $schema_observation, array $legacy, ?callable $heartbeat ): bool {
-		$current = self::read_uncached_observation( self::LEGACY_OPTION );
-		$value   = $current['exists'] ? $current['value'] : array();
-		if ( $current['failed'] || ! \is_array( $value ) || $value !== $legacy || ! self::heartbeat_is_healthy( $heartbeat ) ) {
-			return false;
-		}
-		$fence = $this->mutation_fence();
-		if ( false === $fence || ! self::compare_and_swap_option_value( self::SCHEMA_OPTION, $schema_observation, self::SCHEMA_VERSION, false, $fence ) || self::SCHEMA_VERSION !== self::current_schema() ) {
-			return false;
-		}
-		if ( ! self::heartbeat_is_healthy( $heartbeat ) || false === $this->mutation_fence() || ! $this->bump_revision() ) {
-			return false;
-		}
-		$fence = $this->mutation_fence();
-		if ( false === $fence || ( $current['exists'] && ! self::compare_and_swap_option( self::LEGACY_OPTION, $current, array(), $fence ) ) ) {
-			return false;
-		}
-		if ( self::read_uncached_observation( self::LEGACY_OPTION )['exists'] ) {
-			return false;
-		}
-		$this->clear_local_cache();
-		return true;
-	}
-
-	private function has_persisted_shard_data( ?callable $heartbeat = null ): bool {
-		for ( $shard = 0; $shard < self::SHARD_COUNT; ++$shard ) {
-			if ( 0 === $shard % 8 && null !== $heartbeat && ! $heartbeat() ) {
-				return true;
-			}
-			$stored = self::read_uncached_option( self::shard_option_name( $shard ), null );
-			if ( null !== $stored && false !== $stored && array() !== $stored ) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * @param array<int,array<string,array{hash:string,generation:int}>> $expected_shards
-	 */
-	private static function verify_migration( array $expected_shards, ?callable $heartbeat = null ): bool {
-		for ( $shard = 0; $shard < self::SHARD_COUNT; ++$shard ) {
-			if ( null !== $heartbeat && ! $heartbeat() ) {
-				return false;
-			}
-			$stored = self::read_uncached_option( self::shard_option_name( $shard ), array() );
-			if (
-				! self::validate_shard_storage( $stored, $shard )
-				|| self::normalize_records( $stored ) !== ( $expected_shards[ $shard ] ?? array() )
-			) {
-				return false;
-			}
-		}
-
-		return true;
-	}
 
 	/**
 	 * Persist only dirty shards after a standalone mutation reload.
@@ -682,8 +559,11 @@ final class StaticOwnershipStore {
 	 * @param array<string,array{hash:string,generation:int}> $records
 	 */
 	public function write_shard_records( int $shard, array $records, bool $bump_revision = true ): bool {
+		if ( self::SCHEMA_VERSION === $this->schema() ) {
+			return $this->replace_table_shard( $shard, $records, $bump_revision );
+		}
 		if (
-			self::SCHEMA_VERSION !== $this->schema()
+			self::SHARD_SCHEMA_VERSION !== $this->schema()
 			|| $shard < 0
 			|| $shard >= self::SHARD_COUNT
 			|| ! self::validate_shard_storage( $records, $shard )
@@ -709,6 +589,9 @@ final class StaticOwnershipStore {
 	 * @return array<string,array{hash:string,generation:int}>
 	 */
 	public function load_shard( int $shard ): array {
+		if ( self::SCHEMA_VERSION === $this->schema() ) {
+			return $this->read_table_shard( $shard );
+		}
 		if ( $shard < 0 || $shard >= self::SHARD_COUNT ) {
 			return array();
 		}
@@ -716,7 +599,7 @@ final class StaticOwnershipStore {
 			return $this->loaded_shards[ $shard ];
 		}
 
-		if ( self::SCHEMA_VERSION !== $this->schema() ) {
+		if ( self::SHARD_SCHEMA_VERSION !== $this->schema() ) {
 			$this->loaded_shards[ $shard ] = array();
 			return $this->loaded_shards[ $shard ];
 		}
@@ -742,7 +625,10 @@ final class StaticOwnershipStore {
 	}
 
 	public function is_shard_valid( int $shard ): bool {
-		if ( self::SCHEMA_VERSION !== $this->schema() || $shard < 0 || $shard >= self::SHARD_COUNT ) {
+		if ( self::SCHEMA_VERSION === $this->schema() ) {
+			return false !== $this->read_records_page( $shard, '', 1 );
+		}
+		if ( self::SHARD_SCHEMA_VERSION !== $this->schema() || $shard < 0 || $shard >= self::SHARD_COUNT ) {
 			return false;
 		}
 		$this->load_shard( $shard );
@@ -947,36 +833,65 @@ final class StaticOwnershipStore {
 			return false;
 		}
 		if ( $delete ) {
-			return self::direct_option_query( $wpdb, 'DELETE FROM %i WHERE option_name = %s AND BINARY option_value = BINARY %s', array( $wpdb->options, $option_name, $observed['raw'] ), $fence );
+			return self::direct_query( $wpdb, 'DELETE FROM %i WHERE option_name = %s AND BINARY option_value = BINARY %s', array( $wpdb->options, $option_name, $observed['raw'] ), $fence );
 		}
 		if ( $observed['exists'] ) {
-			return self::direct_option_query( $wpdb, 'UPDATE %i SET option_value = %s, autoload = %s WHERE option_name = %s AND BINARY option_value = BINARY %s', array( $wpdb->options, self::serialize_option_value( $next_value ), 'off', $option_name, $observed['raw'] ), $fence );
+			return self::direct_query( $wpdb, 'UPDATE %i SET option_value = %s, autoload = %s WHERE option_name = %s AND BINARY option_value = BINARY %s', array( $wpdb->options, self::serialize_option_value( $next_value ), 'off', $option_name, $observed['raw'] ), $fence );
 		}
 		$sql  = null === $fence ? 'INSERT IGNORE INTO %i (option_name, option_value, autoload) VALUES (%s, %s, %s)' : 'INSERT IGNORE INTO %i (option_name, option_value, autoload) SELECT %s, %s, %s WHERE IS_USED_LOCK(%s) = CONNECTION_ID() AND CONNECTION_ID() = %d';
 		$args = array( $wpdb->options, $option_name, self::serialize_option_value( $next_value ), 'off' );
-		return self::direct_option_query( $wpdb, $sql, $args, $fence );
+		return self::direct_query( $wpdb, $sql, $args, $fence );
 	}
 
-	private static function direct_option_query( mixed $wpdb, string $sql, array $args, ?array $fence ): int|false {
+	private static function direct_query( mixed $wpdb, string $sql, array $args, ?array $fence, bool $rows = false ): array|int|false {
 		if ( null !== $fence ) {
-			if ( ! \str_contains( $sql, 'IS_USED_LOCK' ) ) {
-				$sql .= ' AND IS_USED_LOCK(%s) = CONNECTION_ID() AND CONNECTION_ID() = %d';
-			}
-			$args[] = $fence['name'];
-			$args[] = $fence['connection_id'];
+			list( $sql, $args ) = self::fenced_query( $sql, $args, $fence );
 		}
-		return $wpdb->query( $wpdb->prepare( $sql, ...$args ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- Private helper receives fixed SQL templates; appended lock predicates are literal and all values/identifiers are prepared.
+		if ( $rows ) {
+			$wpdb->last_result = array();
+		}
+		$result = $wpdb->query( array() === $args ? $sql : $wpdb->prepare( $sql, ...$args ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- Private helper receives fixed SQL templates; appended lock predicates are literal and all values/identifiers are prepared.
+		if ( false === $result || ( isset( $wpdb->last_error ) && '' !== (string) $wpdb->last_error ) ) {
+			return false;
+		}
+		return $rows ? self::copy_query_rows( $wpdb ) : (int) $result;
+	}
+
+	/** Add a same-statement fence before fixed ORDER BY/LIMIT suffixes. */
+	private static function fenced_query( string $sql, array $args, array $fence ): array {
+		if ( str_contains( $sql, 'IS_USED_LOCK' ) ) {
+			return array( $sql, array_merge( $args, array( $fence['name'], $fence['connection_id'] ) ) );
+		}
+		$split  = preg_split( '/ (?=ORDER BY|LIMIT)/', $sql, 2 );
+		$suffix = $split[1] ?? '';
+		$count  = preg_match_all( '/%[dis]/', $suffix );
+		$tail   = $count > 0 ? array_splice( $args, -$count ) : array();
+		$sql    = $split[0] . ' AND IS_USED_LOCK(%s) = CONNECTION_ID() AND CONNECTION_ID() = %d';
+		$args   = array_merge( $args, array( $fence['name'], $fence['connection_id'] ), $tail );
+		return array( $sql . ( '' === $suffix ? '' : ' ' . $suffix ), $args );
+	}
+
+	private static function copy_query_rows( mixed $wpdb ): array|false {
+		$rows = $wpdb->last_result ?? null;
+		if ( ! is_array( $rows ) || count( $rows ) > 100 ) {
+			return false;
+		}
+		$result = array();
+		foreach ( $rows as $row ) {
+			if ( ! is_object( $row ) ) {
+				return false;
+			}
+			$result[] = get_object_vars( $row );
+		}
+		return $result;
 	}
 
 	private static function direct_noop_matches( mixed $wpdb, string $option_name, array $observed, mixed $next_value, bool $delete, ?array $fence ): bool {
 		if ( $delete || ! $observed['exists'] || $observed['value'] !== $next_value ) {
 			return false;
 		}
-		if ( null === $fence ) {
-			$current = $wpdb->get_var( $wpdb->prepare( 'SELECT option_value FROM %i WHERE option_name = %s LIMIT 1', $wpdb->options, $option_name ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		} else {
-			$current = $wpdb->get_var( $wpdb->prepare( 'SELECT option_value FROM %i WHERE option_name = %s AND IS_USED_LOCK(%s) = CONNECTION_ID() AND CONNECTION_ID() = %d LIMIT 1', $wpdb->options, $option_name, $fence['name'], $fence['connection_id'] ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		}
+		$rows    = self::direct_query( $wpdb, 'SELECT option_value FROM %i WHERE option_name = %s LIMIT 1', array( $wpdb->options, $option_name ), $fence, true );
+		$current = is_array( $rows ) ? ( $rows[0]['option_value'] ?? null ) : null;
 		return \is_string( $current ) && \hash_equals( self::serialize_option_value( $next_value ), $current );
 	}
 
@@ -1065,42 +980,11 @@ final class StaticOwnershipStore {
 	 * Read coordination data without this request's potentially stale option cache.
 	 */
 	private static function read_uncached_option( string $option_name, mixed $fallback ): mixed {
-		if (
-			\defined( 'CYBERMAPS_PHPUNIT' )
-			&& CYBERMAPS_PHPUNIT
-			&& empty( $GLOBALS['cybermaps_test_static_ownership_use_sql'] )
-		) {
-			$blog_id = (int) ( $GLOBALS['cybermaps_mock_current_blog_id'] ?? 1 );
-			$by_blog = $GLOBALS['cybermaps_mock_options_by_blog'] ?? array();
-			if ( isset( $by_blog[ $blog_id ] ) && \array_key_exists( $option_name, $by_blog[ $blog_id ] ) ) {
-				return $by_blog[ $blog_id ][ $option_name ];
-			}
-			$options = $GLOBALS['cybermaps_mock_options'] ?? array();
-			return \array_key_exists( $option_name, $options ) ? $options[ $option_name ] : $fallback;
+		$observed = self::read_uncached_observation( $option_name );
+		if ( $observed['failed'] ) {
+			return self::read_failure_marker();
 		}
-
-		global $wpdb;
-		if (
-			\is_object( $wpdb )
-			&& isset( $wpdb->options )
-			&& \is_string( $wpdb->options )
-			&& \method_exists( $wpdb, 'prepare' )
-			&& \method_exists( $wpdb, 'get_var' )
-		) {
-			$raw = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-				$wpdb->prepare(
-					'SELECT option_value FROM %i WHERE option_name = %s LIMIT 1',
-					$wpdb->options,
-					$option_name
-				)
-			);
-			if ( false === $raw || ( isset( $wpdb->last_error ) && '' !== (string) $wpdb->last_error ) ) {
-				return self::read_failure_marker();
-			}
-			return null === $raw ? $fallback : \maybe_unserialize( $raw );
-		}
-
-		return \get_option( $option_name, $fallback );
+		return $observed['exists'] ? $observed['value'] : $fallback;
 	}
 
 	private static function read_failure_marker(): object {
@@ -1172,7 +1056,7 @@ final class StaticOwnershipStore {
 	}
 
 	private function can_write_shard( int $shard, array $records ): bool {
-		return self::SCHEMA_VERSION === $this->schema() && $shard >= 0 && $shard < self::SHARD_COUNT && ! isset( $this->invalid_shards[ $shard ] ) && ! isset( $this->conflicted_shards[ $shard ] ) && self::validate_shard_storage( $records, $shard );
+		return self::SHARD_SCHEMA_VERSION === $this->schema() && $shard >= 0 && $shard < self::SHARD_COUNT && ! isset( $this->invalid_shards[ $shard ] ) && ! isset( $this->conflicted_shards[ $shard ] ) && self::validate_shard_storage( $records, $shard );
 	}
 
 	private function verify_shard_write( int $shard, string $option, array $records ): bool {
@@ -1197,7 +1081,11 @@ final class StaticOwnershipStore {
 	 * @return array{hash:string,generation:int}|null
 	 */
 	private function get_record( string $path ): ?array {
-		$path   = self::normalize_path( $path );
+		$path = self::normalize_path( $path );
+		if ( self::SCHEMA_VERSION === $this->schema() ) {
+			$record = $this->observe_row( $path );
+			return false === $record ? null : $record;
+		}
 		$schema = $this->schema();
 		if ( 0 === $schema ) {
 			$hash = $this->read_flat_hashes()[ $path ] ?? null;
@@ -1208,7 +1096,7 @@ final class StaticOwnershipStore {
 				)
 				: null;
 		}
-		if ( self::SCHEMA_VERSION !== $schema ) {
+		if ( self::SHARD_SCHEMA_VERSION !== $schema ) {
 			return null;
 		}
 
@@ -1229,6 +1117,7 @@ final class StaticOwnershipStore {
 		$options = array(
 			self::LEGACY_OPTION,
 			self::SCHEMA_OPTION,
+			self::MIGRATION_OPTION,
 			self::REPAIR_ACK_OPTION,
 			self::REPAIR_OPTION,
 			self::REVISION_OPTION,
@@ -1236,6 +1125,9 @@ final class StaticOwnershipStore {
 		);
 		for ( $shard = 0; $shard < self::SHARD_COUNT; ++$shard ) {
 			$options[] = self::shard_option_name( $shard );
+		}
+		foreach ( self::PURGE_SCOPES as $scope ) {
+			$options[] = 'cybermaps_static_purge_' . $scope;
 		}
 		return $options;
 	}
@@ -1282,5 +1174,439 @@ final class StaticOwnershipStore {
 		}
 
 		return true;
+	}
+	/** @return array<int,array{key:string,path:string,hash:string,generation:int}>|false */
+	public function read_records_page( int $shard = -1, string $after = '', int $limit = 100 ): array|false {
+		if ( self::SCHEMA_VERSION !== $this->schema() || $shard < -1 || $shard >= self::SHARD_COUNT ) {
+			return false;
+		}
+		return $this->table_store()->page( $shard, $after, $limit );
+	}
+
+	/** False includes unreadable inventories; only a proven empty table is empty. */
+	public function is_empty(): bool {
+		return array() === $this->read_records_page( -1, '', 1 );
+	}
+
+	/** Read one of the fixed, bounded purge checkpoints. */
+	public function read_purge_checkpoint( string $scope ): array|null|false {
+		if ( ! in_array( $scope, self::PURGE_SCOPES, true ) ) {
+			return false;
+		}
+		$state = self::read_uncached_observation( 'cybermaps_static_purge_' . $scope );
+		if ( $state['failed'] || ( $state['exists'] && ! is_array( $state['value'] ) ) ) {
+			return false;
+		}
+		return $state['exists'] ? $state['value'] : null;
+	}
+
+	/** Persist bounded continuation state under the publication's database fence. */
+	public function write_purge_checkpoint( string $scope, ?array $state ): bool {
+		if ( ! in_array( $scope, self::PURGE_SCOPES, true ) || strlen( (string) wp_json_encode( $state ) ) > 131072 ) {
+			return false;
+		}
+		$name     = 'cybermaps_static_purge_' . $scope;
+		$observed = self::read_uncached_observation( $name );
+		$fence    = $this->mutation_fence();
+		return false !== $fence && self::compare_and_swap_option_value( $name, $observed, $state, null === $state, $fence );
+	}
+
+	private function table_store(): StaticOwnershipTable {
+		global $wpdb;
+		return new StaticOwnershipTable(
+			(string) ( $wpdb->prefix ?? '' ) . StaticOwnershipTable::SUFFIX,
+			fn( string $sql, array $args, bool $rows, bool $fenced ): array|int|false => $this->table_query( $sql, $args, $rows, $fenced )
+		);
+	}
+
+	private function table_query( string $sql, array $args, bool $rows, bool $fenced ): array|int|false {
+		global $wpdb;
+		if ( ! self::supports_direct_observation( $wpdb ) ) {
+			return false;
+		}
+		$fence = $fenced ? $this->mutation_fence() : null;
+		if ( false === $fence ) {
+			return false;
+		}
+		$result = self::direct_query( $wpdb, $sql, $args, $fence, $rows );
+		return null !== $this->cutover_connection && ! $this->cutover_session_is_current() ? false : $result;
+	}
+
+	/** @return array{hash:string,generation:int}|null|false */
+	private function observe_row( string $path ): array|null|false {
+		if ( array_key_exists( $path, $this->row_changes ) ) {
+			return $this->row_changes[ $path ];
+		}
+		return $this->table_store()->read( $path );
+	}
+
+	private function stage_row( string $path, ?array $next, bool $force_flush, bool $bump_revision ): bool {
+		if ( ! array_key_exists( $path, $this->row_observations ) ) {
+			$prior = $this->table_store()->read( $path );
+			if ( false === $prior ) {
+				return false;
+			}
+			$this->row_observations[ $path ] = $prior;
+		}
+		if ( ! array_key_exists( $path, $this->row_changes ) && $this->row_observations[ $path ] === $next ) {
+			unset( $this->row_observations[ $path ] );
+			return ! $force_flush || $this->flush( 0, true, $bump_revision );
+		}
+		$this->row_changes[ $path ] = $next;
+		$this->local_hashes         = null;
+		$this->local_dirty          = true;
+		return ! ( $force_flush || count( $this->row_changes ) >= 250 ) || $this->flush_rows( $bump_revision );
+	}
+
+	private function flush_rows( bool $bump_revision ): bool {
+		if ( false === $this->mutation_fence() ) {
+			return false;
+		}
+		$table = $this->table_store();
+		foreach ( $this->row_changes as $path => $next ) {
+			if ( ! $table->replace( $path, $this->row_observations[ $path ], $next ) ) {
+				return false;
+			}
+			unset( $this->row_changes[ $path ], $this->row_observations[ $path ] );
+		}
+		if ( $bump_revision && ! $this->bump_revision() ) {
+			return false;
+		}
+		$this->local_dirty = false;
+		return true;
+	}
+
+	private function read_table_hashes(): array {
+		$flat  = array();
+		$after = '';
+		do {
+			$page = $this->read_records_page( -1, $after );
+			if ( false === $page ) {
+				return array();
+			}
+			foreach ( $page as $row ) {
+				$flat[ $row['path'] ] = $row['hash'];
+				$after                = $row['key'];
+			}
+				$full_page = count( $page ) === StaticOwnershipTable::PAGE_SIZE;
+		} while ( $full_page );
+		foreach ( $this->row_changes as $path => $record ) {
+			if ( null === $record ) {
+				unset( $flat[ $path ] );
+			} else {
+				$flat[ $path ] = $record['hash'];
+			}
+		}
+		return $flat;
+	}
+
+	private function read_table_shard( int $shard ): array {
+		$records = array();
+		$after   = '';
+		do {
+			$page = $this->read_records_page( $shard, $after );
+			if ( false === $page ) {
+				$this->invalid_shards[ $shard ] = true;
+				return array();
+			}
+			foreach ( $page as $row ) {
+				$records[ $row['path'] ] = array(
+					'hash'       => $row['hash'],
+					'generation' => $row['generation'],
+				);
+				$after                   = $row['key'];
+			}
+				$full_page = count( $page ) === StaticOwnershipTable::PAGE_SIZE;
+		} while ( $full_page );
+		foreach ( $this->row_changes as $path => $record ) {
+			if ( self::shard_for_path( $path ) !== $shard ) {
+				continue;
+			}
+			if ( null === $record ) {
+				unset( $records[ $path ] );
+			} else {
+				$records[ $path ] = $record;
+			}
+		}
+		return $records;
+	}
+
+	private function replace_table_shard( int $shard, array $records, bool $bump_revision ): bool {
+		if ( ! self::validate_shard_storage( $records, $shard ) ) {
+			return false;
+		}
+		$current = $this->read_table_shard( $shard );
+		if ( isset( $this->invalid_shards[ $shard ] ) ) {
+			return false;
+		}
+		foreach ( $current as $path => $record ) {
+			if ( ! isset( $records[ $path ] ) && ! $this->delete_hash( $path, true, false ) ) {
+				return false;
+			}
+		}
+		foreach ( self::normalize_records( $records ) as $path => $record ) {
+			if ( ! $this->set_hash( $path, $record['hash'], $record['generation'], true, false ) ) {
+				return false;
+			}
+		}
+		return ! $bump_revision || $this->commit_revision();
+	}
+
+	public function has_pending_migration(): bool {
+		return $this->migration_pending;
+	}
+
+	/** Refuse caller transactions before any schema DDL or staging mutation. */
+	private function migration_context_available(): bool {
+		global $wpdb;
+		return self::supports_direct_observation( $wpdb ) && $this->begin_cutover( false ) && $this->finish_cutover( false, false, array() );
+	}
+
+	private function migrate_table( array $schema_observation, int $schema, ?callable $heartbeat ): bool {
+		if ( ! $this->migration_context_available() ) {
+			return false;
+		}
+		$progress = self::read_uncached_observation( self::MIGRATION_OPTION );
+		if ( $progress['failed'] ) {
+			return false;
+		}
+		$state = $progress['exists'] ? $progress['value'] : null;
+		if ( null === $state ) {
+			$generation = AtomicOptionSequence::current( self::SYNC_EPOCH_OPTION );
+			if ( $generation < 0 || ! $this->table_store()->install() ) {
+				return false;
+			}
+			$state = StaticOwnershipMigration::initial_state( $schema, $generation );
+			if ( ! $this->save_migration_state( $state ) ) {
+				return false;
+			}
+		}
+		if ( ! self::valid_migration_state( $state, $schema ) ) {
+			return false;
+		}
+		$migration = $this->migration_worker( $heartbeat );
+		if ( ! $migration->advance( $state ) ) {
+			$this->migration_pending = $migration->has_pending_work();
+			return false;
+		}
+		return $this->cutover_table( $schema_observation, $state, $migration, $heartbeat );
+	}
+
+	/** Promote authority and remove pinned sources in one short, connection-bound transaction. */
+	private function cutover_table( array $schema_observation, array $state, StaticOwnershipMigration $migration, ?callable $heartbeat ): bool {
+		if ( ! $this->begin_cutover() ) {
+			return false;
+		}
+		$committed = false;
+		$restart   = false;
+		try {
+			$pins    = $migration->verify_cutover_sources( $state );
+			$restart = 0 === $pins;
+			if ( 1 !== $pins || ! $this->promote_cutover_schema( $schema_observation ) || ! $this->cleanup_table_migration( $heartbeat ) ) {
+				return false;
+			}
+			$committed = $this->cutover_control( 'COMMIT' );
+			if ( $committed ) {
+				$this->schema_cache = self::SCHEMA_VERSION;
+			}
+		} finally {
+			$settled = $this->finish_cutover( $committed, $restart, $state );
+		}
+		return $committed && $settled;
+	}
+
+	private function begin_cutover( bool $check_engines = true ): bool {
+		global $wpdb;
+		$fence      = $this->mutation_fence();
+		$connection = $this->database_connection();
+		if ( false === $fence || null === $connection || ( $check_engines && ! $this->cutover_engines_supported() ) ) {
+			return false;
+		}
+		// No SESSION keyword: both supported servers reject this inside an active
+		// transaction, preserving caller work instead of implicitly committing it.
+		if ( false === self::direct_query( $wpdb, 'SET TRANSACTION ISOLATION LEVEL SERIALIZABLE', array(), null ) ) {
+			return false;
+		}
+		$this->cutover_connection = $connection;
+		$this->cutover_fence      = $fence;
+		if ( ! $this->set_cutover_lock_wait() || ! $this->cutover_control( 'START TRANSACTION' ) ) {
+			$this->finish_cutover( false, false, array() );
+			return false;
+		}
+		return true;
+	}
+
+	/** Bound row-lock waits using a setting available on older supported servers. */
+	private function set_cutover_lock_wait(): bool {
+		global $wpdb;
+		$rows  = self::direct_query( $wpdb, 'SELECT @@SESSION.innodb_lock_wait_timeout AS lock_wait', array(), null, true );
+		$value = is_array( $rows ) ? (string) ( $rows[0]['lock_wait'] ?? '' ) : '';
+		if ( 1 !== preg_match( '/^[0-9]+$/D', $value ) || ! $this->cutover_session_is_current() ) {
+			return false;
+		}
+		$this->cutover_lock_wait = (int) $value;
+		return false !== self::direct_query( $wpdb, 'SET SESSION innodb_lock_wait_timeout = %d', array( 1 ), null ) && $this->cutover_session_is_current();
+	}
+
+	private function restore_cutover_lock_wait(): bool {
+		global $wpdb;
+		if ( null === $this->cutover_lock_wait ) {
+			return true;
+		}
+		return $this->cutover_connection === $this->database_connection()
+			&& false !== self::direct_query( $wpdb, 'SET SESSION innodb_lock_wait_timeout = %d', array( $this->cutover_lock_wait ), null )
+			&& $this->cutover_connection === $this->database_connection();
+	}
+
+	private function cutover_engines_supported(): bool {
+		global $wpdb;
+		$rows = self::direct_query( $wpdb, 'SELECT TABLE_NAME, ENGINE FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME IN (%s,%s) LIMIT 2', array( $wpdb->options, $wpdb->prefix . StaticOwnershipTable::SUFFIX ), null, true );
+		if ( ! is_array( $rows ) || 2 !== count( $rows ) ) {
+			return false;
+		}
+		foreach ( $rows as $row ) {
+			if ( 'InnoDB' !== ( $row['ENGINE'] ?? null ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private function database_connection(): ?int {
+		global $wpdb;
+		$rows  = self::direct_query( $wpdb, 'SELECT CONNECTION_ID() AS connection_id', array(), null, true );
+		$value = is_array( $rows ) ? (string) ( $rows[0]['connection_id'] ?? '' ) : '';
+		return 1 === preg_match( '/^[1-9][0-9]*$/D', $value ) ? (int) $value : null;
+	}
+
+	private function cutover_session_is_current(): bool {
+		return $this->cutover_connection === $this->database_connection() && $this->cutover_fence === $this->mutation_fence();
+	}
+
+	/** Transaction control has no WHERE clause; validate the captured session on both sides. */
+	private function cutover_control( string $statement ): bool {
+		global $wpdb;
+		if ( ! in_array( $statement, array( 'START TRANSACTION', 'COMMIT' ), true ) || ! $this->cutover_session_is_current() ) {
+			return false;
+		}
+		$result = self::direct_query( $wpdb, $statement, array(), null );
+		return false !== $result && $this->cutover_session_is_current();
+	}
+
+	private function promote_cutover_schema( array $observed ): bool {
+		$fence = $this->mutation_fence();
+		if ( false === $fence || ! $this->cutover_session_is_current() || ! self::compare_and_swap_option_value( self::SCHEMA_OPTION, $observed, self::SCHEMA_VERSION, false, $fence ) ) {
+			return false;
+		}
+		$revision = self::read_uncached_observation( self::REVISION_OPTION );
+		$value    = $revision['exists'] ? (string) $revision['value'] : '0';
+		if ( $revision['failed'] || 1 !== preg_match( '/^(?:0|[1-9][0-9]*)$/D', $value ) || (int) $value >= PHP_INT_MAX ) {
+			return false;
+		}
+		return self::compare_and_swap_option_value( self::REVISION_OPTION, $revision, (int) $value + 1, false, $fence ) && $this->cutover_session_is_current();
+	}
+
+	private function finish_cutover( bool $committed, bool $restart, array $state ): bool {
+		global $wpdb;
+		$settled = $committed;
+		if ( ! $committed && $this->cutover_connection === $this->database_connection() ) {
+			$settled = false !== self::direct_query( $wpdb, 'ROLLBACK', array(), null ) && $this->cutover_connection === $this->database_connection();
+		}
+		$restored                 = $this->restore_cutover_lock_wait();
+		$this->cutover_lock_wait  = null;
+		$this->cutover_connection = null;
+		$this->cutover_fence      = null;
+		$this->schema_cache       = null;
+		foreach ( self::all_option_names() as $option ) {
+			self::invalidate_option_cache( $option );
+		}
+		if ( $restart && $settled ) {
+			$this->migration_pending = $this->save_migration_state( StaticOwnershipMigration::initial_state( $state['schema'], $state['generation'] ) );
+		}
+		return $settled && $restored;
+	}
+
+	private function migration_worker( ?callable $heartbeat ): StaticOwnershipMigration {
+		global $wpdb;
+		return new StaticOwnershipMigration(
+			$this->table_store(),
+			$wpdb->options,
+			fn( string $sql, array $args, bool $rows, bool $fenced ): array|int|false => $this->table_query( $sql, $args, $rows, $fenced ),
+			fn( array $state ): bool => $this->save_migration_state( $state ),
+			fn(): bool => self::heartbeat_is_healthy( $heartbeat ) && false !== $this->mutation_fence()
+		);
+	}
+
+	private function save_migration_state( array $state ): bool {
+		$observed = self::read_uncached_observation( self::MIGRATION_OPTION );
+		$fence    = $this->mutation_fence();
+		return false !== $fence && self::compare_and_swap_option_value( self::MIGRATION_OPTION, $observed, $state, false, $fence );
+	}
+
+	private static function valid_migration_state( mixed $state, int $schema ): bool {
+		if ( ! is_array( $state ) || array_keys( StaticOwnershipMigration::initial_state( $schema, 0 ) ) !== array_keys( $state ) ) {
+			return false;
+		}
+		if ( 1 !== $state['format'] || $schema !== $state['schema'] || ! is_int( $state['generation'] ) || $state['generation'] < 0 || ! is_array( $state['pins'] ) || count( $state['pins'] ) > 65 ) {
+			return false;
+		}
+		return self::valid_migration_cursors( $state ) && self::valid_migration_pins( $state['pins'] );
+	}
+
+	private static function valid_migration_pins( array $pins ): bool {
+		foreach ( $pins as $index => $pin ) {
+			if ( ! is_int( $index ) || $index < 0 || $index > self::SHARD_COUNT ) {
+				return false;
+			}
+			if ( null === $pin ) {
+				continue;
+			}
+			if ( ! is_array( $pin ) || array( 'bytes', 'digest' ) !== array_keys( $pin ) || ! is_int( $pin['bytes'] ) || $pin['bytes'] < 0 || ! is_string( $pin['digest'] ) || 1 !== preg_match( '/^[a-f0-9]{64}$/D', $pin['digest'] ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private static function valid_migration_cursors( array $state ): bool {
+		return is_int( $state['source'] ) && $state['source'] >= 0 && $state['source'] <= 65
+			&& is_int( $state['offset'] ) && $state['offset'] >= 0
+			&& is_int( $state['remaining'] ) && $state['remaining'] >= -1
+			&& in_array( $state['phase'], array( 'reset', 'copy', 'validate', 'verify', 'ready' ), true )
+			&& is_string( $state['after'] ) && ( '' === $state['after'] || 1 === preg_match( '/^[a-f0-9]{64}$/D', $state['after'] ) );
+	}
+
+	private function cleanup_table_migration( ?callable $heartbeat ): bool {
+		$progress = self::read_uncached_observation( self::MIGRATION_OPTION );
+		if ( $progress['failed'] || ! $progress['exists'] ) {
+			return ! $progress['failed'];
+		}
+		$state = $progress['value'];
+		if ( ! is_array( $state ) || ! self::valid_migration_state( $state, (int) ( $state['schema'] ?? -1 ) ) || 'ready' !== $state['phase'] ) {
+			return false;
+		}
+		foreach ( $state['pins'] as $index => $pin ) {
+			if ( ! self::heartbeat_is_healthy( $heartbeat ) || ! $this->delete_migrated_source( (int) $index, $pin ) ) {
+				return false;
+			}
+		}
+		$fence = $this->mutation_fence();
+		return false !== $fence && self::compare_and_swap_option_value( self::MIGRATION_OPTION, $progress, null, true, $fence );
+	}
+
+	private function delete_migrated_source( int $index, ?array $pin ): bool {
+		global $wpdb;
+		$worker  = $this->migration_worker( null );
+		$current = $worker->metadata( $index );
+		if ( null === $current ) {
+			return true;
+		}
+		if ( false === $current || $pin !== $current ) {
+			return false;
+		}
+		$option  = StaticOwnershipMigration::source_option( $index );
+		$deleted = $this->table_query( 'DELETE FROM %i WHERE option_name = %s AND LENGTH(option_value) = %d AND SHA2(option_value,256) = %s', array( $wpdb->options, $option, $pin['bytes'], $pin['digest'] ), false, true );
+		self::invalidate_option_cache( $option );
+		return false !== $deleted && null === $worker->metadata( $index );
 	}
 }

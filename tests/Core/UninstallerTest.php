@@ -372,6 +372,74 @@ final class UninstallerTest extends TestCase {
 		$this->assertTrue( $this->queries_contain( 'DROP TABLE IF EXISTS wp_cybermaps_logs' ) );
 	}
 
+	public function test_cloudflare_state_and_all_numeric_pointer_pages_are_removed_but_foreign_names_remain(): void {
+		$GLOBALS['cybermaps_mock_options'] = array( 'cybermaps_settings' => array( 'delete_data_on_uninstall' => '1' ), 'cybermaps_cloudflare_rule_state' => array( 'owned' => true ), 'cybermaps_cf_oauth_pointer_extension' => 'foreign', 'cybermaps_cf_oauth_pointer_12_extra' => 'foreign', 'CYBERMAPS_cf_oauth_pointer_9' => 'foreign' );
+		for ( $id = 1; $id <= 321; ++$id ) { $GLOBALS['cybermaps_mock_options'][ 'cybermaps_cf_oauth_pointer_' . $id ] = 'transaction-id'; }
+		Uninstaller::run();
+		self::assertArrayNotHasKey( 'cybermaps_cloudflare_rule_state', $GLOBALS['cybermaps_mock_options'] );
+		self::assertSame( array( 100, 100, 100, 21, 0 ), $GLOBALS['wpdb']->pointer_page_sizes );
+		self::assertTrue( $this->queries_contain( "BINARY LEFT(option_name,27) = BINARY 'cybermaps_cf_oauth_pointer_'" ) );
+		self::assertTrue( $this->queries_contain( "SUBSTRING(option_name,28) NOT REGEXP '[^0-9]'" ) );
+		self::assertSame( array( 'cybermaps_cf_oauth_pointer_extension' => 'foreign', 'cybermaps_cf_oauth_pointer_12_extra' => 'foreign', 'CYBERMAPS_cf_oauth_pointer_9' => 'foreign' ), array_filter( $GLOBALS['cybermaps_mock_options'], static fn( string $name ): bool => 0 === stripos( $name, 'cybermaps_cf_oauth_pointer_' ), ARRAY_FILTER_USE_KEY ) );
+	}
+
+	public function test_opted_in_cleanup_removes_managed_htaccess_recovery_without_replaying_it(): void {
+		$filesystem = new class {
+			public array $calls = array();
+			public function __call( string $method, array $arguments ): bool {
+				$this->calls[] = array( $method, $arguments );
+				return false;
+			}
+		};
+		$previous_filesystem = $GLOBALS['wp_filesystem'] ?? null;
+		$GLOBALS['wp_filesystem'] = $filesystem;
+		$GLOBALS['cybermaps_mock_options'] = array(
+			'cybermaps_managed_htaccess' => array( 'path' => '/foreign/.htaccess', 'previous' => 'Private stale configuration', 'block' => 'owned block', 'message' => 'Removal failed; manual review needed.' ),
+			'cybermaps_managed_htaccess_lock' => 'old-operation',
+			'extension_managed_htaccess' => 'retain',
+		);
+		try {
+			$method = new \ReflectionMethod( Uninstaller::class, 'cleanup_owned_site_data' );
+			self::assertTrue( $method->invoke( null, array( 'success' => true, 'status' => 'complete', 'retained' => array() ) ) );
+			self::assertFalse( get_option( 'cybermaps_managed_htaccess', false ) );
+			self::assertFalse( get_option( 'cybermaps_managed_htaccess_lock', false ) );
+			self::assertSame( 'retain', get_option( 'extension_managed_htaccess' ) );
+			self::assertSame( array(), $filesystem->calls );
+		} finally {
+			$GLOBALS['wp_filesystem'] = $previous_filesystem;
+		}
+	}
+
+	public function test_opt_out_keeps_managed_htaccess_recovery_records(): void {
+		$recovery = array( 'previous' => 'Private recovery bytes', 'message' => 'Manual review needed.' );
+		$GLOBALS['cybermaps_mock_options'] = array(
+			'cybermaps_settings' => array( 'delete_data_on_uninstall' => '0' ),
+			'cybermaps_managed_htaccess' => $recovery,
+			'cybermaps_managed_htaccess_lock' => 'old-operation',
+		);
+		Uninstaller::run();
+		self::assertSame( $recovery, get_option( 'cybermaps_managed_htaccess' ) );
+		self::assertSame( 'old-operation', get_option( 'cybermaps_managed_htaccess_lock' ) );
+	}
+
+	public function test_failed_pointer_inventory_preserves_pointer_and_prevents_shared_cleanup(): void {
+		$GLOBALS['cybermaps_mock_options'] = array( 'cybermaps_settings' => array( 'delete_data_on_uninstall' => '1' ), 'cybermaps_cf_oauth_pointer_7' => 'transaction-id' );
+		$GLOBALS['wpdb']->fail_pointer_read = true;
+		Uninstaller::run();
+		self::assertSame( 'transaction-id', get_option( 'cybermaps_cf_oauth_pointer_7' ) );
+		self::assertFalse( $this->queries_contain( 'DROP TABLE IF EXISTS wp_cybermaps_translations' ) );
+	}
+
+	public function test_failed_pointer_delete_is_verified_before_shared_cleanup(): void {
+		$GLOBALS['cybermaps_mock_options'] = array( 'cybermaps_settings' => array( 'delete_data_on_uninstall' => '1' ), 'cybermaps_cf_oauth_pointer_7' => 'transaction-id' );
+		$GLOBALS['cybermaps_mock_get_option_observer'] = static function ( string $name ): void {
+			if ( 'cybermaps_cf_oauth_pointer_7' === $name ) { $GLOBALS['cybermaps_mock_options'][ $name ] = 'transaction-id'; }
+		};
+		Uninstaller::run();
+		self::assertSame( 'transaction-id', get_option( 'cybermaps_cf_oauth_pointer_7' ) );
+		self::assertFalse( $this->queries_contain( 'DROP TABLE IF EXISTS wp_cybermaps_translations' ) );
+	}
+
 	public function test_failed_local_table_drop_prevents_shared_cleanup(): void {
 		$GLOBALS['cybermaps_mock_options'] = array(
 			'cybermaps_settings' => array( 'delete_data_on_uninstall' => '1' ),
@@ -479,6 +547,8 @@ final class UninstallerWpdbStub {
 	public string $postmeta = 'wp_postmeta';
 	public string $last_error = '';
 	public string $fail_drop_table = '';
+	public bool $fail_pointer_read = false;
+	public array $pointer_page_sizes = array();
 
 	/** @var string[] */
 	public array $existing_tables = array(
@@ -539,6 +609,18 @@ final class UninstallerWpdbStub {
 		unset( $output );
 		$this->queries[] = $query;
 		$this->last_error = '';
+		if ( str_starts_with( $query, 'SELECT option_name FROM ' ) ) {
+			if ( $this->fail_pointer_read ) { $this->last_error = 'Injected pointer read failure'; return array(); }
+			preg_match( "/option_name > '([^']*)'/", $query, $cursor );
+			preg_match( '/LIMIT ([0-9]+)/', $query, $limit );
+			$blog = (int) ( $GLOBALS['cybermaps_mock_current_blog_id'] ?? 1 );
+			$options = $GLOBALS['cybermaps_mock_options_by_blog'][ $blog ] ?? $GLOBALS['cybermaps_mock_options'];
+			$names = array_filter( array_keys( $options ), static fn( string $name ): bool => 1 === preg_match( '/^cybermaps_cf_oauth_pointer_[0-9]+$/D', $name ) && strcmp( $name, $cursor[1] ?? '' ) > 0 );
+			sort( $names, SORT_STRING );
+			$names = array_slice( $names, 0, (int) ( $limit[1] ?? 100 ) );
+			$this->pointer_page_sizes[] = count( $names );
+			return array_map( static fn( string $name ): array => array( 'option_name' => $name ), $names );
+		}
 		if ( str_starts_with( $query, 'SHOW TABLES LIKE ' ) ) {
 			$table = stripslashes( trim( substr( $query, strlen( 'SHOW TABLES LIKE ' ) ), "'" ) );
 			return in_array( $table, $this->existing_tables, true )

@@ -10,9 +10,14 @@ use Cybermaps\Admin\SetupWizard\SetupWizardPlanFactory;
 use Cybermaps\Admin\SetupWizard\SetupWizardRegistry;
 use PHPUnit\Framework\TestCase;
 
+require_once dirname( __DIR__ ) . '/mocks/configuration-database.php';
+
 final class SetupWizardPlanFactoryTest extends TestCase {
+	use \CybermapsConfigurationDatabaseFixture;
+
 	protected function setUp(): void {
 		parent::setUp();
+		$this->install_configuration_database();
 		$GLOBALS['cybermaps_mock_options']           = array();
 		$GLOBALS['cybermaps_mock_posts']             = array();
 		$GLOBALS['cybermaps_mock_pages']             = array();

@@ -105,6 +105,24 @@ class ChunkerTest extends \WP_UnitTestCase {
 		$this->assertNotSame( $first['chunks'], $second['chunks'] );
 	}
 
+	public function test_retired_v3_chunks_cannot_bypass_current_literal_analysis(): void {
+		$post = (object) array(
+			'ID' => 26, 'post_type' => 'post', 'post_content' => '<p>Current literal content.</p>',
+			'post_modified_gmt' => '2026-07-01 00:00:00',
+		);
+		$GLOBALS['cybermaps_mock_posts'][26] = $post;
+		$config = Chunker::normalize_configuration( array() );
+		$meta = \Cybermaps\Discovery\AIMetadata::calculate( 26 );
+		$intent = \Cybermaps\Discovery\IntentEngine::calculate( 26, 'post', 'post' );
+		$identity = substr( hash( 'sha256', 'bounded-v3:' . $config['window_size'] . ':' . $config['overlap'] . ':' . ( $meta['freshness'] ?? '' ) . ':' . $intent ), 0, 16 );
+		$key = 'cybermaps_chunks_26_' . md5( $post->post_modified_gmt ) . '_' . $identity;
+		$old = array( 'chunks' => array( array( 'index' => 0, 'text' => 'Retired incorrect literal' ) ) );
+		\Cybermaps\Core\CacheManager::set( $key, $old, DAY_IN_SECONDS, 'chunks' );
+		$result = ( new Chunker() )->get_chunks( 26 );
+		$this->assertNotSame( $old, $result );
+		$this->assertSame( 'Current literal content.', $result['chunks'][0]['text'] );
+	}
+
 	public function test_cache_identity_changes_with_resolved_intent(): void {
 		$GLOBALS['cybermaps_mock_posts'][35] = (object) array(
 			'ID'                => 35,

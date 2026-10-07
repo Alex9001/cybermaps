@@ -77,6 +77,25 @@ final class OptionLeaseLockTest extends \WP_UnitTestCase {
 		$this->assertSame( $raw, $database->raw );
 	}
 
+	public function test_unfenced_renewal_uses_shared_exact_byte_cas_and_retains_owner(): void {
+		$database = $this->fenced_database( null, array() );
+		$GLOBALS['wpdb'] = $database;
+		$lock = new OptionLeaseLock( self::OPTION, 300, 60 );
+		$this->assertTrue( $lock->acquire() );
+		$database->raw = serialize( array( 'token' => $lock->get_token(), 'time' => time() - 100 ) );
+		$before = $database->raw;
+		$this->assertTrue( $lock->maintain() );
+		$this->assertSame( 1, $database->update_count );
+		$this->assertNotSame( $before, $database->raw );
+		$update = $database->queries[ $this->fenced_query_index( $database, 'UPDATE' ) ];
+		$this->assertStringContainsString( 'BINARY option_value = BINARY %s', $update['query'] );
+		$this->assertStringNotContainsString( 'IS_USED_LOCK', $update['query'] );
+		$this->assertSame( $before, $update['args'][3] );
+		$this->assertSame( $lock->get_token(), maybe_unserialize( $database->raw )['token'] );
+		$lock->release();
+		$this->assertNull( $database->raw );
+	}
+
 	public function test_far_future_lock_timestamp_is_reclaimed_as_stale(): void {
 		$future          = array(
 			'token' => 'clock-skewed-contender',

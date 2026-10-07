@@ -86,19 +86,30 @@ final class IndexabilityResolver {
 			$redirect    = $signal->redirect;
 			$reasons[]   = 'redirect:' . $signal->source;
 		}
-		if ( '' === $signal->canonical ) {
-			return;
+		foreach ( $this->signal_canonicals( $signal ) as $source => $url ) {
+			$canonicals[] = $url;
+			if ( ! $this->same_url( $context->url, $url ) ) {
+				$canonical = $url;
+				$reasons[] = 'canonical_other:' . $signal->source;
+				$reasons[] = 'canonical_other:' . $source;
+			} elseif ( '' === $canonical ) {
+				$canonical = $url;
+			}
 		}
-		$canonicals[] = $signal->canonical;
-		$canonical    = $signal->canonical;
-		if ( ! $this->same_url( $context->url, $canonical ) ) {
-			$reasons[] = 'canonical_other:' . $signal->source;
+	}
+
+	/** @return array<string,string> Every active provider contributes evidence. */
+	private function signal_canonicals( SeoSignals $signal ): array {
+		$sources = $signal->details['canonical_sources'] ?? null;
+		if ( 'seo_plugins' === $signal->source && is_array( $sources ) ) {
+			return array_filter( array_intersect_key( $sources, array_flip( array( 'yoast', 'rank_math', 'aioseo' ) ) ), static fn( $url ): bool => is_string( $url ) && '' !== $url );
 		}
+		return '' === $signal->canonical ? array() : array( $signal->source => $signal->canonical );
 	}
 
 	/** @param string[] $reasons @param string[] $canonicals @param string[] $redirects @return string[] */
 	private function conflict_reasons( array $reasons, array $canonicals, array $redirects ): array {
-		if ( count( array_unique( array_filter( $canonicals, static fn( string $url ): bool => '' !== trim( $url ) ) ) ) > 1 ) {
+		if ( count( array_unique( array_map( $this->normalize_url( ... ), array_filter( $canonicals, static fn( string $url ): bool => '' !== trim( $url ) ) ) ) ) > 1 ) {
 			$reasons[] = 'canonical_conflict';
 		}
 		if ( count( array_unique( array_filter( $redirects, static fn( string $url ): bool => '' !== trim( $url ) ) ) ) > 1 ) {

@@ -31,9 +31,11 @@ class StaticBridgePurgeTest extends \WP_UnitTestCase {
 		$this->delete_test_file( 'owned-static.txt' );
 		$this->delete_test_file( 'discovery/chunks/1.json' );
 		$this->delete_test_file( \Cybermaps\Sitemap\Orchestrator::get_sitemap_base() . '.xml' );
+		\cybermaps_mock_enable_static_ownership_database( true );
 	}
 
 	protected function tearDown(): void {
+		\cybermaps_mock_disable_static_ownership_database();
 		$this->delete_test_file( 'robots.txt' );
 		$this->delete_test_file( 'ai.json' );
 		$this->delete_test_file( 'llms.txt' );

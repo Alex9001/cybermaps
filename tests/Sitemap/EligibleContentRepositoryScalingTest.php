@@ -304,8 +304,10 @@ final class EligibleContentRepositoryScalingTest extends \WP_UnitTestCase {
 		$this->assertSame( 1, $repository->get_archive_count() );
 		$this->assertSame( '2026-07-30T11:00:00+00:00', $repository->get_archive_lastmod() );
 		$this->assertSame( 2, $GLOBALS['wpdb']->get_results_calls );
-		$this->assertStringContainsString( 'GROUP BY YEAR(post_date_gmt)', $GLOBALS['wpdb']->prepared[1]['query'] );
-		$this->assertSame( array( 'wp_posts', 2400 ), $GLOBALS['wpdb']->prepared[1]['args'] );
+		$this->assertStringContainsString( 'GROUP BY YEAR(post_date), MONTH(post_date)', $GLOBALS['wpdb']->prepared[1]['query'] );
+		$this->assertStringContainsString( 'MAX(post_modified_gmt)', $GLOBALS['wpdb']->prepared[1]['query'] );
+		$this->assertStringNotContainsString( 'post_date_gmt', $GLOBALS['wpdb']->prepared[1]['query'] );
+		$this->assertSame( array( 'wp_posts', 2401 ), $GLOBALS['wpdb']->prepared[1]['args'] );
 	}
 
 	public function test_recent_window_has_a_fixed_ten_query_scan_ceiling(): void {
@@ -319,10 +321,12 @@ final class EligibleContentRepositoryScalingTest extends \WP_UnitTestCase {
 		);
 
 		$repository = new EligibleContentRepository();
-		$this->assertSame(
-			array(),
-			$repository->get_recent_post_rows( 'post', 1785369600, 2 * DAY_IN_SECONDS, 1000 )
-		);
+		try {
+			$repository->get_recent_post_rows( 'post', 1785369600, 2 * DAY_IN_SECONDS, 1000 );
+			$this->fail( 'An exhausted selection must not appear complete.' );
+		} catch ( \Cybermaps\Core\BuildUnavailableException ) {
+			$this->assertTrue( true );
+		}
 		$this->assertCount( 10, $GLOBALS['cybermaps_mock_wp_query_args'] );
 		foreach ( $GLOBALS['cybermaps_mock_wp_query_args'] as $index => $args ) {
 			$this->assertSame( 1000, $args['posts_per_page'] );
@@ -330,6 +334,44 @@ final class EligibleContentRepositoryScalingTest extends \WP_UnitTestCase {
 			$this->assertTrue( $args['no_found_rows'] );
 			$this->assertArrayHasKey( 'date_query', $args );
 		}
+	}
+
+	public function test_expiration_budget_exhaustion_invalidates_conservatively(): void {
+		$rows = array_fill( 0, 1000, $this->post( 1 ) );
+		$GLOBALS['cybermaps_mock_wp_query_callback'] = static fn( array $args ): array => $rows;
+		$GLOBALS['cybermaps_mock_filter_callbacks']['cybermaps_publication_eligibility'] = array(
+			static fn( $decision ) => $decision->with_reasons( array( 'test_exclusion' ) ),
+		);
+		$this->assertTrue( ( new EligibleContentRepository() )->has_eligible_post_in_publication_window( 'post', 1, 1785369600 ) );
+		$this->assertCount( 10, $GLOBALS['cybermaps_mock_wp_query_args'] );
+	}
+
+	public function test_archive_overflow_is_unavailable_without_caching_a_complete_prefix(): void {
+		\cybermaps_mock_reset_cache_runtime();
+		$GLOBALS['cybermaps_mock_transients'] = array();
+		$GLOBALS['wpdb']->result_rows = array_fill( 0, 2401, (object) array( 'archive_year' => 2026, 'archive_month' => 1, 'lastmod' => '' ) );
+		$repository = new EligibleContentRepository();
+		try {
+			$repository->get_archive_count();
+			$this->fail( 'Overflowing inventory must not advertise a complete count.' );
+		} catch ( \Cybermaps\Core\BuildUnavailableException ) {
+			$this->assertFalse( \Cybermaps\Core\CacheManager::get( 'cybermaps_archive_month_inventory_v2', 'sitemap' ) );
+		}
+		$GLOBALS['wpdb']->result_rows = array_fill( 0, 2400, (object) array( 'archive_year' => 1500, 'archive_month' => 1, 'lastmod' => '' ) );
+		$this->assertSame( 2400, $repository->get_archive_count() );
+	}
+
+	public function test_archive_old_truncated_cache_is_ignored_and_historic_years_are_retained(): void {
+		\cybermaps_mock_reset_cache_runtime();
+		$GLOBALS['cybermaps_mock_transients'] = array();
+		\Cybermaps\Core\CacheManager::set_if_current( 'cybermaps_archive_month_inventory', array(), HOUR_IN_SECONDS, 'sitemap', \Cybermaps\Core\CacheManager::get_generation( 'sitemap', true ) );
+		$GLOBALS['wpdb']->result_rows = array(
+			(object) array( 'archive_year' => 2026, 'archive_month' => 10, 'lastmod' => '' ),
+			(object) array( 'archive_year' => 1500, 'archive_month' => 1, 'lastmod' => '' ),
+		);
+		$repository = new EligibleContentRepository();
+		$this->assertSame( 2, $repository->get_archive_count() );
+		$this->assertSame( array( 2026, 1500 ), array_column( $repository->get_archive_page( 1, 20 ), 'year' ) );
 	}
 
 	private function post( int $id ): object {

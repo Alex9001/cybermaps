@@ -69,6 +69,7 @@ class Command {
 		\WP_CLI::line( __( 'Regenerating sitemaps and static files...', 'cybermaps' ) );
 		$orchestrator = new \Cybermaps\Sitemap\Orchestrator();
 		$orchestrator->clear_sitemap_cache();
+		$orchestrator->invalidate_occupancy();
 		\Cybermaps\Core\CacheManager::clear_family( 'discovery' );
 		\Cybermaps\Core\CacheManager::clear_family( 'chunks' );
 		$report = \Cybermaps\Discovery\StaticBridge::get_instance()->request_sync( true );

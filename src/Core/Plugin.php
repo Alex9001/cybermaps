@@ -173,11 +173,8 @@ class Plugin {
 		);
 		$container->set(
 			'publication_notifier',
-			function ( $c ) {
-				return new \Cybermaps\Discovery\PublicationNotifier(
-					$c->get( 'indexnow' ),
-					new \Cybermaps\Discovery\WebSub()
-				);
+			function () {
+				return new \Cybermaps\Discovery\PublicationNotifier();
 			}
 		);
 		$container->set(
@@ -207,6 +204,7 @@ class Plugin {
 			self::$edge_cache_coordinator->register_hooks();
 			add_action( 'cybermaps_cache_family_invalidated', array( self::class, 'on_cache_family_invalidated' ), 10, 2 );
 			add_action( Lifecycle::RUNTIME_COUNTER_CLEANUP_HOOK, array( self::class, 'cleanup_runtime_counters' ) );
+			add_action( RuntimeCounterStore::CLEANUP_CONTINUATION_HOOK, array( self::class, 'cleanup_runtime_counters' ) );
 			self::$edge_cache_hooks_registered = true;
 		}
 
@@ -564,11 +562,23 @@ class Plugin {
 		$scanner = new \Cybermaps\Sitemap\MediaScanner();
 		$scanner->run_audit( $post_id, $intensity );
 
-		\Cybermaps\Discovery\AIMetadata::refresh( (int) $post_id );
+		self::refresh_optional_ai_metadata( (int) $post_id );
+	}
+
+	/** A bounded optional hint must never abort a successful post save. */
+	private static function refresh_optional_ai_metadata( int $post_id ): void {
+		try {
+			\Cybermaps\Discovery\AIMetadata::refresh( $post_id );
+		} catch ( \Cybermaps\Discovery\PublicationSizeLimitException $error ) {
+			foreach ( array( '_cybermaps_ai_meta', '_cybermaps_ai_meta_ts', '_cybermaps_ai_meta_version' ) as $key ) {
+				delete_post_meta( $post_id, $key );
+			}
+			\Cybermaps\Discovery\AIMetadata::refresh_transition_index( $post_id );
+		}
 	}
 
 	public static function cleanup_runtime_counters(): void {
-		RuntimeCounterStore::cleanup( 1000 );
+		RuntimeCounterStore::cleanup_expired();
 	}
 
 	public static function on_cache_family_invalidated( string $family, int $generation ): void {
@@ -581,7 +591,9 @@ class Plugin {
 		if ( ! is_string( $signature_payload ) ) {
 			$signature_payload = '';
 		}
-		$signature = (string) $plan['family']
+		$signature = get_current_blog_id()
+			. ':'
+			. (string) $plan['family']
 			. ':'
 			. $generation
 			. ':'
@@ -598,12 +610,13 @@ class Plugin {
 		self::$edge_cache_coordinator->invalidate(
 			(string) $plan['family'],
 			is_array( $plan['urls'] ) ? $plan['urls'] : array(),
-			! empty( $plan['wait_for_static'] )
+			! empty( $plan['wait_for_static'] ),
+			! empty( $plan['url_scope_complete'] )
 		);
 	}
 
 	/**
-	 * @return array{family:string,urls:string[],wait_for_static:bool}|array{}
+	 * @return array{family:string,urls:string[],wait_for_static:bool,url_scope_complete:bool}|array{}
 	 */
 	private static function edge_invalidation_plan( string $family ): array {
 		$settings    = ConfigurationStore::settings();
@@ -611,19 +624,22 @@ class Plugin {
 
 		return match ( $family ) {
 			'discovery' => array(
-				'family'          => 'discovery',
-				'urls'            => self::discovery_invalidation_urls(),
-				'wait_for_static' => 'off' !== $static_mode,
+				'family'             => 'discovery',
+				'urls'               => self::discovery_invalidation_urls(),
+				'url_scope_complete' => false,
+				'wait_for_static'    => 'off' !== $static_mode,
 			),
 			'sitemap'   => array(
-				'family'          => 'sitemap',
-				'urls'            => self::sitemap_invalidation_urls(),
-				'wait_for_static' => 'all' === $static_mode,
+				'family'             => 'sitemap',
+				'urls'               => self::sitemap_invalidation_urls(),
+				'url_scope_complete' => false,
+				'wait_for_static'    => 'all' === $static_mode,
 			),
 			'chunks'    => array(
-				'family'          => 'chunks',
-				'urls'            => array(),
-				'wait_for_static' => 'all' === $static_mode,
+				'family'             => 'chunks',
+				'urls'               => array(),
+				'url_scope_complete' => false,
+				'wait_for_static'    => 'all' === $static_mode,
 			),
 			default     => array(),
 		};

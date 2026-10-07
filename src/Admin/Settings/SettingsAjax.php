@@ -102,6 +102,12 @@ class SettingsAjax {
 	 * Stream a configuration backup or editable template as an attachment.
 	 */
 	public static function handle_export_config(): void {
+		$request_method = isset( $_SERVER['REQUEST_METHOD'] ) && is_string( $_SERVER['REQUEST_METHOD'] )
+			? strtoupper( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) )
+			: '';
+		if ( 'GET' !== $request_method ) {
+			wp_die( esc_html__( 'Invalid request method.', 'cybermaps' ), '', array( 'response' => 405 ) );
+		}
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die(
 				esc_html__( 'You are not allowed to export Cybermaps configuration.', 'cybermaps' ),
@@ -113,8 +119,8 @@ class SettingsAjax {
 
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Verified above.
 		$include_values = isset( $_GET['include_values'] )
-			&& is_scalar( $_GET['include_values'] )
-			&& '1' === sanitize_key( wp_unslash( (string) $_GET['include_values'] ) );
+		&& is_scalar( $_GET['include_values'] )
+		&& '1' === sanitize_key( wp_unslash( (string) $_GET['include_values'] ) );
 		$hub            = \Cybermaps\Admin\MigrationHub::get_instance();
 		try {
 			$content = $include_values ? $hub->generate_backup() : $hub->generate_markdown();

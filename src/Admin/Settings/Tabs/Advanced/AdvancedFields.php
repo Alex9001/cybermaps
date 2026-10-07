@@ -39,7 +39,7 @@ class AdvancedFields {
 			<?php \Cybermaps\Admin\LocalDeliveryController::render(); ?>
 			<div class="cm-card-sm">
 				<h3><?php esc_html_e( 'Connect Cloudflare and optimize', 'cybermaps' ); ?></h3>
-				<p><?php esc_html_e( 'Open Cloudflare, choose the account that owns this hostname, review three narrowly scoped permissions, and press Authorize. Cybermaps then installs or repairs both discovery-header and cache-safety rules.', 'cybermaps' ); ?></p>
+				<p><?php esc_html_e( 'Open Cloudflare, choose the account that owns this hostname, review three narrowly scoped permissions, and press Authorize. Cybermaps installs cache-safety rules and a missing-MIME fallback for eligible static files. Origin headers and dynamic endpoint policy remain authoritative; incorrect origin MIME types must be repaired at the origin.', 'cybermaps' ); ?></p>
 				<?php self::render_cloudflare_detection( $context['cloudflare_detected'], $context['cloudflare_host'] ); ?>
 				<?php self::render_oauth_mode_description( $oauth_mode ); ?>
 				<div class="cm-status-actions">
@@ -191,7 +191,7 @@ class AdvancedFields {
 		<input id="cybermaps-cloudflare-token" class="regular-text cm-cloudflare-token" type="password" autocomplete="new-password" spellcheck="false" value="" aria-describedby="cybermaps-cloudflare-token-help">
 		<p id="cybermaps-cloudflare-token-help" class="description"><?php esc_html_e( 'Use all three permissions to install or remove both Cybermaps rule families. The token is transmitted only when you press one of these buttons.', 'cybermaps' ); ?></p>
 		<div class="cm-status-actions">
-			<button type="button" class="button" data-cybermaps-edge-action="cybermaps_edge_install_headers" data-requires-token="1" data-cloudflare-required="1"><?php esc_html_e( 'Install/repair discovery headers', 'cybermaps' ); ?></button>
+			<button type="button" class="button" data-cybermaps-edge-action="cybermaps_edge_install_headers" data-requires-token="1" data-cloudflare-required="1"><?php esc_html_e( 'Install missing static MIME fallback', 'cybermaps' ); ?></button>
 			<button type="button" class="button" data-cybermaps-edge-action="cybermaps_edge_install_cache" data-requires-token="1" data-cloudflare-required="1"><?php esc_html_e( 'Install/repair cache safety', 'cybermaps' ); ?></button>
 			<button type="button" class="button button-link-delete" data-cybermaps-edge-action="cybermaps_edge_remove_rules" data-requires-token="1" data-cloudflare-required="1"><?php esc_html_e( 'Remove Cybermaps Cloudflare rules', 'cybermaps' ); ?></button>
 		</div>

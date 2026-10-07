@@ -1,6 +1,18 @@
 Cybermaps release history
 =========================
 
+8.0.2
+-----
+* Enforce producer byte budgets before Markdown, JSON and link allocations; preserve completeness evidence and avoid caching partial publications.
+* Release only owned runtime cache entries during discovery inventory scans; preserve caller and persistent cache state.
+* Move static ownership to per-path rows with resumable legacy migration, fenced writes and bounded reconciliation and lifecycle cleanup.
+* Validate identity and imported configuration independently from partial settings forms; use exact-byte conflict detection and rollback only owned changes.
+* Preserve origin response headers and native REST serialization; reject incomplete Cloudflare rule responses and isolate concurrent authorization transactions.
+* Correct RSS UTC dates, XML character handling, multisite sitemap output, query aliases, canonical decisions and old-permalink notifications.
+* Report incomplete sitemap and audit scans explicitly; preserve queued edge invalidations and surface backpressure or scheduling failures.
+* Bound browser delivery checks, fence stale page-search responses and preserve disabled controls during overlapping operations.
+* Extend local release checks and retain exact candidate, runtime, website and review evidence.
+
 8.0.1
 -----
 * Replace retired MCP mode configuration with an explicit read-only adapter switch.

@@ -30,6 +30,7 @@ class StaticBridge {
 	private const WRITE_ERRORS_OPTION                = 'cybermaps_static_write_errors';
 	private const WRITE_ERROR_DROPPED_OPTION         = 'cybermaps_static_write_errors_dropped';
 	private const WRITE_ERROR_SAMPLE_LIMIT           = 200;
+	public const PURGE_CONTINUATION_HOOK             = 'cybermaps_continue_static_purge_event';
 	private const SYNC_STATE_OPTION                  = 'cybermaps_static_sync_state';
 	private const FAILED_RETRY_OPTION                = 'cybermaps_static_failed_retry';
 	private const SYNC_EPOCH_OPTION                  = 'cybermaps_static_sync_epoch';
@@ -48,6 +49,8 @@ class StaticBridge {
 		'.well-known/ai-actions.json',
 		'.well-known/ai-discovery',
 		'.well-known/api-catalog',
+		'.well-known/ai-catalog.json',
+		'.well-known/mcp/server-card.json',
 		'ai-discovery',
 	);
 
@@ -90,6 +93,7 @@ class StaticBridge {
 	private bool $sync_active                = false;
 	private bool $time_sensitive_active      = false;
 	private bool $sync_deferred              = false;
+	private ?float $terminal_purge_deadline  = null;
 	private int $write_error_dropped_pending = 0;
 	private int $sync_written_count          = 0;
 	private float $sync_started_at           = 0.0;
@@ -131,6 +135,7 @@ class StaticBridge {
 			\defined( 'CYBERMAPS_PHPUNIT' ) && true === CYBERMAPS_PHPUNIT
 		);
 		$this->sync_runner        = new StaticSyncRunner( $this );
+		add_action( self::PURGE_CONTINUATION_HOOK, array( $this, 'resume_pending_purge' ) );
 	}
 
 	/**
@@ -1944,14 +1949,7 @@ class StaticBridge {
 		);
 
 		if ( ! empty( $settings['enable_google_news'] ) ) {
-			$news              = new \Cybermaps\Sitemap\NewsProvider();
-			$news_filename     = \Cybermaps\Sitemap\Orchestrator::get_news_sitemap_base() . '.xml';
-			$owns_news         = null !== $this->ownership_store->get_hash( $news_filename );
-			$state['news_due'] = $checkpoint < 1
-				? ( $news->get_count() > 0 || $owns_news )
-				: $news->has_expiration_between( $checkpoint, $now );
-			$state['pending']  = ! empty( $state['news_due'] );
-			$state['next']     = $news->get_next_expiration_timestamp( $now );
+			$this->collect_time_sensitive_news_state( $state, $checkpoint, $now );
 		}
 
 		if ( ! empty( $settings['enable_discovery_hub'] ) ) {
@@ -1983,6 +1981,24 @@ class StaticBridge {
 		}
 
 		return $state;
+	}
+
+	/** Preserve unavailable News work without interrupting independent AI collection. */
+	private function collect_time_sensitive_news_state( array &$state, int $checkpoint, int $now ): void {
+		$news          = new \Cybermaps\Sitemap\NewsProvider();
+		$news_filename = \Cybermaps\Sitemap\Orchestrator::get_news_sitemap_base() . '.xml';
+		$owns_news     = null !== $this->ownership_store->get_hash( $news_filename );
+		try {
+			$state['news_due'] = $checkpoint < 1
+				? ( $news->get_count() > 0 || $owns_news )
+				: $news->has_expiration_between( $checkpoint, $now );
+			$state['pending']  = ! empty( $state['news_due'] );
+			$state['next']     = $news->get_next_expiration_timestamp( $now );
+		} catch ( \Cybermaps\Core\BuildUnavailableException ) {
+			$state['news_due'] = true;
+			$state['pending']  = true;
+			$state['next']     = $now + \Cybermaps\Core\BuildUnavailableException::RETRY_AFTER;
+		}
 	}
 
 	/** Collect bounded transition rows due since the checkpoint. */
@@ -2039,7 +2055,7 @@ class StaticBridge {
 
 	/** Collect bounded posts whose transition index predates the checkpoint. */
 	private function collect_stale_transition_posts( array $post_types, int $checkpoint, int $limit, array &$posts_by_id, bool &$backlog ): void {
-		if ( $checkpoint < 1 || empty( $post_types ) || $limit < 1 ) {
+		if ( $checkpoint < 2 || empty( $post_types ) || $limit < 1 ) {
 			return; }
 		$posts = (array) \get_posts(
 			array(
@@ -2050,8 +2066,8 @@ class StaticBridge {
 				'orderby'        => 'ID',
 				'order'          => 'ASC',
 				'meta_key'       => AIMetadata::TRANSITION_META_KEY, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Bounded transition reconciliation requires this metadata predicate and ordering to preserve publication freshness.
-				'meta_value'     => $checkpoint, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- Bounded transition reconciliation requires this metadata predicate and ordering to preserve publication freshness.
-				'meta_compare'   => '<',
+				'meta_value'     => array( 1, $checkpoint - 1 ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- Bounded transition reconciliation requires this metadata predicate and ordering to preserve publication freshness.
+				'meta_compare'   => 'BETWEEN',
 				'meta_type'      => 'NUMERIC',
 			)
 		);
@@ -2285,7 +2301,44 @@ class StaticBridge {
 		bool $cleanup_after_cancel = false
 	): array {
 		$this->invalidate( $suspend, $cleanup_after_cancel );
-		return $this->purge_all( '', '', $scope );
+		return $suspend ? $this->drain_terminal_purge( $scope, microtime( true ) + 10.0 ) : $this->purge_all( '', '', $scope );
+	}
+
+	/** Drain bounded keyset pages while lifecycle code is still available. */
+	private function drain_terminal_purge( string $scope, float $deadline ): array {
+		$this->terminal_purge_deadline = $deadline;
+		$prior                         = null;
+		try {
+			do {
+				$result     = $this->purge_all( '', '', $scope );
+				$checkpoint = $this->ownership_store->read_purge_checkpoint( $scope );
+				$progress   = wp_json_encode( array( $checkpoint, get_option( StaticOwnershipStore::MIGRATION_OPTION, null ) ) );
+				if ( $progress === $prior || ! $this->terminal_purge_can_continue( $result ) ) {
+					break;
+				}
+				$prior = $progress;
+			} while ( microtime( true ) < $deadline );
+			$result['deadline_reached']    = empty( $result['success'] ) && microtime( true ) >= $deadline;
+			$result['pending_lower_bound'] = $this->terminal_remaining_inventory( $result, $checkpoint );
+			return $result;
+		} finally {
+			$this->terminal_purge_deadline = null;
+			wp_clear_scheduled_hook( self::PURGE_CONTINUATION_HOOK );
+		}
+	}
+
+	/** Return a proven bounded residual count, or null when the inventory is unavailable. */
+	private function terminal_remaining_inventory( array $result, mixed $checkpoint ): ?int {
+		if ( ! empty( $result['success'] ) ) {
+			return 0;
+		}
+		$after = is_array( $checkpoint ) ? (string) ( $checkpoint['after'] ?? '' ) : '';
+		$rows  = $this->ownership_store->read_records_page( -1, $after );
+		return false === $rows ? null : count( $rows );
+	}
+
+	private function terminal_purge_can_continue( array $result ): bool {
+		return 'incomplete' === ( $result['status'] ?? '' ) || $this->ownership_store->has_pending_migration();
 	}
 
 	/**
@@ -2389,32 +2442,23 @@ class StaticBridge {
 			return false;
 		}
 
-		$records = $this->ownership_store->load_shard( $shard );
-		if ( ! $this->ownership_store->is_shard_valid( $shard ) ) {
+		$page = $this->ownership_store->read_records_page( $shard, $after_path );
+		if ( false === $page ) {
 			$report['failed']['stale_reconciliation'] = array(
 				'code'    => 'invalid_ownership_shard',
-				'message' => \sprintf(
-					/* translators: %d: zero-based ownership shard number. */
-					__( 'Ownership shard %d is malformed and was preserved for administrator review.', 'cybermaps' ),
-					$shard
-				),
+				'message' => __( 'The ownership cursor could not be read safely; reconciliation was deferred.', 'cybermaps' ),
 			);
-			$cursor                                   = array(
-				'shard' => $shard,
-				'path'  => $after_path,
-			);
-			// This is a deterministic administrator-repair condition, not
-			// resumable work. Complete the phase with a failed report so the
-			// continuation worker does not hot-loop on preserved evidence.
-			return true;
+			$this->sync_deferred                      = true;
+			return false;
 		}
-		\ksort( $records, SORT_STRING );
-		$paths = \array_values(
-			\array_filter(
-				\array_keys( $records ),
-				static fn ( string $path ): bool => '' === $after_path || \strcmp( $path, $after_path ) > 0
-			)
-		);
+		$records = array();
+		foreach ( $page as $row ) {
+			$records[ $row['path'] ] = array(
+				'hash'       => $row['hash'],
+				'generation' => $row['generation'],
+			);
+		}
+		$paths = array_keys( $records );
 		if ( empty( $paths ) ) {
 			$cursor = array(
 				'shard' => $shard + 1,
@@ -2430,8 +2474,15 @@ class StaticBridge {
 		global $wp_filesystem;
 
 		foreach ( $batch as $file ) {
+			$prior_cursor = $last;
 			if ( ! $this->reconcile_stale_slice_record( $file, $shard, $report, $records, $errors, $changed, $last, $wp_filesystem ) ) {
-				break; }
+				$last = $prior_cursor;
+				break;
+			}
+			$last = hash( 'sha256', $file );
+		}
+		if ( count( $page ) === StaticOwnershipTable::PAGE_SIZE ) {
+			$paths[] = ''; // Full pages require a bounded continuation read.
 		}
 		return $this->finish_stale_slice( $report, $cursor, $shard, $after_path, $last, $paths, $batch, $records, $errors, $changed );
 	}
@@ -2456,6 +2507,9 @@ class StaticBridge {
 			return true; }
 		$recorded_hash = (string) ( $record['hash'] ?? '' );
 		$path          = $this->validate_stale_slice_record( $file, $recorded_hash, $report, $records, $errors, $changed, $filesystem );
+		if ( $this->sync_deferred ) {
+			return false;
+		}
 		if ( null === $path || ! $this->verify_stale_slice_body( $file, $path, $recorded_hash, $report, $errors, $filesystem ) ) {
 			return true; }
 		$deletion = $this->delete_owned_publication( $file, \strtolower( $recorded_hash ), $generation );
@@ -2465,7 +2519,7 @@ class StaticBridge {
 			return false; }
 		if ( 'conflict' === $deletion['status'] || 'successor_preserved' === $deletion['code'] ) {
 			$report['retained'][ $file ] = (string) $deletion['code'];
-			$records                     = $this->ownership_store->load_shard( $shard );
+			// A successor is authoritative; the bounded page is never written back.
 			return true; }
 		if ( empty( $deletion['success'] ) ) {
 			$report['retained'][ $file ] = (string) $deletion['code'];
@@ -2499,9 +2553,15 @@ class StaticBridge {
 			$report['retained'][ $file ] = (string) ( $resolution['reason'] ?? 'publication_root_unavailable' );
 			return null; }
 		if ( ! $filesystem->exists( $path ) ) {
+			if ( ! $this->ownership_store->delete_hash( $file, true, false ) ) {
+				$report['retained'][ $file ] = 'ownership_checkpoint_failed';
+				$this->sync_deferred         = true;
+				return null;
+			}
 			unset( $records[ $file ], $errors[ $file ] );
 			$changed = true;
-			return null; }
+			return null;
+		}
 		$issue = $this->get_ownership_verification_issue( $file, $path, $filesystem );
 		if ( null !== $issue ) {
 			$report['retained'][ $file ] = (string) $issue['code'];
@@ -2533,7 +2593,7 @@ class StaticBridge {
 			$this->sync_deferred = true;
 			$cursor              = $retry_cursor;
 			return false; }
-		if ( $changed && ! $this->ownership_store->write_shard_records( $shard, $records, false ) ) {
+		if ( $changed && ! $this->ownership_store->flush( 0, true, false ) ) {
 			$report['failed']['stale_reconciliation_checkpoint'] = array(
 				'code'    => 'ownership_checkpoint_failed',
 				'message' => __( 'Stale-file reconciliation could not checkpoint its ownership shard.', 'cybermaps' ),
@@ -2985,7 +3045,7 @@ class StaticBridge {
 		$prior             = \array_values( \array_unique( \array_filter( (array) ( $report['deleted'] ?? array() ), 'is_string' ) ) );
 		$incoming          = \array_values( \array_unique( \array_filter( (array) ( $purge['deleted'] ?? array() ), 'is_string' ) ) );
 		$count             = max( \count( $prior ), (int) ( $aggregate_counts['deleted'] ?? 0 ) )
-			+ \count( \array_diff( $incoming, $prior ) );
+			+ ( $purge['count_deltas']['deleted'] ?? \count( \array_diff( $incoming, $prior ) ) );
 		$report['deleted'] = \array_slice(
 			\array_values( \array_unique( \array_merge( $prior, $incoming ) ) ),
 			0,
@@ -3006,7 +3066,7 @@ class StaticBridge {
 		$prior              = \is_array( $report['retained'] ?? null ) ? $report['retained'] : array();
 		$incoming           = \is_array( $purge['retained'] ?? null ) ? $purge['retained'] : array();
 		$count              = max( \count( $prior ), (int) ( $aggregate_counts['retained'] ?? 0 ) )
-			+ \count( \array_diff_key( $incoming, $prior ) );
+			+ ( $purge['count_deltas']['retained'] ?? \count( \array_diff_key( $incoming, $prior ) ) );
 		$report['retained'] = \array_slice(
 			\array_replace( $prior, $incoming ),
 			0,
@@ -3099,13 +3159,13 @@ class StaticBridge {
 	 * @return array<string,mixed>
 	 */
 	private function finish_full_sync_report( array $report, array $settings ): array {
-		$report = $this->finish_sync_report( $report, false );
+		$preview = $this->finish_sync_report( $report, false );
 		if ( 'all' !== (string) $report['mode'] ) {
 			$this->clear_time_sensitive_schedule();
 			return $this->finish_sync_report( $report );
 		}
 
-		if ( ! empty( $report['success'] ) && 'complete' === $report['status'] ) {
+		if ( ! empty( $preview['success'] ) && 'complete' === $preview['status'] ) {
 			$checkpoint_target = $this->report_start_timestamp( $report );
 			if (
 				AtomicOptionSequence::advance_to(
@@ -3117,7 +3177,7 @@ class StaticBridge {
 					'code'    => 'time_sensitive_checkpoint_failed',
 					'message' => __( 'The full sync completed, but its monotonic freshness checkpoint could not be persisted.', 'cybermaps' ),
 				);
-				$report                                        = $this->finish_sync_report( $report, false );
+				$this->increment_aggregate_count( $report, 'failed' );
 			}
 		}
 
@@ -3127,6 +3187,7 @@ class StaticBridge {
 				'code'    => 'time_sensitive_checkpoint_read_failed',
 				'message' => __( 'The freshness checkpoint could not be read safely, so its next timer was deferred.', 'cybermaps' ),
 			);
+			$this->increment_aggregate_count( $report, 'failed' );
 			$this->schedule_time_sensitive_retry();
 			return $this->finish_sync_report( $report );
 		}
@@ -3341,7 +3402,7 @@ class StaticBridge {
 	/**
 	 * Purge generated files that Cybermaps can prove it still owns.
 	 *
-	 * The static hash option doubles as the generated-file inventory. A file is
+	 * The per-path ownership table supplies the generated-file inventory. A file is
 	 * deleted only when its current contents still match the hash recorded after
 	 * Cybermaps wrote it. This protects pre-existing or subsequently edited files
 	 * such as robots.txt from lifecycle and manual purge operations.
@@ -3411,56 +3472,240 @@ class StaticBridge {
 			return $preflight;
 		}
 
-		global $wp_filesystem;
-		$deleted  = array();
-		$retained = array();
-		if ( $this->ownership_dirty ) {
-			return array(
-				'success'  => false,
-				'status'   => 'error',
-				'message'  => __( 'Static reconciliation stopped because an ownership checkpoint is still unresolved.', 'cybermaps' ),
-				'deleted'  => $deleted,
-				'retained' => $retained,
-			);
+		if ( 'failed_publication' === $scope ) {
+			return $this->purge_owned_paths_unlocked( $desired_files, true );
 		}
-		$this->ownership_store->clear_local_cache();
-		$hashes = $this->get_ownership_hashes();
-		$errors = $this->load_write_errors();
+		return $this->bounded_purge( (string) $old_base, (string) $old_news_base, (string) $scope, $desired_files, $desired_generation );
+	}
 
-		if ( ! \is_array( $hashes ) ) {
-			$hashes = array();
+	/** Resume one bounded purge batch; its original generation must still match. */
+	public function resume_pending_purge(): void {
+		foreach ( StaticOwnershipStore::PURGE_SCOPES as $scope ) {
+			$state = $this->ownership_store->read_purge_checkpoint( $scope );
+			if ( ! is_array( $state ) || ! $this->valid_purge_checkpoint( $state ) ) {
+				continue;
+			}
+			if ( ! $this->acquire_operation_lock() ) {
+				$this->queue_purge_continuation();
+				return;
+			}
+			try {
+				$this->resume_purge_checkpoint( $scope, $state );
+			} finally {
+				$this->release_operation_lock();
+			}
+			return;
 		}
-		$sitemap_targets = array_values(
-			array_filter(
-				array(
-					'' !== (string) $old_base ? (string) $old_base . '.xml' : '',
-					'' !== (string) $old_news_base ? (string) $old_news_base . '.xml' : '',
-				)
-			)
-		);
-		$desired_lookup  = array();
-		foreach ( $desired_files as $desired_file ) {
-			if ( \is_string( $desired_file ) && $this->is_safe_generated_path( $desired_file ) ) {
-				$desired_lookup[ $desired_file ] = true;
+	}
+
+	private function resume_purge_checkpoint( string $scope, array $state ): void {
+		if ( $state['generation'] !== $this->operation_generation || $scope !== $state['args']['scope'] ) {
+			$this->ownership_store->write_purge_checkpoint( $scope, null );
+		} else {
+			$args = $state['args'];
+			$this->purge_all_unlocked( $args['old_base'], $args['old_news_base'], $scope, $args['desired_files'], $args['desired_generation'] );
+		}
+		foreach ( StaticOwnershipStore::PURGE_SCOPES as $pending_scope ) {
+			if ( is_array( $this->ownership_store->read_purge_checkpoint( $pending_scope ) ) ) {
+				$this->queue_purge_continuation();
+				break;
 			}
 		}
+	}
 
-		$terminal = $this->purge_inventory_records( $hashes, $errors, $deleted, $retained, (string) $scope, $sitemap_targets, $desired_lookup, $desired_generation, $wp_filesystem );
-		if ( null !== $terminal ) {
-			return $terminal;
+	private function bounded_purge( string $old_base, string $old_news_base, string $scope, array $desired_files, ?int $desired_generation ): array {
+		$args = array(
+			'old_base'           => $old_base,
+			'old_news_base'      => $old_news_base,
+			'scope'              => $scope,
+			'desired_files'      => $desired_files,
+			'desired_generation' => $desired_generation,
+		);
+		if ( strlen( (string) wp_json_encode( $args ) ) > 65536 || ! $this->valid_purge_arguments( $args ) ) {
+			return $this->purge_checkpoint_error();
 		}
+		$state = $this->purge_initial_state( $args );
+		if ( false === $state ) {
+			return $this->purge_checkpoint_error();
+		}
+		$prior_counts = $state['counts'];
+		$errors       = $this->load_write_errors();
+		$deadline     = min( microtime( true ) + 1.5, $this->terminal_purge_deadline ?? PHP_FLOAT_MAX );
+		$complete     = false;
+		for ( $page_index = 0; $page_index < 3; ++$page_index ) {
+			$page = $this->ownership_store->read_records_page( -1, $state['after'] );
+			if ( false === $page ) {
+				return $this->purge_checkpoint_error( $state );
+			}
+			$complete = array() === $page;
+			if ( $complete || ! $this->purge_page( $page, $state, $errors, $deadline ) ) {
+				break;
+			}
+		}
+		return $this->finish_bounded_purge( $scope, $state, $errors, $complete, $prior_counts );
+	}
 
-		// A failed publication may have a pre-existing file that is not in Core's
-		// ownership inventory. It cannot be deleted, but it must be surfaced so a
-		// stale web-server response is not hidden behind the generation error.
-		$this->surface_failed_purge_publications( $scope, $desired_lookup, $hashes, $deleted, $retained, $errors, $wp_filesystem );
+	private function finish_bounded_purge( string $scope, array $state, array $errors, bool $complete, array $prior_counts ): array {
+		if ( $complete ) {
+			$this->reconcile_bounded_purge_errors( $state, $errors );
+		}
+		$this->persist_write_errors( $errors );
+		if ( ! $this->ownership_store->write_purge_checkpoint( $scope, $complete ? null : $state ) ) {
+			return $this->purge_checkpoint_error( $state );
+		}
+		$scheduled = $complete || null !== $this->terminal_purge_deadline || $this->queue_purge_continuation();
+		return array(
+			'success'         => $complete,
+			'status'          => $complete ? ( empty( $state['retained'] ) ? 'complete' : 'partial' ) : 'incomplete',
+			'deleted'         => $state['deleted'],
+			'retained'        => $state['retained'],
+			'counts'          => $state['counts'],
+			'count_deltas'    => array(
+				'deleted'  => $state['counts']['deleted'] - $prior_counts['deleted'],
+				'retained' => $state['counts']['retained'] - $prior_counts['retained'],
+			),
+			'continuation'    => ! $complete && $scheduled && null === $this->terminal_purge_deadline,
+			'schedule_failed' => ! $scheduled,
+		);
+	}
 
-		// Diagnostics can outlive the hash inventory (for example an untracked
-		// conflict or a failed first write). Reconcile them against the same scope
-		// so status screens do not show failures for publications no longer desired.
-		$this->reconcile_purge_errors( $errors, $hashes, $retained, $scope, $desired_lookup, $sitemap_targets, $desired_generation );
+	private function reconcile_bounded_purge_errors( array $state, array &$errors ): void {
+		$hashes = array();
+		foreach ( array_keys( $errors ) as $path ) {
+			$hash = $this->ownership_store->get_hash( $path );
+			if ( null !== $hash ) {
+				$hashes[ $path ] = $hash;
+			}
+		}
+		$args    = $state['args'];
+		$targets = array_filter( array( '' === $args['old_base'] ? '' : $args['old_base'] . '.xml', '' === $args['old_news_base'] ? '' : $args['old_news_base'] . '.xml' ) );
+		$this->reconcile_purge_errors( $errors, $hashes, $state['retained'], $args['scope'], array_fill_keys( $args['desired_files'], true ), $targets, $args['desired_generation'] );
+	}
 
-		return $this->finish_purge_all( $hashes, $errors, $deleted, $retained );
+	private function purge_initial_state( array $args ): array|false {
+		$scope    = $args['scope'];
+		$identity = hash( 'sha256', (string) wp_json_encode( array( $args, $this->operation_generation ) ) );
+		$state    = $this->ownership_store->read_purge_checkpoint( $scope );
+		if ( false === $state ) {
+			return false;
+		}
+		if ( ! is_array( $state ) || ! $this->valid_purge_checkpoint( $state ) || $identity !== $state['identity'] ) {
+			$state = array(
+				'schema'     => 1,
+				'identity'   => $identity,
+				'generation' => $this->operation_generation,
+				'args'       => $args,
+				'after'      => '',
+				'deleted'    => array(),
+				'retained'   => array(),
+				'counts'     => array(
+					'deleted'  => 0,
+					'retained' => 0,
+				),
+			);
+		}
+		return $state;
+	}
+
+	private function purge_page( array $page, array &$state, array &$errors, float $deadline ): bool {
+		global $wp_filesystem;
+		$args    = $state['args'];
+		$targets = array_filter( array( '' === $args['old_base'] ? '' : $args['old_base'] . '.xml', '' === $args['old_news_base'] ? '' : $args['old_news_base'] . '.xml' ) );
+		$lookup  = array_fill_keys( $args['desired_files'], true );
+		foreach ( $page as $row ) {
+			if ( microtime( true ) >= $deadline || ! $this->maintain_operation_lock() ) {
+				return false;
+			}
+			$hashes   = array( $row['path'] => $row['hash'] );
+			$deleted  = array();
+			$retained = array();
+			$terminal = $this->purge_inventory_records( $hashes, $errors, $deleted, $retained, $args['scope'], $targets, $lookup, $args['desired_generation'], $wp_filesystem );
+			if ( null !== $terminal || in_array( 'ownership_checkpoint_failed', $retained, true ) ) {
+				$this->merge_purge_checkpoint_samples( $state, $deleted, array() );
+				return false;
+			}
+			$this->merge_purge_checkpoint_samples( $state, $deleted, $retained );
+			$state['after'] = $row['key'];
+		}
+		return true;
+	}
+
+	private function merge_purge_checkpoint_samples( array &$state, array $deleted, array $retained ): void {
+		$state['counts']['deleted']  += count( $deleted );
+		$state['counts']['retained'] += count( $retained );
+		$state['deleted']             = array_slice( array_merge( $state['deleted'], $deleted ), 0, 100 );
+		$state['retained']            = array_slice( $state['retained'] + $retained, 0, 100, true );
+	}
+
+	private function valid_purge_checkpoint( array $state ): bool {
+		if ( array( 'schema', 'identity', 'generation', 'args', 'after', 'deleted', 'retained', 'counts' ) !== array_keys( $state ) || 1 !== $state['schema'] ) {
+			return false;
+		}
+		return is_array( $state['args'] ) && is_array( $state['deleted'] ) && is_array( $state['retained'] ) && is_array( $state['counts'] )
+			&& is_string( $state['after'] ) && ( '' === $state['after'] || 1 === preg_match( '/^[a-f0-9]{64}$/D', $state['after'] ) )
+			&& $this->valid_purge_arguments( $state['args'] ) && $this->valid_purge_identity( $state ) && $this->valid_purge_samples( $state );
+	}
+
+	private function valid_purge_arguments( array $args ): bool {
+		if ( array( 'old_base', 'old_news_base', 'scope', 'desired_files', 'desired_generation' ) !== array_keys( $args ) ) {
+			return false;
+		}
+		if ( ! is_string( $args['old_base'] ) || ! is_string( $args['old_news_base'] ) || ! in_array( $args['scope'], StaticOwnershipStore::PURGE_SCOPES, true ) ) {
+			return false;
+		}
+		return $this->valid_purge_paths( $args['desired_files'] )
+			&& ( null === $args['desired_generation'] || is_int( $args['desired_generation'] ) );
+	}
+
+	private function valid_purge_paths( mixed $paths, int $limit = 1000 ): bool {
+		if ( ! is_array( $paths ) || count( $paths ) > $limit ) {
+			return false;
+		}
+		foreach ( $paths as $path ) {
+			if ( ! is_string( $path ) || ! $this->is_safe_generated_path( $path ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private function valid_purge_samples( array $state ): bool {
+		if ( ! $this->valid_purge_paths( $state['deleted'], 100 ) || count( $state['retained'] ) > 100 ) {
+			return false;
+		}
+		foreach ( $state['retained'] as $path => $reason ) {
+			if ( ! is_string( $path ) || strlen( $path ) > 4096 || ! is_string( $reason ) || strlen( $reason ) > 512 ) {
+				return false;
+			}
+		}
+		return self::valid_purge_count( $state['counts']['deleted'] ?? null ) && self::valid_purge_count( $state['counts']['retained'] ?? null );
+	}
+
+	private static function valid_purge_count( mixed $value ): bool {
+		return is_int( $value ) && $value >= 0;
+	}
+
+	private function valid_purge_identity( array $state ): bool {
+		return is_string( $state['identity'] ) && 1 === preg_match( '/^[a-f0-9]{64}$/D', $state['identity'] )
+			&& is_int( $state['generation'] ) && $state['generation'] >= 0;
+	}
+
+	private function queue_purge_continuation(): bool {
+		if ( wp_next_scheduled( self::PURGE_CONTINUATION_HOOK ) ) {
+			return true;
+		}
+		$result = wp_schedule_single_event( time() + 30, self::PURGE_CONTINUATION_HOOK, array(), true );
+		return ! is_wp_error( $result ) && false !== $result;
+	}
+
+	private function purge_checkpoint_error( array $state = array() ): array {
+		return array(
+			'success'  => false,
+			'status'   => 'error',
+			'message'  => __( 'Static purge could not verify its bounded ownership checkpoint.', 'cybermaps' ),
+			'deleted'  => $state['deleted'] ?? array(),
+			'retained' => $state['retained'] ?? array(),
+		);
 	}
 
 	/** Return an early full-purge error, or null when purge may proceed. */
@@ -3474,7 +3719,7 @@ class StaticBridge {
 				'retained' => array(),
 			);
 		}
-		if ( ! \in_array( $scope, array( 'all', 'web_root', 'discovery', 'sitemaps', 'stale', 'stale_generation', 'legacy_publications', 'failed_publication' ), true ) ) {
+		if ( ! \in_array( $scope, StaticOwnershipStore::PURGE_SCOPES, true ) ) {
 			return array(
 				'success'  => false,
 				'status'   => 'error',
@@ -3519,32 +3764,12 @@ class StaticBridge {
 		return null;
 	}
 
-	/** Persist full-purge inventory and diagnostics. */
-	private function finish_purge_all( array $hashes, array $errors, array $deleted, array $retained ): array {
-		if ( null !== $this->operation_lock_token && ! $this->maintain_operation_lock() ) {
-			return $this->operation_lock_lost_purge_result( $deleted, $retained ); }
-		if ( ! $this->store_ownership_hashes( $hashes ) ) {
-			return array(
-				'success'  => false,
-				'status'   => 'error',
-				'message'  => __( 'The generated-file inventory could not be checkpointed after reconciliation.', 'cybermaps' ),
-				'deleted'  => $deleted,
-				'retained' => $retained,
-			); }
-		$this->persist_write_errors( $errors );
-		return array(
-			'success'  => true,
-			'status'   => empty( $retained ) ? 'complete' : 'partial',
-			'deleted'  => $deleted,
-			'retained' => $retained,
-		);
-	}
-
 	/** Determine whether a purge scope includes an owned path. */
 	private function purge_scope_includes_file( string $file, string $scope, array $sitemap_targets, array $desired_lookup, ?int $desired_generation ): bool {
 		$included = array(
 			'web_root'            => ! $this->is_well_known_mode_static_path( $file ),
 			'discovery'           => $this->is_discovery_generated_path( $file ),
+			'xml'                 => str_ends_with( $file, '.xml' ),
 			'sitemaps'            => \in_array( $file, $sitemap_targets, true ),
 			'legacy_publications' => \in_array( $file, self::LEGACY_GENERATED_FILES, true ),
 			'stale'               => ! isset( $desired_lookup[ $file ] ),
@@ -3569,8 +3794,8 @@ class StaticBridge {
 			return array( 'ready' => false );
 		}
 		if ( ! $filesystem->exists( $path ) ) {
-			unset( $hashes[ $file ], $errors[ $file ] );
-			return array( 'ready' => false ); }
+			return $this->purge_missing_inventory_file( $file, $hashes, $errors, $retained );
+		}
 		$issue = $this->get_ownership_verification_issue( $file, $path, $filesystem );
 		if ( null !== $issue ) {
 			$retained[ $file ] = (string) $issue['code'];
@@ -3592,6 +3817,16 @@ class StaticBridge {
 			return array( 'ready' => false );
 		}
 		return $this->verify_inventory_purge_body( $file, $recorded_hash, $path, $errors, $retained, $filesystem );
+	}
+
+	private function purge_missing_inventory_file( string $file, array &$hashes, array &$errors, array &$retained ): array {
+		if ( ! $this->ownership_store->delete_hash( $file, true, false ) ) {
+			$retained[ $file ] = 'ownership_checkpoint_failed';
+			return array( 'ready' => false );
+		}
+			$this->ownership_revision_pending = true;
+			unset( $hashes[ $file ], $errors[ $file ] );
+			return array( 'ready' => false );
 	}
 
 	/** Verify an inventory record still matches its body. */
@@ -3997,7 +4232,7 @@ class StaticBridge {
 		}
 
 		$this->ownership_store->clear_local_cache();
-		return array() === $this->ownership_store->read_flat_hashes();
+		return $this->ownership_store->is_empty();
 	}
 
 	/**
@@ -4223,6 +4458,9 @@ class StaticBridge {
 			fn(): bool => $this->maintain_operation_lock()
 		);
 		if ( ! $this->ownership_ready ) {
+			if ( $this->ownership_store->has_pending_migration() && null === $this->terminal_purge_deadline ) {
+				$this->schedule_retry();
+			}
 			return;
 		}
 		$repair_incident = AtomicOptionSequence::current( StaticOwnershipStore::REPAIR_OPTION );
@@ -4514,26 +4752,12 @@ class StaticBridge {
 	 *
 	 * @return array<string,mixed>
 	 */
-	private function get_ownership_hashes(): array {
-		return $this->ownership_store->read_flat_hashes();
-	}
 
 	/**
 	 * Stage an inventory change and checkpoint only at bounded boundaries.
 	 *
 	 * @param array<string,mixed> $hashes Updated ownership inventory.
 	 */
-	private function store_ownership_hashes( array $hashes ): bool {
-		$stored                        = $this->ownership_store->stage_hashes(
-			$hashes,
-			$this->ownership_epoch(),
-			true
-		);
-		$this->ownership_dirty         = ! $stored;
-		$this->ownership_repair_needed = ! $stored || $this->ownership_repair_needed;
-		$this->ownership_changes       = $stored ? 0 : 1;
-		return $stored;
-	}
 
 	/**
 	 * Stage one verified ownership record in the active publication epoch.

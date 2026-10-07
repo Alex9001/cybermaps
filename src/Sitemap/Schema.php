@@ -40,7 +40,7 @@ class Schema {
 		$data['name'] = $name;
 
 		$schema = array( '@context' => 'https://schema.org' )
-			+ \Cybermaps\Core\IdentityEntityBuilder::build( $data );
+			+ \Cybermaps\Core\IdentityEntityBuilder::build( $data, false, PublicationEligibility::SCHEMA );
 
 		wp_print_inline_script_tag(
 			(string) wp_json_encode( $schema ),

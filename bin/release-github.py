@@ -88,6 +88,40 @@ def asset_records(state):
             for asset in state['assets']]
 
 
+def verify_retry_candidate(archive):
+    """Verify retained draft bytes without writing tags, releases or assets."""
+    commit = source_commit()
+    version = archive.name.removeprefix('cybermaps_').removesuffix('.zip')
+    tag = 'v' + version
+    local, remote = verify_tag(tag, commit)
+    require(local and remote, 'Retained draft requires matching local and remote tags.')
+    state = release_state(tag)
+    require(state is not None, 'Tagged candidate has no retained draft; inspect before retrying.')
+    beta = state['prerelease']
+    require(isinstance(beta, bool), 'Invalid draft channel.')
+    title = 'Cybermaps ' + version + (' — Open beta' if beta else '')
+    notes = release_notes(version, beta, commit)
+    matching_draft(state, tag, commit, beta, notes, title)
+    package_files(archive)
+    artifacts = {p.name: p.read_bytes() for p in (archive, Path(str(archive) + '.sha256'))}
+    names = [asset['name'] for asset in state['assets']]
+    require(len(names) == len(set(names)) and set(names) <= artifacts.keys(),
+            'Draft has unexpected or duplicate assets.')
+    with tempfile.TemporaryDirectory(prefix='draft-revalidation-') as temporary:
+        for name in names:
+            run('gh', 'release', 'download', tag, '--repo', REPO, '--pattern', name,
+                '--dir', temporary)
+            require((Path(temporary) / name).read_bytes() == artifacts[name],
+                    'Retained draft asset mismatch: ' + name)
+    final = release_state(tag)
+    matching_draft(final, tag, commit, beta, notes, title)
+    require(final['id'] == state['id'] and asset_records(final) == asset_records(state),
+            'Draft changed during retry verification.')
+    require(source_commit() == commit and verify_tag(tag, commit)[1],
+            'Source or tag changed during retry verification.')
+    return dict(id=state['id'], tag=tag, commit=commit)
+
+
 def release_notes(version, beta, commit):
     history = Path("changelog.txt").read_text()
     match = re.search(r"^" + re.escape(version) + r"\n-+\n(.*?)(?=^\d+\.\d+\.\d+\n-+\n|\Z)",

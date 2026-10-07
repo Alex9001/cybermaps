@@ -37,6 +37,7 @@ final class AuditRunRepositoryTest extends TestCase {
 				'added_count'     => 3,
 				'resolved_count'  => 2,
 				'persisting_count' => 4,
+				'text_comparable' => true,
 			),
 			$run['diff']
 		);
@@ -60,6 +61,13 @@ final class AuditRunRepositoryTest extends TestCase {
 			$sql
 		);
 		$this->assertStringNotContainsString( '{$current_filter}', $sql );
+	}
+
+	public function test_database_comparison_suppresses_thin_resolution_when_text_is_incomplete(): void {
+		( new AuditRunRepository() )->finding_diff_counts( 8, 7, 17, true, false );
+		$sql = implode( "\n", $GLOBALS['wpdb']->queries );
+		$this->assertStringContainsString( "AND (0 = 1 OR current_finding.finding_key <> 'thin_content')", $sql );
+		$this->assertStringContainsString( "AND (0 = 1 OR baseline_finding.finding_key <> 'thin_content')", $sql );
 	}
 
 	public function test_full_run_path_still_hydrates_complete_export_resources(): void {
@@ -117,6 +125,65 @@ final class AuditRunRepositoryTest extends TestCase {
 
 		$repository->release_run_lock( $owner );
 		$this->assertFalse( get_option( AuditRunRepository::RUN_LOCK_OPTION, false ) );
+	}
+
+	public function test_initial_insert_cannot_replace_a_concurrent_winner(): void {
+		$winner = null;
+		$GLOBALS['wpdb']->before_insert = static function () use ( &$winner ): void {
+			$winner = ( new AuditRunRepository() )->acquire_run_lock( 600 );
+		};
+		$this->assertNull( ( new AuditRunRepository() )->acquire_run_lock( 600 ) );
+		$this->assertIsString( $winner );
+		$this->assertSame( $winner, json_decode( get_option( AuditRunRepository::RUN_LOCK_OPTION ), true )['token'] );
+		$this->assertStringContainsString( 'INSERT IGNORE', implode( "\n", $GLOBALS['wpdb']->queries ) );
+	}
+
+	public function test_initial_insert_database_failure_is_not_reported_as_a_busy_lease(): void {
+		$GLOBALS['wpdb']->fail_insert = true;
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'could not acquire' );
+		( new AuditRunRepository() )->acquire_run_lock( 600 );
+	}
+
+	public function test_native_empty_scalar_lease_is_recovered_by_exact_takeover(): void {
+		$GLOBALS['cybermaps_mock_options'][ AuditRunRepository::RUN_LOCK_OPTION ] = '';
+		$repository = new AuditRunRepository();
+		$owner = $repository->acquire_run_lock( 600 );
+		$this->assertIsString( $owner );
+		$this->assertSame( $owner, json_decode( get_option( AuditRunRepository::RUN_LOCK_OPTION ), true )['token'] );
+		$this->assertTrue( $repository->refresh_run_lock( $owner, 600 ) );
+		$repository->release_run_lock( $owner );
+		$this->assertFalse( get_option( AuditRunRepository::RUN_LOCK_OPTION ) );
+	}
+
+	public function test_saved_incomplete_measurement_projects_null_in_all_resource_reads(): void {
+		$GLOBALS['wpdb']->resource_measurement = '{"text_complete":false,"sample_words":2}';
+		$run = ( new \Cybermaps\Audit\AuditReadAPI() )->get_json_run( 8 );
+		$this->assertNull( $run['resources'][0]['word_count'] );
+		$this->assertSame( '', $run['resources'][0]['content_hash'] );
+		$this->assertFalse( $run['resources'][0]['measurement']['text_complete'] );
+		$json = json_decode( ( new \Cybermaps\Audit\AuditExporter() )->json( $run ), true );
+		$this->assertNull( $json['resources'][0]['word_count'] );
+		$this->assertSame( '', $json['resources'][0]['content_hash'] );
+	}
+
+	public function test_incomplete_measurement_survives_repository_storage_and_json_read(): void {
+		$repository = new AuditRunRepository();
+		( new \ReflectionProperty( AuditRunRepository::class, 'running_runs' ) )->setValue( $repository, array( 8 => true ) );
+		$resource = array(
+			'resource_key' => 'post:1:8', 'object_type' => 'post', 'object_id' => 8,
+			'post_type' => 'page', 'title' => 'Incomplete fixture', 'url' => 'https://example.com/fixture/',
+			'modified_gmt' => '', 'word_count' => null, 'age_days' => null, 'has_media' => false,
+			'indexable' => true, 'indexability' => array( 'indexable' => true ),
+			'measurement' => array( 'text_complete' => false, 'sample_words' => 2 ), 'content_hash' => '',
+		);
+		$repository->add_resource( 8, $resource, array() );
+		$this->assertSame( 0, $GLOBALS['wpdb']->saved_resource['word_count'] );
+		$this->assertFalse( json_decode( $GLOBALS['wpdb']->saved_resource['measurement_json'], true )['text_complete'] );
+		$run = ( new \Cybermaps\Audit\AuditReadAPI() )->get_json_run( 8 );
+		$this->assertNull( $run['resources'][0]['word_count'] );
+		$this->assertSame( '', $run['resources'][0]['content_hash'] );
+		$this->assertSame( 2, $run['resources'][0]['measurement']['sample_words'] );
 	}
 
 	public function test_expired_run_lock_is_replaced_without_allowing_the_old_owner_to_delete_it(): void {
@@ -350,13 +417,27 @@ final class AuditRunRepositoryWpdbStub {
 	public string $prefix = 'wp_';
 	public string $options = 'wp_options';
 	public string $last_error = '';
+	public array $last_result = array();
 	public string $missing_table = '';
 	public bool $fail_next_get_row = false;
 	public bool $fail_cleanup_read = false;
 	public bool $fail_cleanup_delete = false;
 	public ?string $replace_lock_before_next_update = null;
+	public mixed $before_insert = null;
+	public bool $fail_insert = false;
+	public string $resource_measurement = '{"words":100}';
+	public ?array $saved_resource = null;
+	public int $insert_id = 80;
 	/** @var array<int,string> */
 	public array $queries = array();
+
+	public function insert( string $table, array $data ): int {
+		if ( 'wp_cybermaps_audit_resources' !== $table ) {
+			throw new \RuntimeException( 'Unexpected fixture insert.' );
+		}
+		$this->saved_resource = $data;
+		return 1;
+	}
 
 	public function get_charset_collate(): string {
 		return 'DEFAULT CHARACTER SET utf8mb4';
@@ -434,13 +515,18 @@ final class AuditRunRepositoryWpdbStub {
 			);
 		}
 		if ( str_contains( $query, 'SELECT * FROM wp_cybermaps_audit_resources' ) ) {
+			if ( null !== $this->saved_resource ) {
+				return array( $this->saved_resource );
+			}
 			return array(
 				array(
 					'id'                => 80,
 					'run_id'            => 8,
 					'resource_key'      => 'post:1:10',
 					'indexability_json' => '{"indexable":true}',
-					'measurement_json'  => '{"words":100}',
+					'measurement_json'  => $this->resource_measurement,
+					'word_count' => 0,
+					'content_hash' => '',
 				),
 			);
 		}
@@ -467,7 +553,9 @@ final class AuditRunRepositoryWpdbStub {
 	public function get_var( string $query ): mixed {
 		$this->queries[] = $query;
 		if ( str_contains( $query, 'SELECT option_value FROM wp_options' ) ) {
-			return get_option( AuditRunRepository::RUN_LOCK_OPTION, null );
+			$raw = get_option( AuditRunRepository::RUN_LOCK_OPTION, null );
+			$this->last_result = null === $raw ? array() : array( (object) array( 'option_value' => $raw ) );
+			return '' === $raw ? null : $raw;
 		}
 		if ( str_starts_with( $query, 'SHOW TABLES LIKE ' ) ) {
 			$quoted  = trim( substr( $query, strlen( 'SHOW TABLES LIKE ' ) ), "'" );
@@ -492,6 +580,22 @@ final class AuditRunRepositoryWpdbStub {
 
 	public function query( string $query ): int|false {
 		$this->queries[] = $query;
+		if ( str_starts_with( $query, 'INSERT IGNORE INTO wp_options' ) ) {
+			if ( is_callable( $this->before_insert ) ) {
+				$callback = $this->before_insert;
+				$this->before_insert = null;
+				$callback();
+			}
+			if ( $this->fail_insert ) {
+				$this->last_error = 'Insert failed';
+				return false;
+			}
+			preg_match( "/VALUES \(\'([^']+)\', \'((?:[^']|'')*)\', \'off\'\)/", $query, $values );
+			if ( count( $values ) !== 3 ) {
+				throw new \RuntimeException( 'Unexpected audit insert SQL.' );
+			}
+			return add_option( $values[1], str_replace( "''", "'", $values[2] ) ) ? 1 : 0;
+		}
 		if (
 			$this->fail_cleanup_delete
 			&& str_contains( $query, 'DELETE finding, resource, report' )

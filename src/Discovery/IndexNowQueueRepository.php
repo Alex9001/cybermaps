@@ -31,7 +31,9 @@ final class IndexNowQueueRepository {
 	private const MAX_ERROR_BYTES   = 255;
 	private const LOCK_TIMEOUT      = 0;
 
-	private bool $migrated_legacy = false;
+	private bool $migrated_legacy     = false;
+	private int $admission_connection = 0;
+	private string $admission_name    = '';
 
 	/**
 	 * @return array{accepted:int,duplicate:int,rejected:int,schema_available:bool}
@@ -470,7 +472,7 @@ final class IndexNowQueueRepository {
 		$now      = time();
 		$inserted = $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->prepare(
-				'INSERT IGNORE INTO %i (url_hash, url, state, attempts, next_attempt_at, claim_token, lease_expires_at, queued_again, last_status, last_error, created_at, updated_at) VALUES (%s, %s, %s, %d, %d, %s, %d, %d, %d, %s, %d, %d)',
+				'INSERT IGNORE INTO %i (url_hash, url, state, attempts, next_attempt_at, claim_token, lease_expires_at, queued_again, last_status, last_error, created_at, updated_at) SELECT %s, %s, %s, %d, %d, %s, %d, %d, %d, %s, %d, %d WHERE IS_USED_LOCK(%s) = CONNECTION_ID() AND CONNECTION_ID() = %d',
 				IndexNowQueueSchema::table_name(),
 				$hash,
 				$url,
@@ -483,7 +485,9 @@ final class IndexNowQueueRepository {
 				0,
 				'',
 				$now,
-				$now
+				$now,
+				$this->admission_name,
+				$this->admission_connection
 			)
 		);
 
@@ -522,11 +526,13 @@ final class IndexNowQueueRepository {
 		global $wpdb;
 		$updated = $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->prepare(
-				'UPDATE %i SET queued_again = 1, updated_at = %d WHERE url_hash = %s AND state = %s AND queued_again = 0',
+				'UPDATE %i SET queued_again = 1, updated_at = %d WHERE url_hash = %s AND state = %s AND queued_again = 0 AND IS_USED_LOCK(%s) = CONNECTION_ID() AND CONNECTION_ID() = %d',
 				IndexNowQueueSchema::table_name(),
 				time(),
 				$hash,
-				self::STATE_CLAIMED
+				self::STATE_CLAIMED,
+				$this->admission_name,
+				$this->admission_connection
 			)
 		);
 
@@ -539,31 +545,18 @@ final class IndexNowQueueRepository {
 	private function candidate_ids( int $limit, int $now, bool $force ): array {
 		global $wpdb;
 		$table = IndexNowQueueSchema::table_name();
-		if ( $force ) {
-			$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-				$wpdb->prepare(
-					'SELECT id FROM %i WHERE state IN (%s, %s) ORDER BY next_attempt_at ASC, created_at ASC, id ASC LIMIT %d',
-					$table,
-					self::STATE_QUEUED,
-					self::STATE_CLAIMED,
-					$limit
-				),
-				ARRAY_A
-			);
-		} else {
-			$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-				$wpdb->prepare(
-					'SELECT id FROM %i WHERE (state = %s AND next_attempt_at <= %d) OR (state = %s AND lease_expires_at > 0 AND lease_expires_at <= %d) ORDER BY next_attempt_at ASC, created_at ASC, id ASC LIMIT %d',
-					$table,
-					self::STATE_QUEUED,
-					$now,
-					self::STATE_CLAIMED,
-					$now,
-					$limit
-				),
-				ARRAY_A
-			);
-		}
+		$rows  = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->prepare(
+				'SELECT id FROM %i WHERE (state = %s AND next_attempt_at <= %d) OR (state = %s AND lease_expires_at > 0 AND lease_expires_at <= %d) ORDER BY next_attempt_at ASC, created_at ASC, id ASC LIMIT %d',
+				$table,
+				self::STATE_QUEUED,
+				$force ? PHP_INT_MAX : $now,
+				self::STATE_CLAIMED,
+				$now,
+				$limit
+			),
+			ARRAY_A
+		);
 
 		$ids = array();
 		foreach ( \is_array( $rows ) ? $rows : array() as $row ) {
@@ -752,41 +745,6 @@ final class IndexNowQueueRepository {
 	private function claim_id_chunk( array $ids, string $token, int $now, int $lease_ttl, bool $force ): int {
 		global $wpdb;
 		$ids = array_pad( $ids, 20, 0 );
-		if ( $force ) {
-			return (int) $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-				$wpdb->prepare(
-					'UPDATE %i SET state = %s, claim_token = %s, lease_expires_at = %d, updated_at = %d WHERE id IN (%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d) AND state IN (%s, %s)',
-					IndexNowQueueSchema::table_name(),
-					self::STATE_CLAIMED,
-					$token,
-					$now + $lease_ttl,
-					$now,
-					$ids[0],
-					$ids[1],
-					$ids[2],
-					$ids[3],
-					$ids[4],
-					$ids[5],
-					$ids[6],
-					$ids[7],
-					$ids[8],
-					$ids[9],
-					$ids[10],
-					$ids[11],
-					$ids[12],
-					$ids[13],
-					$ids[14],
-					$ids[15],
-					$ids[16],
-					$ids[17],
-					$ids[18],
-					$ids[19],
-					self::STATE_QUEUED,
-					self::STATE_CLAIMED
-				)
-			);
-		}
-
 		return (int) $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->prepare(
 				'UPDATE %i SET state = %s, claim_token = %s, lease_expires_at = %d, updated_at = %d WHERE id IN (%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d) AND ((state = %s AND next_attempt_at <= %d) OR (state = %s AND lease_expires_at > 0 AND lease_expires_at <= %d))',
@@ -816,7 +774,7 @@ final class IndexNowQueueRepository {
 				$ids[18],
 				$ids[19],
 				self::STATE_QUEUED,
-				$now,
+				$force ? PHP_INT_MAX : $now,
 				self::STATE_CLAIMED,
 				$now
 			)
@@ -1005,9 +963,11 @@ final class IndexNowQueueRepository {
 		global $wpdb;
 		$row = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->prepare(
-				'SELECT * FROM %i WHERE url_hash = %s LIMIT 1',
+				'SELECT * FROM %i WHERE url_hash = %s AND IS_USED_LOCK(%s) = CONNECTION_ID() AND CONNECTION_ID() = %d LIMIT 1',
 				IndexNowQueueSchema::table_name(),
-				$hash
+				$hash,
+				$this->admission_name,
+				$this->admission_connection
 			),
 			ARRAY_A
 		);
@@ -1022,10 +982,12 @@ final class IndexNowQueueRepository {
 		global $wpdb;
 		$count = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->prepare(
-				'SELECT COUNT(*) FROM %i WHERE state IN (%s, %s)',
+				'SELECT COUNT(*) FROM %i WHERE state IN (%s, %s) AND IS_USED_LOCK(%s) = CONNECTION_ID() AND CONNECTION_ID() = %d',
 				IndexNowQueueSchema::table_name(),
 				self::STATE_QUEUED,
-				self::STATE_CLAIMED
+				self::STATE_CLAIMED,
+				$this->admission_name,
+				$this->admission_connection
 			)
 		);
 		if ( false === $count || ( isset( $wpdb->last_error ) && '' !== (string) $wpdb->last_error ) || ! \is_numeric( $count ) ) {
@@ -1125,7 +1087,8 @@ final class IndexNowQueueRepository {
 	}
 
 	private function admission_lock_name(): string {
-		return 'cybermaps_indexnow_queue_' . \hash( 'sha256', IndexNowQueueSchema::table_name() );
+		// MySQL advisory-lock names are limited to 64 bytes.
+		return 'cybermaps_indexnow_' . \substr( \hash( 'sha256', IndexNowQueueSchema::table_name() ), 0, 40 );
 	}
 
 	private function acquire_admission_lock(): string {
@@ -1136,10 +1099,15 @@ final class IndexNowQueueRepository {
 
 		$name     = $this->admission_lock_name();
 		$acquired = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$wpdb->prepare( 'SELECT GET_LOCK(%s, %d)', $name, self::LOCK_TIMEOUT )
+			$wpdb->prepare( 'SELECT IF(GET_LOCK(%s, %d) = 1, CONNECTION_ID(), 0)', $name, self::LOCK_TIMEOUT )
 		);
 
-		return 1 === (int) $acquired ? $name : '';
+		if ( ! empty( $wpdb->last_error ) || ! is_numeric( $acquired ) || (int) $acquired < 1 ) {
+			return '';
+		}
+		$this->admission_connection = (int) $acquired;
+		$this->admission_name       = $name;
+		return $name;
 	}
 
 	private function release_admission_lock( string $name ): void {
@@ -1149,7 +1117,7 @@ final class IndexNowQueueRepository {
 		}
 
 		$wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $name )
+			$wpdb->prepare( 'SELECT RELEASE_LOCK(%s) WHERE CONNECTION_ID() = %d', $name, $this->admission_connection )
 		);
 	}
 
@@ -1163,6 +1131,8 @@ final class IndexNowQueueRepository {
 			return $callback();
 		} finally {
 			$this->release_admission_lock( $lock );
+			$this->admission_connection = 0;
+			$this->admission_name       = '';
 		}
 	}
 

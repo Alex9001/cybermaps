@@ -331,6 +331,12 @@ class Logs {
 	 * Handle export logs request.
 	 */
 	public function handle_export_logs() {
+		$request_method = isset( $_SERVER['REQUEST_METHOD'] ) && is_string( $_SERVER['REQUEST_METHOD'] )
+			? strtoupper( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) )
+			: '';
+		if ( 'GET' !== $request_method ) {
+			wp_die( esc_html__( 'Invalid request method.', 'cybermaps' ), '', array( 'response' => 405 ) );
+		}
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'Unauthorized', 'cybermaps' ) );
 		}
@@ -481,7 +487,8 @@ class Logs {
 	 */
 	private static function get_export_batch( ?int $before_id, int $batch_size ): ?array {
 		global $wpdb;
-		$table = $wpdb->prefix . 'cybermaps_logs';
+		$table            = $wpdb->prefix . 'cybermaps_logs';
+		$wpdb->last_error = '';
 
 		// Keyset pagination keeps export memory bounded even on busy sites.
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching -- Export reads an exact bounded page of the persisted analytics stream.
@@ -514,7 +521,7 @@ class Logs {
 		}
 		// phpcs:enable
 
-		return is_array( $logs ) ? $logs : null;
+		return is_array( $logs ) && '' === $wpdb->last_error ? $logs : null;
 	}
 
 	/**
@@ -719,9 +726,12 @@ KEY wp_user_id (wp_user_id)
 			return;
 		}
 
-		$logs = $this->get_repository()->get_widget_activity();
+		$repository = $this->get_repository();
+		$logs       = $repository->get_widget_activity();
 
-		if ( empty( $logs ) ) {
+		if ( ! $repository->is_available() ) {
+			echo '<p>' . esc_html__( 'Analytics observations are unavailable because the database could not be read. Check Discovery Analytics and the site database logs.', 'cybermaps' ) . '</p>';
+		} elseif ( empty( $logs ) ) {
 			echo '<p>' . esc_html__( 'No endpoint observations or crawler-signature requests have reached PHP yet.', 'cybermaps' ) . '</p>';
 		} else {
 			echo '<ul style="margin: 0; padding: 0; list-style: none;">';

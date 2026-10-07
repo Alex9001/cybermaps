@@ -118,7 +118,7 @@ final class AcceptNegotiator {
 		$quality          = 0.0;
 		foreach ( $ranges as $range ) {
 			$specificity = self::matching_specificity( $range, $type, $subtype );
-			if ( $specificity < $best_specificity ) {
+			if ( $specificity < 0 || $specificity < $best_specificity ) {
 				continue;
 			}
 			if ( $specificity > $best_specificity ) {

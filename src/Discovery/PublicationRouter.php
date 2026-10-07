@@ -57,7 +57,13 @@ class PublicationRouter {
 
 		$handler = $this->handler_resolver->resolve( $handler_class, $endpoint_id, $definition );
 		if ( null !== $handler && \is_callable( array( $handler, 'handle' ) ) ) {
-			$handler->handle();
+			try {
+				$handler->handle();
+			} catch ( PublicationSizeLimitException $error ) {
+				PublicationRequestGuard::serve_size_limit_error( $error );
+			} catch ( \Cybermaps\Core\BuildUnavailableException $error ) {
+				PublicationRequestGuard::serve_unavailable( $error );
+			}
 			return;
 		}
 
@@ -82,7 +88,9 @@ class PublicationRouter {
 		\nocache_headers();
 		\header( 'Cache-Control: no-store' );
 		\header( 'Content-Type: text/plain; charset=utf-8' );
-		\esc_html_e( 'This publication is temporarily unavailable.', 'cybermaps' );
+		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
+			\esc_html_e( 'This publication is temporarily unavailable.', 'cybermaps' );
+		}
 		exit;
 	}
 }

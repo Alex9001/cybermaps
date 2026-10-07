@@ -69,7 +69,13 @@ final class RequestInputBoundaryTest extends TestCase {
 			self::assertSame( '3.1.2', RequestInput::query_text( 'version', 16 ) );
 			self::assertSame( $_SERVER['HTTP_ACCEPT'], RequestInput::header( 'accept' ) );
 
+			$_SERVER['REQUEST_URI'] = '/cybermaps-openapi.json?version=3%2E1%2E2';
+			self::assertSame( '3.1.2', RequestInput::query_text( 'version', 16 ) );
 			$_SERVER['REQUEST_URI'] = '/cybermaps-openapi.json?version%5B%5D=3.1.2';
+			self::assertSame( '', RequestInput::query_text( 'version', 16 ) );
+			$_SERVER['HTTP_IF_NONE_MATCH'] = '"opaque%25\\tag"';
+			self::assertSame( wp_unslash( $_SERVER['HTTP_IF_NONE_MATCH'] ), RequestInput::header( 'if-none-match' ) );
+			$_SERVER['REQUEST_URI'] = '/cybermaps-openapi.json?version=3.1.2%0D';
 			self::assertSame( '', RequestInput::query_text( 'version', 16 ) );
 			$_SERVER['HTTP_ACCEPT'] = "application/json\r\nX-Injected: yes";
 			self::assertSame( '', RequestInput::header( 'accept' ) );

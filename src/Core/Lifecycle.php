@@ -100,6 +100,7 @@ final class Lifecycle {
 				'cybermaps_logs',
 				'cybermaps_runtime_counters',
 				'cybermaps_indexnow_queue',
+				'cybermaps_static_ownership',
 				'cybermaps_audit_findings',
 				'cybermaps_audit_resources',
 				'cybermaps_audit_runs',
@@ -303,8 +304,10 @@ final class Lifecycle {
 			array(
 				'cybermaps_cleanup_logs_event',
 				self::RUNTIME_COUNTER_CLEANUP_HOOK,
+				RuntimeCounterStore::CLEANUP_CONTINUATION_HOOK,
 				'cybermaps_continue_logs_cleanup_event',
 				'cybermaps_bg_sync_static_files',
+				\Cybermaps\Discovery\StaticBridge::PURGE_CONTINUATION_HOOK,
 				'cybermaps_refresh_time_sensitive_static_files',
 				'cybermaps_daily_health_snapshot',
 				'cybermaps_weekly_health_snapshot',

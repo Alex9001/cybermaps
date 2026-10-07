@@ -13,6 +13,68 @@ final class CacheManagerTest extends \WP_UnitTestCase {
 		$GLOBALS['cybermaps_mock_transients'] = array();
 	}
 
+	public function test_generation_read_failure_cannot_resurrect_old_or_legacy_values(): void {
+		$GLOBALS['cybermaps_mock_using_ext_object_cache'] = true;
+		self::assertTrue( CacheManager::put( 'publication', 'old', 3600, 'discovery' ) );
+		CacheManager::clear_family( 'discovery' );
+		set_transient( 'cybermaps_llms_cache', 'legacy', 3600 );
+		$previous_wpdb = $GLOBALS['wpdb'] ?? null;
+		$GLOBALS['wpdb'] = new CacheGenerationFailureWpdbStub();
+		CacheManager::reset_runtime();
+		try {
+			self::assertSame( -1, CacheManager::get_generation( 'discovery' ) );
+			foreach ( array( 'publication', 'cybermaps_llms_cache' ) as $key ) {
+				self::assertFalse( CacheManager::get( $key, 'discovery', $found ) );
+				self::assertFalse( $found );
+			}
+			self::assertFalse( CacheManager::put( 'new', 'value', 3600, 'discovery' ) );
+			self::assertFalse( CacheManager::set( 'new-legacy', 'value', 3600, 'discovery' ) );
+			self::assertFalse( CacheManager::set_if_current( 'new', 'value', 3600, 'discovery', -1 ) );
+			self::assertFalse( get_transient( 'new-legacy' ) );
+			$GLOBALS['wpdb']->fail_read = false;
+			self::assertSame( 1, CacheManager::get_generation( 'discovery' ) );
+			self::assertFalse( CacheManager::get( 'publication', 'discovery', $found ) );
+			self::assertFalse( $found );
+			self::assertTrue( CacheManager::put( 'new', 'fresh', 3600, 'discovery' ) );
+		} finally {
+			$GLOBALS['wpdb'] = $previous_wpdb;
+			CacheManager::reset_runtime();
+		}
+	}
+
+	public function test_failed_invalidation_rejects_cached_values_until_increment_succeeds(): void {
+		$GLOBALS['cybermaps_mock_using_ext_object_cache'] = true;
+		self::assertTrue( CacheManager::put( 'publication', 'old', 3600, 'discovery' ) );
+		$previous_wpdb = $GLOBALS['wpdb'] ?? null;
+		$GLOBALS['wpdb'] = new CacheGenerationFailureWpdbStub();
+		$GLOBALS['wpdb']->fail_read = false;
+		$GLOBALS['wpdb']->generation = 0;
+		try {
+			CacheManager::clear_family( 'discovery' );
+			self::assertSame( -1, CacheManager::get_generation( 'discovery', true ) );
+			self::assertFalse( CacheManager::get( 'publication', 'discovery', $found ) );
+			self::assertFalse( $found );
+			self::assertFalse( CacheManager::put( 'new', 'value', 3600, 'discovery' ) );
+			$GLOBALS['wpdb']->fail_write = false;
+			CacheManager::clear_family( 'discovery' );
+			self::assertSame( 1, CacheManager::get_generation( 'discovery' ) );
+			self::assertFalse( CacheManager::get( 'publication', 'discovery', $found ) );
+			self::assertFalse( $found );
+		} finally {
+			$GLOBALS['wpdb'] = $previous_wpdb;
+			CacheManager::reset_runtime();
+		}
+	}
+
+	public function test_discovery_invalidation_removes_current_and_retired_raw_fallbacks(): void {
+		$keys = array( 'cybermaps_tldr_cache', \Cybermaps\Discovery\LLMSTLDR::CACHE_KEY, 'cybermaps_adp_updates_v4' );
+		foreach ( $keys as $key ) { set_transient( $key, 'stale body', 3600 ); }
+		set_transient( 'extension_owned_updates', 'keep', 3600 );
+		CacheManager::clear_family( 'discovery' );
+		foreach ( $keys as $key ) { self::assertFalse( get_transient( $key ), $key ); }
+		self::assertSame( 'keep', get_transient( 'extension_owned_updates' ) );
+	}
+
 	public function test_clear_all_deletes_only_exact_core_owned_keys(): void {
 		CacheManager::set( 'cybermaps_v7_index', '<xml/>', HOUR_IN_SECONDS, 'sitemap' );
 		set_transient( 'cybermaps_pro_cache', 'extension-owned', HOUR_IN_SECONDS );
@@ -416,5 +478,23 @@ final class CacheManagerTest extends \WP_UnitTestCase {
 			)
 		);
 		$this->assertFalse( get_transient( $key ) );
+	}
+}
+
+final class CacheGenerationFailureWpdbStub {
+	public string $options = 'wp_options';
+	public string $last_error = '';
+	public bool $fail_read = true;
+	public bool $fail_write = true;
+	public int $generation = 1;
+	public function prepare( string $sql, mixed ...$args ): string { return $sql; }
+	public function get_var( string $sql ): ?string {
+		$this->last_error = $this->fail_read ? 'Injected generation read failure' : '';
+		return $this->fail_read ? null : (string) $this->generation;
+	}
+	public function query( string $sql ): int|false {
+		if ( $this->fail_write ) { return false; }
+		++$this->generation;
+		return 1;
 	}
 }

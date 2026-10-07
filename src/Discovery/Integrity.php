@@ -25,9 +25,11 @@ class Integrity {
 	 * @param int      $ttl Cache-Control max-age in seconds.
 	 * @param int|null $last_modified_ts Optional timestamp only when it represents
 	 *                                   every input to this exact body.
+	 * @param int|null $discovery_generation Optional generation captured before publication authorization.
 	 * @return void
 	 */
-	public static function send_headers( string $content, int $ttl = 3600, ?int $last_modified_ts = null ): void {
+	public static function send_headers( string $content, int $ttl = 3600, ?int $last_modified_ts = null, ?int $discovery_generation = null ): void {
+		self::require_discovery_generation( $discovery_generation );
 		// WordPress marks virtual discovery URLs as 404 before handlers run; force success.
 		status_header( 200 );
 		$policy = PublicationCachePolicy::for_request_path(
@@ -36,7 +38,8 @@ class Integrity {
 		// Retain the historical per-handler TTL argument as an internal override.
 		$policy['browser_ttl'] = max( 0, $ttl );
 		$policy['shared_ttl']  = max( 0, $ttl );
-		$not_modified          = self::send_representation_headers( $content, $policy, $last_modified_ts );
+		self::require_discovery_generation( $discovery_generation );
+		$not_modified = self::send_representation_headers( $content, $policy, $last_modified_ts );
 
 		// X-Robots-Tag for AI training control.
 		$settings = \Cybermaps\Core\ConfigurationStore::settings();
@@ -47,9 +50,20 @@ class Integrity {
 		// Content-Security-Policy for discovery data endpoints
 		header( "Content-Security-Policy: default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'" );
 
+		self::require_discovery_generation( $discovery_generation );
 		if ( $not_modified ) {
 			status_header( 304 );
 			exit;
+		}
+	}
+
+	/** Optional publication boundary; historical callers retain their existing contract. */
+	private static function require_discovery_generation( ?int $generation ): void {
+		if ( null !== $generation && ( $generation < 0 || \Cybermaps\Core\CacheManager::get_generation( 'discovery', true ) !== $generation ) ) {
+			foreach ( array( 'Link', 'ETag', 'Last-Modified', 'Repr-Digest', 'Content-Digest', 'X-Markdown-Tokens' ) as $name ) {
+				header_remove( $name );
+			}
+			throw new \Cybermaps\Core\BuildUnavailableException( esc_html__( 'Cybermaps content changed during publication. Please retry shortly.', 'cybermaps' ) );
 		}
 	}
 
@@ -90,7 +104,7 @@ class Integrity {
 			\Cybermaps\Integration\EdgeCache\LiteSpeedAdapter::emit_tags( $tags );
 		}
 
-		return self::is_not_modified( $etag, $last_modified_ts );
+		return empty( $policy['no_store'] ) && self::is_not_modified( $etag, $last_modified_ts );
 	}
 
 	/**

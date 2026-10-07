@@ -212,21 +212,16 @@ final class DocsManifestTest extends TestCase {
 		$this->assertSame(
 			array(
 				'/ai.json',
-				'/ai-discovery',
 				'/ai-usage.json',
 				'/ai-actions.json',
 				'/.well-known/agent-skills/cybermaps-site-guide/SKILL.md',
 				'/.well-known/agent-skills/index.json',
-				'/.well-known/api-catalog',
-				'/.well-known/ai-catalog.json',
-				'/.well-known/mcp/server-card.json',
 			),
 			array_column( $well_known_targets, 'path' )
 		);
 		$this->assertSame(
 			array(
 				'/ai.json',
-				'/ai-discovery',
 				'/llms.txt',
 				'/llms-full.txt',
 				'/llms-tldr.txt',
@@ -241,9 +236,6 @@ final class DocsManifestTest extends TestCase {
 				'/ai-actions.json',
 				'/.well-known/agent-skills/cybermaps-site-guide/SKILL.md',
 				'/.well-known/agent-skills/index.json',
-				'/.well-known/api-catalog',
-				'/.well-known/ai-catalog.json',
-				'/.well-known/mcp/server-card.json',
 			),
 			array_column( $all_targets, 'path' )
 		);

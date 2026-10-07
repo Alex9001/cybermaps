@@ -197,7 +197,9 @@ class Throttler {
 		header( 'X-Cybermaps-Throttled: true' );
 		header( 'Content-Type: text/plain; charset=utf-8' );
 		nocache_headers();
-		esc_html_e( 'Rate limit exceeded. Please retry after 60 seconds.', 'cybermaps' );
+		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
+			esc_html_e( 'Rate limit exceeded. Please retry after 60 seconds.', 'cybermaps' );
+		}
 		exit;
 	}
 

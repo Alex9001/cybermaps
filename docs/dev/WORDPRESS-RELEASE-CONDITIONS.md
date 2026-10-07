@@ -21,6 +21,14 @@ package-parity checks, then test the exact ZIP on minimum WordPress/PHP and late
 stable WordPress across PHP 8.2–8.5, plus multisite. Runtime checks include current
 pinned Plugin Check, experimental and low-severity checks, debug logs, upgrade,
 activation, deactivation, uninstall retention/deletion, and browser interactions.
+The runtime evidence also requires sitemap regressions, native REST
+serialization, configuration/upgrade compare-and-swap, Cloudflare persistence,
+audit lease acquisition, bounded ownership migration and state cutover checks.
+Missing or false evidence flags reject the candidate. Relay security, WebMCP
+browser security, admin UI contract tests using a mocked DOM, and
+performance-harness self-tests run in the same candidate gate; harness
+self-tests do not establish performance at any corpus size. The runtime matrix
+also exercises the admin interface in a real browser.
 The multisite case runs both Plugin Check runtime modes on the single-site
 installation first, then converts that same installation and runs the two-site
 and lifecycle fixtures. Plugin Check 2.1.0's early temporary-site bootstrap fails
@@ -117,8 +125,9 @@ Policy references: [Directory guidelines](https://developer.wordpress.org/plugin
 
 ## Development skills
 
-The bundled WordPress plugin-development and plugin-directory-guidelines skills
-in `.claude/skills/agent-skills/skills/` informed this review. Their durable rules
-are recorded here and in AGENTS.md, so release safety does not depend on ignored
-local skill files. Re-read current official guidance when changing services,
-licensing, privacy, distribution or public output.
+Use the [official WordPress agent skills](https://github.com/WordPress/agent-skills),
+reading the applicable `SKILL.md` and its referenced guidance before applying it.
+The former `.claude/skills/agent-skills/skills/` path is absent; do not claim a
+bundled skill was read. Durable release rules are recorded here and in AGENTS.md.
+Re-read current official guidance when changing services, licensing, privacy,
+distribution or public output.

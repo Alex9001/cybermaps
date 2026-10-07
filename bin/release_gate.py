@@ -5,6 +5,7 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 import fcntl
 import hashlib
+import importlib.util
 import json
 import os
 import re
@@ -25,6 +26,10 @@ COMMANDS = {
     'complexity': ['composer', 'run', 'lint:complexity'],
     'source': ['composer', 'run', 'release:check'],
     'package': ['bash', 'bin/package-candidate.sh'],
+    'relay-security': ['npm', 'test', '--prefix', 'infrastructure/cloudflare-oauth-relay'],
+    'webmcp-security': ['node', 'tests/browser/webmcp-security.mjs'],
+    'admin-ui-contract': ['node', '--test', 'tests/browser/admin-ui-contract.mjs'],
+    'performance-harness': ['python3', '-B', '-m', 'unittest', 'discover', '-s', 'tests/performance', '-p', 'test_*.py'],
 }
 
 
@@ -157,10 +162,28 @@ def execute(record, name, command, directory, env=None):
     save_json(release_dir() / 'validation.json', record)
     print('Validating ' + name + ': ' + str(path), flush=True)
     with path.open('w') as output:
-        result = subprocess.run(command, cwd=ROOT, stdout=output, stderr=subprocess.STDOUT, env=env)
+        environment = dict(os.environ if env is None else env,
+                           PLAYWRIGHT_BROWSERS_PATH=str(ROOT / 'docs/generated/tmp/playwright-browsers'))
+        result = subprocess.run(command, cwd=ROOT, stdout=output, stderr=subprocess.STDOUT, env=environment)
     record['checks'][name].update(status='passed' if result.returncode == 0 else 'failed', sha256=digest(path))
     save_json(release_dir() / 'validation.json', record)
     require(result.returncode == 0, name + ' failed; see ' + str(path))
+
+
+def retained_candidate(record):
+    require(record.get('identity') == identity(), 'Retained candidate source/policy changed')
+    _, archive_hash = package_files(candidate())
+    require(record.get('zip_sha256') == archive_hash, 'Retained candidate ZIP changed')
+    final = release_dir() / candidate().name
+    _, final_hash = package_files(final)
+    require(final_hash == archive_hash and final.read_bytes() == candidate().read_bytes(),
+            'Retained final artifact differs from candidate')
+    spec = importlib.util.spec_from_file_location('cybermaps_publisher', ROOT / 'bin/release-github.py')
+    publisher = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(publisher)
+    proof = publisher.verify_retry_candidate(candidate())
+    require(proof['commit'] == record['identity']['commit'], 'Retained draft commit changed')
+    return archive_hash, proof
 
 
 def build():
@@ -177,18 +200,29 @@ def build():
             return
         except (RuntimeError, ValueError, KeyError, OSError):
             pass
-    require(not git(ROOT, 'tag', '--list', 'v' + version()), 'Version is already tagged; prepare a new patch version')
+    tag = 'v' + version()
+    tagged = git(ROOT, 'tag', '--list', tag) or git(
+        ROOT, 'ls-remote', 'https://github.com/Alex9001/cybermaps.git', 'refs/tags/' + tag)
+    retained_hash, retry = retained_candidate(load_record()) if tagged else (None, None)
     attempt = directory / 'attempts' / uuid.uuid4().hex
     attempt.mkdir(parents=True)
-    for name in ('release-readiness.json', 'cybermaps_' + version() + '.zip', 'cybermaps_' + version() + '.zip.sha256'):
+    disposable = ['release-readiness.json']
+    if retry is None:
+        disposable += ['cybermaps_' + version() + '.zip', 'cybermaps_' + version() + '.zip.sha256']
+    for name in disposable:
         (directory / name).unlink(missing_ok=True)
     record = dict(schema_version=1, state='candidate', identity=identity(), started_at=now(), checks={}, evidence={})
+    if retry is not None:
+        record.update(zip_sha256=retained_hash, retained_draft=retry)
     save_json(previous, record)
     try:
         record['upstream'] = upstream()
         for name, command in COMMANDS.items():
+            if name == 'package' and retry is not None:
+                command = ['bash', 'bin/validate-release.sh', str(directory / 'cybermaps'), str(candidate())]
             execute(record, name, command, attempt)
         _, record['zip_sha256'] = package_files(candidate())
+        require(retained_hash is None or record['zip_sha256'] == retained_hash, 'Retained ZIP changed during revalidation')
         env = dict(os.environ, CYBERMAPS_LATEST_WP=record['upstream']['wordpress_version'])
         execute(record, 'matrix', ['python3', '-B', 'bin/validate_matrix.py', str(candidate()), str(attempt)], attempt, env)
         execute(record, 'xsl', ['python3', '-B', 'tests/integration/sitemap_xsl.py'], attempt)

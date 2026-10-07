@@ -44,6 +44,16 @@ final class IndexNowTest extends \WP_UnitTestCase {
 		$this->assertArrayHasKey( IndexNowQueue::CRON_HOOK, $GLOBALS['cybermaps_mock_scheduled'] );
 	}
 
+	public function test_new_enqueues_never_postpone_an_earlier_worker(): void {
+		$queue = new IndexNowQueue();
+		$deadline = time() + 5;
+		wp_schedule_single_event( $deadline, IndexNowQueue::CRON_HOOK );
+		foreach ( range( 1, 3 ) as $id ) {
+			$this->assertSame( 1, $queue->enqueue( array( 'https://frontend.example/post-' . $id ) )['accepted'] );
+			$this->assertSame( $deadline, wp_next_scheduled( IndexNowQueue::CRON_HOOK ) );
+		}
+	}
+
 	public function test_process_now_uses_publication_host_and_supplied_public_url(): void {
 		$result = ( new IndexNow() )->submit_urls( array( 'https://frontend.example/?p=42' ), true );
 
@@ -294,6 +304,18 @@ final class IndexNowTest extends \WP_UnitTestCase {
 		$this->assertSame( 50000, ( new IndexNowQueue() )->health()['queued'] );
 	}
 
+	public function test_session_loss_after_capacity_count_and_before_insert_cannot_exceed_cap(): void {
+		foreach ( array( 'lookup', 'insert' ) as $boundary ) {
+			$this->database()->seed_count( 49999 );
+			$this->database()->lose_admission_at = $boundary;
+			$result = ( new IndexNowQueue() )->enqueue( array( 'https://frontend.example/lost-at-' . $boundary ) );
+			self::assertSame( 0, $result['accepted'], $boundary );
+			self::assertSame( 1, $result['rejected'], $boundary );
+			self::assertSame( array(), $this->database()->rows );
+			self::assertSame( 50000, ( new IndexNowQueue() )->health()['queued'] );
+		}
+	}
+
 	public function test_claim_read_failure_releases_token_for_immediate_reclaim(): void {
 		$queue = new IndexNowQueue();
 		$queue->enqueue( array( 'https://frontend.example/read-failure' ) );
@@ -361,6 +383,9 @@ final class IndexNowQueueTestWpdb {
 	public bool $table_exists = true;
 	public bool $admission_lock_available = true;
 	public bool $admission_lock_held = false;
+	public int $connection_id = 41;
+	public string $lose_admission_at = '';
+	private bool $admission_count_read = false;
 	public bool $fill_to_capacity_after_lock = false;
 	public bool $fail_next_insert = false;
 	public bool $fail_next_claim_read = false;
@@ -398,9 +423,10 @@ final class IndexNowQueueTestWpdb {
 			if ( $this->fill_to_capacity_after_lock ) {
 				$this->synthetic_count = 50000;
 			}
-			return 1;
+			return str_contains( $query, 'CONNECTION_ID' ) ? $this->connection_id : 1;
 		}
 		if ( str_contains( $query, 'RELEASE_LOCK' ) ) {
+			if ( isset( $args[1] ) && $args[1] !== $this->connection_id ) { return null; }
 			$this->admission_lock_held = false;
 			return 1;
 		}
@@ -408,6 +434,8 @@ final class IndexNowQueueTestWpdb {
 			return $this->table_exists ? $this->prefix . 'cybermaps_indexnow_queue' : '';
 		}
 		if ( str_contains( $query, 'COUNT(*)' ) && str_contains( $query, 'state IN' ) ) {
+			$this->admission_count_read = true;
+			if ( ! $this->admission_fence_allows( $query, $args ) ) { return 0; }
 			return $this->synthetic_count + count( $this->open_rows() );
 		}
 		if ( str_contains( $query, 'COUNT(*)' ) && str_contains( $query, 'next_attempt_at <=' ) ) {
@@ -435,6 +463,8 @@ final class IndexNowQueueTestWpdb {
 		$query = is_array( $prepared ) ? $prepared['query'] : $prepared;
 		$args  = is_array( $prepared ) ? $prepared['args'] : array();
 		if ( str_contains( $query, 'WHERE url_hash = ' ) ) {
+			$this->maybe_lose_admission( 'lookup' );
+			if ( ! $this->admission_fence_allows( $query, $args ) ) { return array(); }
 			$row = $this->row_by_hash( (string) ( $args[1] ?? '' ) );
 			return null === $row ? array() : array( $row );
 		}
@@ -499,6 +529,8 @@ final class IndexNowQueueTestWpdb {
 			'args'  => $args,
 		);
 		if ( str_starts_with( $query, 'INSERT IGNORE INTO' ) ) {
+			$this->maybe_lose_admission( 'insert' );
+			if ( ! $this->admission_fence_allows( $query, $args ) ) { return 0; }
 			if ( $this->fail_next_insert ) {
 				$this->fail_next_insert = false;
 				$this->last_error       = 'Insert failed';
@@ -526,6 +558,7 @@ final class IndexNowQueueTestWpdb {
 			return 1;
 		}
 		if ( str_starts_with( $query, 'UPDATE' ) && str_contains( $query, 'SET queued_again = 1' ) ) {
+			if ( ! $this->admission_fence_allows( $query, $args ) ) { return 0; }
 			$hash = (string) ( $args[2] ?? '' );
 			foreach ( $this->rows as &$row ) {
 				if ( $hash === $row['url_hash'] && 'claimed' === $row['state'] && 0 === (int) $row['queued_again'] ) {
@@ -631,6 +664,17 @@ final class IndexNowQueueTestWpdb {
 				$row['lease_expires_at'] = time() - 1;
 			}
 		}
+	}
+
+	private function maybe_lose_admission( string $stage ): void {
+		if ( ! $this->admission_count_read || $stage !== $this->lose_admission_at ) { return; }
+		$this->lose_admission_at = '';
+		$this->admission_lock_held = false;
+		++$this->connection_id;
+		$this->synthetic_count = 50000;
+	}
+	private function admission_fence_allows( string $query, array $args ): bool {
+		return ! str_contains( $query, 'IS_USED_LOCK' ) || ( $this->admission_lock_held && end( $args ) === $this->connection_id );
 	}
 
 	public function seed_count( int $count ): void {

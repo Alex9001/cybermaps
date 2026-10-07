@@ -593,18 +593,21 @@
             if (!validStep() || status.saving) {
                 return;
             }
+            var submittedPayload = payload();
+            var submittedAnswers = JSON.parse(submittedPayload).answers;
             setStatus({ loading: false, saving: true, error: '' });
-            ajax('cybermaps_setup_wizard_preview', { payload: payload() })
+            ajax('cybermaps_setup_wizard_preview', { payload: submittedPayload })
                 .then(function (result) {
                     setPreview(result);
                     return ajax('cybermaps_setup_wizard_apply', {
-                        payload: payload(),
+                        payload: submittedPayload,
                         environment_hash: result.environment_hash,
                         content_hash: result.preview.content_hash,
                         configuration_hash: result.preview.configuration_hash
                     });
                 })
                 .then(function (applyResult) {
+                    setAnswers(submittedAnswers);
                     setResult(applyResult);
                     allowExit.current = true;
                     setComplete(true);
@@ -685,7 +688,7 @@
                           el('p', null, status.error)
                       )
                     : null,
-                el('div', { key: 'content', className: 'cm-quick-setup__content' }, content),
+                el('fieldset', { key: 'content', className: 'cm-quick-setup__content', disabled: status.saving }, content),
                 el('footer', { key: 'footer' }, [
                     el(
                         'button',

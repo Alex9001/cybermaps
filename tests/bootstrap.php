@@ -133,6 +133,9 @@ if ( ! function_exists( '__' ) ) {
 
 if ( ! function_exists( 'do_action' ) ) {
 	function do_action( $hook, ...$args ) {
+		foreach ( $GLOBALS['cybermaps_mock_action_callbacks'][ $hook ] ?? array() as $callback ) {
+			$callback( ...$args );
+		}
 	}
 }
 

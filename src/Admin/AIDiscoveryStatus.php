@@ -62,19 +62,20 @@ class AIDiscoveryStatus {
 			wp_die( esc_html__( 'You do not have permission to access this page.', 'cybermaps' ) );
 		}
 
-		$status_data  = ( new DiscoveryStatus() )->get_status_data( self::force_refresh_requested() );
-		$page_context = self::page_context( $status_data );
-		$hub_enabled  = $page_context['hub_enabled'];
-		$static_mode  = $page_context['static_mode'];
-		$endpoints    = $page_context['endpoints'];
-		$notices      = $page_context['notices'];
-		$observations = $page_context['observations'];
-		$missing      = $page_context['missing'];
-		$static_count = $page_context['static_count'];
-		$checked_at   = $page_context['checked_at'];
-		$refresh_url  = $page_context['refresh_url'];
-		$negotiation  = $page_context['markdown_negotiation'];
-		$routing      = $page_context['well_known_routing'];
+		$status_data            = ( new DiscoveryStatus() )->get_status_data( self::force_refresh_requested() );
+		$page_context           = self::page_context( $status_data );
+		$hub_enabled            = $page_context['hub_enabled'];
+		$static_mode            = $page_context['static_mode'];
+		$endpoints              = $page_context['endpoints'];
+		$notices                = $page_context['notices'];
+		$observations           = $page_context['observations'];
+		$observations_available = $page_context['observations_available'];
+		$missing                = $page_context['missing'];
+		$static_count           = $page_context['static_count'];
+		$checked_at             = $page_context['checked_at'];
+		$refresh_url            = $page_context['refresh_url'];
+		$negotiation            = $page_context['markdown_negotiation'];
+		$routing                = $page_context['well_known_routing'];
 		?>
 		<div class="wrap cybermaps-wrap">
 			<?php self::render_page_header( $static_mode, $checked_at, $refresh_url, count( $endpoints ) ); ?>
@@ -86,7 +87,7 @@ class AIDiscoveryStatus {
 			<?php self::render_publication_warnings( $hub_enabled, $missing, $status_data ); ?>
 			<?php self::render_notices( $notices ); ?>
 
-			<?php self::render_endpoint_table( $endpoints, $observations ); ?>
+			<?php self::render_endpoint_table( $endpoints, $observations, $observations_available ); ?>
 			<?php DeploymentGuidance::render( $endpoints ); ?>
 
 			<div class="cm-flex cm-gap-20 cm-mt-20">
@@ -103,14 +104,22 @@ class AIDiscoveryStatus {
 				<div class="cm-card-sm" style="flex:1;">
 					<h3><?php esc_html_e( 'Static server requirements', 'cybermaps' ); ?></h3>
 					<ul style="list-style:disc;margin-left:20px;">
-						<li><?php esc_html_e( 'Allow the selected extension-bearing JSON files to be served with their declared JSON media types.', 'cybermaps' ); ?></li>
-						<li><?php esc_html_e( 'For static copies, configure Cache-Control, CORS, Content-Digest calculated from the deployed body, and opt-in Content-Usage where enabled.', 'cybermaps' ); ?></li>
-						<li><?php esc_html_e( 'Cybermaps keeps its custom discovery documents at ordinary root paths, avoiding unregistered .well-known aliases.', 'cybermaps' ); ?></li>
-						<li><?php esc_html_e( 'Canonical well-known fallback bodies remain available when the server bypasses WordPress. Debugging separates body availability from media-type, CORS, cache, and digest conformance.', 'cybermaps' ); ?></li>
+						<?php self::render_static_server_requirements(); ?>
 					</ul>
 				</div>
 			</div>
 		</div>
+		<?php
+	}
+
+	/** Render deployment requirements without probing public endpoints. */
+	private static function render_static_server_requirements(): void {
+		?>
+						<li><?php esc_html_e( 'Allow the selected extension-bearing JSON files to be served with their declared JSON media types.', 'cybermaps' ); ?></li>
+						<li><?php esc_html_e( 'For static copies, configure Cache-Control, CORS, Content-Digest calculated from the deployed body, and opt-in Content-Usage where enabled.', 'cybermaps' ); ?></li>
+						<li><?php esc_html_e( 'Cybermaps keeps its custom discovery documents at ordinary root paths, avoiding unregistered .well-known aliases.', 'cybermaps' ); ?></li>
+						<li><?php esc_html_e( 'Core discovery mode publishes five files: /ai.json, /ai-usage.json, /ai-actions.json, /.well-known/agent-skills/cybermaps-site-guide/SKILL.md, and /.well-known/agent-skills/index.json.', 'cybermaps' ); ?></li>
+						<li><?php esc_html_e( 'API Catalog, AI Catalog, MCP Server Card, and /ai-discovery remain dynamic in every mode. Route these requests to WordPress so their required headers and request observation work.', 'cybermaps' ); ?></li>
 		<?php
 	}
 
@@ -134,17 +143,19 @@ class AIDiscoveryStatus {
 	private static function page_context( array $status_data ): array {
 		$endpoints = is_array( $status_data['endpoints'] ?? null ) ? $status_data['endpoints'] : array();
 		usort( $endpoints, array( self::class, 'compare_endpoints' ) );
-		$counts = self::static_publication_counts( $endpoints );
+		$counts       = self::static_publication_counts( $endpoints );
+		$observations = CrawlerAnalyticsRecorder::get_endpoint_observations( $observations_available );
 		return array(
-			'hub_enabled'          => ! empty( $status_data['hub_enabled'] ),
-			'static_mode'          => (string) ( $status_data['static_mode'] ?? 'off' ),
-			'endpoints'            => $endpoints,
-			'notices'              => self::status_array( $status_data, 'notices' ),
-			'observations'         => CrawlerAnalyticsRecorder::get_endpoint_observations(),
-			'missing'              => $counts['missing'],
-			'static_count'         => $counts['static'],
-			'checked_at'           => (string) ( $status_data['checked_at'] ?? '' ),
-			'refresh_url'          => wp_nonce_url(
+			'hub_enabled'            => ! empty( $status_data['hub_enabled'] ),
+			'static_mode'            => (string) ( $status_data['static_mode'] ?? 'off' ),
+			'endpoints'              => $endpoints,
+			'notices'                => self::status_array( $status_data, 'notices' ),
+			'observations'           => $observations,
+			'observations_available' => $observations_available,
+			'missing'                => $counts['missing'],
+			'static_count'           => $counts['static'],
+			'checked_at'             => (string) ( $status_data['checked_at'] ?? '' ),
+			'refresh_url'            => wp_nonce_url(
 				add_query_arg(
 					array(
 						'page'              => 'cybermaps-ai-discovery-status',
@@ -154,8 +165,8 @@ class AIDiscoveryStatus {
 				),
 				'cybermaps_refresh_discovery_status'
 			),
-			'markdown_negotiation' => self::status_array( $status_data, 'markdown_negotiation' ),
-			'well_known_routing'   => self::status_array( $status_data, 'well_known_routing' ),
+			'markdown_negotiation'   => self::status_array( $status_data, 'markdown_negotiation' ),
+			'well_known_routing'     => self::status_array( $status_data, 'well_known_routing' ),
 		);
 	}
 
@@ -366,7 +377,7 @@ class AIDiscoveryStatus {
 	}
 
 	/** @param array<int, array<string, mixed>> $endpoints Endpoint rows. @param array<string, array<string, mixed>> $observations Request observations. */
-	private static function render_endpoint_table( array $endpoints, array $observations ): void {
+	private static function render_endpoint_table( array $endpoints, array $observations, bool $observations_available = true ): void {
 		?>
 		<table class="wp-list-table widefat cm-discovery-status-table">
 			<thead><tr>
@@ -383,8 +394,10 @@ class AIDiscoveryStatus {
 					<tr class="cm-discovery-status-group-row"><th colspan="10" scope="colgroup"><?php echo esc_html( self::group_label( $group ) ); ?></th></tr>
 					<?php
 				}
-				$endpoint_id = sanitize_key( (string) ( $endpoint['endpoint_id'] ?? '' ) );
-				self::render_endpoint_row( $endpoint, $observations[ $endpoint_id ] ?? array() );
+				$endpoint_id              = sanitize_key( (string) ( $endpoint['endpoint_id'] ?? '' ) );
+				$observation              = $observations[ $endpoint_id ] ?? array();
+				$observation['available'] = $observations_available;
+				self::render_endpoint_row( $endpoint, $observation );
 			}
 			?>
 			</tbody>
@@ -507,6 +520,12 @@ class AIDiscoveryStatus {
 
 	/** @param array<string, mixed> $observation Request observation. */
 	private static function render_php_observation_cell( string $intended, array $observation ): void {
+		if ( false === ( $observation['available'] ?? true ) ) {
+			?>
+			<td class="cm-discovery-status-field--php"><span class="cm-discovery-status-field-label"><?php esc_html_e( 'PHP observation', 'cybermaps' ); ?></span><strong><?php esc_html_e( 'Unavailable', 'cybermaps' ); ?></strong><div class="cm-text-xs cm-text-muted"><?php esc_html_e( 'The analytics database could not be read. Request counts are unknown.', 'cybermaps' ); ?></div></td>
+			<?php
+			return;
+		}
 		$last_php = ! empty( $observation['last_php'] )
 			? sprintf( /* translators: %s: database timestamp. */ __( 'Last PHP: %s', 'cybermaps' ), (string) $observation['last_php'] )
 			: __( 'No PHP-observed request', 'cybermaps' );

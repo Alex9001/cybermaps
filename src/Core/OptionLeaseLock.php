@@ -209,7 +209,7 @@ final class OptionLeaseLock {
 	}
 
 	private function unfenced_direct_renewal( mixed $wpdb, string $raw, array $renewed ): int|false {
-		return $wpdb->query( $wpdb->prepare( 'UPDATE %i SET option_value = %s WHERE option_name = %s AND BINARY option_value = BINARY %s', $wpdb->options, $this->serialize_option_value( $renewed ), $this->option_name, $raw ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		return RawOptionStore::replace( $wpdb, $this->option_name, $raw, $this->serialize_option_value( $renewed ) );
 	}
 
 	public function release(): void {
@@ -303,13 +303,10 @@ final class OptionLeaseLock {
 			&& \method_exists( $wpdb, 'get_var' )
 			&& \method_exists( $wpdb, 'query' )
 		) {
-			$raw = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-				$wpdb->prepare(
-					'SELECT option_value FROM %i WHERE option_name = %s LIMIT 1',
-					$wpdb->options,
-					$this->option_name
-				)
-			);
+			$raw = RawOptionStore::read( $wpdb, $this->option_name );
+			if ( false === $raw ) {
+				$this->lost = true;
+			}
 			$raw = \is_string( $raw ) ? $raw : null;
 			return array(
 				'value'  => null === $raw ? null : \maybe_unserialize( $raw ),
@@ -353,14 +350,7 @@ final class OptionLeaseLock {
 					)
 				);
 			} else {
-				$deleted = $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-					$wpdb->prepare(
-						'DELETE FROM %i WHERE option_name = %s AND BINARY option_value = BINARY %s',
-						$wpdb->options,
-						$this->option_name,
-						$raw
-					)
-				);
+				$deleted = RawOptionStore::remove( $wpdb, $this->option_name, $raw );
 			}
 			if ( 1 !== (int) $deleted ) {
 				return false;
@@ -418,15 +408,7 @@ final class OptionLeaseLock {
 					)
 				);
 			} else {
-				$inserted = $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-					$wpdb->prepare(
-						'INSERT IGNORE INTO %i (option_name, option_value, autoload) VALUES (%s, %s, %s)',
-						$wpdb->options,
-						$this->option_name,
-						$this->serialize_option_value( $lock ),
-						'off'
-					)
-				);
+				$inserted = RawOptionStore::insert( $wpdb, $this->option_name, $this->serialize_option_value( $lock ) );
 			}
 			if ( 1 !== (int) $inserted ) {
 				return false;

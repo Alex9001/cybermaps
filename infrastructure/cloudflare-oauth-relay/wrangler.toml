@@ -18,6 +18,9 @@ MAX_TRANSACTION_POLLS = "48"
 enabled = true
 head_sampling_rate = 1.0
 
+[observability.logs]
+invocation_logs = false
+
 [[durable_objects.bindings]]
 name = "OAUTH_TRANSACTIONS"
 class_name = "OAuthTransaction"

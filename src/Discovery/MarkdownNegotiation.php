@@ -21,13 +21,27 @@ final class MarkdownNegotiation {
 	}
 
 	public function handle(): void {
-		$settings = \Cybermaps\Core\ConfigurationStore::settings();
-		if ( ! self::is_enabled( $settings ) || ! ReadOnlyRequest::is_allowed( ReadOnlyRequest::method() ) || ! $this->is_supported_view() ) {
+		if ( ! ReadOnlyRequest::is_allowed( ReadOnlyRequest::method() ) || ! $this->is_supported_view() ) {
+			return;
+		}
+		$prefers_markdown = AcceptNegotiator::prefers_markdown( $this->accept_header() );
+		$generation       = \Cybermaps\Core\CacheManager::get_generation( 'discovery', true );
+		try {
+			self::require_current_generation( $generation );
+			$settings = \Cybermaps\Core\ConfigurationStore::publication_settings();
+			\Cybermaps\Core\ConfigurationStore::publication_discovery();
+		} catch ( \Cybermaps\Core\BuildUnavailableException $error ) {
+			if ( ! $prefers_markdown ) {
+				return;
+			}
+			PublicationRequestGuard::serve_unavailable( $error );
+		}
+		if ( ! self::is_enabled( $settings ) ) {
 			return;
 		}
 
 		MarkdownResponder::add_vary_accept();
-		if ( ! AcceptNegotiator::prefers_markdown( $this->accept_header() ) ) {
+		if ( ! $prefers_markdown ) {
 			return;
 		}
 
@@ -36,6 +50,9 @@ final class MarkdownNegotiation {
 		$responder = new MarkdownResponder();
 		try {
 			$representation = $this->representation( $settings );
+			self::require_current_generation( $generation );
+		} catch ( \Cybermaps\Core\BuildUnavailableException $error ) {
+			PublicationRequestGuard::serve_unavailable( $error );
 		} catch ( PublicationSizeLimitException $error ) {
 			$responder->send_size_limit_error( $error, true );
 		}
@@ -47,8 +64,16 @@ final class MarkdownNegotiation {
 			$representation['content'],
 			$representation['modified'],
 			$representation['links'],
-			true
+			true,
+			$generation
 		);
+	}
+
+	/** Reject observed privacy movement before conditional headers or body delivery. */
+	private static function require_current_generation( int $generation ): void {
+		if ( $generation < 0 || \Cybermaps\Core\CacheManager::get_generation( 'discovery', true ) !== $generation ) {
+			throw new \Cybermaps\Core\BuildUnavailableException( esc_html__( 'Cybermaps content changed during Markdown publication. Please retry shortly.', 'cybermaps' ) );
+		}
 	}
 
 	/**
@@ -108,7 +133,8 @@ final class MarkdownNegotiation {
 		$alternate = new MarkdownAlternate();
 		return array(
 			'content'  => $alternate->get_content( $post ),
-			'modified' => MarkdownResponder::modified_timestamp( $post ),
+			// Locale and public URL settings also contribute to the representation.
+			'modified' => null,
 			'links'    => $alternate->get_markdown_response_links( $post ),
 		);
 	}
@@ -141,7 +167,18 @@ final class MarkdownNegotiation {
 
 	private function current_public_url(): string {
 		$path = (string) URLManager::get_request_path();
-		return URLManager::get_home_url( '/' === $path ? '/' : $path );
+		$url  = URLManager::get_home_url( '/' === $path ? '/' : $path );
+		if ( '/' !== $path ) {
+			return $url;
+		}
+		$query = array();
+		foreach ( array( 'cat', 'category_name', 'tag', 'tag_id', 'author', 'author_name', 'year', 'monthnum', 'day', 'm', 'post_type', 'taxonomy', 'term', 'paged', 'page' ) as $key ) {
+			$value = get_query_var( $key, '' );
+			if ( is_scalar( $value ) && '' !== (string) $value && '0' !== (string) $value ) {
+				$query[ $key ] = PublicationConstraints::bounded_text( (string) $value, 200 );
+			}
+		}
+		return empty( $query ) ? $url : add_query_arg( $query, $url );
 	}
 
 	private function page_link( string $callback, int $maximum = 0 ): string {

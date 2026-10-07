@@ -16,6 +16,7 @@ class IdentityHub {
 	 */
 	public function register_hooks() {
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
+		add_action( 'wp_ajax_cybermaps_identity_pages', array( new IdentityPageSelector(), 'ajax_search' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 		add_action( 'update_option_cybermaps_identity_data', array( $this, 'on_identity_updated' ), 10, 2 );
 		add_action( 'add_option_cybermaps_identity_data', array( $this, 'on_identity_added' ), 10, 2 );
@@ -76,6 +77,7 @@ class IdentityHub {
 		}
 
 		wp_enqueue_media();
+		IdentityPageSelector::enqueue();
 	}
 
 	/**
@@ -472,15 +474,10 @@ class IdentityHub {
 								<div class="auto-fields" style="<?php echo 'auto' === $mode ? '' : 'display:none;'; ?>">
 										<label class="catalog-parent-label" for="<?php echo esc_attr( $catalog_id . '-parent' ); ?>" style="font-weight: 600;"><?php esc_html_e( 'Parent Page (The Catalog):', 'cybermaps' ); ?></label>
 										<?php
-										wp_dropdown_pages(
-											array(
-												'name'     => 'cybermaps_identity_data[catalogs][' . esc_attr( $c_index ) . '][parent_id]',
-												'id'       => esc_attr( $catalog_id . '-parent' ),
-												'selected' => absint( $catalog['parent_id'] ),
-												'show_option_none' => esc_html__( 'Select a parent page...', 'cybermaps' ),
-												'option_none_value' => 0,
-												'class'    => 'catalog-parent-select',
-											)
+										IdentityPageSelector::render(
+											'cybermaps_identity_data[catalogs][' . $c_index . '][parent_id]',
+											$catalog_id . '-parent',
+											absint( $catalog['parent_id'] )
 										);
 										?>
 									</div>
@@ -494,14 +491,10 @@ class IdentityHub {
 				<div id="cybermaps-page-dropdown-template" style="display:none;">
 					<label class="screen-reader-text" for="cybermaps-catalog-__INDEX__-parent"><?php esc_html_e( 'Parent Page (The Catalog)', 'cybermaps' ); ?></label>
 					<?php
-					wp_dropdown_pages(
-						array(
-							'name'              => 'cybermaps_identity_data[catalogs][__INDEX__][parent_id]',
-							'id'                => 'cybermaps-catalog-__INDEX__-parent',
-							'show_option_none'  => esc_html__( 'Select a parent page...', 'cybermaps' ),
-							'option_none_value' => 0,
-							'class'             => 'catalog-parent-select',
-						)
+					IdentityPageSelector::render(
+						'cybermaps_identity_data[catalogs][__INDEX__][parent_id]',
+						'cybermaps-catalog-__INDEX__-parent',
+						0
 					);
 					?>
 				</div>
@@ -698,6 +691,7 @@ class IdentityHub {
                 id: prefix + "-parent"
             });
             box.find(".catalog-parent-label").first().attr("for", prefix + "-parent");
+            box.find(".cybermaps-page-query").first().attr("id", prefix + "-parent-query");
             box.find(".item-row").each(function(itemIndex) {
                 $(this).find(".catalog-item-input").first().attr({
                     name: "cybermaps_identity_data[catalogs][" + catalogIndex + "][items][" + itemIndex + "]",
@@ -1212,34 +1206,30 @@ class IdentityHub {
 			return is_array( $input ) ? $input : array();
 		}
 
-		if ( \Cybermaps\Admin\Settings\Sanitizers\SettingsSanitizer::is_incomplete_main_submission() ) {
-			$current = get_option( 'cybermaps_identity_data', array() );
-			return is_array( $current ) ? $current : array();
+		if ( null === $input || \Cybermaps\Admin\Settings\Sanitizers\SettingsSanitizer::is_incomplete_main_submission() ) {
+			return $this->stored_identity();
 		}
-
-		if ( is_string( $input ) ) {
-			$decoded = json_decode( $input, true );
-			if ( ! is_array( $decoded ) ) {
-				$current = get_option( 'cybermaps_identity_data', array() );
-				return is_array( $current ) ? $current : array();
-			}
-			$input = $decoded;
-		}
-
-		/*
-		 * WordPress passes null for registered options omitted from an
-		 * options.php submission. The main settings form submits only the
-		 * active tab so large AI inventories stay below max_input_vars; an
-		 * absent Identity Hub payload must therefore retain the saved entity.
-		 * The active builder submits either its ordinary nested-array fallback
-		 * or one browser-compacted JSON object.
-		 */
-		if ( ! is_array( $input ) ) {
-			$current = get_option( 'cybermaps_identity_data', array() );
-			return is_array( $current ) ? $current : array();
+		$input = \Cybermaps\Admin\Settings\Sanitizers\IdentitySubmission::decode( $input );
+		if ( null === $input ) {
+			add_settings_error( 'cybermaps_identity_data', 'cybermaps_invalid_identity', __( 'The identity submission was invalid. Your saved identity was preserved.', 'cybermaps' ) );
+			return $this->stored_identity();
 		}
 
 		return $this->normalize_identity_data( $input );
+	}
+
+	/** Import validation never reads or preserves the destination implicitly. */
+	public function sanitize_import( array $input ): array {
+		$input = \Cybermaps\Admin\Settings\Sanitizers\IdentitySubmission::import_record( $input );
+		if ( null === $input ) {
+			throw new \InvalidArgumentException( esc_html__( 'The imported identity has invalid fields or exceeds its limits.', 'cybermaps' ) );
+		}
+		return $this->normalize_identity_data( $input );
+	}
+
+	private function stored_identity(): array {
+		$current = get_option( 'cybermaps_identity_data', array() );
+		return is_array( $current ) ? $current : array();
 	}
 
 	/**
@@ -1252,9 +1242,7 @@ class IdentityHub {
 	 * @return array<string, mixed>
 	 */
 	private function normalize_identity_data( $input ): array {
-		if ( ! is_array( $input ) ) {
-			return array();
-		}
+		$input = is_array( $input ) ? $input : array();
 
 		$sanitized                    = array_merge(
 			self::normalize_entity_type_data( $input ),

@@ -20,7 +20,11 @@ StaticOwnershipStore, TaskRepository and EligibleContentRepository. They involve
 fixed SQL fragments with placeholders and preparation across variables, rather
 than unprepared request interpolation. In particular, IN lists construct one
 typed placeholder per value; static ownership appends literal lock predicates;
-atomic deletion selects between two fixed prepared templates.
+atomic deletion selected between two fixed prepared templates. This paragraph
+describes the inherited migration inventory: `AtomicOneTimeStateStore` has since
+been removed. Current Cloudflare transaction pointers use the reviewed
+`CloudflareOptionStore` and exact-byte `RawOptionStore` operations under the
+captured database-session fence.
 
 Nonce findings in private helpers rely on authenticated callers; reviewing only
 the helper is insufficient. Inspect callers and negative request tests whenever

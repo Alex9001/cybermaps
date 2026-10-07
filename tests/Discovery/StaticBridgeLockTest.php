@@ -39,9 +39,11 @@ final class StaticBridgeLockTest extends \WP_UnitTestCase {
 		unset( $GLOBALS['cybermaps_mock_get_option_observer'] );
 		$this->reset_bridge_state();
 		$this->delete_test_files();
+		\cybermaps_mock_enable_static_ownership_database( true );
 	}
 
 	protected function tearDown(): void {
+		\cybermaps_mock_disable_static_ownership_database();
 		delete_option( 'cybermaps_static_operation_lock' );
 		delete_option( StaticWriteIntentStore::OPTION );
 		delete_option( 'cybermaps_static_schedule_error' );
@@ -129,59 +131,15 @@ final class StaticBridgeLockTest extends \WP_UnitTestCase {
 		$lock = get_option( 'cybermaps_static_operation_lock' );
 		$lock['time'] = time() - 301;
 
-		$database = new class( serialize( $lock ) ) {
-			public string $options = 'wp_options';
-			public ?string $raw;
-			public array $queries = array();
-
-			public function __construct( string $raw ) {
-				$this->raw = $raw;
-			}
-
-			public function prepare( string $query, mixed ...$args ): array {
-				return array( 'query' => $query, 'args' => $args );
-			}
-
-			public function get_var( array $prepared ): ?string {
-				$this->queries[] = $prepared;
-				return $this->raw;
-			}
-
-			public function query( array $prepared ): int {
-				$this->queries[] = $prepared;
-				$args = $prepared['args'];
-				if ( str_starts_with( ltrim( $prepared['query'] ), 'UPDATE' ) ) {
-					if ( $this->raw !== ( $args[3] ?? null ) ) {
-						return 0;
-					}
-					$this->raw = (string) $args[1];
-					return 1;
-				}
-				if ( str_starts_with( ltrim( $prepared['query'] ), 'DELETE' ) ) {
-					if ( $this->raw !== ( $args[2] ?? null ) ) {
-						return 0;
-					}
-					$this->raw = null;
-					return 1;
-				}
-				return 0;
-			}
-		};
-		$GLOBALS['wpdb'] = $database;
-
+		$database = $GLOBALS['wpdb'];
+		update_option( 'cybermaps_static_operation_lock', $lock, false );
 		$this->assertTrue( $bridge->heartbeat() );
-		$renewed = maybe_unserialize( (string) $database->raw );
+		$renewed = get_option( 'cybermaps_static_operation_lock' );
 		$this->assertSame( $lock['token'], $renewed['token'] );
 		$this->assertGreaterThan( $lock['time'], $renewed['time'] );
-
 		$this->invoke_private( $bridge, 'release_operation_lock' );
-		$this->assertNull( $database->raw );
-		$this->assertNotEmpty(
-			array_filter(
-				$database->queries,
-				static fn( array $query ): bool => str_contains( $query['query'], 'AND BINARY option_value = BINARY %s' )
-			)
-		);
+		$this->assertFalse( get_option( 'cybermaps_static_operation_lock' ) );
+		$this->assertNotEmpty( array_filter( $database->queries, static fn( array $query ): bool => str_contains( $query['query'], 'AND BINARY option_value = BINARY %s' ) ) );
 	}
 
 	public function test_stale_operation_lease_requires_explicit_recovery_and_malformed_intent_is_visible(): void {
@@ -322,7 +280,9 @@ final class StaticBridgeLockTest extends \WP_UnitTestCase {
 		$bridge   = StaticBridge::get_instance();
 		$this->assertTrue( $bridge->write_file( $filename, $old_body ) );
 
-		$GLOBALS['cybermaps_mock_get_option_observer'] = static function ( string $option ) use ( &$stolen ): void {
+		$GLOBALS['wpdb']->before_query = static function ( $database, array $query ) use ( &$stolen ): void {
+			$option = $query['args'][1] ?? '';
+			if ( ! str_starts_with( $query['query'], 'SELECT option_value' ) ) { return; }
 			if (
 				$stolen
 				|| StaticWriteIntentStore::OPTION !== $option
@@ -331,7 +291,7 @@ final class StaticBridgeLockTest extends \WP_UnitTestCase {
 				return;
 			}
 			$stolen = true;
-			unset( $GLOBALS['cybermaps_mock_get_option_observer'] );
+			$database->before_query = null;
 			\update_option(
 				StaticBridge::OPERATION_LOCK_OPTION,
 				array(

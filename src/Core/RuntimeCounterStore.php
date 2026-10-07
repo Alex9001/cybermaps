@@ -14,7 +14,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * receive null and retain their compatibility fallback.
  */
 final class RuntimeCounterStore {
-	public const READY_OPTION = 'cybermaps_runtime_counter_table_ready';
+	public const READY_OPTION              = 'cybermaps_runtime_counter_table_ready';
+	public const CLEANUP_CONTINUATION_HOOK = 'cybermaps_continue_runtime_counter_cleanup_event';
 
 	/** Increment a bucket atomically, or return null when the table is unavailable. */
 	public static function increment( string $bucket, int $ttl_seconds ): ?int {
@@ -61,6 +62,20 @@ final class RuntimeCounterStore {
 		// phpcs:enable
 
 		return null === $count || false === $count ? null : max( 1, (int) $count );
+	}
+
+	/** Drain expired counters in bounded batches and continue any remaining backlog. */
+	public static function cleanup_expired(): void {
+		$deadline = \microtime( true ) + 1.0;
+		$batches  = 0;
+		do {
+			$deleted = self::cleanup( 1000 );
+			++$batches;
+		} while ( 1000 === $deleted && $batches < 10 && \microtime( true ) < $deadline );
+
+		if ( 1000 === $deleted && ! \wp_next_scheduled( self::CLEANUP_CONTINUATION_HOOK ) ) {
+			\wp_schedule_single_event( \time() + 60, self::CLEANUP_CONTINUATION_HOOK );
+		}
 	}
 
 	/** Delete a bounded batch of expired buckets. */

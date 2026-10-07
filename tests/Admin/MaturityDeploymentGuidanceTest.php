@@ -18,7 +18,7 @@ final class MaturityDeploymentGuidanceTest extends TestCase {
 			'webmcp'             => array( 'Early preview', 'WebMCP is available only in participating preview browsers. Cybermaps exposes read-only tools and safely does nothing when the browser API is unavailable.' ),
 			'markdown'           => array( 'Vendor convention', 'This emerging negotiation convention prepares eligible pages for Markdown-capable agents. HTML remains the default, and shared caches must honor Vary: Accept.' ),
 			'api_catalog'        => array( 'RFC standard', "RFC 9727 is a formal standard. 'Enabled' means Cybermaps generated the catalog; use AI Discovery Status to confirm that the origin serves the canonical well-known URL." ),
-			'deployment'         => array( 'Deployment required', 'Cybermaps materializes ownership-safe canonical fallback bodies when the origin bypasses WordPress. Debugging reports header conformance, and Advanced can optionally install scoped Cloudflare response rules.' ),
+			'deployment'         => array( 'Deployment required', 'Core discovery mode publishes five files: /ai.json, /ai-usage.json, /ai-actions.json, the canonical Site Guide SKILL.md, and its Agent Skills index. API Catalog, AI Catalog, MCP Server Card, and /ai-discovery remain dynamic in every mode and must reach WordPress. Debugging checks delivery and headers; Advanced offers optional scoped Cloudflare response rules.' ),
 		);
 
 		foreach ( $expected as $key => $contract ) {
@@ -50,7 +50,11 @@ final class MaturityDeploymentGuidanceTest extends TestCase {
 		$method = new \ReflectionMethod( StaticHeaderManifest::class, 'routing_snippets' );
 		$rules  = $method->invoke( new StaticHeaderManifest() );
 
-		self::assertStringContainsString( 'try_files $uri /index.php?$args;', $rules['nginx'] );
+		self::assertStringContainsString( 'rewrite ^ /index.php last;', $rules['nginx'] );
+		foreach ( array( '/.well-known/api-catalog', '/.well-known/ai-catalog.json', '/.well-known/mcp/server-card.json', '/ai-discovery' ) as $path ) {
+			self::assertStringContainsString( 'location = ' . $path . ' { rewrite ^ /index.php last; }', $rules['nginx'] );
+		}
+		self::assertStringNotContainsString( 'try_files $uri', $rules['nginx'] );
 		self::assertStringContainsString( 'RewriteRule ^', $rules['apache_openlitespeed'] );
 		self::assertStringContainsString( 'E=Cache-Control:no-cache', $rules['litespeed_cache'] );
 		self::assertStringContainsString( 'return (pass);', $rules['varnish'] );

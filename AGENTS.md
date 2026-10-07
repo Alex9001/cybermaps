@@ -293,8 +293,9 @@ php docs/dev/generate-docs.php --ai-catalog > docs/dev/ai-configuration/catalog.
 - `docs/features.md`, `docs/comparison.md` — feature/positioning references.
 - `docs/llms-tldr-whitepaper.md` — the LLMS-TLDR pipeline spec.
 - `docs/dev/manifest.json` — the generated machine-readable surface map (good first read for orientation).
-- `.claude/skills/agent-skills/skills/` — bundled WordPress skill references (plugin dev,
-  REST API, block dev, performance, PHPStan, WP-CLI, plugin-directory guidelines, etc.).
+- [Official WordPress agent skills](https://github.com/WordPress/agent-skills) —
+  read the applicable `SKILL.md` and its referenced guidance. No bundled local
+  `.claude/skills/agent-skills/skills/` checkout is required or assumed.
 
 ## MCP boundary
 

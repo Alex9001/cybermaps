@@ -19,7 +19,12 @@ final class MarkdownResponder {
 	 *
 	 * @param string[] $links RFC 8288 Link field values.
 	 */
-	public function send( string $content, ?int $modified, array $links, bool $negotiated ): never {
+	public function send( string $content, ?int $modified, array $links, bool $negotiated, ?int $discovery_generation = null ): never {
+		try {
+			self::require_current_generation( $discovery_generation );
+		} catch ( \Cybermaps\Core\BuildUnavailableException $error ) {
+			PublicationRequestGuard::serve_unavailable( $error );
+		}
 		if ( $negotiated ) {
 			self::add_vary_accept();
 			header( 'X-Cybermaps-Markdown-Source: origin' );
@@ -30,11 +35,25 @@ final class MarkdownResponder {
 			header( 'Link: ' . $link, false );
 		}
 
-		Integrity::send_headers( $content, HOUR_IN_SECONDS, $modified );
+		try {
+			Integrity::send_headers( $content, HOUR_IN_SECONDS, $modified, $discovery_generation );
+			self::require_current_generation( $discovery_generation );
+		} catch ( \Cybermaps\Core\BuildUnavailableException $error ) {
+			foreach ( array( 'Link', 'ETag', 'Last-Modified', 'Repr-Digest', 'Content-Digest', 'X-Markdown-Tokens' ) as $name ) {
+				header_remove( $name );
+			}
+			PublicationRequestGuard::serve_unavailable( $error );
+		}
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
 			ProtocolOutput::emit( $content, 'text' );
 		}
 		exit;
+	}
+
+	private static function require_current_generation( ?int $generation ): void {
+		if ( null !== $generation && ( $generation < 0 || \Cybermaps\Core\CacheManager::get_generation( 'discovery', true ) !== $generation ) ) {
+			throw new \Cybermaps\Core\BuildUnavailableException( esc_html__( 'Cybermaps content changed during Markdown publication. Please retry shortly.', 'cybermaps' ) );
+		}
 	}
 
 	/**

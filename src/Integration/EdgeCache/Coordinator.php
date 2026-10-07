@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Cybermaps\Integration\EdgeCache;
 
 use Cybermaps\Discovery\PublicationCachePolicy;
+use Cybermaps\Core\RawOptionStore;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -25,14 +26,17 @@ final class Coordinator {
 	private const MAX_EVENTS     = 20;
 	private const MAX_RETRIES    = 3;
 	private const MAX_URL_LENGTH = 2048;
+	private const CAS_ATTEMPTS   = 8;
+	private string $queue_error  = 'queue_storage_failed';
 
 	/**
-	 * Register only the completion hook. Call this from Plugin bootstrap; Core
-	 * deliberately does not alter a server or cache without that integration.
+	 * Register completion, retry and bounded scheduling recovery hooks. Core
+	 * does not alter a server or cache without an explicitly enabled adapter.
 	 */
 	public function register_hooks(): void {
 		add_action( 'cybermaps_static_sync_complete', array( $this, 'on_static_sync_complete' ), 10, 1 );
 		add_action( 'cybermaps_edge_cache_retry', array( $this, 'retry_pending' ) );
+		add_action( 'init', array( $this, 'recover_pending_retry' ) );
 	}
 
 	/**
@@ -42,16 +46,17 @@ final class Coordinator {
 	 * @param string   $family Publication family.
 	 * @param string[] $urls Exact public URLs.
 	 * @param bool     $wait_for_static Require a complete static reconciliation.
+	 * @param bool     $url_scope_complete Whether the exact URL list covers the affected publication scope.
 	 * @return array<string,mixed>
 	 */
-	public function invalidate( string $family, array $urls = array(), bool $wait_for_static = false ): array {
-		$event = $this->event( $family, $urls );
+	public function invalidate( string $family, array $urls = array(), bool $wait_for_static = false, bool $url_scope_complete = true ): array {
+		$event = $this->event( $family, $urls, $url_scope_complete );
 		if ( $wait_for_static ) {
-			$this->queue_static( $event );
+			$queued = $this->queue_static( $event );
 			return $this->record(
 				$event,
 				array(
-					'status'   => 'pending_static_sync',
+					'status'   => $queued ? 'pending_static_sync' : $this->queue_error,
 					'adapters' => array(),
 				)
 			);
@@ -76,8 +81,36 @@ final class Coordinator {
 			}
 			$event['static_ready'] = true;
 			$event['next_attempt'] = 0;
-			$this->replace_pending_event( $event );
+			if ( ! $this->replace_pending_event( $event ) ) {
+				$this->record( $event, array( 'status' => $this->queue_error ) );
+				continue;
+			}
 			$this->deliver_pending_event( $event );
+		}
+	}
+
+	/** Recover a rejected cron schedule on a later request without delivery. */
+	public function recover_pending_retry(): void {
+		$this->schedule_pending_retry();
+	}
+
+	/** Recover stranded scheduling without dispatching or advancing attempts. */
+	private function schedule_pending_retry(): void {
+		$next_attempt = null;
+		foreach ( $this->pending_events() as $event ) {
+			if ( ! is_array( $event ) || empty( $event['static_ready'] ) || '' === $this->event_token( $event ) ) {
+				continue;
+			}
+			$timestamp    = (int) ( $event['next_attempt'] ?? 0 );
+			$next_attempt = null === $next_attempt ? $timestamp : min( $next_attempt, $timestamp );
+		}
+		if ( null !== $next_attempt ) {
+			$scheduled = $this->schedule_retry( $next_attempt );
+			foreach ( $this->pending_events() as $event ) {
+				if ( is_array( $event ) && ! empty( $event['static_ready'] ) ) {
+					$this->record( $event, array( 'status' => $scheduled ? 'retry_pending' : 'schedule_failed' ) );
+				}
+			}
 		}
 	}
 
@@ -90,6 +123,7 @@ final class Coordinator {
 			}
 			$this->deliver_pending_event( $event );
 		}
+		$this->schedule_pending_retry();
 	}
 
 	/**
@@ -104,22 +138,28 @@ final class Coordinator {
 
 	/**
 	 * @param string[] $urls Exact public URLs.
+	 * @param bool     $url_scope_complete Whether all affected URLs were supplied.
 	 * @return array<string,mixed>
 	 */
-	private function event( string $family, array $urls ): array {
-		$policy = PublicationCachePolicy::for_publication( $family, 'invalidation' );
-		$urls   = self::normalize_purge_urls( $urls, $policy );
+	private function event( string $family, array $urls, bool $url_scope_complete ): array {
+		$policy              = PublicationCachePolicy::for_publication( $family, 'invalidation' );
+		$requested_url_count = count( $urls );
+		$truncated_url_count = max( 0, $requested_url_count - self::MAX_URLS );
+		$urls                = self::normalize_purge_urls( $urls, $policy );
 
 		return array(
-			'id'           => wp_generate_uuid4(),
-			'time'         => time(),
-			'family'       => (string) $policy['family'],
-			'generation'   => (int) $policy['generation'],
-			'tags'         => PublicationCachePolicy::tags( $policy ),
-			'urls'         => array_slice( $urls, 0, self::MAX_URLS ),
-			'attempts'     => 0,
-			'next_attempt' => 0,
-			'static_ready' => false,
+			'id'                  => wp_generate_uuid4(),
+			'time'                => time(),
+			'family'              => (string) $policy['family'],
+			'generation'          => (int) $policy['generation'],
+			'tags'                => PublicationCachePolicy::tags( $policy ),
+			'urls'                => array_slice( $urls, 0, self::MAX_URLS ),
+			'requested_url_count' => $requested_url_count,
+			'truncated_url_count' => $truncated_url_count,
+			'url_scope_complete'  => $url_scope_complete && 0 === $truncated_url_count && count( $urls ) === $requested_url_count,
+			'attempts'            => 0,
+			'next_attempt'        => 0,
+			'static_ready'        => false,
 		);
 	}
 
@@ -211,8 +251,8 @@ final class Coordinator {
 	/**
 	 * @param array<string,mixed> $event Event.
 	 */
-	private function queue_static( array $event ): void {
-		$this->replace_pending_event( $event, true );
+	private function queue_static( array $event ): bool {
+		return $this->replace_pending_event( $event, true );
 	}
 
 	/**
@@ -238,7 +278,7 @@ final class Coordinator {
 		$result                    = $this->record(
 			$event,
 			array(
-				'status'          => 'dispatched',
+				'status'          => $this->has_incomplete_delivery( $adapters ) ? 'incomplete' : 'dispatched',
 				'adapters'        => $adapters,
 				'failed_delivery' => $failed_delivery,
 			)
@@ -276,12 +316,21 @@ final class Coordinator {
 
 		$event['attempts']     = $attempts;
 		$event['next_attempt'] = time() + min( 3600, 60 * ( 2 ** ( $attempts - 1 ) ) );
-		$this->replace_pending_event( $event );
-		$this->schedule_retry( (int) $event['next_attempt'] );
+		if ( ! $this->replace_pending_event( $event ) ) {
+			$this->record(
+				$event,
+				array(
+					'status'   => $this->queue_error,
+					'adapters' => $result['adapters'] ?? array(),
+				)
+			);
+			return;
+		}
+		$scheduled = $this->schedule_retry( (int) $event['next_attempt'] );
 		$this->record(
 			$event,
 			array(
-				'status'   => 'retry_pending',
+				'status'   => $scheduled ? 'retry_pending' : 'schedule_failed',
 				'adapters' => (array) ( $result['adapters'] ?? array() ),
 			)
 		);
@@ -299,43 +348,103 @@ final class Coordinator {
 		return false;
 	}
 
-	/** @return array<int,array<string,mixed>> */
-	private function pending_events(): array {
-		$pending = get_option( self::PENDING_OPTION, array() );
-		return is_array( $pending ) ? array_slice( $pending, 0, self::MAX_EVENTS ) : array();
-	}
-
-	/**
-	 * Replace only the matching token, preserving events written by another
-	 * request after this worker obtained its original snapshot.
-	 *
-	 * @param array<string,mixed> $event Event.
-	 */
-	private function replace_pending_event( array $event, bool $append = false ): void {
-		$token   = $this->event_token( $event );
-		$pending = $this->pending_events();
-		$updated = false;
-		foreach ( $pending as $index => $stored ) {
-			if ( is_array( $stored ) && $token === $this->event_token( $stored ) ) {
-				$pending[ $index ] = $event;
-				$updated           = true;
-				break;
+	/** @param array<int,array<string,mixed>> $adapters */
+	private function has_incomplete_delivery( array $adapters ): bool {
+		foreach ( $adapters as $adapter ) {
+			$status = is_array( $adapter ) ? (string) ( $adapter['status'] ?? '' ) : '';
+			if ( in_array( $status, array( 'unsupported_scope', 'incomplete_scope' ), true ) ) {
+				return true;
 			}
 		}
-		if ( ! $updated && $append && '' !== $token ) {
-			$pending[] = $event;
-		}
-		update_option( self::PENDING_OPTION, array_slice( array_values( $pending ), -self::MAX_EVENTS ), false );
+		return false;
+	}
+
+	/** @return array<int,array<string,mixed>> */
+	private function pending_events(): array {
+		global $wpdb;
+		$raw     = RawOptionStore::read( $wpdb, self::PENDING_OPTION );
+		$pending = is_string( $raw ) ? maybe_unserialize( $raw ) : array();
+		return is_array( $pending ) ? $pending : array();
+	}
+
+	/** @param array<string,mixed> $event Event. */
+	private function replace_pending_event( array $event, bool $append = false ): bool {
+		$token = $this->event_token( $event );
+		return $this->mutate_pending(
+			static function ( array $pending ) use ( $token, $event, $append ): array|false {
+				foreach ( $pending as $index => $stored ) {
+					if ( is_array( $stored ) && ( $stored['id'] ?? '' ) === $token ) {
+						$pending[ $index ] = $event;
+						return $pending;
+					}
+				}
+				if ( ! $append || '' === $token ) {
+					return $pending;
+				}
+				if ( count( $pending ) >= self::MAX_EVENTS ) {
+					return false;
+				}
+				$pending[] = $event;
+				return $pending;
+			}
+		);
 	}
 
 	private function remove_pending_event( string $token ): void {
-		$pending = array_values(
-			array_filter(
-				$this->pending_events(),
-				fn( mixed $event ): bool => ! is_array( $event ) || $token !== $this->event_token( $event )
+		$removed = $this->mutate_pending(
+			static fn( array $pending ): array => array_values(
+				array_filter( $pending, static fn( mixed $event ): bool => ! is_array( $event ) || ( $event['id'] ?? '' ) !== $token )
 			)
 		);
-		update_option( self::PENDING_OPTION, $pending, false );
+		if ( ! $removed ) {
+			$this->record( array( 'id' => $token ), array( 'status' => $this->queue_error ) );
+		}
+	}
+
+	/** Atomically change the observed queue, retrying conflicts without eviction.
+	 *
+	 * @param callable(array):array|false $mutation Queue operation.
+	 */
+	private function mutate_pending( callable $mutation ): bool {
+		global $wpdb;
+		$this->queue_error = 'queue_storage_failed';
+		for ( $attempt = 0; $attempt < self::CAS_ATTEMPTS; ++$attempt ) {
+			$raw = RawOptionStore::read( $wpdb, self::PENDING_OPTION );
+			if ( false === $raw ) {
+				return false;
+			}
+			$pending = null === $raw ? array() : maybe_unserialize( $raw );
+			if ( ! is_array( $pending ) || count( $pending ) > self::MAX_EVENTS ) {
+				return false;
+			}
+			$next = $mutation( $pending );
+			if ( false === $next ) {
+				$this->queue_error = 'queue_full';
+				return false;
+			}
+			if ( $next === $pending ) {
+				return true;
+			}
+			$result = $this->write_pending( $raw, $next );
+			if ( false === $result ) {
+				return false;
+			}
+			if ( 1 === $result ) {
+				RawOptionStore::invalidate( self::PENDING_OPTION );
+				return true;
+			}
+		}
+		$this->queue_error = 'queue_contention';
+		return false;
+	}
+
+	/** @param array<int,array<string,mixed>> $next Queue snapshot. */
+	private function write_pending( ?string $raw, array $next ): int|false {
+		global $wpdb;
+		$serialized = maybe_serialize( array_values( $next ) );
+		return null === $raw
+			? RawOptionStore::insert( $wpdb, self::PENDING_OPTION, $serialized )
+			: RawOptionStore::replace( $wpdb, self::PENDING_OPTION, $raw, $serialized );
 	}
 
 	private function event_token( array $event ): string {
@@ -343,11 +452,19 @@ final class Coordinator {
 		return is_string( $token ) && 1 === preg_match( '/^[A-Za-z0-9-]{1,96}$/', $token ) ? $token : '';
 	}
 
-	private function schedule_retry( int $timestamp ): void {
-		if ( ! function_exists( 'wp_schedule_single_event' ) || ! function_exists( 'wp_next_scheduled' ) || wp_next_scheduled( 'cybermaps_edge_cache_retry' ) ) {
-			return;
+	private function schedule_retry( int $timestamp ): bool {
+		if ( ! function_exists( 'wp_schedule_single_event' ) || ! function_exists( 'wp_next_scheduled' ) ) {
+			return false;
 		}
-		wp_schedule_single_event( max( time() + 1, $timestamp ), 'cybermaps_edge_cache_retry' );
+		$timestamp = max( time() + 1, $timestamp );
+		$scheduled = wp_next_scheduled( 'cybermaps_edge_cache_retry' );
+		if ( false !== $scheduled ) {
+			if ( $scheduled <= $timestamp ) {
+				return true;
+			}
+			wp_clear_scheduled_hook( 'cybermaps_edge_cache_retry' );
+		}
+		return true === wp_schedule_single_event( $timestamp, 'cybermaps_edge_cache_retry', array(), true );
 	}
 
 	/**
@@ -356,20 +473,32 @@ final class Coordinator {
 	 * @return array<string,mixed>
 	 */
 	private function record( array $event, array $result ): array {
-		$row     = array(
-			'id'         => (string) ( $event['id'] ?? '' ),
-			'time'       => (int) ( $event['time'] ?? time() ),
-			'family'     => (string) ( $event['family'] ?? '' ),
-			'generation' => (int) ( $event['generation'] ?? 0 ),
-			'tag_count'  => count( (array) ( $event['tags'] ?? array() ) ),
-			'url_count'  => count( (array) ( $event['urls'] ?? array() ) ),
-			'status'     => (string) ( $result['status'] ?? 'unknown' ),
-			'adapters'   => array_slice( (array) ( $result['adapters'] ?? array() ), 0, 4 ),
+		$row     = array_merge(
+			$this->event_url_coverage( $event ),
+			array(
+				'id'         => (string) ( $event['id'] ?? '' ),
+				'time'       => (int) ( $event['time'] ?? time() ),
+				'family'     => (string) ( $event['family'] ?? '' ),
+				'generation' => (int) ( $event['generation'] ?? 0 ),
+				'tag_count'  => count( (array) ( $event['tags'] ?? array() ) ),
+				'url_count'  => count( (array) ( $event['urls'] ?? array() ) ),
+				'status'     => (string) ( $result['status'] ?? 'unknown' ),
+				'adapters'   => array_slice( (array) ( $result['adapters'] ?? array() ), 0, 4 ),
+			)
 		);
 		$history = get_option( self::STATUS_OPTION, array() );
 		$history = is_array( $history ) ? $history : array();
 		array_unshift( $history, $row );
 		update_option( self::STATUS_OPTION, array_slice( $history, 0, self::MAX_EVENTS ), false );
 		return $row;
+	}
+
+	/** @param array<string,mixed> $event Event. @return array<string,int|bool> */
+	private function event_url_coverage( array $event ): array {
+		return array(
+			'requested_url_count' => max( count( (array) ( $event['urls'] ?? array() ) ), (int) filter_var( $event['requested_url_count'] ?? 0, FILTER_VALIDATE_INT ) ),
+			'truncated_url_count' => max( 0, (int) filter_var( $event['truncated_url_count'] ?? 0, FILTER_VALIDATE_INT ) ),
+			'url_scope_complete'  => true === ( $event['url_scope_complete'] ?? false ),
+		);
 	}
 }

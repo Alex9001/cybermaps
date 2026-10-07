@@ -42,6 +42,7 @@ class MediaAuditor {
 
 		$post_types_placeholder = implode( ',', array_fill( 0, count( $post_types ), '%s' ) );
 
+		$wpdb->last_error = '';
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- The explicit rescan request needs a current total; caching could report obsolete progress.
 		$total_result = $wpdb->get_var(
 			$wpdb->prepare(
@@ -50,7 +51,7 @@ class MediaAuditor {
 			)
 		);
 
-		if ( null === $total_result || false === $total_result ) {
+		if ( null === $total_result || false === $total_result || '' !== $wpdb->last_error ) {
 			self::send_database_error();
 			return;
 		}
@@ -101,6 +102,7 @@ class MediaAuditor {
 		$post_types_placeholder = implode( ',', array_fill( 0, count( $post_types ), '%s' ) );
 		$query_args             = array_merge( array( $wpdb->posts ), $post_types, array( $cursor ) );
 
+		$wpdb->last_error = '';
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Every bounded cursor page is consumed once; caching unique pages would add stale state without reusable work.
 		$ids = $wpdb->get_col(
 			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- The argument array supplies the Core identifier, one value per sanitized post type, and the cursor.
@@ -115,7 +117,7 @@ class MediaAuditor {
 			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 		);
 
-		if ( ! is_array( $ids ) ) {
+		if ( ! is_array( $ids ) || '' !== $wpdb->last_error ) {
 			self::send_database_error();
 			return;
 		}

@@ -165,8 +165,24 @@ final class IdentityHubTest extends TestCase {
         $this->assertSame( 'Corporation', $result['precise_type'] );
     }
 
-    public function test_sanitizer_enforces_nested_identity_contracts(): void {
-        $result = ( new IdentityHub() )->sanitize_identity_data(
+    public function test_saved_scalar_identity_renders_defaults_without_mutating_legacy_data(): void {
+        $GLOBALS['cybermaps_mock_options']['cybermaps_identity_data'] = 'legacy scalar';
+        set_error_handler( static function ( int $severity, string $message ): never { throw new \ErrorException( $message, 0, $severity ); } );
+        ob_start();
+        try {
+            ( new IdentityHub() )->render_identity_builder();
+            $html = ob_get_contents();
+        } finally {
+            ob_end_clean();
+            restore_error_handler();
+        }
+        $this->assertStringContainsString( 'cybermaps-identity-builder', $html );
+        $this->assertStringContainsString( 'value="Organization"', $html );
+        $this->assertSame( 'legacy scalar', get_option( 'cybermaps_identity_data' ) );
+    }
+
+    public function test_legacy_read_normalization_handles_old_nested_identity_values(): void {
+        $result = ( new \ReflectionMethod( IdentityHub::class, 'normalize_identity_data' ) )->invoke( new IdentityHub(),
             array(
                 'image_id'        => -15,
                 'address_country' => 'us',
@@ -248,18 +264,13 @@ final class IdentityHubTest extends TestCase {
         );
     }
 
-    public function test_sanitizer_rejects_non_iso_country_codes_and_non_numeric_coordinates(): void {
-        $result = ( new IdentityHub() )->sanitize_identity_data(
-            array(
-                'address_country' => 'United States',
-                'latitude'        => 'north',
-                'longitude'       => '180',
-            )
-        );
-
-        $this->assertSame( '', $result['address_country'] );
-        $this->assertSame( '', $result['latitude'] );
-        $this->assertSame( '180', $result['longitude'] );
+    public function test_invalid_coordinate_transport_preserves_saved_identity(): void {
+        $saved = array( 'name' => 'Saved', 'latitude' => '10', 'longitude' => '20' );
+        update_option( 'cybermaps_identity_data', $saved );
+        $GLOBALS['cybermaps_mock_settings_errors'] = array();
+        $result = ( new IdentityHub() )->sanitize_identity_data( array( 'latitude' => 'north' ) );
+        $this->assertSame( $saved, $result );
+        $this->assertSame( 'cybermaps_invalid_identity', $GLOBALS['cybermaps_mock_settings_errors'][0]['code'] );
     }
 
     public function test_sanitizer_accepts_any_valid_iso_country_code(): void {
@@ -330,98 +341,25 @@ final class IdentityHubTest extends TestCase {
         }
     }
 
-    public function test_sanitizer_discards_malformed_nested_values_without_php_warnings(): void {
-        $input = array(
-            'type'            => array( 'LocalBusiness' ),
-            'precise_type'    => array( 'Restaurant' ),
-            'name'            => array( 'Example' ),
-            'description'     => array( 'Description' ),
-            'image_id'        => array( 25 ),
-            'address_country' => array( 'US' ),
-            'address'         => array( '123 Main Street' ),
-            'latitude'        => array( '37.8044' ),
-            'longitude'       => array( '-122.2711' ),
-            'hours' => array(
-                'monday' => array(
-                    array(
-                        'open'  => array( '09:00' ),
-                        'close' => '17:00',
-                    ),
-                ),
-            ),
-            'catalogs' => array(
-                array(
-                    'mode'      => array( 'manual' ),
-                    'name'      => array( 'Services' ),
-                    'items'     => array( array( 'Consulting' ), 'Support' ),
-                    'parent_id' => array( 10 ),
-                ),
-            ),
-            'social_profiles' => array(
-                array( 'https://invalid.example' ),
-                '/relative',
-                'javascript:alert(1)',
-                'https://social.example/profile',
-                'https://social.example/profile',
-            ),
-            'contact_points' => array(
-                array(
-                    'type'  => array( 'Sales' ),
-                    'phone' => array( '+1 555 0100' ),
-                    'email' => array( 'sales@example.com' ),
-                ),
-                array(
-                    'type'  => 'Sales',
-                    'phone' => '',
-                    'email' => 'sales@example.com',
-                ),
-            ),
+    public function test_malformed_identity_payload_preserves_saved_values_without_warnings(): void {
+        $saved = array( 'type' => 'Organization', 'name' => 'Saved', 'email' => 'saved@example.com' );
+        update_option( 'cybermaps_identity_data', $saved );
+        $payloads = array(
+            '[]', '{}', '{"unexpected":1}', '{"name":{"nested":"wrong"}}',
+            array( 'name' => array( 'wrong' ) ),
+            array( 'hours' => array( 'funday' => array() ) ),
+            array( 'catalogs' => array( array( 'name' => 'Catalog', 'extra' => true ) ) ),
+            array( 'social_profiles' => array_fill( 0, 41, 'https://example.com' ) ),
+            array( 'name' => str_repeat( 'x', 1025 ) ),
+            str_repeat( ' ', 262145 ) . '{"name":"Changed"}',
         );
-
-        set_error_handler(
-            static function ( int $severity, string $message ): never {
-                throw new \ErrorException( $message, 0, $severity );
-            }
-        );
-        try {
-            $result = ( new IdentityHub() )->sanitize_identity_data( $input );
-        } finally {
-            restore_error_handler();
+        foreach ( $payloads as $payload ) {
+            $GLOBALS['cybermaps_mock_settings_errors'] = array();
+            $this->assertSame( $saved, ( new IdentityHub() )->sanitize_identity_data( $payload ) );
+            $this->assertSame( 'cybermaps_invalid_identity', $GLOBALS['cybermaps_mock_settings_errors'][0]['code'] );
         }
-
-        $this->assertSame( 'Organization', $result['type'] );
-        $this->assertSame( '', $result['precise_type'] );
-        $this->assertSame( '', $result['name'] );
-        $this->assertSame( '', $result['description'] );
-        $this->assertSame( 0, $result['image_id'] );
-        $this->assertSame( '', $result['address_country'] );
-        $this->assertSame( '', $result['address'] );
-        $this->assertSame( '', $result['latitude'] );
-        $this->assertSame( '', $result['longitude'] );
-        $this->assertSame( array(), $result['hours'] );
-        $this->assertSame(
-            array(
-                array(
-                    'mode'      => 'manual',
-                    'item_type' => 'Service',
-                    'name'      => '',
-                    'items'     => array( 'Support' ),
-                    'parent_id' => 0,
-                ),
-            ),
-            $result['catalogs']
-        );
-        $this->assertSame( array( 'https://social.example/profile' ), $result['social_profiles'] );
-        $this->assertSame(
-            array(
-                array(
-                    'type'  => 'Sales',
-                    'phone' => '',
-                    'email' => 'sales@example.com',
-                ),
-            ),
-            $result['contact_points']
-        );
+        $this->assertSame( '', ( new IdentityHub() )->sanitize_identity_data( '{"name":""}' )['name'] );
+        $this->assertSame( '', ( new IdentityHub() )->sanitize_import( array() )['name'] );
     }
 
     public function test_identity_controls_have_stable_or_reindexed_accessible_names(): void {

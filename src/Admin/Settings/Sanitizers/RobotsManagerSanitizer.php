@@ -14,10 +14,27 @@ class RobotsManagerSanitizer {
 		if ( SettingsSanitizer::is_incomplete_main_submission() ) {
 			return self::stored_policy();
 		}
-		$input = self::decode_input( $input );
-		if ( ! is_array( $input ) ) {
+		if ( null === $input ) {
 			return self::stored_policy();
 		}
+		$input = SettingsSubmission::decode( $input, self::submission_schema() );
+		if ( ! is_array( $input ) ) {
+			add_settings_error( 'cybermaps_robots_manager', 'cybermaps_invalid_robots_policy', __( 'The crawler policy submission was invalid. Your saved policy was preserved.', 'cybermaps' ) );
+			return self::stored_policy();
+		}
+		return self::normalize( $input );
+	}
+
+	/** Validate a complete import record without consulting the destination. */
+	public static function sanitize_import( array $input ): array {
+		$input = SettingsSubmission::import_record( $input, self::submission_schema() );
+		if ( null === $input ) {
+			throw new \InvalidArgumentException( esc_html__( 'The imported crawler policy has invalid fields or exceeds its limits.', 'cybermaps' ) );
+		}
+		return self::normalize( $input );
+	}
+
+	private static function normalize( array $input ): array {
 		$sanitized                     = self::default_policy();
 		$sanitized['takeover_enabled'] = ! empty( $input['takeover_enabled'] );
 		$sanitized['overrides']        = self::sanitize_crawler_overrides( $input );
@@ -35,12 +52,66 @@ class RobotsManagerSanitizer {
 		return is_array( $current ) ? $current : array();
 	}
 
-	private static function decode_input( $input ) {
-		if ( ! is_string( $input ) ) {
-			return $input;
-		}
-		$decoded = json_decode( $input, true );
-		return is_array( $decoded ) ? $decoded : null;
+	/** Exact transport fields, including supported historical preference aliases. */
+	private static function submission_schema(): array {
+		$flag        = array( 'type' => 'checkbox' );
+		$preference  = array(
+			'type' => 'text',
+			'max'  => 16,
+		);
+		$preferences = array_fill_keys( array( 'ai-train', 'train-ai', 'ai_train', 'search', 'ai-input' ), $preference );
+		$usage       = $preferences + array(
+			'path'          => array(
+				'type' => 'text',
+				'max'  => 2048,
+			),
+			'content_usage' => array(
+				'type'   => 'record',
+				'fields' => $preferences,
+			),
+			'signals'       => array(
+				'type'   => 'record',
+				'fields' => $preferences,
+			),
+		);
+		return array(
+			'takeover_enabled'        => $flag,
+			'reset_overrides'         => $flag,
+			'content_usage_enabled'   => $flag,
+			'manual_directives'       => array(
+				'type' => 'text',
+				'max'  => 2 * \Cybermaps\Discovery\Robots::MAX_MANUAL_DIRECTIVES_BYTES,
+			),
+			'overrides'               => array(
+				'type'  => 'map',
+				'max'   => 400,
+				'value' => array(
+					'type'   => 'record',
+					'fields' => array(
+						'robots' => $flag,
+						'llm'    => $flag,
+						'tpm'    => array(
+							'type'  => 'number',
+							'empty' => true,
+						),
+					),
+				),
+			),
+			'content_signals'         => array(
+				'type'   => 'record',
+				'fields' => array_fill_keys( array( 'ai-train', 'search', 'ai-input', 'training', 'ai_train', 'ai_input' ), $preference ),
+			),
+			'content_usage_overrides' => array(
+				'type'         => 'map',
+				'max'          => 2 * \Cybermaps\Discovery\Robots::MAX_CONTENT_USAGE_OVERRIDES,
+				'key_max'      => 2048,
+				'numeric_keys' => true,
+				'value'        => array(
+					'type'   => 'record',
+					'fields' => $usage,
+				),
+			),
+		);
 	}
 
 	/** @return array<string, mixed> */

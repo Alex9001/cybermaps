@@ -3,76 +3,78 @@ Contributors: oreshkin
 Tags: sitemap, llms-txt, technical-seo, content-audit, indexnow
 Requires at least: 7.1
 Tested up to: 7.1
-Stable tag: 8.0.1
+Stable tag: 8.0.2
 Requires PHP: 8.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Publish WordPress sitemaps and machine-readable maps.
+WordPress sitemaps, AI discovery, static delivery and reports.
 
 == Description ==
 
-Sitemaps, AI discovery, static delivery and reports.
 Optional MCP requires MCP Adapter 0.7.0+.
 
 == Installation ==
 
 Activate; open Cybermaps → Overview → Quick Setup.
-MCP: in AI Publishing, install/activate MCP Adapter, enable read-only MCP and save.
+MCP: activate MCP Adapter; enable read-only MCP in AI Publishing and save.
 Use HTTPS and a Subscriber Application Password, or WP-CLI.
-Endpoint, setup and migration: https://cybermaps.dev/docs/mcp/
+Setup: https://cybermaps.dev/docs/mcp/
 
 == Source Code ==
 
-https://github.com/Alex9001/cybermaps/tree/v8.0.1
-Editable JS/CSS: assets/; setup-wizard.js uses wp.element. No compilation.
-Build: composer install; bash bin/package-candidate.sh. Assets copied unchanged.
+https://github.com/Alex9001/cybermaps/tree/v8.0.2
+JS/CSS source: assets/; setup-wizard.js uses wp.element. No compilation.
+Build: composer install; bash bin/package-candidate.sh.
 
 == External Services ==
 
 = Cloudflare and Cybermaps OAuth relay =
 
-Connect Cloudflare contacts https://connect.cybermaps.dev for a five-minute
-transaction: PKCE challenge, random state and authorization code. No verifier,
-access token, WordPress identity, site URL or rules reach the relay. Hosting
-processes network metadata; rate limits use salted IP hashes. WordPress sends
-credentials directly to Cloudflare for token exchange/revocation, plus zone,
-hostname and rules for requested optimization. Manual/self-managed modes bypass
-the relay. Policies:
+Connect Cloudflare sends a PKCE challenge, random state and authorization code
+to https://connect.cybermaps.dev for five minutes. No verifier, access token,
+WordPress identity, site URL or rules reach the relay. Hosting processes network
+metadata; rate limits use salted IP hashes. WordPress sends credentials to
+Cloudflare for exchange/revocation, plus zone, hostname and requested rules.
+Manual/self-managed modes bypass the relay. Policies:
 https://cybermaps.dev/privacy/#cloudflare-oauth-relay
 https://www.cloudflare.com/website-terms/
 https://www.cloudflare.com/privacypolicy/
 
 = IndexNow =
 
-Enabled publication changes send URLs, host, verification key and key location
-to https://api.indexnow.org/indexnow. Headless sites must proxy or publish Cybermaps' generated `/{key}.txt` verification path.
+Publication changes send URLs, host, key and key location to
+https://api.indexnow.org/indexnow when enabled. Headless sites must serve the generated `/{key}.txt`.
 Terms/privacy: https://www.indexnow.org/terms
 
 = WebSub =
 
-Enabled WebSub and AI publishing send public /feed.json and publish notifications
-to configured HTTPS hubs. Defaults and policies:
+Opt-in WebSub sends public /feed.json notifications to configured HTTPS hubs.
+Defaults and policies:
 https://pubsubhubbub.appspot.com/
 https://policies.google.com/terms
 https://policies.google.com/privacy
 https://pubsubhubbub.superfeedr.com/
 https://superfeedr.com/terms
 https://superfeedr.com/privacy
-Custom hubs receive the same data under their own policies.
+Custom hubs use their own policies.
 
 = Public delivery checks =
 
-Status checks GET/HEAD the site or Frontend Base URL with `X-Cybermaps-Diagnostic: 1` to exclude analytics. Configured Varnish receives cache purge requests.
+Checks GET/HEAD the site or Frontend Base URL with `X-Cybermaps-Diagnostic: 1` to omit analytics. Configured Varnish receives purge requests.
 
 == Privacy ==
 
-Opt-in analytics stays in WordPress. IPs default to /24 (IPv4) or /64 (IPv6).
-Retention: 1–365 days; export/clear available. Public routes use local 60-second rate limits.
-REST search stores neither raw IPs nor queries. Logged-in/diagnostic traffic omits
-identifying data. Uninstall retains data unless Uninstall Cleanup was enabled.
+Opt-in analytics is local: /24 IPv4, /64 IPv6 by default; 1–365-day retention,
+export and clear. Public routes have 60-second rate limits.
+REST search stores no raw IPs or queries. Logged-in rows keep WP user IDs,
+but omit IPs, requester keys and User-Agent. Diagnostic probes are excluded.
+Uninstall keeps data unless Uninstall Cleanup is enabled.
 
 == Changelog ==
+
+= 8.0.2 =
+* Fix privacy, configuration, ownership, publication limits, reports and admin UI; expand release checks.
 
 = 8.0.1 =
 * Delete obsolete MCP settings and upgrade code; use one adapter switch.
@@ -182,6 +184,9 @@ identifying data. Uninstall retains data unless Uninstall Cleanup was enabled.
 Earlier release history is included in `changelog.txt`.
 
 == Upgrade Notice ==
+
+= 8.0.2 =
+Ownership migrates in batches. Review file conflicts and incomplete reports. Restart pending Cloudflare authorization.
 
 = 8.0.1 =
 Removes legacy MCP settings; preserves 8.0 adapter consent.

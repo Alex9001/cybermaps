@@ -106,7 +106,7 @@ class NotFoundSuggestions {
 	 * @return array
 	 */
 	private function find_alternatives( $slug ) {
-		if ( empty( $slug ) ) {
+		if ( empty( $slug ) || Search::rate_limit_exceeded() ) {
 			return array();
 		}
 
@@ -114,7 +114,13 @@ class NotFoundSuggestions {
 		$parts        = explode( '-', $slug );
 		$search_query = implode( ' ', $parts );
 
-		$settings  = \Cybermaps\Core\ConfigurationStore::settings();
+		$generation = \Cybermaps\Core\CacheManager::get_generation( 'discovery', true );
+		try {
+			$settings = \Cybermaps\Core\ConfigurationStore::publication_settings();
+			\Cybermaps\Core\ConfigurationStore::publication_discovery();
+		} catch ( \Cybermaps\Core\BuildUnavailableException $error ) {
+			return array();
+		}
 		$inventory = new PublicationInventory( $settings );
 		if ( ! $inventory->has_included_post_types() ) {
 			return array();
@@ -127,15 +133,15 @@ class NotFoundSuggestions {
 			)
 		);
 
-		$query        = new \WP_Query( $args );
+		try {
+			$posts = \Cybermaps\Sitemap\PublicationQuery::posts( $args );
+		} catch ( \Cybermaps\Core\BuildUnavailableException $error ) {
+			return array();
+		}
 		$alternatives = array();
 
-		if ( $query->have_posts() ) {
-			while ( $query->have_posts() ) {
-				$query->the_post();
-				$post = isset( $query->post ) && is_object( $query->post )
-					? $query->post
-					: null;
+		if ( ! empty( $posts ) ) {
+			foreach ( $posts as $post ) {
 				if (
 					! is_object( $post )
 					|| ! ( new PublicationEligibility( null, $settings ) )->post( $post, PublicationEligibility::AI )->indexable
@@ -144,7 +150,7 @@ class NotFoundSuggestions {
 				}
 				$alternatives[] = array(
 					'url'   => \Cybermaps\Core\URLManager::rewrite_url( (string) get_permalink( (int) $post->ID ) ),
-					'title' => get_the_title( (int) $post->ID ),
+					'title' => wp_strip_all_tags( PublicationConstraints::bounded_text( get_the_title( (int) $post->ID ), PublicationConstraints::SEARCH_TITLE_MAX_LENGTH ) ),
 				);
 				if ( count( $alternatives ) >= 3 ) {
 					break;
@@ -153,6 +159,6 @@ class NotFoundSuggestions {
 			wp_reset_postdata();
 		}
 
-		return $alternatives;
+		return $generation >= 0 && \Cybermaps\Core\CacheManager::get_generation( 'discovery', true ) === $generation ? $alternatives : array();
 	}
 }

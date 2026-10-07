@@ -16,6 +16,12 @@ class StaticBridgeModeTest extends TestCase {
 		$GLOBALS['cybermaps_mock_is_multisite'] = false;
 		require_once dirname( __DIR__ ) . '/mocks/mock-wp.php';
 		require_once dirname( __DIR__, 2 ) . '/src/Discovery/StaticBridge.php';
+		\cybermaps_mock_enable_static_ownership_database( true );
+	}
+
+	protected function tearDown(): void {
+		\cybermaps_mock_disable_static_ownership_database();
+		parent::tearDown();
 	}
 
 	public function test_get_mode_well_known_explicit(): void {

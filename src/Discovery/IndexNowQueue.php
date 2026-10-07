@@ -130,7 +130,7 @@ final class IndexNowQueue {
 	}
 
 	/**
-	 * Ensure a single cron worker will revisit the durable queue.
+	 * Ensure a single cron worker visits the queue no later than the requested time.
 	 */
 	public function schedule( ?int $timestamp = null ): void {
 		if ( ! function_exists( 'wp_schedule_single_event' ) || ! function_exists( 'wp_next_scheduled' ) ) {
@@ -139,7 +139,7 @@ final class IndexNowQueue {
 		$timestamp = max( time() + 1, (int) ( $timestamp ?? ( time() + self::MIN_RETRY_DELAY ) ) );
 		$existing  = wp_next_scheduled( self::CRON_HOOK );
 		if ( false !== $existing ) {
-			if ( (int) $existing === $timestamp ) {
+			if ( (int) $existing <= $timestamp ) {
 				return;
 			}
 			if ( function_exists( 'wp_unschedule_event' ) ) {
@@ -153,7 +153,7 @@ final class IndexNowQueue {
 	}
 
 	/**
-	 * Re-arm the worker for the exact earliest queued item. This is required
+	 * Re-arm the worker for the earliest queued item without delaying an existing event. This is required
 	 * after an early cron invocation observes no due URLs.
 	 */
 	public function rearm(): void {

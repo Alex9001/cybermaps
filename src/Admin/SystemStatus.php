@@ -154,7 +154,7 @@ final class SystemStatus {
 					</div>
 				</section>
 			<?php endforeach; ?>
-			<p class="description"><?php esc_html_e( 'Detection is evidence-based and may be inconclusive when a proxy hides the origin stack. The copied report intentionally omits secrets and deployment-specific paths.', 'cybermaps' ); ?></p>
+			<p class="description"><?php esc_html_e( 'Detection is evidence-based and may be inconclusive when a proxy hides the origin stack. Review the copied report for private information before sharing it.', 'cybermaps' ); ?></p>
 		</div>
 		<?php
 	}
@@ -165,7 +165,7 @@ final class SystemStatus {
 		?>
 		<section class="cm-card-sm cm-mb-20 cybermaps-debug-card" aria-labelledby="cybermaps-debug-title">
 			<h2 id="cybermaps-debug-title"><?php esc_html_e( 'Cybermaps diagnostic logging', 'cybermaps' ); ?></h2>
-			<p><?php esc_html_e( 'Temporarily records bounded Cybermaps operations and failures. It omits credentials, cookies, request bodies, crawler analytics, IP and email addresses, full URLs, and absolute filesystem paths.', 'cybermaps' ); ?></p>
+			<p><?php esc_html_e( 'Temporarily records bounded Cybermaps operations and failures without collecting credential options, request headers or bodies, cookies, or crawler analytics. Common credentials, addresses, URLs, and paths in diagnostic messages receive best-effort redaction. Review every support bundle for private information before sharing it.', 'cybermaps' ); ?></p>
 			<div class="cybermaps-debug-controls">
 				<label class="cybermaps-debug-toggle"><input type="checkbox" id="cybermaps-debug-enabled" <?php checked( ! empty( $state['enabled'] ) ); ?> /> <strong><?php esc_html_e( 'Enable diagnostic logging', 'cybermaps' ); ?></strong></label>
 				<label for="cybermaps-debug-duration"><?php esc_html_e( 'Automatically stop after', 'cybermaps' ); ?></label>
@@ -204,7 +204,13 @@ final class SystemStatus {
 	public function ajax_clear(): void {
 		check_ajax_referer( 'cybermaps_debugging', 'nonce' );
 		$this->authorize_debug_request();
-		wp_send_json_success( array( 'state' => DiagnosticLogger::clear() ) );
+		try {
+			$state = DiagnosticLogger::clear();
+		} catch ( \RuntimeException $error ) {
+			wp_send_json_error( array( 'message' => __( 'Diagnostic events could not be cleared. Reload and try again.', 'cybermaps' ) ), 500 );
+			return;
+		}
+		wp_send_json_success( array( 'state' => $state ) );
 	}
 
 	/** Return a fresh, bounded support bundle. */

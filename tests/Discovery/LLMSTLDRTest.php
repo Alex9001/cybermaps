@@ -162,8 +162,7 @@ final class LLMSTLDRTest extends TestCase {
 	}
 
 	public function test_get_content_uses_transient_cache(): void {
-		global $cybermaps_mock_transients;
-		$cybermaps_mock_transients[ LLMSTLDR::CACHE_KEY ] = "# Cached briefing\n";
+		\Cybermaps\Core\CacheManager::put( LLMSTLDR::CACHE_KEY, "# Cached briefing\n", HOUR_IN_SECONDS, 'discovery' );
 
 		$this->assertStringContainsString( 'Cached', ( new LLMSTLDR() )->get_content() );
 	}

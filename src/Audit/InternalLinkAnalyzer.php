@@ -21,25 +21,33 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Builds a bounded graph from stored post content and assigned navigation.
  */
 final class InternalLinkAnalyzer {
-	public const ANALYSIS_VERSION       = 1;
-	public const MAX_RESOURCES          = 10000;
-	public const MAX_EDGES              = 100000;
-	public const DEEP_THRESHOLD         = 3;
-	private const MAX_NAVIGATION_BLOCKS = 10000;
-	private const MAX_STORED_BLOCKS     = 2000;
+	public const ANALYSIS_VERSION         = 3;
+	public const MAX_RESOURCES            = 10000;
+	public const MAX_EDGES                = 100000;
+	public const MAX_STORED_LINKS         = 100000;
+	public const MAX_STORED_LINK_BYTES    = 8388608;
+	public const DEEP_THRESHOLD           = 3;
+	private const MAX_NAVIGATION_BLOCKS   = 10000;
+	private const MAX_STORED_BLOCKS       = 2000;
+	private const MAX_BLOCK_SOURCE_BYTES  = 1048576;
+	private const MAX_PARSED_SOURCE_BYTES = 8388608;
 
 	private ContentAnalyzer $content_analyzer;
 	private PublicationEligibility $eligibility;
 	private PublishedPostSource $post_source;
+	private StoredTemplateSource $template_source;
+	/** @var array{links:int,bytes:int,complete:bool} */
+	private array $source_budget = array();
 
 	public function __construct(
 		?ContentAnalyzer $content_analyzer = null,
 		?PublicationEligibility $eligibility = null,
 		?PublishedPostSource $post_source = null
 	) {
-		$this->content_analyzer = $content_analyzer ?? new ContentAnalyzer();
+		$this->content_analyzer = $content_analyzer ?? new ContentAnalyzer( false );
 		$this->eligibility      = $eligibility ?? new PublicationEligibility();
 		$this->post_source      = $post_source ?? new PublishedPostSource();
+		$this->template_source  = new StoredTemplateSource();
 	}
 
 	/**
@@ -47,10 +55,11 @@ final class InternalLinkAnalyzer {
 	 *
 	 * @param string[]      $post_types Public post types in the report.
 	 * @param callable|null $heartbeat  Called between database batches.
+	 * @param callable|null $before_load Checkpoint before batch hydration.
 	 * @return array{findings:array<int,array<int,array<string,mixed>>>,measurements:array<int,array<string,mixed>>,analysis:array<string,mixed>}
 	 */
-	public function analyze( array $post_types, ?callable $heartbeat = null ): array {
-		$inventory  = $this->build_inventory( $post_types, $heartbeat );
+	public function analyze( array $post_types, ?callable $heartbeat = null, ?callable $before_load = null ): array {
+		$inventory  = $this->build_inventory( $post_types, $heartbeat, $before_load );
 		$graph      = $this->build_graph( $inventory['nodes'], $inventory['url_map'] );
 		$navigation = $this->navigation_targets( $inventory['nodes'], $inventory['url_map'] );
 		$depths     = $this->calculate_depths( $inventory['nodes'], $graph['outgoing'], $navigation['targets'] );
@@ -69,6 +78,7 @@ final class InternalLinkAnalyzer {
 					$inventory['truncated'] ? 'resource_limit_reached' : '',
 					$graph['truncated'] ? 'edge_limit_reached' : '',
 					! $inventory['complete'] ? 'stored_content_incomplete' : '',
+					$inventory['link_limit'] ? 'stored_link_limit_reached' : '',
 					! $navigation['complete'] ? 'navigation_scan_incomplete' : '',
 					! $depths['available'] ? 'homepage_path_unavailable' : '',
 				)
@@ -81,14 +91,20 @@ final class InternalLinkAnalyzer {
 			'analysis'     => array(
 				'internal_link_version' => self::ANALYSIS_VERSION,
 				'method'                => 'stored_content_and_assigned_navigation',
+				'scope'                 => 'literal stored content, published template overrides, active theme files, and registered templates; dynamic blocks and block hooks are not rendered',
 				'resource_count'        => count( $inventory['nodes'] ),
 				'edge_count'            => $graph['edge_count'],
 				'navigation_references' => $navigation['reference_count'],
 				'depth_available'       => $depths['available'],
 				'complete'              => $sufficient,
 				'limits'                => array(
-					'resources' => self::MAX_RESOURCES,
-					'edges'     => self::MAX_EDGES,
+					'resources'               => self::MAX_RESOURCES,
+					'edges'                   => self::MAX_EDGES,
+					'stored_links'            => self::MAX_STORED_LINKS,
+					'stored_link_bytes'       => self::MAX_STORED_LINK_BYTES,
+					'templates'               => StoredTemplateSource::MAX_TEMPLATES,
+					'block_source_bytes'      => self::MAX_BLOCK_SOURCE_BYTES,
+					'parsed_navigation_bytes' => self::MAX_PARSED_SOURCE_BYTES,
 				),
 				'limitations'           => $limitations,
 			),
@@ -98,15 +114,21 @@ final class InternalLinkAnalyzer {
 	/**
 	 * @param string[]      $post_types Post types.
 	 * @param callable|null $heartbeat  Batch callback.
-	 * @return array{nodes:array<int,array<string,mixed>>,url_map:array<string,int>,truncated:bool,complete:bool}
+	 * @param callable|null $before_load Checkpoint before batch hydration.
+	 * @return array{nodes:array<int,array<string,mixed>>,url_map:array<string,int>,truncated:bool,complete:bool,link_limit:bool}
 	 */
-	private function build_inventory( array $post_types, ?callable $heartbeat ): array {
+	private function build_inventory( array $post_types, ?callable $heartbeat, ?callable $before_load ): array {
 		$nodes     = array();
 		$url_map   = array();
 		$truncated = false;
 		$complete  = true;
+		$budget    = array(
+			'links'    => self::MAX_STORED_LINKS,
+			'bytes'    => self::MAX_STORED_LINK_BYTES,
+			'complete' => true,
+		);
 
-		foreach ( $this->post_source->batches( $post_types ) as $posts ) {
+		foreach ( $this->post_source->batches( $post_types, $before_load ) as $posts ) {
 			foreach ( $posts as $post ) {
 				if ( count( $nodes ) >= self::MAX_RESOURCES ) {
 					$truncated = true;
@@ -115,11 +137,14 @@ final class InternalLinkAnalyzer {
 				if ( ! is_object( $post ) || (int) ( $post->ID ?? 0 ) < 1 ) {
 					continue;
 				}
-				$node                 = $this->create_node( $post );
+				$node                 = $this->create_node( $post, $budget );
 				$nodes[ $node['id'] ] = $node;
 				$complete             = $complete && $node['complete'];
 				foreach ( $node['aliases'] as $alias ) {
 					$url_map[ $alias ] = $node['id'];
+				}
+				if ( ! $budget['complete'] ) {
+					break 2;
 				}
 			}
 			if ( null !== $heartbeat ) {
@@ -127,28 +152,18 @@ final class InternalLinkAnalyzer {
 			}
 		}
 
-		$this->expand_stored_page_lists( $nodes );
-
-		return compact( 'nodes', 'url_map', 'truncated', 'complete' );
+		$link_limit = ! $budget['complete'];
+		return compact( 'nodes', 'url_map', 'truncated', 'complete', 'link_limit' );
 	}
 
-	/** @return array<string,mixed> */
-	private function create_node( object $post ): array {
+	/** @param array{links:int,bytes:int,complete:bool} $budget Retained-link budget. @return array<string,mixed> */
+	private function create_node( object $post, array &$budget ): array {
 		$post_id    = (int) $post->ID;
 		$permalink  = (string) get_permalink( $post_id );
 		$public_url = (string) URLManager::rewrite_url( $permalink );
 		$analysis   = $this->content_analyzer->analyze_post( $post );
 		$blocks     = $this->stored_block_links( (string) ( $post->post_content ?? '' ) );
-		$aliases    = array_values(
-			array_unique(
-				array_filter(
-					array(
-						$this->normalize_url( $permalink ),
-						$this->normalize_url( $public_url ),
-					)
-				)
-			)
-		);
+		$aliases    = $this->post_aliases( $post, $permalink, $public_url );
 
 		return array(
 			'id'        => $post_id,
@@ -156,11 +171,58 @@ final class InternalLinkAnalyzer {
 			'title'     => (string) ( $post->post_title ?? get_the_title( $post_id ) ),
 			'post_type' => sanitize_key( (string) ( $post->post_type ?? 'post' ) ),
 			'indexable' => $this->eligibility->post( $post, PublicationEligibility::REPORT )->indexable,
-			'links'     => array_merge( (array) ( $analysis['links'] ?? array() ), $blocks['links'] ),
+			'links'     => $this->retain_links( array( (array) ( $analysis['links'] ?? array() ), $blocks['links'] ), $budget ),
 			'page_list' => $blocks['page_list'],
-			'complete'  => ! empty( $analysis['complete'] ) && $blocks['complete'],
+			'complete'  => ! empty( $analysis['complete'] ) && $blocks['complete'] && $budget['complete'],
 			'aliases'   => $aliases,
 		);
+	}
+
+	/** Register a fixed number of WordPress aliases once per source, never per edge. @return string[] */
+	private function post_aliases( object $post, string $permalink, string $public_url ): array {
+		$id   = (int) $post->ID;
+		$urls = array( $permalink, $public_url, home_url( '/?p=' . $id ) );
+		if ( 'page' === (string) $post->post_type ) {
+			$urls[] = home_url( '/?page_id=' . $id );
+		} elseif ( 'post' !== (string) $post->post_type ) {
+			$urls[] = home_url( '/?post_type=' . rawurlencode( (string) $post->post_type ) . '&p=' . $id );
+		}
+		if ( function_exists( 'wp_get_shortlink' ) ) {
+			$urls[] = (string) wp_get_shortlink( $id, 'post', false );
+		}
+		$aliases = array();
+		foreach ( $urls as $url ) {
+			$aliases[] = $this->normalize_url( $url );
+			$aliases[] = $this->normalize_url( (string) URLManager::rewrite_url( $url ) );
+		}
+		return array_values( array_unique( array_filter( $aliases ) ) );
+	}
+
+	/**
+	 * Retain only URLs used by the graph, under one inventory-wide budget.
+	 *
+	 * @param array<int,array<int,mixed>> $lists Extracted link lists.
+	 * @param array{links:int,bytes:int,complete:bool} $budget Retained-link budget.
+	 * @return array<int,array{url:string}>
+	 */
+	private function retain_links( array $lists, array &$budget ): array {
+		$links = array();
+		foreach ( $lists as $list ) {
+			foreach ( $list as $link ) {
+				$url = is_array( $link ) && is_string( $link['url'] ?? null ) ? $link['url'] : '';
+				if ( '' === $url ) {
+					continue;
+				}
+				if ( $budget['links'] < 1 || strlen( $url ) > $budget['bytes'] ) {
+					$budget['complete'] = false;
+					break 2;
+				}
+				--$budget['links'];
+				$budget['bytes'] -= strlen( $url );
+				$links[]          = array( 'url' => $url );
+			}
+		}
+		return $links;
 	}
 
 	/** @return array{links:array<int,array{url:string,text:string}>,page_list:bool,complete:bool} */
@@ -173,14 +235,16 @@ final class InternalLinkAnalyzer {
 			);
 		}
 
+		$this->reset_source_budget();
 		$sources = array();
 		$visited = array();
 		$budget  = array(
 			'remaining' => self::MAX_STORED_BLOCKS,
+			'bytes'     => self::MAX_PARSED_SOURCE_BYTES,
 			'complete'  => true,
 			'page_list' => false,
 		);
-		$this->collect_block_urls( $content, 'stored', $sources, $visited, array(), array(), $budget, 0 );
+		$this->collect_block_urls( $content, 'stored', $sources, $visited, array(), $budget, 0 );
 		$links = array_map(
 			static fn( string $url ): array => array(
 				'url'  => $url,
@@ -192,27 +256,8 @@ final class InternalLinkAnalyzer {
 		return array(
 			'links'     => $links,
 			'page_list' => $budget['page_list'],
-			'complete'  => $budget['complete'],
+			'complete'  => $budget['complete'] && $this->source_budget['complete'],
 		);
-	}
-
-	/** @param array<int,array<string,mixed>> $nodes Inventory nodes. */
-	private function expand_stored_page_lists( array &$nodes ): void {
-		$page_urls = array();
-		foreach ( $nodes as $node ) {
-			if ( 'page' === $node['post_type'] ) {
-				$page_urls[] = array(
-					'url'  => (string) $node['url'],
-					'text' => '',
-				);
-			}
-		}
-		foreach ( $nodes as &$node ) {
-			if ( ! empty( $node['page_list'] ) ) {
-				$node['links'] = array_merge( $node['links'], $page_urls );
-			}
-		}
-		unset( $node );
 	}
 
 	/**
@@ -227,10 +272,7 @@ final class InternalLinkAnalyzer {
 		$truncated  = false;
 
 		foreach ( $nodes as $source_id => $node ) {
-			foreach ( (array) $node['links'] as $link ) {
-				$url       = is_array( $link ) ? (string) ( $link['url'] ?? '' ) : '';
-				$url       = $this->content_analyzer->resolve_link_url( $url, (string) $node['url'] );
-				$target_id = $url_map[ $this->normalize_url( $url ) ] ?? 0;
+			foreach ( $this->graph_targets( $node, $nodes, $url_map ) as $target_id ) {
 				if ( $target_id < 1 || $target_id === $source_id || isset( $outgoing[ $source_id ][ $target_id ] ) ) {
 					continue;
 				}
@@ -248,11 +290,34 @@ final class InternalLinkAnalyzer {
 	}
 
 	/**
+	 * Generate page-list edges without copying the page inventory into each node.
+	 *
+	 * @param array<string,mixed> $node Source node.
+	 * @param array<int,array<string,mixed>> $nodes Inventory nodes.
+	 * @param array<string,int> $url_map URL-to-ID map.
+	 * @return \Generator<int,int>
+	 */
+	private function graph_targets( array $node, array $nodes, array $url_map ): \Generator {
+		foreach ( $node['links'] as $link ) {
+			$url = $this->content_analyzer->resolve_link_url( (string) $link['url'], (string) $node['url'] );
+			yield $url_map[ $this->normalize_url( $url ) ] ?? 0;
+		}
+		if ( ! empty( $node['page_list'] ) ) {
+			foreach ( $nodes as $target_id => $target ) {
+				if ( 'page' === $target['post_type'] ) {
+					yield $target_id;
+				}
+			}
+		}
+	}
+
+	/**
 	 * @param array<int,array<string,mixed>> $nodes   Inventory nodes.
 	 * @param array<string,int>              $url_map URL-to-ID map.
 	 * @return array{targets:array<int,array<string,true>>,reference_count:int,available:bool,complete:bool}
 	 */
 	private function navigation_targets( array $nodes, array $url_map ): array {
+		$this->reset_source_budget();
 		$sources   = array();
 		$available = false;
 		$complete  = true;
@@ -273,7 +338,7 @@ final class InternalLinkAnalyzer {
 			'targets'         => $targets,
 			'reference_count' => array_sum( array_map( 'count', $targets ) ),
 			'available'       => $available,
-			'complete'        => $complete,
+			'complete'        => $complete && $this->source_budget['complete'],
 		);
 	}
 
@@ -287,20 +352,38 @@ final class InternalLinkAnalyzer {
 		if ( ! is_array( $locations ) ) {
 			return;
 		}
-		foreach ( $locations as $location => $menu_id ) {
-			$items = wp_get_nav_menu_items( (int) $menu_id );
-			if ( ! is_array( $items ) ) {
-				continue;
-			}
+		if ( count( $locations ) > 100 ) {
+			$this->source_budget['complete'] = false;
+		}
+		foreach ( array_slice( $locations, 0, 100, true ) as $location => $menu_id ) {
+			$items     = $this->bounded_menu_items( (int) $menu_id );
 			$available = true;
 			$source    = 'menu:' . sanitize_key( (string) $location );
-			foreach ( $items as $item ) {
+			foreach ( array_slice( $items, 0, self::MAX_NAVIGATION_BLOCKS ) as $item ) {
 				$url = is_object( $item ) ? (string) ( $item->url ?? '' ) : '';
 				if ( '' !== $url ) {
-					$sources[ $source ][ $url ] = true;
+					$this->retain_source_url( $sources, $source, $url );
 				}
 			}
 		}
+	}
+
+	/** @return object[] */
+	private function bounded_menu_items( int $menu_id ): array {
+		$items = wp_get_nav_menu_items(
+			$menu_id,
+			array(
+				'nopaging'    => false,
+				'numberposts' => self::MAX_NAVIGATION_BLOCKS + 1,
+			)
+		);
+		if ( ! is_array( $items ) ) {
+			return array();
+		}
+		if ( count( $items ) > self::MAX_NAVIGATION_BLOCKS ) {
+			$this->source_budget['complete'] = false;
+		}
+		return array_slice( $items, 0, self::MAX_NAVIGATION_BLOCKS );
 	}
 
 	/**
@@ -308,55 +391,32 @@ final class InternalLinkAnalyzer {
 	 * @param array<int,array<string,mixed>>   $nodes   Inventory nodes.
 	 */
 	private function collect_block_navigation( array &$sources, bool &$available, bool &$complete, array $nodes ): void {
-		if ( ! function_exists( 'get_block_templates' ) || ! function_exists( 'parse_blocks' ) ) {
+		if ( ! function_exists( 'get_stylesheet' ) || ! function_exists( 'parse_blocks' ) ) {
 			return;
 		}
-
-		$templates      = (array) get_block_templates( array(), 'wp_template' );
-		$template_parts = (array) get_block_templates( array(), 'wp_template_part' );
-		$part_map       = $this->template_part_map( array_slice( $template_parts, 0, 500 ) );
-		$visited        = array();
-		$budget         = array(
+		$visited = array();
+		$budget  = array(
 			'remaining' => self::MAX_NAVIGATION_BLOCKS,
+			'bytes'     => self::MAX_PARSED_SOURCE_BYTES,
 			'complete'  => true,
 			'page_list' => false,
 		);
-		foreach ( array_slice( $templates, 0, 100 ) as $template ) {
-			if ( ! is_object( $template ) || ! isset( $template->content ) ) {
-				continue;
-			}
-			$source = 'template:' . sanitize_key( (string) ( $template->slug ?? $template->id ?? 'theme' ) );
-			$this->collect_block_urls( (string) $template->content, $source, $sources, $visited, $nodes, $part_map, $budget, 0 );
-			if ( isset( $sources[ $source ] ) ) {
-				$available = true;
+		foreach ( $this->template_source->templates() as $template ) {
+			$source = 'template:' . $template['slug'];
+			$this->collect_block_urls( $template['content'], $source, $sources, $visited, $nodes, $budget, 0 );
+			$available = $available || isset( $sources[ $source ] );
+			if ( ! $budget['complete'] ) {
+				break;
 			}
 		}
-		if ( count( $templates ) > 100 || count( $template_parts ) > 500 ) {
-			$complete = false;
-		}
-		$complete = $complete && $budget['complete'];
-	}
-
-	/**
-	 * @param object[] $parts Theme template parts.
-	 * @return array<string,string>
-	 */
-	private function template_part_map( array $parts ): array {
-		$map = array();
-		foreach ( $parts as $part ) {
-			if ( is_object( $part ) && isset( $part->slug, $part->content ) ) {
-				$map[ sanitize_key( (string) $part->slug ) ] = (string) $part->content;
-			}
-		}
-		return $map;
+		$complete = $complete && $budget['complete'] && $this->template_source->complete();
 	}
 
 	/**
 	 * @param array<string,array<string,true>> $sources Navigation sources.
 	 * @param array<string,true>               $visited Visited navigation and template-part IDs.
 	 * @param array<int,array<string,mixed>>   $nodes   Inventory nodes.
-	 * @param array<string,string>             $part_map Theme template parts by slug.
-	 * @param array{remaining:int,complete:bool,page_list:bool} $budget Traversal budget.
+	 * @param array{remaining:int,bytes:int,complete:bool,page_list:bool} $budget Traversal budget.
 	 */
 	private function collect_block_urls(
 		string $content,
@@ -364,14 +424,14 @@ final class InternalLinkAnalyzer {
 		array &$sources,
 		array &$visited,
 		array $nodes,
-		array $part_map,
 		array &$budget,
 		int $depth
 	): void {
-		if ( $depth > 8 ) {
+		if ( ! $this->can_parse_blocks( $content, $budget, $depth ) ) {
 			$budget['complete'] = false;
 			return;
 		}
+		$budget['bytes'] -= strlen( $content );
 		foreach ( (array) parse_blocks( $content ) as $block ) {
 			if ( $budget['remaining'] < 1 ) {
 				$budget['complete'] = false;
@@ -381,8 +441,34 @@ final class InternalLinkAnalyzer {
 			if ( ! is_array( $block ) ) {
 				continue;
 			}
-			$this->collect_parsed_block_urls( $block, $source, $sources, $visited, $nodes, $part_map, $budget, $depth );
+			$this->collect_parsed_block_urls( $block, $source, $sources, $visited, $nodes, $budget, $depth );
 		}
+	}
+
+	/** Check byte, block-count and nesting limits before WordPress allocates parsed blocks. */
+	private function can_parse_blocks( string $content, array $budget, int $depth ): bool {
+		if ( $depth > 8 || $budget['remaining'] < 1 || strlen( $content ) > min( self::MAX_BLOCK_SOURCE_BYTES, $budget['bytes'] ) ) {
+			return false;
+		}
+		if ( substr_count( $content, '<!--' ) > 2 * $budget['remaining'] + 1 ) {
+			return false;
+		}
+		preg_match_all( '/<!--\s*(\/?)wp:[a-zA-Z0-9_\/-]+\b.*?-->/s', $content, $markers, PREG_SET_ORDER );
+		$blocks = 0;
+		foreach ( $markers as $marker ) {
+			if ( '/' === $marker[1] ) {
+				$depth = max( 0, $depth - 1 );
+				continue;
+			}
+			++$blocks;
+			if ( ! str_ends_with( rtrim( $marker[0] ), '/-->' ) && 1 !== preg_match( '/\/\s+-->$/D', $marker[0] ) ) {
+				++$depth;
+			}
+			if ( $depth > 8 || $blocks > $budget['remaining'] ) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
@@ -390,8 +476,7 @@ final class InternalLinkAnalyzer {
 	 * @param array<string,array<string,true>>   $sources  Navigation sources.
 	 * @param array<string,true>                 $visited  Visited references.
 	 * @param array<int,array<string,mixed>>     $nodes    Inventory nodes.
-	 * @param array<string,string>               $part_map Theme template parts by slug.
-	 * @param array{remaining:int,complete:bool,page_list:bool} $budget Traversal budget.
+	 * @param array{remaining:int,bytes:int,complete:bool,page_list:bool} $budget Traversal budget.
 	 */
 	private function collect_parsed_block_urls(
 		array $block,
@@ -399,25 +484,24 @@ final class InternalLinkAnalyzer {
 		array &$sources,
 		array &$visited,
 		array $nodes,
-		array $part_map,
 		array &$budget,
 		int $depth
 	): void {
 		$attrs = is_array( $block['attrs'] ?? null ) ? $block['attrs'] : array();
 		foreach ( array( 'url', 'href' ) as $attribute ) {
 			if ( isset( $attrs[ $attribute ] ) && is_scalar( $attrs[ $attribute ] ) ) {
-				$sources[ $source ][ (string) $attrs[ $attribute ] ] = true;
+				$this->retain_source_url( $sources, $source, (string) $attrs[ $attribute ] );
 			}
 		}
 		if ( 'core/page-list' === (string) ( $block['blockName'] ?? '' ) ) {
 			$budget['page_list'] = true;
-			$this->append_page_list_urls( $sources[ $source ], $nodes );
+			$this->append_page_list_urls( $sources, $source, $nodes );
 		}
-		$this->collect_template_part( $block, $attrs, $source, $sources, $visited, $nodes, $part_map, $budget, $depth );
+		$this->collect_template_part( $block, $attrs, $source, $sources, $visited, $nodes, $budget, $depth );
 		if ( 'core/navigation' === (string) ( $block['blockName'] ?? '' ) ) {
-			$this->collect_referenced_navigation( $attrs, $source, $sources, $visited, $nodes, $part_map, $budget, $depth );
+			$this->collect_referenced_navigation( $attrs, $source, $sources, $visited, $nodes, $budget, $depth );
 		}
-		$this->collect_inner_block_urls( $block, $source, $sources, $visited, $nodes, $part_map, $budget, $depth );
+		$this->collect_inner_block_urls( $block, $source, $sources, $visited, $nodes, $budget, $depth );
 	}
 
 	/**
@@ -426,8 +510,7 @@ final class InternalLinkAnalyzer {
 	 * @param array<string,array<string,true>>   $sources  Navigation sources.
 	 * @param array<string,true>                 $visited  Visited references.
 	 * @param array<int,array<string,mixed>>     $nodes    Inventory nodes.
-	 * @param array<string,string>               $part_map Theme template parts by slug.
-	 * @param array{remaining:int,complete:bool,page_list:bool} $budget Traversal budget.
+	 * @param array{remaining:int,bytes:int,complete:bool,page_list:bool} $budget Traversal budget.
 	 */
 	private function collect_template_part(
 		array $block,
@@ -436,21 +519,33 @@ final class InternalLinkAnalyzer {
 		array &$sources,
 		array &$visited,
 		array $nodes,
-		array $part_map,
 		array &$budget,
 		int $depth
 	): void {
 		if ( 'core/template-part' !== (string) ( $block['blockName'] ?? '' ) ) {
 			return;
 		}
-		$slug = sanitize_key( (string) ( $attrs['slug'] ?? '' ) );
-		$key  = 'template-part:' . $slug;
-		if ( '' === $slug || isset( $visited[ $key ] ) || ! isset( $part_map[ $slug ] ) ) {
+		$slug = is_string( $attrs['slug'] ?? null ) ? $attrs['slug'] : '';
+		$key  = 'template-part:' . (string) ( $attrs['theme'] ?? '' ) . ':' . $slug;
+		if ( '' === $slug || isset( $visited[ $key ] ) ) {
 			return;
 		}
 
 		$visited[ $key ] = true;
-		$this->collect_block_urls( $part_map[ $slug ], $source, $sources, $visited, $nodes, $part_map, $budget, $depth + 1 );
+		$content         = $this->referenced_template_part( $slug, $attrs, $budget );
+		if ( null !== $content ) {
+			$this->collect_block_urls( $content, $source, $sources, $visited, $nodes, $budget, $depth + 1 );
+		}
+	}
+
+	/** Load only an actually referenced part, never the entire theme part collection. */
+	private function referenced_template_part( string $slug, array $attrs, array &$budget ): ?string {
+		$theme   = is_string( $attrs['theme'] ?? null ) ? $attrs['theme'] : get_stylesheet();
+		$content = $this->template_source->part( $slug, $theme );
+		if ( null === $content ) {
+			$budget['complete'] = false;
+		}
+		return $content;
 	}
 
 	/**
@@ -458,8 +553,7 @@ final class InternalLinkAnalyzer {
 	 * @param array<string,array<string,true>> $sources Navigation sources.
 	 * @param array<string,true>               $visited Visited navigation and template-part IDs.
 	 * @param array<int,array<string,mixed>>   $nodes   Inventory nodes.
-	 * @param array<string,string>             $part_map Theme template parts by slug.
-	 * @param array{remaining:int,complete:bool,page_list:bool} $budget Traversal budget.
+	 * @param array{remaining:int,bytes:int,complete:bool,page_list:bool} $budget Traversal budget.
 	 */
 	private function collect_referenced_navigation(
 		array $attrs,
@@ -467,7 +561,6 @@ final class InternalLinkAnalyzer {
 		array &$sources,
 		array &$visited,
 		array $nodes,
-		array $part_map,
 		array &$budget,
 		int $depth
 	): void {
@@ -488,7 +581,6 @@ final class InternalLinkAnalyzer {
 			$sources,
 			$visited,
 			$nodes,
-			$part_map,
 			$budget,
 			$depth + 1
 		);
@@ -499,8 +591,7 @@ final class InternalLinkAnalyzer {
 	 * @param array<string,array<string,true>> $sources Navigation sources.
 	 * @param array<string,true>               $visited Visited navigation and template-part IDs.
 	 * @param array<int,array<string,mixed>>   $nodes   Inventory nodes.
-	 * @param array<string,string>             $part_map Theme template parts by slug.
-	 * @param array{remaining:int,complete:bool,page_list:bool} $budget Traversal budget.
+	 * @param array{remaining:int,bytes:int,complete:bool,page_list:bool} $budget Traversal budget.
 	 */
 	private function collect_inner_block_urls(
 		array $block,
@@ -508,22 +599,19 @@ final class InternalLinkAnalyzer {
 		array &$sources,
 		array &$visited,
 		array $nodes,
-		array $part_map,
 		array &$budget,
 		int $depth
 	): void {
 		$inner_blocks = is_array( $block['innerBlocks'] ?? null ) ? $block['innerBlocks'] : array();
 		foreach ( $inner_blocks as $inner_block ) {
-			$this->collect_block_urls(
-				serialize_block( $inner_block ),
-				$source,
-				$sources,
-				$visited,
-				$nodes,
-				$part_map,
-				$budget,
-				$depth + 1
-			);
+			if ( $budget['remaining'] < 1 || $depth >= 8 ) {
+				$budget['complete'] = false;
+				return;
+			}
+			--$budget['remaining'];
+			if ( is_array( $inner_block ) ) {
+				$this->collect_parsed_block_urls( $inner_block, $source, $sources, $visited, $nodes, $budget, $depth + 1 );
+			}
 		}
 	}
 
@@ -531,12 +619,34 @@ final class InternalLinkAnalyzer {
 	 * @param array<string,true>              $urls  Target URLs.
 	 * @param array<int,array<string,mixed>> $nodes Inventory nodes.
 	 */
-	private function append_page_list_urls( array &$urls, array $nodes ): void {
+	private function append_page_list_urls( array &$sources, string $source, array $nodes ): void {
 		foreach ( $nodes as $node ) {
 			if ( 'page' === $node['post_type'] && '' !== (string) $node['url'] ) {
-				$urls[ (string) $node['url'] ] = true;
+				$this->retain_source_url( $sources, $source, (string) $node['url'] );
 			}
 		}
+	}
+
+	private function reset_source_budget(): void {
+		$this->source_budget = array(
+			'links'    => self::MAX_STORED_LINKS,
+			'bytes'    => self::MAX_STORED_LINK_BYTES,
+			'complete' => true,
+		);
+	}
+
+	/** @param array<string,array<string,true>> $sources Bounded source URL sets. */
+	private function retain_source_url( array &$sources, string $source, string $url ): void {
+		if ( isset( $sources[ $source ][ $url ] ) ) {
+			return;
+		}
+		if ( $this->source_budget['links'] < 1 || strlen( $url ) > $this->source_budget['bytes'] ) {
+			$this->source_budget['complete'] = false;
+			return;
+		}
+		--$this->source_budget['links'];
+		$this->source_budget['bytes'] -= strlen( $url );
+		$sources[ $source ][ $url ]    = true;
 	}
 
 	/**
@@ -728,7 +838,22 @@ final class InternalLinkAnalyzer {
 		$path   = '/' . ltrim( (string) ( $parts['path'] ?? '/' ), '/' );
 		$path   = '/' === $path ? '/' : untrailingslashit( $path );
 
-		return $scheme . '://' . $host . $port . $path;
+		$query = $this->routing_query( (string) ( $parts['query'] ?? '' ) );
+		return $scheme . '://' . $host . $port . $path . ( '' === $query ? '' : '?' . $query );
+	}
+
+	/** Preserve resource-defining query parameters while ignoring known tracking fields. */
+	private function routing_query( string $query ): string {
+		$parts = array();
+		foreach ( explode( '&', $query ) as $part ) {
+			$key = strtolower( rawurldecode( explode( '=', $part, 2 )[0] ) );
+			if ( '' === $part || str_starts_with( $key, 'utm_' ) || in_array( $key, array( 'fbclid', 'gclid', 'dclid', 'msclkid' ), true ) ) {
+				continue;
+			}
+			$parts[] = $part;
+		}
+		sort( $parts, SORT_STRING );
+		return implode( '&', $parts );
 	}
 
 	private function navigation_url_key( string $url ): string {

@@ -1,7 +1,7 @@
 {
     "format": "cybermaps-ai-configuration-catalog",
     "format_version": 2,
-    "plugin_version": "8.0.1",
+    "plugin_version": "8.0.2",
     "sections": [
         {
             "id": "core_settings",
@@ -748,7 +748,7 @@
             "option": "cybermaps_settings",
             "field": "enable_shortcode",
             "label": "HTML sitemap shortcode",
-            "purpose": "Registers the cybermaps_sitemap shortcode for front-end HTML sitemap output.",
+            "purpose": "Enables the cybermap shortcode for front-end HTML sitemap output.",
             "json_type": "boolean",
             "allowed": {
                 "enum": [

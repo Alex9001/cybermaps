@@ -37,15 +37,32 @@ final class NativeRoutingRegistrarTest extends TestCase {
 		$this->assertSame( $internal[0]['query'], $GLOBALS['wp_rewrite']->non_wp_rules[ $internal[0]['regex'] ] );
 	}
 
-	public function test_default_static_inventory_contains_intercept_safe_well_known_fallbacks(): void {
+	public function test_runtime_header_requirement_prevents_static_target_inclusion(): void {
+		$registry = EndpointRegistry::get_instance();
+		$this->assertTrue( $registry->register( 'dynamic_fixture', array(
+			'kind' => 'path',
+			'path' => '/dynamic-fixture.json',
+			'type' => 'application/json',
+			'delivery_requirement' => 'runtime_headers_required',
+			'static_targets' => array( array( 'path' => '/dynamic-fixture.json', 'bucket' => 'well_known' ) ),
+		) ) );
+		foreach ( array( 'well_known', 'all' ) as $mode ) {
+			$this->assertNotContains( '/dynamic-fixture.json', array_column( $registry->get_static_targets( $mode, array(), true ), 'path' ) );
+		}
+	}
+
+	public function test_default_static_inventory_keeps_protocol_publications_dynamic(): void {
 		$targets = EndpointRegistry::get_instance()->get_static_targets( 'well_known', array(), true );
 		$paths   = array_column( $targets, 'path' );
 
-		$this->assertContains( '/.well-known/api-catalog', $paths );
+		$this->assertNotContains( '/.well-known/api-catalog', $paths );
 		$this->assertContains( '/.well-known/agent-skills/index.json', $paths );
 		$this->assertContains( '/.well-known/agent-skills/cybermaps-site-guide/SKILL.md', $paths );
 		$this->assertNotContains( '/.well-known/oauth-authorization-server', $paths );
 		$this->assertNotContains( '/.well-known/oauth-protected-resource', $paths );
-		$this->assertContains( '/ai-discovery', $paths );
+		$this->assertNotContains( '/ai-discovery', $paths );
+		$this->assertNotContains( '/.well-known/ai-catalog.json', $paths );
+		$this->assertNotContains( '/.well-known/mcp/server-card.json', $paths );
+		$this->assertCount( 5, $paths );
 	}
 }

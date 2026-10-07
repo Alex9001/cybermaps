@@ -49,7 +49,11 @@ final class ADPNews {
 			return;
 		}
 
-		$output = $this->get_content( $endpoint_id );
+		try {
+			$output = $this->get_content( $endpoint_id );
+		} catch ( PublicationSizeLimitException $error ) {
+			PublicationRequestGuard::serve_size_limit_error( $error );
+		}
 		$config = self::ENDPOINTS[ $endpoint_id ];
 		Integrity::send_headers( $output, $config['ttl'] );
 		header( 'Content-Type: ' . $config['type'] );
@@ -72,11 +76,7 @@ final class ADPNews {
 			'adp_news_archive'   => $this->build_archive(),
 			default              => throw new \InvalidArgumentException( 'Unknown ADP news endpoint.' ),
 		};
-		if ( strlen( $output ) > self::MAX_OUTPUT_BYTES ) {
-			throw new \RuntimeException(
-				__( 'An ADP news publication exceeded its safe output limit.', 'cybermaps' ) // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception becomes escaped status data.
-			);
-		}
+		PublicationSizeLimitException::require_capacity( strlen( $output ), 'news', self::MAX_OUTPUT_BYTES );
 		return $output;
 	}
 
@@ -204,28 +204,36 @@ final class ADPNews {
 		if ( null !== $this->articles ) {
 			return $this->articles;
 		}
-		$this->articles = array();
+		$articles = array();
+		$bytes    = 0;
 		foreach ( ( new PublicationInventory() )->iterate_posts() as $post ) {
 			$post_id = (int) ( $post->ID ?? 0 );
 			if ( $post_id < 1 ) {
 				continue;
 			}
-			$content          = wp_strip_all_tags( (string) ( $post->post_content ?? '' ) );
-			$this->articles[] = array(
+			$source = (string) ( $post->post_content ?? '' );
+			PublicationSizeLimitException::require_capacity( strlen( $source ), 'news', 33554431 );
+			$content = ( new \Cybermaps\Content\ContentAnalyzer( false ) )->visible_text( $source );
+			$article = array(
 				'id'          => $post_id,
 				'type'        => sanitize_key( (string) ( $post->post_type ?? 'post' ) ),
 				'headline'    => PublicationConstraints::bounded_text( sanitize_text_field( (string) get_the_title( $post_id ) ), PublicationConstraints::SEARCH_TITLE_MAX_LENGTH ),
-				'summary'     => PublicationConstraints::bounded_text( wp_trim_words( wp_strip_all_tags( (string) get_the_excerpt( $post ) ), 200, '' ), self::SUMMARY_MAX ),
+				'summary'     => PublicationConstraints::bounded_text( ( new \Cybermaps\Content\VisibleTextExtractor() )->summary( $post, 200 ), self::SUMMARY_MAX ),
 				'url'         => \Cybermaps\Core\URLManager::rewrite_url( (string) get_permalink( $post_id ) ),
 				'publishedAt' => $this->iso_date( (string) ( $post->post_date_gmt ?? '' ) ),
 				'modifiedAt'  => $this->iso_date( (string) ( $post->post_modified_gmt ?? '' ) ),
 				'wordCount'   => $this->word_count( $content ),
 			);
-			if ( count( $this->articles ) >= self::MAX_ITEMS ) {
+			PublicationSizeLimitException::require_value_capacity( $article, 'news', self::MAX_OUTPUT_BYTES );
+			$bytes += strlen( $this->encode_json( $article ) );
+			PublicationSizeLimitException::require_capacity( $bytes, 'news', self::MAX_OUTPUT_BYTES );
+			$articles[] = $article;
+			if ( count( $articles ) >= self::MAX_ITEMS ) {
 				break;
 			}
 		}
-		return $this->articles;
+		$this->articles = $articles;
+		return $articles;
 	}
 
 	private function site_name(): string {
@@ -242,12 +250,13 @@ final class ADPNews {
 	}
 
 	private function word_count( string $content ): int {
-		$words = preg_split( '/\s+/u', trim( $content ) );
-		return is_array( $words ) && '' !== trim( $content ) ? count( array_filter( $words ) ) : 0;
+		$count = preg_match_all( '/\S+/u', $content );
+		return false === $count ? 0 : $count;
 	}
 
 	private function encode_json( mixed $data, bool $pretty = true ): string {
 		unset( $pretty );
+		PublicationSizeLimitException::require_value_capacity( $data, 'news', self::MAX_OUTPUT_BYTES );
 		$output = wp_json_encode( $data );
 		if ( ! is_string( $output ) ) {
 			throw new \RuntimeException(

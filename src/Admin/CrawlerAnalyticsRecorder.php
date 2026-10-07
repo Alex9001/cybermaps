@@ -291,9 +291,11 @@ final class CrawlerAnalyticsRecorder {
 	 * for status-screen compatibility. They mean a crawler-registry User-Agent
 	 * signature matched; they do not mean the provider was verified.
 	 *
+	 * @param bool|null $available Whether the current read or cached projection is available.
 	 * @return array<string,array{php_requests:int,recognized_requests:int,last_php:string,last_recognized:string}>
 	 */
-	public static function get_endpoint_observations(): array {
+	public static function get_endpoint_observations( ?bool &$available = null ): array {
+		$available  = true;
 		$generation = CacheManager::get_generation( 'analytics' );
 		$cached     = CacheManager::get( self::ENDPOINT_OBSERVATIONS_CACHE_KEY, 'analytics', $cache_found );
 		if ( $cache_found && \is_array( $cached ) ) {
@@ -302,9 +304,11 @@ final class CrawlerAnalyticsRecorder {
 
 		global $wpdb;
 		if ( ! is_object( $wpdb ) || ! method_exists( $wpdb, 'get_results' ) ) {
+			$available = false;
 			return array();
 		}
-		$table = $wpdb->prefix . 'cybermaps_logs';
+		$table            = $wpdb->prefix . 'cybermaps_logs';
+		$wpdb->last_error = '';
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching -- Analytics requires an exact aggregate over the plugin-owned event table; the result is cached immediately below.
 		$rows = $wpdb->get_results(
@@ -323,6 +327,25 @@ final class CrawlerAnalyticsRecorder {
 		);
 		// phpcs:enable
 
+		if ( ! self::observation_read_succeeded( $rows ) ) {
+			$available = false;
+			self::persist_health_error();
+			return array();
+		}
+		$results = self::normalize_endpoint_observations( $rows );
+
+		CacheManager::set_compatible_if_current(
+			self::ENDPOINT_OBSERVATIONS_CACHE_KEY,
+			$results,
+			MINUTE_IN_SECONDS,
+			'analytics',
+			$generation
+		);
+		return $results;
+	}
+
+	/** @param array<int,array<string,mixed>> $rows Database observations. @return array<string,array<string,mixed>> */
+	private static function normalize_endpoint_observations( array $rows ): array {
 		$results = array();
 		foreach ( (array) $rows as $row ) {
 			$id = sanitize_key( (string) ( $row['endpoint_id'] ?? '' ) );
@@ -337,14 +360,12 @@ final class CrawlerAnalyticsRecorder {
 			);
 		}
 
-		CacheManager::set_compatible_if_current(
-			self::ENDPOINT_OBSERVATIONS_CACHE_KEY,
-			$results,
-			MINUTE_IN_SECONDS,
-			'analytics',
-			$generation
-		);
 		return $results;
+	}
+
+	private static function observation_read_succeeded( mixed $rows ): bool {
+		global $wpdb;
+		return is_array( $rows ) && '' === $wpdb->last_error;
 	}
 
 	/**

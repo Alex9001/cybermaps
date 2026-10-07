@@ -128,10 +128,14 @@ Companion data must be independently identifiable and independently removable.
 Dynamic WordPress handlers are the baseline. Static modes are:
 
 - `off`: no physical output;
-- `well_known`: four registered origin-root JSON well-known copies; and
+- `well_known`: three root JSON files plus the canonical Agent Skills document
+  and index, for five registered targets; and
 - `all`: eligible sitemap, discovery, localized LLMS, and RAG output.
 
 Multisite is dynamic-only. `robots.txt` remains dynamic.
+API Catalog, AI Catalog, the optional MCP server card, and `/ai-discovery`
+also remain dynamic so WordPress controls their protocol headers and observes
+requests. Deployments must route their canonical paths and aliases to PHP.
 
 Static writes use `WP_Filesystem` and ownership hashes. Core may overwrite or
 delete only the bytes it still owns. A companion does not acquire Core
@@ -178,7 +182,8 @@ Exports are presentations of the preserved run, not regenerated assessments.
 Configuration portability is separate from report export. `MigrationHub`
 produces a complete versioned JSON envelope for exact configuration backup and
 restore, validates its checksum and required option groups before writing, and
-rolls back a partially applied import if verification fails. The editable
+attempts ownership-safe rollback on failed verification, surfacing partial or
+conflicting outcomes instead of claiming an atomic restore. The editable
 Markdown AI template is merge-only; `null` means preserve. Analytics CSV and
 report exports are offline records and are not database restore formats.
 
@@ -194,7 +199,12 @@ Activation provisions Core schema. The 5.0 foundation reset:
 
 Deactivation unschedules Core work and attempts an ownership-safe purge.
 Uninstall deletes persistent Core data only when the explicit delete-data
-setting is enabled.
+setting is enabled. Small, non-sensitive cache generation counters remain as
+invalidation fences: deleting them could let a reinstall reuse old generation
+keys while persistent cache entries have not yet expired. Opted-in cleanup
+removes owned Cloudflare rule state, per-user authorization pointers and managed
+`.htaccess` recovery options. File cleanup never restores arbitrary recovery
+bytes or overwrites a foreign edit.
 
 ## Release gates
 

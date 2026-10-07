@@ -151,12 +151,30 @@ class PublicationRouterTest extends \WP_UnitTestCase {
 				)
 			);
 		$guard_position   = strpos( $source, 'PublicationRequestGuard::enforce_active_route' );
-		$settings_position = strpos( $source, 'ConfigurationStore::settings' );
+		$settings_position = strpos( $source, 'ConfigurationStore::publication_settings' );
 
 		$this->assertNotFalse( $guard_position );
 		$this->assertNotFalse( $settings_position );
 		$this->assertLessThan( $guard_position, $settings_position );
 		$this->assertSame( 1, substr_count( $source, 'PublicationRequestGuard::enforce_active_route' ) );
+	}
+
+	/** @dataProvider chunk_activation_states */
+	public function test_chunk_post_method_guard_runs_only_for_an_enabled_publication( bool $enabled ): void {
+		$process = proc_open( array( PHP_BINARY, __DIR__ . '/fixtures/rag-method-activation.php', $enabled ? 'enabled' : 'disabled' ), array( 1 => array( 'pipe', 'w' ), 2 => array( 'pipe', 'w' ) ), $pipes );
+		$this->assertIsResource( $process );
+		$output = stream_get_contents( $pipes[1] );
+		$error = stream_get_contents( $pipes[2] );
+		fclose( $pipes[1] );
+		fclose( $pipes[2] );
+		$this->assertSame( 0, proc_close( $process ), $error );
+		$case = json_decode( $output, true, 512, JSON_THROW_ON_ERROR );
+		$this->assertSame( $enabled ? array( 405 ) : array(), $case['status'] );
+		$this->assertSame( $enabled ? '' : 'fell_through', $case['body'] );
+	}
+
+	public static function chunk_activation_states(): array {
+		return array( array( true ), array( false ) );
 	}
 
 	public function test_fixed_router_uses_the_shared_options_aware_publication_guard(): void {

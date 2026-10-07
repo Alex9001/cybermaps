@@ -51,6 +51,8 @@ class AIContentSelector {
 	 */
 	private ?array $selected_posts = null;
 
+	private ?int $selected_generation = null;
+
 	/**
 	 * Request-local ID lookup matching selected_posts.
 	 *
@@ -76,6 +78,8 @@ class AIContentSelector {
 	private ?array $weights = null;
 
 	private PublicationEligibility $eligibility;
+	private bool $default_settings;
+	private bool $default_eligibility;
 
 	/**
 	 * @param array<string, mixed>|null $settings Optional settings snapshot.
@@ -88,12 +92,14 @@ class AIContentSelector {
 		?callable $taxonomy_query = null,
 		?PublicationEligibility $eligibility = null
 	) {
-		$this->settings       = null === $settings
+		$this->default_settings    = null === $settings;
+		$this->default_eligibility = null === $eligibility;
+		$this->settings            = null === $settings
 			? \Cybermaps\Core\ConfigurationStore::settings()
 			: $settings;
-		$this->post_query     = $post_query;
-		$this->taxonomy_query = $taxonomy_query;
-		$this->eligibility    = $eligibility ?? new PublicationEligibility( null, $this->settings );
+		$this->post_query          = $post_query;
+		$this->taxonomy_query      = $taxonomy_query;
+		$this->eligibility         = $eligibility ?? new PublicationEligibility( null, $this->settings );
 	}
 
 	/**
@@ -106,19 +112,64 @@ class AIContentSelector {
 	 * @return array<int, object>
 	 */
 	public function get_posts(): array {
-		if ( null !== $this->selected_posts ) {
-			return $this->selected_posts;
+		// One fresh bounded retry permits an ordinary save during hydration. A
+		// second change cannot yield a truthful complete selection in this call.
+		for ( $attempt = 0; $attempt < 2; ++$attempt ) {
+			$generation = \Cybermaps\Core\CacheManager::get_generation( 'discovery', true );
+			if ( $generation < 0 ) {
+				break;
+			}
+			$this->refresh_default_settings();
+			$this->select_current_posts( $generation );
+			if ( \Cybermaps\Core\CacheManager::get_generation( 'discovery', true ) === $generation ) {
+				return $this->selected_posts ?? array();
+			}
+			$this->selected_posts  = null;
+			$this->selected_lookup = array();
 		}
+		throw new \Cybermaps\Core\BuildUnavailableException( esc_html__( 'Cybermaps content changed during AI publication selection. Please retry shortly.', 'cybermaps' ) );
+	}
 
-		$cached_posts = $this->get_cached_posts();
+	/** Re-observe default policy after generation capture, bypassing old request memos. */
+	private function refresh_default_settings(): void {
+		\Cybermaps\Core\ConfigurationStore::publication_discovery();
+		$this->weights = null;
+		$settings      = $this->default_settings
+			? \Cybermaps\Core\ConfigurationStore::publication_settings()
+			: $this->settings;
+		if ( $settings !== $this->settings ) {
+			$this->selected_posts   = null;
+			$this->inventory_lookup = null;
+			$this->weights          = null;
+		}
+		$this->settings = $settings;
+		if ( $this->default_eligibility ) {
+			$this->eligibility = new PublicationEligibility( null, $settings );
+		}
+	}
+
+	private function require_current_settings_generation( int $generation ): void {
+		if ( $generation < 0 || \Cybermaps\Core\CacheManager::get_generation( 'discovery', true ) !== $generation ) {
+			throw new \Cybermaps\Core\BuildUnavailableException( esc_html__( 'Cybermaps content changed during AI publication selection. Please retry shortly.', 'cybermaps' ) );
+		}
+	}
+
+	/** Select a complete inventory for one captured generation. */
+	private function select_current_posts( int $generation ): void {
+		if ( null !== $this->selected_posts && $generation === $this->selected_generation && $this->selected_posts_are_eligible() ) {
+			return;
+		}
+		$this->selected_lookup  = array();
+		$this->inventory_lookup = null;
+		$cached_posts           = $this->get_cached_posts();
 		if ( null !== $cached_posts ) {
-			$this->selected_posts = $cached_posts;
-			return $this->selected_posts;
+			$this->selected_posts      = $cached_posts;
+			$this->selected_generation = $generation;
+			return;
 		}
-
-		$cache_generation = \Cybermaps\Core\CacheManager::get_generation( 'discovery' );
-
-		$this->selected_lookup = array();
+		if ( \Cybermaps\Core\CacheManager::get_generation( 'discovery', true ) !== $generation ) {
+			return;
+		}
 
 		$limit = PublicationConstraints::ai_sitemap_limit(
 			$this->settings['ai_sitemap_limit'] ?? PublicationConstraints::AI_SITEMAP_LIMIT_DEFAULT
@@ -129,9 +180,22 @@ class AIContentSelector {
 			$selected_posts = array_merge( $selected_posts, $this->select_post_type( $post_type, $limit ) );
 		}
 
-		$this->selected_posts = $selected_posts;
-		$this->cache_selected_posts( $cache_generation );
-		return $this->selected_posts;
+		$this->selected_posts      = $selected_posts;
+		$this->selected_generation = $generation;
+		$this->cache_selected_posts( $generation );
+	}
+
+	/** Recheck production request-local objects without issuing per-ID queries. */
+	private function selected_posts_are_eligible(): bool {
+		if ( ! $this->uses_default_queries() ) {
+			return true;
+		}
+		foreach ( $this->selected_posts ?? array() as $post ) {
+			if ( ! $this->runtime_post_is_eligible( $post ) ) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
@@ -148,7 +212,11 @@ class AIContentSelector {
 			return null;
 		}
 
-		return $this->hydrate_cached_posts( $this->normalize_cached_ids( $cached_ids ) );
+		$ids   = $this->normalize_cached_ids( $cached_ids );
+		$posts = $this->hydrate_cached_posts( $ids );
+		// A revoked or deleted candidate requires a fresh selection to fill the
+		// configured per-type limits; the reduced cache is not a complete list.
+		return \count( $ids ) === \count( $posts ) ? $posts : null;
 	}
 
 	/**
@@ -251,6 +319,8 @@ class AIContentSelector {
 	 * @return array{ids:int[],cursor:array<string,int>,complete:bool}
 	 */
 	public function get_id_batch( array $cursor = array(), int $limit = 25 ): array {
+		$generation = \Cybermaps\Core\CacheManager::get_generation( 'discovery', true );
+		$this->refresh_default_settings();
 		$this->assert_valid_id_cursor( $cursor );
 		$types          = $this->get_included_post_types();
 		$state          = $this->initial_batch_state( $cursor, $limit );
@@ -262,6 +332,7 @@ class AIContentSelector {
 			$this->process_batch_type( $types, $state, $selected_limit );
 		}
 
+		$this->require_current_settings_generation( $generation );
 		return array(
 			'ids'      => $state['ids'],
 			'cursor'   => array(
@@ -317,7 +388,8 @@ class AIContentSelector {
 			return;
 		}
 
-		$batch_size = min( self::QUERY_BATCH_SIZE, self::MAX_CANDIDATES_PER_TYPE - $state['inspected'] );
+		// The page offset depends on its width, including when resuming mid-page.
+		$batch_size = self::QUERY_BATCH_SIZE;
 		$posts      = $this->query_selection_batch( $post_type, $state['page'], $batch_size );
 		$post_count = \count( $posts );
 		if ( 0 === $post_count ) {
@@ -325,7 +397,7 @@ class AIContentSelector {
 			return;
 		}
 
-		$this->collect_batch_ids( $posts, $post_type, $state );
+		$this->collect_batch_ids( $posts, $post_type, $state, $selected_limit );
 		if ( $state['type_selected'] >= $selected_limit ) {
 			$this->advance_batch_type( $state );
 			return;
@@ -352,9 +424,10 @@ class AIContentSelector {
 	 * @param array<int, object>   $posts Candidate page.
 	 * @param array<string, mixed> $state Mutable batch state.
 	 */
-	private function collect_batch_ids( array $posts, string $post_type, array &$state ): void {
-		$post_count = \count( $posts );
-		while ( $state['position'] < $post_count && $state['id_count'] < $state['requested'] ) {
+	private function collect_batch_ids( array $posts, string $post_type, array &$state, int $selected_limit ): void {
+		$post_count = min( \count( $posts ), $state['position'] + self::MAX_CANDIDATES_PER_TYPE - $state['inspected'] );
+		$id_limit   = min( $state['requested'], $state['id_count'] + $selected_limit - $state['type_selected'] );
+		while ( $state['position'] < $post_count && $state['id_count'] < $id_limit ) {
 			$post = $posts[ $state['position'] ];
 			++$state['position'];
 			++$state['inspected'];
@@ -522,8 +595,49 @@ class AIContentSelector {
 
 		$posts = null !== $this->post_query
 			? \call_user_func( $this->post_query, $args )
-			: \get_posts( $args );
+			: $this->query_native_posts( $args );
 		return \is_array( $posts ) ? \array_values( $posts ) : array();
+	}
+
+	/** Never cache a failed native SELECT as an authoritative empty inventory. */
+	private function query_native_posts( array $args ): array {
+		global $wpdb;
+		$args['cache_results']          = false;
+		$args['update_post_meta_cache'] = false;
+		$args['update_post_term_cache'] = false;
+		$marker                         = new \stdClass();
+		$args['cybermaps_ai_query']     = $marker;
+		$split_filter                   = static fn( bool $split, $query ): bool =>
+			is_object( $query ) && method_exists( $query, 'get' ) && $marker === $query->get( 'cybermaps_ai_query' ) ? false : $split;
+		$result_filter                  = function ( array $posts, $query ) use ( $marker ): array {
+			if ( is_object( $query ) && method_exists( $query, 'get' ) && $marker === $query->get( 'cybermaps_ai_query' ) ) {
+				$this->require_native_query_success();
+			}
+			return $posts;
+		};
+		\add_filter( 'split_the_query', $split_filter, PHP_INT_MAX, 2 );
+		\add_filter( 'posts_results', $result_filter, PHP_INT_MIN, 2 );
+		if ( is_object( $wpdb ) ) {
+			$wpdb->last_error = '';
+		}
+		try {
+			$posts = \get_posts( $args );
+			$this->require_native_query_success();
+		} finally {
+			\remove_filter( 'split_the_query', $split_filter, PHP_INT_MAX );
+			\remove_filter( 'posts_results', $result_filter, PHP_INT_MIN );
+		}
+		if ( ! is_array( $posts ) ) {
+			throw new \Cybermaps\Core\BuildUnavailableException( esc_html__( 'Cybermaps could not read the AI publication inventory. Please retry shortly.', 'cybermaps' ) );
+		}
+		return $posts;
+	}
+
+	private function require_native_query_success(): void {
+		global $wpdb;
+		if ( is_object( $wpdb ) && ! empty( $wpdb->last_error ) ) {
+			throw new \Cybermaps\Core\BuildUnavailableException( esc_html__( 'Cybermaps could not read the AI publication inventory. Please retry shortly.', 'cybermaps' ) );
+		}
 	}
 
 	/**
@@ -534,6 +648,8 @@ class AIContentSelector {
 			return false;
 		}
 
+		$generation = \Cybermaps\Core\CacheManager::get_generation( 'discovery', true );
+		$this->refresh_default_settings();
 		if ( $this->uses_default_queries() ) {
 			$post = \get_post( $post_id );
 			if ( ! $this->runtime_post_is_eligible( $post ) ) {
@@ -541,6 +657,7 @@ class AIContentSelector {
 			}
 			$cached_result = $this->cached_inventory_contains( $post_id );
 			if ( null !== $cached_result ) {
+				$this->require_current_settings_generation( $generation );
 				return $cached_result;
 			}
 		}
@@ -648,10 +765,11 @@ class AIContentSelector {
 	 * @return array<int, object>
 	 */
 	private function hydrate_post_batch( array $batch, array $post_types ): array {
-		$posts = \get_posts(
+		$posts = $this->query_native_posts(
 			array(
 				'post_type'              => $post_types,
 				'post_status'            => 'publish',
+				'has_password'           => false,
 				'post__in'               => $batch,
 				'posts_per_page'         => \count( $batch ),
 				'orderby'                => 'post__in',
@@ -667,7 +785,7 @@ class AIContentSelector {
 		$posts_by_id = array();
 		foreach ( \is_array( $posts ) ? $posts : array() as $post ) {
 			$post_id = \is_object( $post ) ? (int) ( $post->ID ?? 0 ) : 0;
-			if ( $post_id > 0 ) {
+			if ( $post_id > 0 && $this->runtime_post_is_eligible( $post ) ) {
 				$posts_by_id[ $post_id ] = $post;
 			}
 		}

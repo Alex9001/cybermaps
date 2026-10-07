@@ -392,7 +392,7 @@ final class AIConfigurationRegistry {
 				array( self::dependency( 'enable_rss_sitemap', true ) )
 			),
 			'rss_sitemap_types'               => self::field( $section, 'rss_sitemap_types', 'RSS sitemap content types', 'Selects public post-type slugs eligible for the RSS sitemap. Supply the complete list; importing it replaces the existing list.', 'array', self::key_list( \Cybermaps\Discovery\PublicationConstraints::PUBLICATION_TYPE_ITEMS_MAX ), array( 'post' ), array( 'post', 'page' ), 'medium', array( self::dependency( 'enable_rss_sitemap', true ) ) ),
-			'enable_shortcode'                => self::boolean_field( $section, 'enable_shortcode', 'HTML sitemap shortcode', 'Registers the cybermaps_sitemap shortcode for front-end HTML sitemap output.', false, 'medium' ),
+			'enable_shortcode'                => self::boolean_field( $section, 'enable_shortcode', 'HTML sitemap shortcode', 'Enables the cybermap shortcode for front-end HTML sitemap output.', false, 'medium' ),
 			'media_discovery_intensity'       => self::field( $section, 'media_discovery_intensity', 'Media discovery depth', 'Controls whether sitemap media discovery is off, attachment-based, or includes embedded media.', 'string', array( 'enum' => array( 'none', 'standard', 'advanced' ) ), 'none', 'standard', 'medium' ),
 			'enable_multimodal_discovery'     => self::boolean_field( $section, 'enable_multimodal_discovery', 'AI media hints', 'Publishes Cybermaps media hints in the AI sitemap.', true, 'medium', array( self::dependency( 'media_discovery_intensity', 'standard-or-advanced' ) ) ),
 		);

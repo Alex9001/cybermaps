@@ -18,6 +18,16 @@ define( 'CYBERMAPS_MOCK_PLUGIN_DIR', __DIR__ . '/' );
 define( 'CYBERMAPS_MOCK_DAY_IN_SECONDS', 86400 );
 define( 'CYBERMAPS_MOCK_HOUR_IN_SECONDS', 3600 );
 
+require_once __DIR__ . '/static-ownership-db.php';
+
+/** Mock distinct request identifiers across the whole test collection. */
+if ( ! function_exists( 'wp_generate_uuid4' ) ) {
+	function wp_generate_uuid4(): string {
+		static $sequence = 0;
+		return sprintf( '00000000-0000-4000-8000-%012d', ++$sequence );
+	}
+}
+
 /**
  * Mock plugin_dir_path
  */
@@ -45,6 +55,9 @@ function get_option( $option, $default = false ) {
 				return $pre;
 			}
 		}
+	}
+	if ( ( $GLOBALS['wpdb'] ?? null ) instanceof CybermapsMockStaticOwnershipDatabase ) {
+		return $GLOBALS['wpdb']->read_option( $GLOBALS['wpdb']->options, (string) $option, $default );
 	}
 	if (
 		isset( $cybermaps_mock_options_by_blog[ $cybermaps_mock_current_blog_id ] )
@@ -335,6 +348,11 @@ function maybe_unserialize( $data ) {
 	return false === $unserialized && 'b:0;' !== $serialized
 		? $data
 		: $unserialized;
+}
+
+/** Match WordPress scalar option storage and double-serialized string behavior. */
+function maybe_serialize( $value ) {
+	return is_array( $value ) || is_object( $value ) || ( is_string( $value ) && ( maybe_unserialize( $value ) !== $value || 'b:0;' === $value ) ) ? serialize( $value ) : $value;
 }
 
 /**
@@ -2013,6 +2031,9 @@ function switch_to_blog( $site_id ) {
 	$cybermaps_mock_blog_stack[] = (int) $cybermaps_mock_current_blog_id;
 	$cybermaps_mock_switched_blogs[] = (int) $site_id;
 	$cybermaps_mock_current_blog_id  = (int) $site_id;
+	if ( ( $GLOBALS['wpdb'] ?? null ) instanceof CybermapsMockStaticOwnershipDatabase ) {
+		$GLOBALS['wpdb']->set_blog_id( (int) $site_id );
+	}
 	return true;
 }
 
@@ -2023,6 +2044,9 @@ function restore_current_blog() {
 	global $cybermaps_mock_blog_stack, $cybermaps_mock_current_blog_id;
 	$previous = array_pop( $cybermaps_mock_blog_stack );
 	$cybermaps_mock_current_blog_id = null === $previous ? 1 : (int) $previous;
+	if ( ( $GLOBALS['wpdb'] ?? null ) instanceof CybermapsMockStaticOwnershipDatabase ) {
+		$GLOBALS['wpdb']->set_blog_id( $cybermaps_mock_current_blog_id );
+	}
 	return true;
 }
 
@@ -2042,6 +2066,9 @@ function dbDelta( $queries = '', $execute = true ) {
 	$callback = $GLOBALS['cybermaps_mock_dbdelta_callback'] ?? null;
 	if ( is_callable( $callback ) ) {
 		return $callback( $queries, $execute );
+	}
+	if ( $execute && ( $GLOBALS['wpdb'] ?? null ) instanceof CybermapsMockStaticOwnershipDatabase && is_string( $queries ) && str_contains( $queries, 'cybermaps_static_ownership' ) ) {
+		return $GLOBALS['wpdb']->dbdelta( $queries );
 	}
 
 	unset( $execute );
@@ -2094,6 +2121,7 @@ function get_locale() {
  * Mock WP_Query
  */
 class WP_Query {
+	public $post        = null;
 	public $posts       = array();
 	public $found_posts = 0;
 	private $current_post = -1;
@@ -2111,6 +2139,12 @@ class WP_Query {
 			return;
 		}
 
+		if ( isset( $args['cybermaps_publication_query'] ) ) {
+			$this->posts = get_posts( $args );
+			$this->found_posts = count( $this->posts );
+			return;
+		}
+
 		$this->found_posts = 10;
 		$this->posts       = array( (object) array( 'ID' => 1, 'post_title' => 'Post 1' ) );
 	}
@@ -2121,7 +2155,8 @@ class WP_Query {
 
 	public function the_post() {
 		++$this->current_post;
-		$GLOBALS['post'] = $this->posts[ $this->current_post ] ?? null;
+		$this->post = $this->posts[ $this->current_post ] ?? null;
+		$GLOBALS['post'] = $this->post;
 		$GLOBALS['cybermaps_mock_current_post_id'] = is_object( $GLOBALS['post'] )
 			? (int) ( $GLOBALS['post']->ID ?? 0 )
 			: 0;

@@ -99,6 +99,7 @@ wp_cli() {
 		-v "${RUNTIME_DIR}/wordpress:/var/www/html" \
 		-v "$(dirname "${ARCHIVE_PATH}"):/artifacts:ro" \
 		-v "${PROJECT_DIR}/tests/integration:/validation:ro" \
+		-v "${PROJECT_DIR}/tests/Audit/fixtures:/audit-validation:ro" \
 		-v "${PROJECT_DIR}/docs/generated/releases:/history:ro" \
 		-w /var/www/html \
 		"${WORDPRESS_IMAGE}" php -d memory_limit=512M /cli-tools/vendor/wp-cli/wp-cli/php/boot-fs.php "$@" --allow-root
@@ -127,6 +128,14 @@ installed_plugin_check="$(wp_cli plugin get plugin-check --field=version | tr -d
 [ "${installed_plugin_check}" = "${PLUGIN_CHECK_VERSION}" ] || fail "Plugin Check version is ${installed_plugin_check}, expected ${PLUGIN_CHECK_VERSION}"
 wp_cli plugin activate cybermaps --quiet
 wp_cli eval-file /validation/wporg-smoke.php > "${RUNTIME_DIR}/smoke.txt"
+wp_cli eval-file /validation/wporg-sitemap-regressions.php >> "${RUNTIME_DIR}/smoke.txt"
+wp_cli eval 'define( "CYBERMAPS_DISPOSABLE_REST_FIXTURE", true ); require "/validation/rest-representation.php";' > "${RUNTIME_DIR}/rest-representation.json"
+wp_cli eval 'putenv( "CYBERMAPS_CONFIGURATION_FIXTURE=1" ); require "/validation/configuration-cas.php";' > "${RUNTIME_DIR}/configuration-cas.json"
+wp_cli eval 'putenv( "CYBERMAPS_CONFIGURATION_FIXTURE=1" ); require "/validation/upgrade-configuration-cas.php";' > "${RUNTIME_DIR}/upgrade-configuration-cas.json"
+wp_cli eval 'putenv( "CYBERMAPS_CLOUDFLARE_FIXTURE=1" ); require "/validation/cloudflare-persistence.php";' > "${RUNTIME_DIR}/cloudflare-persistence.json"
+wp_cli eval 'putenv( "CYBERMAPS_AUDIT_LOCK_FIXTURE=1" ); require "/audit-validation/native-run-lock.php";' > "${RUNTIME_DIR}/audit-run-lock.json"
+wp_cli eval 'putenv( "CYBERMAPS_STATE_FIXTURE_DISPOSABLE=1" ); require "/validation/wporg-static-ownership.php";' > "${RUNTIME_DIR}/static-ownership.json"
+wp_cli eval 'putenv( "CYBERMAPS_STATE_FIXTURE_DISPOSABLE=1" ); require "/validation/wporg-state-cutover.php";' > "${RUNTIME_DIR}/state-cutover.json"
 if [ "${CYBERMAPS_TEST_UPGRADE:-0}" = "1" ]; then
 	wp_cli eval 'require "/validation/wporg-mcp-upgrade-check.php";' >> "${RUNTIME_DIR}/smoke.txt"
 fi
@@ -220,6 +229,13 @@ report = {
     "smoke": Path(sys.argv[8]).read_text().strip(),
     "wp_debug_clean": True,
     "lifecycle_passed": True,
+    "sitemap_regressions_passed": True,
+    "rest_representation_passed": True,
+    "configuration_persistence_passed": True,
+    "cloudflare_persistence_passed": True,
+    "audit_run_lock_passed": True,
+    "static_ownership_passed": True,
+    "state_cutover_passed": True,
     "mcp_read_only_passed": True,
     "mcp_adapter_version": sys.argv[12],
     "multisite": sys.argv[11] == "1",

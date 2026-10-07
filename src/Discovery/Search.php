@@ -11,6 +11,7 @@ namespace Cybermaps\Discovery;
 
 use Cybermaps\Core\AtomicMinuteCounter;
 use Cybermaps\Core\ClientIPResolver;
+use Cybermaps\Core\CacheManager;
 use Cybermaps\SEO\PublicationEligibility;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -28,7 +29,17 @@ class Search {
 	 * @return \WP_REST_Response
 	 */
 	public function handle_search( $request ) {
-		if ( ! Integrity::is_hub_enabled() ) {
+		$generation = CacheManager::get_generation( 'discovery', true );
+		if ( $generation < 0 ) {
+			return self::unavailable_response();
+		}
+		try {
+			$settings = \Cybermaps\Core\ConfigurationStore::publication_settings();
+			\Cybermaps\Core\ConfigurationStore::publication_discovery();
+		} catch ( \Cybermaps\Core\BuildUnavailableException $error ) {
+			return self::unavailable_response();
+		}
+		if ( empty( $settings['enable_discovery_hub'] ) ) {
 			return new \WP_Error(
 				'discovery_hub_disabled',
 				__( 'AI Publication Hub is disabled.', 'cybermaps' ),
@@ -54,7 +65,6 @@ class Search {
 			);
 		}
 
-		$settings  = \Cybermaps\Core\ConfigurationStore::settings();
 		$inventory = new PublicationInventory( $settings );
 		$limit     = self::normalize_limit( $request->get_param( 'limit' ) );
 		if ( ! $inventory->has_included_post_types() ) {
@@ -67,7 +77,14 @@ class Search {
 			);
 		}
 
-		$results = $this->find_results( $query_str, $inventory, $settings, $limit );
+		try {
+			$results = $this->find_results( $query_str, $inventory, $settings, $limit );
+		} catch ( \Cybermaps\Core\BuildUnavailableException $error ) {
+			return self::unavailable_response();
+		}
+		if ( CacheManager::get_generation( 'discovery', true ) !== $generation ) {
+			return self::unavailable_response();
+		}
 		return rest_ensure_response(
 			array(
 				'query'   => $query_str,
@@ -77,7 +94,16 @@ class Search {
 		);
 	}
 
-	private function rate_limit_exceeded(): bool {
+	/** Preserve the REST and read-only ability error contract without stale hits. */
+	private static function unavailable_response(): \WP_Error {
+		return new \WP_Error(
+			'publication_unavailable',
+			__( 'Cybermaps content changed during search. Please retry shortly.', 'cybermaps' ),
+			array( 'status' => 503 )
+		);
+	}
+
+	public static function rate_limit_exceeded(): bool {
 		$ip         = ClientIPResolver::get_ip();
 		$material   = '' !== $ip ? $ip : AtomicMinuteCounter::UNRESOLVED_CLIENT_BUCKET;
 		$rate_key   = AtomicMinuteCounter::requester_bucket( 'search', 'rest', $material );
@@ -114,14 +140,13 @@ class Search {
 				)
 			);
 
-			$query      = new \WP_Query( $args );
-			$posts      = is_array( $query->posts ) ? $query->posts : array();
+			$posts      = \Cybermaps\Sitemap\PublicationQuery::posts( $args );
 			$inspected += count( $posts );
 			if ( empty( $posts ) ) {
 				break;
 			}
 
-			$saw_new_candidate = $this->collect_results( $query, $results, $seen, $eligibility, $limit );
+			$saw_new_candidate = $this->collect_results( $posts, $results, $seen, $eligibility, $limit );
 			wp_reset_postdata();
 
 			if (
@@ -144,16 +169,15 @@ class Search {
 	 * @param array<int,bool>                 $seen Seen IDs.
 	 */
 	private function collect_results(
-		\WP_Query $query,
+		array $posts,
 		array &$results,
 		array &$seen,
 		PublicationEligibility $eligibility,
 		int $limit
 	): bool {
 		$saw_new = false;
-		while ( $query->have_posts() ) {
-			$query->the_post();
-			$post_id = get_the_ID();
+		foreach ( $posts as $candidate ) {
+			$post_id = is_object( $candidate ) ? (int) ( $candidate->ID ?? 0 ) : 0;
 			$post    = get_post( $post_id );
 			if ( $post_id < 1 || isset( $seen[ $post_id ] ) ) {
 				continue;
@@ -175,16 +199,14 @@ class Search {
 	 * @return array<string,string>
 	 */
 	private function build_result( object $post ): array {
-		$post_id     = (int) $post->ID;
-		$ai_meta     = AIMetadata::calculate( $post_id );
-		$raw_snippet = $ai_meta['snippet'] ?? '';
-		$snippet     = is_scalar( $raw_snippet ) && '' !== trim( (string) $raw_snippet )
-			? (string) $raw_snippet
-			: wp_strip_all_tags( (string) get_the_excerpt( $post ) );
+		$post_id = (int) $post->ID;
+		$snippet = self::result_snippet( $post );
 		return array(
-			'title'   => PublicationConstraints::bounded_text(
-				wp_strip_all_tags( (string) get_the_title( $post_id ) ),
-				PublicationConstraints::SEARCH_TITLE_MAX_LENGTH
+			'title'   => wp_strip_all_tags(
+				PublicationConstraints::bounded_text(
+					(string) get_the_title( $post_id ),
+					PublicationConstraints::SEARCH_TITLE_MAX_LENGTH
+				)
 			),
 			'url'     => \Cybermaps\Core\URLManager::rewrite_url( (string) get_permalink( $post_id ) ),
 			'snippet' => PublicationConstraints::bounded_text(
@@ -193,6 +215,20 @@ class Search {
 			),
 			'intent'  => IntentEngine::calculate( $post_id, 'post', (string) ( $post->post_type ?? '' ) ),
 		);
+	}
+
+	/** Keep a search hit available when its optional metadata cannot be built. */
+	private static function result_snippet( object $post ): string {
+		try {
+			$ai_meta = AIMetadata::calculate( (int) $post->ID );
+		} catch ( PublicationSizeLimitException $error ) {
+			// Do not retry through the excerpt pipeline after rejecting the source.
+			return '';
+		}
+		$raw_snippet = $ai_meta['snippet'] ?? '';
+		return is_scalar( $raw_snippet ) && '' !== trim( (string) $raw_snippet )
+			? (string) $raw_snippet
+			: ( new \Cybermaps\Content\VisibleTextExtractor() )->summary( $post, 40 );
 	}
 
 	/**

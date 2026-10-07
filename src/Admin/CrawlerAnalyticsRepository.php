@@ -18,13 +18,28 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 final class CrawlerAnalyticsRepository {
 
+	private bool $available = true;
+
 	public const REPORTING_DAYS        = 30;
-	private const OVERVIEW_CACHE_KEY   = 'cybermaps_analytics_overview_v2';
-	private const ACTIVITY_CACHE_KEY   = 'cybermaps_analytics_activity_v2';
+	private const OVERVIEW_CACHE_KEY   = 'cybermaps_analytics_overview_v3';
+	private const ACTIVITY_CACHE_KEY   = 'cybermaps_analytics_activity_v3';
 	private const WIDGET_CACHE_KEY     = 'cybermaps_recent_logs_widget';
 	private const RECENT_PER_KIND      = 50;
 	private const WIDGET_LIMIT         = 5;
 	private const UNKNOWN_CLIENT_LIMIT = 50;
+
+	/** Whether every database projection in this request succeeded. */
+	public function is_available(): bool {
+		return $this->available;
+	}
+
+	private function record_read_result( bool $valid ): void {
+		global $wpdb;
+		if ( ! $valid || '' !== $wpdb->last_error ) {
+			$this->available = false;
+			CrawlerAnalyticsRecorder::persist_health_error();
+		}
+	}
 
 	/**
 	 * Return the complete rolling analytics overview.
@@ -51,7 +66,8 @@ final class CrawlerAnalyticsRepository {
 		$cutoff = self::reporting_cutoff_mysql();
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching -- These exact aggregates read the plugin-owned analytics event table and are cached as one reporting model below.
-		$summary = $wpdb->get_row(
+		$wpdb->last_error = '';
+		$summary          = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT
 					SUM(CASE WHEN request_kind = 'endpoint' THEN 1 ELSE 0 END) AS php_endpoint_requests,
@@ -99,8 +115,10 @@ final class CrawlerAnalyticsRepository {
 			),
 			ARRAY_A
 		);
+		$this->record_read_result( is_array( $summary ) );
 
-		$endpoints = $wpdb->get_results(
+		$wpdb->last_error = '';
+		$endpoints        = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT
 					endpoint_id,
@@ -121,8 +139,10 @@ final class CrawlerAnalyticsRepository {
 			),
 			ARRAY_A
 		);
+		$this->record_read_result( is_array( $endpoints ) );
 
-		$content = $wpdb->get_results(
+		$wpdb->last_error = '';
+		$content          = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT
 					url,
@@ -141,8 +161,10 @@ final class CrawlerAnalyticsRepository {
 			),
 			ARRAY_A
 		);
+		$this->record_read_result( is_array( $content ) );
 
-		$crawlers = $wpdb->get_results(
+		$wpdb->last_error = '';
+		$crawlers         = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT
 					bot,
@@ -162,8 +184,10 @@ final class CrawlerAnalyticsRepository {
 			),
 			ARRAY_A
 		);
+		$this->record_read_result( is_array( $crawlers ) );
 
-		$categories = $wpdb->get_results(
+		$wpdb->last_error = '';
+		$categories       = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT
 					category,
@@ -180,8 +204,10 @@ final class CrawlerAnalyticsRepository {
 			),
 			ARRAY_A
 		);
+		$this->record_read_result( is_array( $categories ) );
 
-		$trend_rows = $wpdb->get_results(
+		$wpdb->last_error = '';
+		$trend_rows       = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT
 					DATE(time) AS day,
@@ -197,8 +223,10 @@ final class CrawlerAnalyticsRepository {
 			),
 			ARRAY_A
 		);
+		$this->record_read_result( is_array( $trend_rows ) );
 
-		$unknown_clients = $wpdb->get_results(
+		$wpdb->last_error = '';
+		$unknown_clients  = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT
 					identity_status,
@@ -242,9 +270,11 @@ final class CrawlerAnalyticsRepository {
 			),
 			ARRAY_A
 		);
+		$this->record_read_result( is_array( $unknown_clients ) );
 		// phpcs:enable
 
 		$overview = array(
+			'available'       => $this->available,
 			'summary'         => $this->normalize_summary( \is_array( $summary ) ? $summary : array() ),
 			'endpoints'       => $this->normalize_rows( $endpoints ),
 			'content'         => $this->normalize_rows( $content ),
@@ -254,6 +284,9 @@ final class CrawlerAnalyticsRepository {
 			'unknown_clients' => $this->normalize_unknown_clients( $unknown_clients ),
 		);
 
+		if ( ! $this->available ) {
+			return isset( $overview ) ? $overview : array();
+		}
 		CacheManager::set_compatible_if_current(
 			self::OVERVIEW_CACHE_KEY,
 			$overview,
@@ -280,7 +313,8 @@ final class CrawlerAnalyticsRepository {
 		$table = $wpdb->prefix . 'cybermaps_logs';
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching -- Recent activity must reflect the persisted event stream; the bounded result is cached immediately below.
-		$endpoint_rows = $wpdb->get_results(
+		$wpdb->last_error = '';
+		$endpoint_rows    = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT *
 				FROM %i
@@ -292,7 +326,9 @@ final class CrawlerAnalyticsRepository {
 			),
 			ARRAY_A
 		);
-		$page_rows     = $wpdb->get_results(
+		$this->record_read_result( is_array( $endpoint_rows ) );
+		$wpdb->last_error = '';
+		$page_rows        = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT *
 				FROM %i
@@ -305,6 +341,7 @@ final class CrawlerAnalyticsRepository {
 			),
 			ARRAY_A
 		);
+		$this->record_read_result( is_array( $page_rows ) );
 		// phpcs:enable
 
 		$activity = \array_merge(
@@ -321,6 +358,9 @@ final class CrawlerAnalyticsRepository {
 			}
 		);
 
+		if ( ! $this->available ) {
+			return isset( $overview ) ? $overview : array();
+		}
 		CacheManager::set_compatible_if_current(
 			self::ACTIVITY_CACHE_KEY,
 			$activity,
@@ -354,7 +394,8 @@ final class CrawlerAnalyticsRepository {
 		// `time` index supports this newest-first time/ID LIMIT without adding a
 		// redundant launch-time schema migration.
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching -- The dashboard needs a fresh bounded projection, which is cached immediately below.
-		$rows = $wpdb->get_results(
+		$wpdb->last_error = '';
+		$rows             = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT time, bot, url, request_kind, response_status
 				FROM %i
@@ -370,9 +411,13 @@ final class CrawlerAnalyticsRepository {
 			),
 			ARRAY_A
 		);
+		$this->record_read_result( is_array( $rows ) );
 		// phpcs:enable
 
 		$activity = $this->normalize_rows( $rows );
+		if ( ! $this->available ) {
+			return isset( $overview ) ? $overview : array();
+		}
 		CacheManager::set_compatible_if_current(
 			self::WIDGET_CACHE_KEY,
 			$activity,

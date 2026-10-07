@@ -57,6 +57,23 @@ final class SitemapStatusTest extends TestCase {
 		$this->assertSame( 'warning', $tone->invoke( null, 'partial' ) );
 		$this->assertSame( 'error', $tone->invoke( null, 'failed' ) );
 		$this->assertSame( 'neutral', $tone->invoke( null, 'not-run' ) );
+		$this->assertSame( 'Continuation queued', $label->invoke( null, 'pending' ) );
+		$this->assertSame( 'warning', $tone->invoke( null, 'pending' ) );
+	}
+
+	public function test_persisted_pending_reconciliation_is_displayed_as_queued(): void {
+		$prior = $GLOBALS['cybermaps_mock_options'] ?? array();
+		try {
+			update_option( 'cybermaps_last_static_sync_report', array( 'status' => 'pending' ) );
+			$context = ( new \ReflectionMethod( SitemapStatus::class, 'status_context' ) )->invoke( null, array( 'static_engine_mode' => 'all' ) );
+			$this->assertSame( 'pending', $context['sync_status'] );
+			$this->assertSame( 'Continuation queued', $context['sync_status_label'] );
+			ob_start();
+			( new \ReflectionMethod( SitemapStatus::class, 'render_full_mode_notice' ) )->invoke( null, $context['sync_status_label'], 'today', 'yesterday' );
+			$html = (string) ob_get_clean();
+			$this->assertStringContainsString( 'Latest reconciliation: Continuation queued', $html );
+			$this->assertStringNotContainsString( 'Unknown', $html );
+		} finally { $GLOBALS['cybermaps_mock_options'] = $prior; }
 	}
 
 	public function test_php_path_probe_uses_a_unique_query_and_matching_challenge_header(): void {
@@ -69,6 +86,14 @@ final class SitemapStatusTest extends TestCase {
 			$probe['url']
 		);
 		$this->assertSame( $challenge, $probe['args']['headers']['X-Cybermaps-Diagnostic-Challenge'] );
+		$this->assertSame( '1', $probe['args']['headers']['X-Cybermaps-Diagnostic'] );
+		$prior = $_SERVER['HTTP_X_CYBERMAPS_DIAGNOSTIC'] ?? null;
+		$_SERVER['HTTP_X_CYBERMAPS_DIAGNOSTIC'] = $probe['args']['headers']['X-Cybermaps-Diagnostic'];
+		try {
+			$this->assertTrue( ( new \ReflectionMethod( \Cybermaps\Admin\CrawlerAnalyticsRecorder::class, 'is_diagnostic_request' ) )->invoke( new \Cybermaps\Admin\CrawlerAnalyticsRecorder() ) );
+		} finally {
+			if ( null === $prior ) { unset( $_SERVER['HTTP_X_CYBERMAPS_DIAGNOSTIC'] ); } else { $_SERVER['HTTP_X_CYBERMAPS_DIAGNOSTIC'] = $prior; }
+		}
 		$this->assertSame( 'no-cache, no-store', $probe['args']['headers']['Cache-Control'] );
 	}
 

@@ -14,20 +14,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Describes headers a deployment must attach when it serves a Cybermaps static
- * copy before PHP. It never writes a web-server or CDN configuration.
+ * Observes header expectations for enabled static publication candidates.
+ * Snapshot validators are diagnostics, never deployable header overrides.
+ * Origin/server response semantics remain authoritative. This class never
+ * writes a web-server or CDN configuration.
  */
 final class StaticHeaderManifest {
 
 	/**
-	 * Return a deterministic manifest for every eligible static publication.
+	 * Return enabled candidate policies and observational filesystem snapshots.
 	 *
 	 * @param array<string, mixed>|null $settings General settings.
 	 * @return array<string, mixed>
 	 */
 	public function get_manifest( ?array $settings = null ): array {
 		$settings = is_array( $settings ) ? $settings : \Cybermaps\Core\ConfigurationStore::settings();
-		$targets  = \Cybermaps\Core\EndpointRegistry::get_instance()->get_static_targets( 'all', $settings, true );
+		$targets  = \Cybermaps\Core\EndpointRegistry::get_instance()->get_static_targets( 'all', $settings );
 		$policies = array();
 
 		foreach ( $targets as $target ) {
@@ -41,9 +43,10 @@ final class StaticHeaderManifest {
 		ksort( $policies, SORT_STRING );
 
 		return array(
-			'version'  => 1,
-			'policies' => $policies,
-			'snippets' => $this->snippets( $policies ),
+			'version'          => 1,
+			'header_authority' => 'origin',
+			'policies'         => $policies,
+			'snippets'         => $this->snippets( $policies ),
 		);
 	}
 
@@ -209,24 +212,26 @@ final class StaticHeaderManifest {
 		$cache_policy  = PublicationCachePolicy::for_publication( 'static', (string) ( $target['id'] ?? 'publication' ) );
 
 		return array(
-			'path'           => $path,
-			'endpoint_id'    => (string) ( $target['id'] ?? '' ),
-			'bucket'         => (string) ( $target['bucket'] ?? '' ),
-			'enabled'        => ! empty( $target['enabled'] ),
-			'mime'           => (string) ( $target['type'] ?? 'application/octet-stream' ),
-			'browser_ttl'    => (int) $cache_policy['browser_ttl'],
-			'shared_ttl'     => (int) $cache_policy['shared_ttl'],
-			'cache_control'  => PublicationCachePolicy::cache_control( $cache_policy ),
-			'cors_origin'    => '*',
-			'expose_headers' => implode( ', ', PublicationCachePolicy::exposed_headers() ),
-			'repr_digest'    => (string) $deployed['repr_digest'],
-			// A static server can add Content-Digest only when it serves identity
-			// bytes or recomputes it after gzip/Brotli. Repr-Digest is portable.
-			'content_digest' => '',
-			'etag'           => (string) $deployed['etag'],
-			'last_modified'  => (string) $deployed['last_modified'],
-			'tags'           => PublicationCachePolicy::tags( $cache_policy ),
-			'content_usage'  => $content_usage,
+			'path'               => $path,
+			'endpoint_id'        => (string) ( $target['id'] ?? '' ),
+			'bucket'             => (string) ( $target['bucket'] ?? '' ),
+			'enabled'            => ! empty( $target['enabled'] ),
+			'snapshot_only'      => true,
+			'existence_snapshot' => '' !== $deployed['repr_digest'],
+			'mime'               => (string) ( $target['type'] ?? 'application/octet-stream' ),
+			'browser_ttl'        => (int) $cache_policy['browser_ttl'],
+			'shared_ttl'         => (int) $cache_policy['shared_ttl'],
+			'cache_control'      => PublicationCachePolicy::cache_control( $cache_policy ),
+			'cors_origin'        => '*',
+			'expose_headers'     => implode( ', ', PublicationCachePolicy::exposed_headers() ),
+			'repr_digest'        => (string) $deployed['repr_digest'],
+			// Content-Digest requires current identity response bytes. Observed
+			// digests never authorize literal header configuration.
+			'content_digest'     => '',
+			'etag'               => (string) $deployed['etag'],
+			'last_modified'      => (string) $deployed['last_modified'],
+			'tags'               => PublicationCachePolicy::tags( $cache_policy ),
+			'content_usage'      => $content_usage,
 		);
 	}
 
@@ -235,139 +240,52 @@ final class StaticHeaderManifest {
 	 * @return array<string, string>
 	 */
 	private function snippets( array $policies ): array {
-		$apache = array( '# Cybermaps static publication headers. Deploy this advisory configuration manually; Cybermaps never writes server configuration.' );
-		$nginx  = array( '# Cybermaps static publication headers. Deploy this advisory configuration manually; Cybermaps never writes server configuration.' );
-		$cdn    = array();
-
-		foreach ( $policies as $path => $policy ) {
-			$apache = array_merge( $apache, self::apache_policy_snippet( $path, $policy ) );
-			$nginx  = array_merge( $nginx, self::nginx_policy_snippet( $path, $policy ) );
-			$cdn[]  = self::cdn_policy_snippet( $path, $policy );
+		$guidance = implode(
+			"\n",
+			array(
+				'# Cybermaps header guidance only; no response-header overrides are generated.',
+				'# Preserve origin Content-Type, Cache-Control, CORS and response status for dynamic responses and errors.',
+				'# Configure MIME types in the existing static-file handler for actual regular files only.',
+				'# Keep native current-file ETag and Last-Modified handling; never copy snapshot validators into configuration.',
+				'# Repr-Digest and Content-Digest require current response bytes; delegate to the origin if the server cannot calculate them.',
+				'# Apply any local public caching/CORS policy only to successful responses from verified owned static files.',
+				'# When that distinction cannot be enforced, keep the endpoint dynamic and use the routing recipes separately.',
+			)
+		);
+		$cdn      = array();
+		foreach ( array_keys( $policies ) as $path ) {
+			$cdn[] = self::cdn_policy_snippet( $path );
 		}
 
-		// LiteSpeed and OpenLiteSpeed read Apache-compatible directives. This is
-		// advisory only: Core never writes a virtual-host configuration file.
 		return array(
-			'apache'    => implode( "\n", $apache ),
-			'nginx'     => implode( "\n", $nginx ),
-			'litespeed' => implode( "\n", $apache ),
+			'apache'    => $guidance,
+			'nginx'     => $guidance,
+			'litespeed' => $guidance,
 			'varnish'   => \Cybermaps\Integration\EdgeCache\VarnishAdapter::advisory_vcl(),
 			'routing'   => $this->routing_snippets(),
 			'cdn'       => implode( "\n", $cdn ),
 		);
 	}
 
-	/**
-	 * Build the Apache directives for one static policy.
-	 *
-	 * @param array<string, mixed> $policy Static path policy.
-	 * @return array<int, string>
-	 */
-	private static function apache_policy_snippet( string $path, array $policy ): array {
-		$quoted_path = preg_quote( ltrim( $path, '/' ), '#' );
-		$lines       = array(
-			'<LocationMatch "^/' . $quoted_path . '$">',
-			'  Header always set Content-Type "' . $policy['mime'] . '"',
-			'  Header always set Cache-Control "' . $policy['cache_control'] . '"',
-			'  Header always set Access-Control-Allow-Origin "*"',
-			'  Header always set Access-Control-Allow-Methods "GET, HEAD, OPTIONS"',
-			'  Header always set Access-Control-Allow-Headers "Accept, If-Modified-Since, If-None-Match"',
-			'  Header always set Access-Control-Max-Age "' . (string) PublicationCachePolicy::PREFLIGHT_TTL . '"',
-			'  Header always set Access-Control-Expose-Headers "' . $policy['expose_headers'] . '"',
-		);
-		$lines[]     = '' !== $policy['repr_digest']
-			? '  Header always set Repr-Digest "' . $policy['repr_digest'] . '"'
-			: '  # INCOMPLETE: materialize this static file, then set its exact Repr-Digest.';
-		if ( '' !== $policy['etag'] ) {
-			$lines[] = '  Header always set ETag "' . addcslashes( (string) $policy['etag'], '"\\' ) . '"';
-		}
-		if ( '' !== $policy['last_modified'] ) {
-			$lines[] = '  Header always set Last-Modified "' . $policy['last_modified'] . '"';
-		}
-		if ( '' !== $policy['content_usage'] ) {
-			$lines[] = '  Header always set Content-Usage "' . $policy['content_usage'] . '"';
-		}
-		$lines[] = '  Header always set Surrogate-Key "' . implode( ' ', (array) $policy['tags'] ) . '"';
-		$lines[] = '  Header always set Cache-Tag "' . implode( ',', (array) $policy['tags'] ) . '"';
-		$lines[] = '</LocationMatch>';
-
-		return $lines;
-	}
-
-	/**
-	 * Build the nginx directives for one static policy.
-	 *
-	 * @param array<string, mixed> $policy Static path policy.
-	 * @return array<int, string>
-	 */
-	private static function nginx_policy_snippet( string $path, array $policy ): array {
-		$lines   = array(
-			'location = ' . $path . ' {',
-			'  etag off; # Cybermaps supplies the canonical representation ETag below.',
-			'  add_header Content-Type "' . $policy['mime'] . '" always;',
-			'  add_header Cache-Control "' . $policy['cache_control'] . '" always;',
-			'  add_header Access-Control-Allow-Origin "*" always;',
-			'  add_header Access-Control-Allow-Methods "GET, HEAD, OPTIONS" always;',
-			'  add_header Access-Control-Allow-Headers "Accept, If-Modified-Since, If-None-Match" always;',
-			'  add_header Access-Control-Max-Age "' . (string) PublicationCachePolicy::PREFLIGHT_TTL . '" always;',
-			'  add_header Access-Control-Expose-Headers "' . $policy['expose_headers'] . '" always;',
-		);
-		$lines[] = '' !== $policy['repr_digest']
-			? '  add_header Repr-Digest "' . $policy['repr_digest'] . '" always;'
-			: '  # INCOMPLETE: materialize this static file, then set its exact Repr-Digest.';
-		if ( '' !== $policy['etag'] ) {
-			$lines[] = "  add_header ETag '" . $policy['etag'] . "' always;";
-		}
-		if ( '' !== $policy['last_modified'] ) {
-			$lines[] = '  add_header Last-Modified "' . $policy['last_modified'] . '" always;';
-		}
-		if ( '' !== $policy['content_usage'] ) {
-			$lines[] = '  add_header Content-Usage "' . $policy['content_usage'] . '" always;';
-		}
-		$lines[] = '  add_header Surrogate-Key "' . implode( ' ', (array) $policy['tags'] ) . '" always;';
-		$lines[] = '  add_header Cache-Tag "' . implode( ',', (array) $policy['tags'] ) . '" always;';
-		$lines[] = '  if ($request_method = OPTIONS) { return 204; }';
-		$lines[] = '}';
-
-		return $lines;
-	}
-
-	/**
-	 * Build the CDN JSON rule for one static policy.
-	 *
-	 * @param array<string, mixed> $policy Static path policy.
-	 */
-	private static function cdn_policy_snippet( string $path, array $policy ): string {
+	/** Describe an origin-authoritative CDN posture without header mutations. */
+	private static function cdn_policy_snippet( string $path ): string {
 		return (string) wp_json_encode(
 			array(
-				'path'       => $path,
-				'headers'    => array_filter(
-					array(
-						'Content-Type'                  => $policy['mime'],
-						'Cache-Control'                 => $policy['cache_control'],
-						'Access-Control-Allow-Origin'   => '*',
-						'Access-Control-Allow-Methods'  => 'GET, HEAD, OPTIONS',
-						'Access-Control-Allow-Headers'  => 'Accept, If-Modified-Since, If-None-Match',
-						'Access-Control-Max-Age'        => (string) PublicationCachePolicy::PREFLIGHT_TTL,
-						'Access-Control-Expose-Headers' => $policy['expose_headers'],
-						'Repr-Digest'                   => $policy['repr_digest'],
-						'ETag'                          => $policy['etag'],
-						'Last-Modified'                 => $policy['last_modified'],
-						'Surrogate-Key'                 => implode( ' ', (array) $policy['tags'] ),
-						'Cache-Tag'                     => implode( ',', (array) $policy['tags'] ),
-						'Content-Usage'                 => $policy['content_usage'],
-					),
-					static fn( string $value ): bool => '' !== $value
+				'path'   => $path,
+				'action' => array(
+					'response_headers' => 'preserve_origin',
+					'cache_control'    => 'respect_origin',
+					'validators'       => 'origin_or_current_file',
 				),
-				'incomplete' => '' === $policy['repr_digest'],
+				'note'   => 'Advisory only. Preserve private/no-store and error responses. Filesystem snapshot metadata is diagnostic and must not be deployed as literal headers.',
 			)
 		);
 	}
 
 	/**
-	 * Calculate the deployable RFC 9530 digest from a materialized static copy.
-	 * A missing file deliberately produces an incomplete snippet rather than a
-	 * placeholder that appears deployable.
+	 * Observe current bytes and modification time at a candidate static path.
+	 * This neither proves ownership nor authorizes header deployment. The values
+	 * are diagnostic snapshots and may change immediately after inspection.
 	 */
 	private function deployed_metadata( string $filename ): array {
 		if ( '' === $filename ) {
@@ -397,7 +315,7 @@ final class StaticHeaderManifest {
 			);
 		}
 		$path = StaticBridge::get_instance()->get_file_path( $filename );
-		if ( '' === $path || ! $wp_filesystem->exists( $path ) ) {
+		if ( '' === $path || ! $wp_filesystem->exists( $path ) || ( method_exists( $wp_filesystem, 'is_file' ) && ! $wp_filesystem->is_file( $path ) ) ) {
 			return array(
 				'repr_digest'   => '',
 				'etag'          => '',
@@ -442,16 +360,17 @@ final class StaticHeaderManifest {
 		);
 	}
 
-	/** Return compatibility aliases that intentionally remain dynamic. */
+	/** Return canonical protocol paths and aliases that must reach WordPress. */
 	private function dynamic_routing_paths(): array {
 		$registry = \Cybermaps\Core\EndpointRegistry::get_instance();
 		$paths    = array();
-		foreach ( array( 'discovery_index', 'api_catalog' ) as $id ) {
+		foreach ( array( 'discovery_index', 'api_catalog', 'ai_catalog', 'mcp_server_card' ) as $id ) {
 			$definition = $registry->get( $id );
 			if ( ! is_array( $definition ) || empty( $definition['path'] ) ) {
 				continue;
 			}
-			$paths = array_merge( $paths, array_filter( (array) ( $definition['aliases'] ?? array() ), 'is_string' ) );
+			$paths[] = (string) $definition['path'];
+			$paths   = array_merge( $paths, array_filter( (array) ( $definition['aliases'] ?? array() ), 'is_string' ) );
 		}
 
 		return array_values( array_unique( $paths ) );
@@ -461,7 +380,7 @@ final class StaticHeaderManifest {
 	private static function nginx_routing_snippet( array $paths ): string {
 		$lines = array( '# Cybermaps dynamic discovery routes. Add inside the server block before a generic /.well-known/ location.' );
 		foreach ( $paths as $path ) {
-			$lines[] = 'location = ' . $path . ' { try_files $uri /index.php?$args; }';
+			$lines[] = 'location = ' . $path . ' { rewrite ^ /index.php last; }';
 		}
 
 		return implode( "\n", $lines );

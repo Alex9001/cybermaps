@@ -61,9 +61,13 @@ final class TimeSensitivePublicationTest extends \WP_UnitTestCase {
 		$GLOBALS['cybermaps_mock_get_posts_args'] = array();
 		ConfigurationStore::reset_memo();
 		$this->delete_generated_files();
+		( new \ReflectionProperty( StaticBridge::class, 'instance' ) )->setValue( null, null );
+		\cybermaps_mock_enable_static_ownership_database( true );
 	}
 
 	protected function tearDown(): void {
+		\cybermaps_mock_disable_static_ownership_database();
+		( new \ReflectionProperty( StaticBridge::class, 'instance' ) )->setValue( null, null );
 		unset(
 			$GLOBALS['cybermaps_mock_get_option_observer'],
 			$GLOBALS['cybermaps_mock_get_posts_callback'],
@@ -72,6 +76,52 @@ final class TimeSensitivePublicationTest extends \WP_UnitTestCase {
 		ConfigurationStore::reset_memo();
 		$this->delete_generated_files();
 		parent::tearDown();
+	}
+
+	public function test_exhausted_news_inventory_preserves_retry_and_independent_ai_work(): void {
+		$now = time();
+		$checkpoint = (int) get_option( 'cybermaps_last_time_sensitive_static_refresh' );
+		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['enable_google_news'] = '1';
+		$excluded = new \WP_Post( array( 'ID' => 99, 'post_type' => 'post', 'post_status' => 'publish', 'post_password' => 'protected', 'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $now ) ) );
+		$GLOBALS['cybermaps_mock_wp_query_args'] = array();
+		$GLOBALS['cybermaps_mock_wp_query_callback'] = static function ( array $args ) use ( $excluded ): array {
+			return isset( $args['date_query'] ) && 'DESC' === ( $args['order'] ?? '' ) ? array_fill( 0, 1000, $excluded ) : array();
+		};
+		try {
+			$bridge = StaticBridge::get_instance();
+			$collect = new \ReflectionMethod( StaticBridge::class, 'collect_time_sensitive_state' );
+			$state = $collect->invoke( $bridge, ConfigurationStore::settings(), $checkpoint, $now );
+			$this->assertTrue( $state['news_due'] );
+			$this->assertTrue( $state['pending'] );
+			$this->assertSame( $now + \Cybermaps\Core\BuildUnavailableException::RETRY_AFTER, $state['next'] );
+			$this->assertContains( 41, $state['index_post_ids'] );
+			$this->assertSame( 41, $state['ai_changed_posts'][0]->ID );
+			$this->assertCount( 11, $GLOBALS['cybermaps_mock_wp_query_args'] );
+			foreach ( $GLOBALS['cybermaps_mock_wp_query_args'] as $args ) {
+				$this->assertLessThanOrEqual( 1000, $args['posts_per_page'] );
+			}
+			$GLOBALS['cybermaps_mock_wp_query_args'] = array();
+			$report = $bridge->refresh_time_sensitive_publications();
+			$this->assertFalse( $report['success'], json_encode( $report ) );
+			$this->assertNotEmpty( $report['failed'] );
+			$this->assertContains( 'ai-sitemap.xml', $report['desired'] );
+			$this->assertSame( $checkpoint, (int) get_option( 'cybermaps_last_time_sensitive_static_refresh' ) );
+			$this->assertNotFalse( wp_next_scheduled( StaticBridge::TIME_SENSITIVE_REFRESH_HOOK ) );
+			$this->assertLessThanOrEqual( 31, count( $GLOBALS['cybermaps_mock_wp_query_args'] ) );
+		} finally {
+			unset( $GLOBALS['cybermaps_mock_wp_query_callback'] );
+		}
+	}
+
+	public function test_news_collection_does_not_mask_unrelated_provider_failures(): void {
+		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['enable_google_news'] = '1';
+		$GLOBALS['cybermaps_mock_wp_query_callback'] = static function (): never { throw new \UnexpectedValueException( 'Unrelated fixture failure' ); };
+		try {
+			$this->expectException( \UnexpectedValueException::class );
+			( new \ReflectionMethod( StaticBridge::class, 'collect_time_sensitive_state' ) )->invoke( StaticBridge::get_instance(), ConfigurationStore::settings(), 0, time() );
+		} finally {
+			unset( $GLOBALS['cybermaps_mock_wp_query_callback'] );
+		}
 	}
 
 	public function test_transition_refresh_updates_only_affected_ai_publications(): void {
@@ -172,8 +222,8 @@ final class TimeSensitivePublicationTest extends \WP_UnitTestCase {
 		$GLOBALS['cybermaps_mock_options']['cybermaps_static_generation']                 = 0;
 		$GLOBALS['cybermaps_mock_scheduled'][ StaticBridge::TIME_SENSITIVE_REFRESH_HOOK ] = time() + 60;
 		$invalidated                                   = false;
-		$GLOBALS['cybermaps_mock_get_option_observer'] = static function ( string $option ) use ( &$invalidated ): void {
-			if ( $invalidated || 'cybermaps_static_generation' !== $option ) {
+		$GLOBALS['wpdb']->before_query = static function ( $database, array $query ) use ( &$invalidated ): void {
+			if ( $invalidated || ! str_starts_with( $query['query'], 'SELECT option_value' ) || 'cybermaps_static_generation' !== ( $query['args'][1] ?? '' ) ) {
 				return;
 			}
 
@@ -291,7 +341,7 @@ final class TimeSensitivePublicationTest extends \WP_UnitTestCase {
 
 		$second = StaticBridge::get_instance()->refresh_time_sensitive_publications();
 
-		$this->assertTrue( $second['success'] );
+		$this->assertTrue( $second['success'], json_encode( $second ) );
 		$this->assertSame( 'complete', $second['status'] );
 		$this->assertSame( 0, $this->due_transition_count( $checkpoint, $now ) );
 		$this->assertGreaterThan( $checkpoint, (int) \get_option( 'cybermaps_last_time_sensitive_static_refresh', 0 ) );
@@ -347,7 +397,7 @@ final class TimeSensitivePublicationTest extends \WP_UnitTestCase {
 		\update_option( 'cybermaps_last_time_sensitive_static_refresh', $newer, false );
 		$second = StaticBridge::get_instance()->refresh_time_sensitive_publications();
 
-		$this->assertTrue( $second['success'] );
+		$this->assertTrue( $second['success'], json_encode( $second ) );
 		$this->assertSame( $newer, (int) \get_option( 'cybermaps_last_time_sensitive_static_refresh', 0 ) );
 	}
 
@@ -370,6 +420,9 @@ final class TimeSensitivePublicationTest extends \WP_UnitTestCase {
 		$GLOBALS['cybermaps_mock_get_posts_callback'] = function ( array $args ): ?array {
 			$key        = AIMetadata::TRANSITION_META_KEY;
 			$meta_query = $args['meta_query'][0] ?? null;
+			if ( null === $meta_query && 'BETWEEN' === ( $args['meta_compare'] ?? '' ) ) {
+				$meta_query = array( 'key' => $args['meta_key'], 'value' => $args['meta_value'], 'compare' => 'BETWEEN' );
+			}
 			$compare    = \is_array( $meta_query ) ? (string) ( $meta_query['compare'] ?? '' ) : '';
 			$posts      = \array_values( (array) $GLOBALS['cybermaps_mock_posts'] );
 

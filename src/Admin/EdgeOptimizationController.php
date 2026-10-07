@@ -11,6 +11,7 @@ namespace Cybermaps\Admin;
 
 use Cybermaps\Core\CacheManager;
 use Cybermaps\Core\ConfigurationStore;
+use Cybermaps\Core\DatabaseSessionLock;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -18,10 +19,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** Coordinates diagnostics, ephemeral Cloudflare OAuth, and fallback token actions. */
 final class EdgeOptimizationController {
-	private const NONCE_ACTION = 'cybermaps_edge_optimization';
-	private const LOCK_TTL     = 90;
-	private const VERIFY_CACHE = 'cybermaps_edge_public_verification';
-	private string $lock_token = '';
+	private const NONCE_ACTION                   = 'cybermaps_edge_optimization';
+	private const VERIFY_CACHE                   = 'cybermaps_edge_public_verification';
+	private ?DatabaseSessionLock $operation_lock = null;
 
 	public function register_hooks(): void {
 		( new LocalDeliveryController() )->register_hooks();
@@ -84,47 +84,87 @@ final class EdgeOptimizationController {
 		if ( ! $this->cloudflare_environment_confirmed() ) {
 			wp_die( esc_html__( 'Cloudflare was not detected for this hostname. Confirm that its DNS record is proxied through Cloudflare before continuing.', 'cybermaps' ), esc_html__( 'Cloudflare not detected', 'cybermaps' ), array( 'response' => 400 ) );
 		}
-		$store = new CloudflareOAuthTransactionStore();
-		try {
-			$client      = new CloudflareOAuthClient();
-			$verifier    = CloudflareOAuthClient::generate_verifier();
-			$oauth       = $this->oauth_configuration();
-			$transaction = $this->create_oauth_transaction( $client, $verifier, $oauth );
-			$store->begin( $transaction, $verifier, $operation, $oauth['mode'], CloudflareRuleManager::public_host() );
-			// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Client validates the exact HTTPS Cloudflare OAuth origin.
-			wp_redirect( (string) $transaction['authorization_url'], 302, 'Cybermaps' );
-			exit;
-		} catch ( \Throwable $error ) {
-			$message = $this->safe_error( $error, __( 'Cloudflare authorization could not be started.', 'cybermaps' ) );
-			$store->fail( $message );
-			wp_die( esc_html( $message ), esc_html__( 'Cloudflare authorization', 'cybermaps' ), array( 'response' => 502 ) );
+		if ( ! $this->acquire_lock() ) {
+			wp_die( esc_html__( 'Another Cybermaps edge operation is running. Try again shortly.', 'cybermaps' ), '', array( 'response' => 409 ) );
 		}
+		$error = null;
+		$url   = '';
+		try {
+			$url = $this->begin_oauth_transaction( $operation );
+		} catch ( \Throwable $exception ) {
+			$error = $this->safe_error( $exception, __( 'Cloudflare authorization could not be started.', 'cybermaps' ) );
+		} finally {
+			$this->release_lock();
+		}
+		if ( null !== $error ) {
+			wp_die( esc_html( $error ), esc_html__( 'Cloudflare authorization', 'cybermaps' ), array( 'response' => 400 ) );
+		}
+		// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Client validates the exact HTTPS Cloudflare OAuth origin.
+		wp_redirect( $url, 302, 'Cybermaps' );
+		exit;
+	}
+
+	private function transaction_store(): CloudflareOAuthTransactionStore {
+		return new CloudflareOAuthTransactionStore( 0, fn() => $this->require_operation_lock(), $this->operation_lock );
+	}
+
+	private function begin_oauth_transaction( string $operation ): string {
+		$this->require_operation_lock();
+		$store = $this->transaction_store();
+		$store->require_restartable();
+		$client      = new CloudflareOAuthClient();
+		$verifier    = CloudflareOAuthClient::generate_verifier();
+		$oauth       = $this->oauth_configuration();
+		$transaction = $this->create_oauth_transaction( $client, $verifier, $oauth );
+		$store->begin( $transaction, $verifier, $operation, $oauth['mode'], CloudflareRuleManager::public_host() );
+		return (string) $transaction['authorization_url'];
 	}
 
 	public function cloudflare_oauth_callback(): void {
+		if ( 'GET' !== \Cybermaps\Core\ReadOnlyRequest::method() ) {
+			wp_die( esc_html__( 'GET is required.', 'cybermaps' ), '', array( 'response' => 405 ) );
+		}
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'Sign in as an administrator to finish Cloudflare authorization.', 'cybermaps' ), '', array( 'response' => 403 ) );
 		}
-		$store       = new CloudflareOAuthTransactionStore();
+		if ( ! $this->acquire_lock() ) {
+			wp_die( esc_html__( 'Another Cybermaps edge operation is running. Retry this callback shortly.', 'cybermaps' ), '', array( 'response' => 409 ) );
+		}
+		$error = null;
+		try {
+			$this->accept_oauth_callback();
+		} catch ( \Throwable $exception ) {
+			$error = $this->safe_error( $exception, __( 'Cloudflare authorization could not be completed.', 'cybermaps' ) );
+		} finally {
+			$this->release_lock();
+		}
+		if ( null !== $error ) {
+			wp_die( esc_html( $error ), '', array( 'response' => 400 ) );
+		}
+		wp_safe_redirect( self::oauth_return_url() );
+		exit;
+	}
+
+	private function accept_oauth_callback(): void {
+		$this->require_operation_lock();
+		$store       = $this->transaction_store();
 		$transaction = $store->current();
 		$state       = $this->callback_value( 'state', 512 );
 		if ( ! $this->valid_direct_callback( $transaction, $state ) ) {
-			wp_die( esc_html__( 'Cloudflare authorization state is invalid or expired. Return to Cybermaps and start again.', 'cybermaps' ), '', array( 'response' => 400 ) );
+			throw new \RuntimeException( esc_html__( 'Cloudflare authorization state is invalid or expired. Return to Cybermaps and start again.', 'cybermaps' ) );
 		}
+		$id    = (string) $transaction['transaction_id'];
 		$error = $this->callback_value( 'error_description', 500 );
 		if ( '' === $error ) {
 			$error = $this->callback_value( 'error', 100 );
 		}
 		if ( '' !== $error ) {
-			$store->fail( sprintf( /* translators: %s: Cloudflare OAuth error. */ __( 'Cloudflare authorization was not completed: %s', 'cybermaps' ), $error ) );
-			wp_safe_redirect( self::oauth_return_url() );
-			exit;
+			$store->fail( sprintf( /* translators: %s: Cloudflare OAuth error. */ __( 'Cloudflare authorization was not completed: %s', 'cybermaps' ), $error ), $id );
+			return;
 		}
-		if ( ! $store->authorize_direct( $state, $this->callback_value( 'code', 4096 ) ) ) {
-			wp_die( esc_html__( 'Cloudflare did not return a usable authorization code. Return to Cybermaps and start again.', 'cybermaps' ), '', array( 'response' => 400 ) );
+		if ( ! $store->authorize_direct( $state, $this->callback_value( 'code', 4096 ), $id ) ) {
+			throw new \RuntimeException( esc_html__( 'Cloudflare did not return a usable authorization code. Return to Cybermaps and start again.', 'cybermaps' ) );
 		}
-		wp_safe_redirect( self::oauth_return_url() );
-		exit;
 	}
 
 	private static function oauth_return_url(): string {
@@ -140,26 +180,6 @@ final class EdgeOptimizationController {
 
 	public function ajax_oauth_poll(): void {
 		$this->authorize();
-		$store       = new CloudflareOAuthTransactionStore();
-		$transaction = $store->current();
-		if ( null === $transaction ) {
-			wp_send_json_success( array( 'status' => 'idle' ) );
-		}
-		$finished = $this->finished_transaction_result( $transaction );
-		if ( null !== $finished ) {
-			$store->clear();
-			wp_send_json_success( $finished );
-		}
-		if ( 'failed' === ( $transaction['status'] ?? '' ) ) {
-			$message = (string) ( $transaction['message'] ?? __( 'Cloudflare authorization did not start.', 'cybermaps' ) );
-			$store->clear();
-			wp_send_json_success(
-				array(
-					'status'  => 'failed',
-					'message' => $message,
-				)
-			);
-		}
 		if ( ! $this->acquire_lock() ) {
 			wp_send_json_success(
 				array(
@@ -168,11 +188,16 @@ final class EdgeOptimizationController {
 				)
 			);
 		}
+		$store          = $this->transaction_store();
+		$transaction_id = '';
 		try {
-			$response = $this->poll_oauth_transaction( $transaction, $store );
+			$transaction_id = (string) ( $store->current()['transaction_id'] ?? '' );
+			$response       = $this->poll_current_transaction( $store );
 		} catch ( \Throwable $error ) {
 			$message = $this->safe_error( $error, __( 'Cloudflare authorization did not complete.', 'cybermaps' ) );
-			$store->fail( $message );
+			if ( '' !== $transaction_id && $this->operation_lock?->maintain() ) {
+				$store->fail( $message, $transaction_id );
+			}
 			$response = array(
 				'status'  => 'failed',
 				'message' => $message,
@@ -181,6 +206,25 @@ final class EdgeOptimizationController {
 			$this->release_lock();
 		}
 		wp_send_json_success( $response );
+	}
+
+	/** Read shared state only while the database connection owns the operation lock. */
+	private function poll_current_transaction( CloudflareOAuthTransactionStore $store ): array {
+		$transaction = $store->current();
+		if ( null === $transaction ) {
+			return array( 'status' => 'idle' );
+		}
+		$finished = $this->finished_transaction_result( $transaction );
+		if ( null !== $finished ) {
+			return $finished;
+		}
+		if ( 'failed' === ( $transaction['status'] ?? '' ) ) {
+			return array(
+				'status'  => 'failed',
+				'message' => (string) ( $transaction['message'] ?? __( 'Cloudflare authorization did not start.', 'cybermaps' ) ),
+			);
+		}
+		return $this->poll_oauth_transaction( $transaction, $store );
 	}
 
 	/** @param array<string,mixed> $transaction @return array<string,mixed>|null */
@@ -247,7 +291,7 @@ final class EdgeOptimizationController {
 			);
 		}
 		if ( 'authorized' !== $status ) {
-			$store->clear();
+			$store->fail( __( 'Cloudflare authorization expired or was declined. Start again.', 'cybermaps' ), (string) $transaction['transaction_id'] );
 			return array(
 				'status'  => 'failed',
 				'message' => 'expired' === $status ? __( 'Cloudflare authorization expired. Start again.', 'cybermaps' ) : __( 'Cloudflare authorization was declined or unavailable.', 'cybermaps' ),
@@ -322,7 +366,7 @@ final class EdgeOptimizationController {
 		try {
 			$this->require_current_transaction_host( $transaction );
 			$token   = $oauth->exchange_code( $code, (string) $transaction['code_verifier'], (string) $transaction['client_id'], (string) $transaction['redirect_uri'] );
-			$manager = new CloudflareRuleManager( new CloudflareRulesClient( $token ) );
+			$manager = new CloudflareRuleManager( new CloudflareRulesClient( $token ), fn() => $this->require_operation_lock(), $this->operation_lock );
 			$result  = 'remove' === (string) $transaction['operation'] ? $manager->remove_rules() : $manager->install_all();
 		} catch ( \Throwable $exception ) {
 			$error = $this->safe_error( $exception, __( 'The Cloudflare rule operation did not complete.', 'cybermaps' ) );
@@ -337,10 +381,12 @@ final class EdgeOptimizationController {
 			}
 			$token = '';
 		}
-		CloudflareRuleManager::record_credential_disposition( 'oauth', $revocation );
+		$this->require_operation_lock();
+		$this->record_disposition( $manager ?? null, 'oauth', $revocation, $error );
 		delete_transient( self::VERIFY_CACHE );
 		$response = $this->oauth_result( $result, $error, $revocation );
-		$store->finish( $response );
+		$this->require_operation_lock();
+		$store->finish( $response, (string) $transaction['transaction_id'] );
 		return $response;
 	}
 
@@ -353,10 +399,14 @@ final class EdgeOptimizationController {
 				'revocation' => $revocation,
 			);
 		}
-		$status  = 'partial' === ( $result['status'] ?? '' ) ? 'partial' : 'complete';
-		$message = 'partial' === $status
-			? __( 'Cloudflare installed the discovery headers, but cache safety needs attention. Review Debugging for details.', 'cybermaps' )
+		$retained = ! empty( $result['retained_legacy'] );
+		$status   = $retained || 'partial' === ( $result['status'] ?? '' ) ? 'partial' : 'complete';
+		$message  = 'partial' === $status
+			? __( 'Cloudflare updated the static MIME fallback profiles, but cache safety needs attention. Review Debugging for details.', 'cybermaps' )
 			: __( 'Cloudflare authorization completed and Cybermaps rules were updated.', 'cybermaps' );
+		if ( $retained ) {
+			$message = __( 'Cybermaps removed its current site rules. Older unscoped rules were retained for manual review in Cloudflare.', 'cybermaps' );
+		}
 		if ( 'revoke_failed' === $revocation ) {
 			$message .= ' ' . __( 'The credential was discarded, but Cloudflare revocation could not be confirmed.', 'cybermaps' );
 		}
@@ -381,20 +431,37 @@ final class EdgeOptimizationController {
 		$result = null;
 		$error  = null;
 		try {
-			$manager = new CloudflareRuleManager( new CloudflareRulesClient( $token ) );
+			$manager = new CloudflareRuleManager( new CloudflareRulesClient( $token ), fn() => $this->require_operation_lock(), $this->operation_lock );
 			$result  = $operation( $manager );
 		} catch ( \Throwable $exception ) {
 			$error = $this->safe_error( $exception, __( 'The Cloudflare operation did not complete.', 'cybermaps' ) );
 		} finally {
 			$token = '';
-			CloudflareRuleManager::record_credential_disposition( 'api_token', 'discarded' );
-			$this->release_lock();
+			try {
+				$this->record_disposition( $manager ?? null, 'api_token', 'discarded', $error );
+			} finally {
+				$this->release_lock();
+			}
 		}
 		if ( null !== $error ) {
 			wp_send_json_error( array( 'message' => $error ), 400 );
 		}
 		delete_transient( self::VERIFY_CACHE );
-		wp_send_json_success( array( 'result' => $result ) );
+		wp_send_json_success(
+			array(
+				'result'  => $result,
+				'message' => ! empty( $result['retained_legacy'] ) ? __( 'Cybermaps removed its current site rules. Older unscoped rules were retained for manual review in Cloudflare.', 'cybermaps' ) : '',
+			)
+		);
+	}
+
+	/** Preserve operation errors while reporting an unrecorded credential disposition. */
+	private function record_disposition( ?CloudflareRuleManager $manager, string $method, string $disposition, ?string &$error ): void {
+		try {
+			$manager?->record_credential_disposition( $method, $disposition );
+		} catch ( \Throwable $failure ) {
+			$error ??= $this->safe_error( $failure, __( 'Cloudflare operation state could not be recorded.', 'cybermaps' ) );
+		}
 	}
 
 	private function authorize(): void {
@@ -446,38 +513,20 @@ final class EdgeOptimizationController {
 	}
 
 	private function acquire_lock(): bool {
-		$key              = $this->lock_key();
-		$this->lock_token = bin2hex( random_bytes( 16 ) );
-		$value            = array(
-			'token' => $this->lock_token,
-			'time'  => time(),
-		);
-		if ( add_option( $key, $value, '', false ) ) {
-			return true;
+		global $wpdb;
+		$scope                  = ( defined( 'DB_NAME' ) ? (string) DB_NAME : '' ) . '|' . (string) ( $wpdb->options ?? ( $wpdb->prefix . 'options' ) );
+		$this->operation_lock ??= new DatabaseSessionLock( 'edge-operation', $scope );
+		return $this->operation_lock->acquire();
+	}
+
+	private function require_operation_lock(): void {
+		if ( ! $this->operation_lock?->maintain() ) {
+			throw new \RuntimeException( esc_html__( 'The edge operation lost its database lock. Start the operation again.', 'cybermaps' ) );
 		}
-		$held = get_option( $key, array() );
-		if ( time() - $this->lock_time( $held ) <= self::LOCK_TTL ) {
-			$this->lock_token = '';
-			return false;
-		}
-		delete_option( $key );
-		return add_option( $key, $value, '', false );
 	}
 
 	private function release_lock(): void {
-		$held = get_option( $this->lock_key(), array() );
-		if ( '' !== $this->lock_token && is_array( $held ) && hash_equals( $this->lock_token, (string) ( $held['token'] ?? '' ) ) ) {
-			delete_option( $this->lock_key() );
-		}
-		$this->lock_token = '';
-	}
-
-	private function lock_time( mixed $held ): int {
-		return is_array( $held ) ? (int) ( $held['time'] ?? 0 ) : (int) $held;
-	}
-
-	private function lock_key(): string {
-		return 'cybermaps_edge_operation_lock';
+		$this->operation_lock?->release();
 	}
 
 	private function safe_error( \Throwable $error, string $fallback ): string {

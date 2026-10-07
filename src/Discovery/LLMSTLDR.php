@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Serves Cybermaps' opt-in experimental budgeted site briefing.
  */
 class LLMSTLDR {
-	public const CACHE_KEY                 = 'cybermaps_tldr_cache';
+	public const CACHE_KEY                 = 'cybermaps_tldr_cache_v2';
 	public const CACHE_TTL                 = HOUR_IN_SECONDS;
 	private const DATABASE_CACHE_MAX_BYTES = 512 * 1024;
 
@@ -56,6 +56,8 @@ class LLMSTLDR {
 			}
 		} catch ( BuildUnavailableException $error ) {
 			PublicationRequestGuard::serve_unavailable( $error );
+		} catch ( PublicationSizeLimitException $error ) {
+			PublicationRequestGuard::serve_size_limit_error( $error );
 		}
 
 		Integrity::send_headers( $output );
