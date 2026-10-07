@@ -128,7 +128,7 @@ installed_plugin_check="$(wp_cli plugin get plugin-check --field=version | tr -d
 [ "${installed_plugin_check}" = "${PLUGIN_CHECK_VERSION}" ] || fail "Plugin Check version is ${installed_plugin_check}, expected ${PLUGIN_CHECK_VERSION}"
 wp_cli plugin activate cybermaps --quiet
 wp_cli eval-file /validation/wporg-smoke.php > "${RUNTIME_DIR}/smoke.txt"
-wp_cli eval-file /validation/wporg-sitemap-regressions.php >> "${RUNTIME_DIR}/smoke.txt"
+wp_cli eval-file /validation/wporg-sitemap-regressions.php --use-include >> "${RUNTIME_DIR}/smoke.txt"
 wp_cli eval 'define( "CYBERMAPS_DISPOSABLE_REST_FIXTURE", true ); require "/validation/rest-representation.php";' > "${RUNTIME_DIR}/rest-representation.json"
 wp_cli eval 'putenv( "CYBERMAPS_CONFIGURATION_FIXTURE=1" ); require "/validation/configuration-cas.php";' > "${RUNTIME_DIR}/configuration-cas.json"
 wp_cli eval 'putenv( "CYBERMAPS_CONFIGURATION_FIXTURE=1" ); require "/validation/upgrade-configuration-cas.php";' > "${RUNTIME_DIR}/upgrade-configuration-cas.json"
