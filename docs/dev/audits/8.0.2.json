@@ -1,0 +1,467 @@
+{
+  "schema_version": 1,
+  "release": "8.0.2",
+  "state": "source_and_performance_audit_checkpoint_complete",
+  "implementation_commit": "283b66f5715a78265675eba26074f587035263b5",
+  "baseline_commit": "ec8787e72f47e066bdb3056049ec7713061bb40b",
+  "candidate_zip_sha256": "d0861ecefc3d6d6b46c4ceac8758eb9df6af6510acbdea0ad47f9274ddc2ba31",
+  "baseline_zip_sha256": "5eb0b49877b3b4ab1d92642133f96427d3e4def607c89ca25592f1732483ba8e",
+  "method": {
+    "kind": "AI-assisted source review and engineering validation",
+    "coverage": "Full current text ranges, or a documented prior full read composed with every changed line and byte-identical unchanged regions; binary files inspected separately.",
+    "shipped_file_review": "Two distinct reviewers for all 270 packaged files; any author of that path is excluded from its independent approvals.",
+    "first_party_review": "At least one complete current-file assessment; authored tests and documentation are disclosed and are not all independent approvals.",
+    "scope_exclusions": [
+      "Third-party vendor source",
+      "Generated release copies and disposable runtimes",
+      "Private reviewer correspondence from publication"
+    ],
+    "not_certification": "This work is not an independent professional infrastructure security audit and does not establish WordPress.org acceptance.",
+    "agent_assignments": [
+      {
+        "focus": "Security boundaries, authorization, concurrency and independent core review",
+        "model": "gpt-6-astra"
+      },
+      {
+        "focus": "Implementation, admin operations and independent discovery review",
+        "model": "gpt-6.1-sol"
+      },
+      {
+        "focus": "Release metadata and editorial precision",
+        "model": "gpt-6-luna",
+        "reasoning_effort": "high"
+      },
+      {
+        "focus": "Coordination, integration and evidence reconciliation",
+        "model": "Runtime model identifier not supplied; no inferred model attribution"
+      }
+    ],
+    "repository_scope": "First-party files in the canonical Cybermaps plugin repository; the separate website receives release-contract and guide reviews."
+  },
+  "coverage": {
+    "shipped_files": 270,
+    "shipped_with_two_independent_current_reviews": 270,
+    "first_party_files_at_implementation_commit": 689,
+    "first_party_text_files": 682,
+    "binary_files_inspected": 7,
+    "inventory_commit": "283b66f5715a78265675eba26074f587035263b5",
+    "inventory_gaps": 0,
+    "scope_note": "These counts cover the audited implementation commit. This public summary is subsequent documentation and receives its own review; generated evidence is excluded.",
+    "status": "Current source and ZIP coverage verified; native and release evidence are recorded separately.",
+    "evidence": {
+      "path": "review-tooling-automatic-settings-exact-zip-reconciliation.json",
+      "sha256": "b071734ccb6618c5d43f2dfb77b3f7925152ceadb4717cbe58dad16c82ec4e63"
+    }
+  },
+  "change_areas": [
+    "Bounded production and content parsing before large allocations; completeness propagated through publications and audit measurements.",
+    "Content/configuration generation checks and uncached failures prevent observed stale or partial publications.",
+    "Bounded post and metadata cache priming preserves candidate-read failure detection and avoids per-row database queries; an observed N+1 regression was repaired and given a permanent native release check.",
+    "Native REST response handling respects WordPress final serialization rather than applying byte validators to a pre-transformation body.",
+    "Configuration writes compare expected stored bytes and roll back only still-owned values; failures and concurrent writers remain visible.",
+    "Automatic retired MCP cleanup and static/translation defaults preserve concurrent authorized saves and explicit choices through exact observed-value replacement; conflicting cleanup remains retryable.",
+    "Per-path static ownership storage, resumable legacy migration, connection-bound fences and bounded lifecycle reconciliation.",
+    "Authoritative database state, option leases, queue claims, upgrade checkpoints and Cloudflare authorization transactions.",
+    "RSS UTC dates, XML characters, canonical and query aliases, multisite behavior and old-permalink notifications.",
+    "Bounded admin probes, stale-response fencing, overlapping-operation controls and diagnostic analytics exclusion.",
+    "Local release validation now covers additional native database cases, browser security, source guards and harness self-tests."
+  ],
+  "validation": {
+    "phpunit": {
+      "tests": 1971,
+      "assertions": 25408,
+      "failed": 0,
+      "skipped": 0,
+      "qualification": "Both native WordPress HTML cases ran using a verified preserved Core 7.1 API copy. An initial missing test-fixture dependency failure is retained separately."
+    },
+    "complexity_gate": {
+      "scope": "Shipped PHP",
+      "maximum_allowed": 10,
+      "passed_before_final_gate": true
+    },
+    "native_fault_cases": {
+      "tested_zip_sha256": "d0861ecefc3d6d6b46c4ceac8758eb9df6af6510acbdea0ad47f9274ddc2ba31",
+      "passed": 32,
+      "databases": [
+        "MariaDB 10.11.19",
+        "MySQL 8.0.46"
+      ],
+      "cache_modes": [
+        "native request cache",
+        "Redis Object Cache 2.7.0"
+      ],
+      "block_theme_checks_passed": 4,
+      "qualification": "Eight fixtures ran on both database engines with native and Redis caches. Automatic-settings fixtures use two real connections and native SQL/cache/hooks; translation-environment detection uses an explicit fixture constant, not a real translation plugin. This does not replace the mandatory release runtime matrix.",
+      "evidence": {
+        "path": "performance/candidate-native-summary-d0861ece.json",
+        "sha256": "2548ba6fd15e2b3146e2bcf3f7259cda5db602ebf11fe50f9fcb302d5e223939"
+      }
+    },
+    "native_publication_smoke": {
+      "tested_zip_sha256": "d0861ecefc3d6d6b46c4ceac8758eb9df6af6510acbdea0ad47f9274ddc2ba31",
+      "scope": "Early and deep sitemap requests on 10,000 posts across native/Redis and plugin cache off/on.",
+      "valid_http_requests": 24,
+      "counted_samples": 16,
+      "uncounted_warmups": 8,
+      "uncached_early_child_query_counts": {
+        "native": 79,
+        "Redis": 76
+      },
+      "metadata_fault_probe": {
+        "native_and_redis_passed": true,
+        "selected_posts": 201,
+        "cold_queries_each": 4,
+        "metadata_disabled_queries_each": 1,
+        "failed_metadata_selects_each": 2,
+        "healthy_retry_rows_each": 201,
+        "owned_seed_posts": 0
+      },
+      "qualification": "Success follows finally restoration, but the probe does not independently read back every original cache value. These bounded probes do not replace the four-size performance matrix."
+    },
+    "website": {
+      "reviewed_guides": 22,
+      "source_contract_hashes_checked": 40,
+      "production_deployment": "pending",
+      "current_candidate_imported": "283b66f5715a78265675eba26074f587035263b5",
+      "current_candidate_prose_review": "complete",
+      "prior_documentation_tests_passed": 14,
+      "mapped_guides_current": 22,
+      "changed_dependency_guides_reread": 21,
+      "website_commit": "ad6da05a24d89044f6e9b12c64bfafb7b2add33b",
+      "full_current_build": "pending",
+      "current_documentation_tests": "pending",
+      "source_and_editorial_checks": "passed",
+      "scope_note": "This records the reviewed implementation import before the audit checkpoint is committed. Final source import, build, publication and live verification are separate mandatory release records."
+    },
+    "release_matrix": {
+      "state": "pending",
+      "minimum_wordpress": "7.1",
+      "latest_wordpress_preflight": "7.1.3",
+      "php_versions": [
+        "8.2",
+        "8.3",
+        "8.4",
+        "8.5"
+      ],
+      "plugin_check_pin": "2.1.0"
+    },
+    "relay": {
+      "state": "deployed_and_read_only_verified",
+      "domain": "connect.cybermaps.dev",
+      "version_id": "01daf2a6-cdf4-4f2a-884f-2ce99aa943d0",
+      "traffic_percentage": 100,
+      "local_security_tests_passed": 14,
+      "health": "HTTP 200, protocol 1, status ok, all five rate-limit bindings reported present.",
+      "configuration": "Recorded bindings and runtime metadata unchanged; existing secret binding retained without reading its value.",
+      "qualification": "Commit and local bundle hashes are associated with the Wrangler deployment receipt; deployed module bytes were not independently downloaded. Health/control-plane checks do not establish a live OAuth round trip or production concurrency.",
+      "logs": "Invocation logging disabled in the submitted configuration; historical logs and independent log sinks were not audited or deleted."
+    }
+  },
+  "performance": {
+    "state": "All four corpus sizes and three ownership scales collected and independently reviewed, including failed and skipped observations. Significant performance constraints remain unresolved.",
+    "sizes": [
+      1000,
+      10000,
+      100000,
+      1000000
+    ],
+    "cache_matrix": "Native versus Redis object cache, each with the plugin cache setting off and on.",
+    "same_fixture_not_identical_work": "The corrected link resolver finds real fixture edges missed by the baseline; do not treat both graph analyses as identical work.",
+    "static_measurement": "One bounded sync invocation per mode. Files, ownership and options are not reset to empty between modes; a later terminal slice is not an independent cold full-publication benchmark.",
+    "invalid_samples": "Retain timeouts, missing metrics, invalid responses and incomplete operations; suppress percentiles for any group containing invalid requested samples.",
+    "controlled_limits": "Six shared CPU cores and per-process address-space ceilings, plus a sampled aggregate RSS and workspace watchdog. This is not a kernel-enforced aggregate cgroup memory guarantee.",
+    "completed_size_reviews": [
+      {
+        "size": 1000,
+        "candidate_counted_valid": 847,
+        "candidate_counted_requested": 848,
+        "candidate_warmups_valid": 36,
+        "candidate_warmups_requested": 36,
+        "review": "review-performance-d086-1000-a.json",
+        "review_sha256": "43497d4e1fff4272017d59f28651095935551703502b38389b71fbe7dab253d1",
+        "failed_observations": [
+          "The first bounded static slice remained pending after 250 writes, with no failed or conflicted targets."
+        ]
+      },
+      {
+        "size": 10000,
+        "candidate_counted_valid": 843,
+        "candidate_counted_requested": 848,
+        "candidate_warmups_valid": 36,
+        "candidate_warmups_requested": 36,
+        "failed_observations": [
+          "Three full-audit timeouts at the fixed 120-second bound.",
+          "Two bounded static slices remained pending."
+        ],
+        "qualification": "Only the Redis/plugin-cache-on full audit completed, at 105.139 seconds. No baseline full audit completed at this size; no audit speed ratio is claimed.",
+        "review": "review-performance-d086-10000-a.json",
+        "review_sha256": "bb4dac0211cf89212718a2082cf5810377fe434890572f8cfe3982a0f2e41f51"
+      },
+      {
+        "size": 100000,
+        "candidate_counted_valid": 744,
+        "candidate_counted_requested": 848,
+        "candidate_counted_observed_failures": 24,
+        "candidate_counted_skips": 80,
+        "candidate_warmups_valid": 32,
+        "candidate_warmups_requested": 36,
+        "candidate_warmups_skipped": 4,
+        "failed_observations": [
+          "Twelve full-LLMS HTTP 503 responses at the generation time limit; 80 further counted requests and four warmups skipped under the failure cutoff.",
+          "Four graph analyses incomplete at the 10,000-resource cap.",
+          "Four full audits timed out at the 120-second bound.",
+          "Four bounded static slices remained pending."
+        ],
+        "qualification": "The fixed baseline has the same strict completion counts after correcting its historical static flags against pending durable state. This does not establish complete large-site publication or audit scalability.",
+        "review": "review-performance-d086-100000-a.json",
+        "review_sha256": "ac70442a84c4ba2cdfd20433545971f43065520a3c8873786b43f3acf917d030"
+      },
+      {
+        "size": 1000000,
+        "candidate_counted_valid": 744,
+        "candidate_counted_requested": 848,
+        "candidate_counted_observed_failures": 24,
+        "candidate_counted_skips": 80,
+        "candidate_warmups_valid": 32,
+        "candidate_warmups_requested": 36,
+        "candidate_warmups_skipped": 4,
+        "failed_observations": [
+          "Twelve full-LLMS HTTP 503 responses at the generation time limit; 80 further counted requests and four warmups skipped under the failure cutoff.",
+          "Four graph analyses incomplete at the 10,000-resource cap.",
+          "Four full audits timed out at the 120-second bound.",
+          "Four bounded static slices remained pending."
+        ],
+        "peak_sampled_rss_bytes": 2804035584,
+        "resource_samples": 501,
+        "qualification": "All requested groups were collected or explicitly skipped by the fixed failure cutoff. This is not a full-site publication, analysis or latency pass.",
+        "review": "review-performance-d086-1000000-a.json",
+        "review_sha256": "87671f6b8a65a7ba49130da8376c8eccd3afc6aaa6ec199ea559bbad88e9a7a3"
+      }
+    ],
+    "retained_observations": [
+      {
+        "id": "PERF-D086-1000-A-OBS-001",
+        "severity": "low",
+        "description": "Cold RAG selection retains 498 additional queries in the 1k fixture: 568 native/555 Redis versus baseline 70/57, with p50 about 0.195–0.257 seconds. The selected inventory is bounded; saved SELECT samples do not prove every extra query redundant. No universal query-count improvement is claimed."
+      },
+      {
+        "id": "PERF-D086-1000-A-OBS-002",
+        "description": "Redis-off/plugin-off LLMS warm p95 is 0.472 seconds versus baseline 0.072, while p50 is 0.061 versus 0.059. Two SQL-time spikes are retained. Saved top SELECTs do not isolate the cause; this is not dismissed as an environmental effect."
+      },
+      {
+        "id": "PERF-D086-100000-A-OBS-002",
+        "status": "confirmed freshness-versus-cache latency tradeoff; no new redundant-read defect shown",
+        "title": "Redis warm native search is substantially slower because selection SQL runs again",
+        "evidence": "Search-miss warm medians with Redis are 0.703–0.706 seconds versus baseline 0.059–0.064; hits are 0.288–0.295 versus 0.075–0.082. Baseline warm records contain no search SELECT. Current search-miss records include a native title/excerpt/content LIKE query costing about 0.65 seconds; Search::find_results calls PublicationQuery::posts, which enforces cache_results=false and captures candidate SQL errors before filters/hydration. Redis-on/plugin-off deep sitemap also reruns LIMIT 54000,2000 (~0.206 seconds in the inspected record) and warm median rises from 0.158 to 0.389 seconds.",
+        "qualification": "This is a real performance regression versus warm result-cache reuse, tied to the reviewed fresh-selection/failure contract. It is not the repaired per-post N+1 and does not prove an avoidable duplicate SELECT within a request. Any future optimization needs the same privacy, freshness and SQL-error semantics; silently enabling result caching is not a behavior-preserving fix."
+      },
+      {
+        "id": "PERF-D086-100000-A-OBS-003",
+        "severity": "low",
+        "status": "retained bounded-selection cost with site-size-sensitive query latency",
+        "title": "Cold RAG reaches approximately one second",
+        "evidence": "Cold RAG still uses 682/669 maximum queries with Redis off/on versus baseline 70/57, the same query counts as current 10k. Current cold medians are 1.055–1.152 seconds versus baseline 0.661–0.712. Warm medians remain 0.063–0.067 seconds.",
+        "qualification": "Stable candidate/query counts do not mean constant runtime: selection SQL costs grow with corpus size. The prior byte-identical source trace places these reads in AIContentSelector outside the sitemap primer. No complete frequency trace proves every extra query redundant."
+      },
+      {
+        "id": "PERF-D086-100000-A-OBS-006",
+        "status": "other latency regressions retained, cause not isolated",
+        "title": "LLMS-TLDR and queue cost varies by mode",
+        "evidence": "Redis-off/plugin-on cold LLMS-TLDR median is 2.818 seconds versus baseline 1.237, with 1,304 versus 1,297 maximum queries; other cold modes are close to baseline. Redis-on/plugin-on queue takes 7.225 seconds versus baseline 5.399, while other mode differences are mixed. Every valid queue operation admits, claims and acknowledges exactly 1,000 URLs with 2,170 queries.",
+        "qualification": "Single CLI samples and limited SELECT capture do not isolate a new source regression or provide throughput for 100,000 queued URLs."
+      },
+      {
+        "id": "PERF-D086-1000000-A-OBS-001",
+        "status": "substantial measured regression tied to fresh selection; unresolved product performance constraint",
+        "title": "Warm Redis search loses the large baseline result-cache advantage",
+        "evidence": "Candidate warm Redis search-hit medians are 2.305–2.317 seconds versus baseline 0.081–0.085; misses are 6.435–6.488 seconds versus 0.066–0.072. One inspected miss spends 6.432 seconds in its native title/excerpt/content LIKE SELECT; the corresponding baseline warm record has no search SELECT. The current source enforces fresh selection and immediate SQL error capture through PublicationQuery.",
+        "defect_assessment": "This is a real, substantial performance regression. Intentional safety behavior does not make it disappear or establish that the latency is acceptable. The current evidence does not prove a new correctness/security failure, duplicate selection within one request, unbounded application candidate collection, or a behavior-preserving optimization already missed by the fix. No latency SLO was supplied against which to establish a new medium/high source-contract violation.",
+        "safety_tradeoff": "Simply restoring native query-result-cache reuse would change the reviewed failure/freshness semantics. A later result-cache or indexed-search design would require generation/configuration/privacy and SQL-failure proofs. Closing the original N+1 finding neither waives these costs nor approves release."
+      },
+      {
+        "id": "PERF-D086-1000000-A-OBS-002",
+        "status": "substantial warm sitemap selection cost retained",
+        "title": "Deep uncached Redis sitemap and index remain slower than baseline warm results",
+        "evidence": "With Redis on and plugin caching off, deep-page warm median is 1.665 seconds versus baseline 0.501; the inspected raw record spends 1.159 seconds executing LIMIT 544000,2000, absent from the baseline warm trace. Index warm median is 6.099 seconds versus 4.257, and early page 0.892 versus 0.658. Plugin-cache-on child warm medians remain approximately 0.447–0.451 seconds.",
+        "qualification": "The per-post N+1 is repaired while fresh candidate/count/last-modified work still costs time. No claim that all selection overhead is required or optimally implemented; the trace establishes work differences, not a full SQL-frequency optimization proof."
+      },
+      {
+        "id": "PERF-D086-1000000-A-OBS-003",
+        "status": "retained cold RAG cost; performance improvement opportunity remains open",
+        "title": "Cold RAG takes about ten seconds",
+        "evidence": "Cold medians are 10.127–10.295 seconds versus baseline 8.024–8.347, with 682/669 maximum queries versus baseline 70/57. Warm medians are approximately 0.063–0.069 seconds. The inspected current post selection costs 7.827 seconds versus baseline 6.408; current selects full rows and baseline selects IDs before hydration.",
+        "qualification": "The extra 612 queries are bounded at these tested inventories but remain undesirable. Most measured cold wall time is selection SQL; eliminating singleton reads alone is not proven to remove the roughly two-second delta. The prior AIContentSelector priming lead remains open, with fresh membership and eligibility constraints. This record is not upgraded into an unproven medium/high defect."
+      },
+      {
+        "id": "PERF-D086-1000000-A-OBS-004",
+        "status": "retained large-site completion limits; neither package passes the whole matrix",
+        "title": "Full LLMS, complete graph, full audit and full static publication remain unavailable in these samples",
+        "evidence": "Both packages emit 12 full-LLMS time-limit HTTP 503 responses with no-store and Retry-After 5, then skip 84 requested warm records. Both graph operations cap at 10,000 resources with complete=false; current extracts 9,285 edges versus baseline zero. All four current audits terminate at about 120.15–120.30 seconds with exit 143 and no operation metrics. Every static call retains pending state; candidate processes 32–35 targets in approximately 24.67–24.99 seconds, with zero file failures/conflicts.",
+        "qualification": "Fast partial graph work, deadline refusals and pending slices are not successful full-operation timings. The fixture contains 1.15 million post-table rows including auxiliaries. No complete million-item analysis/publication claim follows from these results."
+      },
+      {
+        "id": "PERF-D086-1000000-A-OBS-005",
+        "status": "other material timing differences retained without isolated source attribution",
+        "title": "Discovery and queue timings are mixed",
+        "evidence": "Redis-off/plugin-off LLMS-TLDR cold median rises to 4.645 seconds from baseline 2.751, while other modes are faster or similar. Redis-off/plugin-on LLMS cold median rises to 2.236 seconds from 1.545. All queue samples still admit, claim and acknowledge exactly 1,000 URLs with 2,170 queries, taking 5.570–6.967 seconds; they do not measure one million queued URLs.",
+        "qualification": "One CLI sample per mode and only selected slow SELECTs prevent strong causal or universal throughput claims."
+      }
+    ],
+    "collection_finished": true,
+    "all_behavior_passed": false,
+    "sampling": "Sequential HTTP requests: three counted cold and 20 counted warm samples per endpoint/cache mode; the first warm request is excluded. These descriptive percentiles are not concurrent-throughput or production-tail guarantees.",
+    "cache_qualification": "Cold clears application caches, not database buffers or OS caches. The plugin cache setting does not disable independent discovery caches. Synthetic distinct client addresses avoid rate-limit interference.",
+    "response_qualification": "Valid means expected status, nonempty body and protocol shape. Successful bodies were not retained for semantic URL-set, privacy or byte-equivalence comparison; fixture host ports differ.",
+    "query_qualification": "The slowest SELECT samples and selected execution plans are not a complete query-frequency or write-latency trace.",
+    "resource_qualification": "Six shared CPU cores; per-process address-space ceilings of 6 GiB for the database, 1 GiB for Redis and each of up to three PHP processes, and 256 MiB for the helper; sampled aggregate RSS and workspace watchdogs at 12 GiB and 90 GiB. Instrumentation overhead and shared-host effects remain.",
+    "corpus": "Deterministic bulk SQL creates the named number of primary records across public/private/draft/future post types, plus attachments at 10% and revisions at 5%. The 1M fixture therefore contains 1,150,000 wp_posts rows. Bulk seeding does not measure importer or WordPress hook throughput.",
+    "baseline": "Cybermaps 8.0.1 at the fixed commit and ZIP hashes above. Current terminal-state rules are applied to historical static results so pending publication is not counted as complete.",
+    "matrix_evidence": {
+      "path": "performance/candidate-matrix-summary.json",
+      "sha256": "1b8e01074160df2147bc636da0b105616e7f0131cbbe709b68c63a897580a353"
+    },
+    "ownership": {
+      "sizes": [
+        1000,
+        5000,
+        10000
+      ],
+      "all_three_operations_valid": true,
+      "samples_per_size_per_package": 1,
+      "rows": [
+        {
+          "size": 1000,
+          "baseline_seconds": 6.524673767,
+          "candidate_seconds": 10.010524418,
+          "baseline_queries": 7014,
+          "candidate_queries": 8015,
+          "baseline_sql_text_bytes": 3121125,
+          "candidate_sql_text_bytes": 1549695
+        },
+        {
+          "size": 5000,
+          "baseline_seconds": 44.631137942,
+          "candidate_seconds": 40.467236836,
+          "baseline_queries": 35014,
+          "candidate_queries": 40015,
+          "baseline_sql_text_bytes": 54379507,
+          "candidate_sql_text_bytes": 7745013
+        },
+        {
+          "size": 10000,
+          "baseline_seconds": 103.2354773,
+          "candidate_seconds": 89.515109663,
+          "baseline_queries": 70014,
+          "candidate_queries": 80015,
+          "baseline_sql_text_bytes": 206479980,
+          "candidate_sql_text_bytes": 15499256
+        }
+      ],
+      "qualification": "One timed operation per package and size on a fresh disposable runtime with Redis disabled. Counts represent successful forced-flush ownership API calls, without an independent final table-row count or filesystem writes. Submitted SQL text bytes grow approximately linearly in the candidate; query counts rise about 14.3% and 1k latency worsens by 53.4%. These observations do not measure physical database I/O, latency distributions, large serialized legacy migration, complete static publication, or adversarial concurrency.",
+      "evidence": {
+        "path": "performance/candidate-ownership-comparison.json",
+        "sha256": "3735ec5cf6f6c78eca9482712153b4a0c0e78d2929773ddfc906a6450267aeb4"
+      },
+      "independent_review": {
+        "path": "review-performance-d086-ownership-a.json",
+        "sha256": "935ec45304dcfe60f6eb1abd5d614b2eea8666fa0fdb9894c9d6c59fd44aef4e"
+      }
+    },
+    "runtime_cleanup": {
+      "path": "performance/candidate-runtime-quiet-d0861ece.json",
+      "sha256": "84880c5d28025778115bef02bd8a5284c95fe9ee273f6daf45e0651ea6f3e9eb"
+    },
+    "sitemap_query_repair": {
+      "id": "PERF-PARTIAL-A-001",
+      "status": "original sitemap per-post N+1 repaired on exact d086 across all four completed sizes",
+      "evidence": "At one million records, Redis-off/plugin-off early/deep maximum queries are 79/65 versus baseline 46/46. Cold medians are 0.734/1.650 seconds versus baseline 0.826/1.699. Combined with current 1k, 10k and 100k results, the selected pages remain bounded to tens of queries rather than the original thousands.",
+      "qualification": "This closes that specific redundant post/metadata read defect, not all performance concerns. Baseline query counts remain lower; warm authoritative selection can be materially slower."
+    },
+    "cleanup_qualification": "All ten current-candidate runtime IDs are absent, including stopped containers. No performance containers are running. Two stopped historical diagnostic containers are preserved; unrelated workloads were not modified.",
+    "runtime_cleanup_scope": {
+      "path": "performance/candidate-runtime-quiet-d0861ece-current-scope.json",
+      "sha256": "1c8f6e9609c214db5b1ce2073565bcd6ccddd818d3bd0818e7273cb77e4fb7d3"
+    },
+    "runtime_cleanup_inventory": {
+      "path": "performance/candidate-runtime-quiet-d0861ece-container-inventory.json",
+      "sha256": "9e2981f584fdccd7247c8109c5c0c08ee21d7f395de2907febab06b7a2bb05af"
+    },
+    "final_independent_interpretation": {
+      "path": "review-performance-d086-final-a.json",
+      "sha256": "6f596e19678d8cf58703f166f7bf333fe8df00e46bc7bf716f4dc1ff39c320cd"
+    },
+    "total_accounting": {
+      "counted_requested": 3392,
+      "counted_valid": 3178,
+      "counted_observed_failures": 54,
+      "counted_skipped": 160,
+      "warmups_requested": 144,
+      "warmups_valid": 136,
+      "warmups_skipped": 8,
+      "raw_requested": 3536,
+      "raw_valid": 3314,
+      "raw_observed_failures": 54,
+      "raw_skipped": 168,
+      "definition": "Per size: nine HTTP endpoints × four independent Redis/plugin-cache modes × (three cold + twenty counted warm) = 828 counted HTTP records, plus twenty CLI records. Thirty-six additional warmup records are excluded from counted latency populations. At large sizes, failed full-LLMS cold requests cause the recorded warm skips.",
+      "invalid_timing_policy": "Time-limit 503s, timeout exits, capped analyses and pending static slices are retained as failures/incomplete observations, never successful timing samples. Suppressed/never-executed warm records are not converted to valid zero latency.",
+      "baseline_policy": "Use fixed 5eb0 baseline and strict current completion interpretation. Old optimistic static flags are overridden where durable continuation remains pending; no aborted baseline/predecessor candidate is substituted."
+    },
+    "repair_scope": "The original sitemap N+1 is repaired. The material warm-search slowdown, fresh-selection costs, cold RAG costs and incomplete large-site operations remain unresolved product constraints; this checkpoint does not declare their latency acceptable or grant a blanket performance pass."
+  },
+  "accepted_limits": [
+    {
+      "id": "CACHE-LEASE-FINAL-A-001",
+      "severity": "low",
+      "description": "A worker-created request-cache object with a shared nested mutable object can be evicted after a caller changes that nested object. The caller object retains its change. No wrong public response or persistent mutation was demonstrated; no first-party producer of this shape was established. Universal preservation of arbitrary extension objects is not claimed."
+    },
+    "Cooperative byte, time and memory checks do not interrupt a blocked database/cache call or guarantee an arbitrarily large row fits memory.",
+    "Publication output ceilings and bounded static slices remain deliberate limits; a partial result is not reported as completed.",
+    "Diagnostic redaction is best effort; support bundles require local review before sharing.",
+    "Metadata cache hooks run earlier in 100-ID batches while cache additions are suspended; arbitrary hook cache-write side effects and original invocation cadence are not universally preserved. A batch count is not a metadata byte ceiling.",
+    "Third-party plugins, external caches/CDNs and production traffic differ from the controlled fixtures."
+  ],
+  "local_evidence_directory": "docs/generated/releases/8.0.2/audit/",
+  "last_updated": "2026-10-07T15:43:10.927718+00:00",
+  "candidate_status": "The exact ZIP matches the reviewed source, and all 32 targeted native fixture executions passed across two databases and two cache modes. All four performance sizes and three ownership scales are collected and independently reviewed, including preserved failures and skips. Significant performance constraints remain. The separate mandatory release gate, publication and live website verification follow this checkpoint.",
+  "open_findings": [
+    {
+      "id": "CACHE-LEASE-FINAL-A-001",
+      "severity": "low",
+      "disposition": "Retained without a code fix; exact behavior and limits are documented in accepted_limits."
+    }
+  ],
+  "resolved_late_findings": [
+    {
+      "id": "MCP-RETIREMENT-FINAL-001",
+      "severity": "medium",
+      "disposition": "corrected_and_independently_verified_in_tested_native_database_and_cache_combinations",
+      "evidence": "review-native-settings-retirement-final-a.json"
+    },
+    {
+      "id": "CONFIG-SIBLING-A-001",
+      "severity": "medium",
+      "disposition": "corrected_and_independently_verified_in_tested_native_database_and_cache_combinations",
+      "evidence": "review-native-settings-retirement-final-a.json"
+    },
+    {
+      "id": "CONFIG-SIBLING-A-002",
+      "severity": "medium",
+      "disposition": "corrected_and_independently_verified_in_tested_native_database_and_cache_combinations",
+      "evidence": "review-native-settings-retirement-final-a.json"
+    },
+    {
+      "id": "PERF-PARTIAL-A-001",
+      "severity": "medium",
+      "disposition": "The original sitemap per-post N+1 is repaired on the exact candidate across all four measured sizes. Significant other performance regressions and product constraints remain open in performance.retained_observations.",
+      "evidence": "review-performance-d086-1000000-a.json"
+    }
+  ],
+  "checkpoint_scope": "This immutable source and performance audit checkpoint precedes the mandatory final release gate. It records only completed evidence available at this checkpoint; final runtime validation, publication and live-website completion are recorded separately.",
+  "release_handoff": {
+    "validation": "docs/generated/releases/8.0.2/validation.json",
+    "policy_review": "docs/generated/releases/8.0.2/agent-review.json",
+    "publication_and_installation": "docs/generated/releases/8.0.2/workflow.json",
+    "live_website": "docs/generated/releases/8.0.2/website-live.json",
+    "state_at_checkpoint": "Mandatory release gate, publication and website deployment pending. No approval or completed release is claimed by this source checkpoint."
+  }
+}
