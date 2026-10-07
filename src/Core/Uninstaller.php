@@ -297,7 +297,7 @@ final class Uninstaller {
 		$pattern = \method_exists( $wpdb, 'esc_like' )
 			? $wpdb->esc_like( $table_name )
 			: \addcslashes( $table_name, '_%\\' );
-		$rows    = self::read_cleanup_rows( $wpdb->prepare( 'SHOW TABLES LIKE %s', $pattern ) );
+		$rows    = self::read_cleanup_rows( 'table', array( $pattern ) );
 		return is_array( $rows ) && empty( $rows );
 	}
 
@@ -313,29 +313,32 @@ final class Uninstaller {
 			return true;
 		}
 
-		$placeholders = \implode( ',', \array_fill( 0, \count( self::POST_META_KEYS ), '%s' ) );
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The fixed Core-owned key list supplies exactly one string value per generated placeholder in this single statement.
-		$query = $wpdb->prepare(
-			"SELECT meta_key FROM %i
-			WHERE meta_key IN ({$placeholders})
-			LIMIT 1",
-			...array_merge( array( $wpdb->postmeta ), self::POST_META_KEYS )
-		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
-		$rows = self::read_cleanup_rows( $query );
+		$rows = self::read_cleanup_rows( 'post_meta', array_merge( array( $wpdb->postmeta ), self::POST_META_KEYS ) );
 		return is_array( $rows ) && empty( $rows );
 	}
 
-	/** Execute only fully prepared, bounded cleanup inventory queries. */
-	private static function read_cleanup_rows( string $query ): array|false {
+	/** Prepare the three fixed, bounded cleanup inventories beside their shared reader. */
+	private static function read_cleanup_rows( string $inventory, array $values ): array|false {
 		global $wpdb;
-		if ( ! is_object( $wpdb ) || ! method_exists( $wpdb, 'get_results' ) ) {
+		if ( ! is_object( $wpdb ) || ! method_exists( $wpdb, 'get_results' ) || ! method_exists( $wpdb, 'prepare' ) ) {
+			return false;
+		}
+		if ( 'table' === $inventory ) {
+			$query = $wpdb->prepare( 'SHOW TABLES LIKE %s', ...$values );
+		} elseif ( 'post_meta' === $inventory ) {
+			$placeholders = \implode( ',', \array_fill( 0, \count( self::POST_META_KEYS ), '%s' ) );
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The fixed Core-owned key list supplies exactly one string value per generated placeholder in this single statement.
+			$query = $wpdb->prepare( "SELECT meta_key FROM %i WHERE meta_key IN ({$placeholders}) LIMIT 1", ...$values );
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		} elseif ( 'oauth_pointer' === $inventory ) {
+			$query = $wpdb->prepare( 'SELECT option_name FROM %i WHERE option_name LIKE %s AND BINARY LEFT(option_name,%d) = BINARY %s AND LENGTH(option_name) > %d AND SUBSTRING(option_name,%d) NOT REGEXP %s AND option_name > %s ORDER BY option_name LIMIT %d', $values[0], $values[1], $values[2], $values[3], $values[4], $values[5], $values[6], $values[7], $values[8] );
+		} else {
 			return false;
 		}
 		$wpdb->last_error = '';
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Prepared cleanup queries inspect only the fixed owned table, post-meta and numeric OAuth-pointer inventories; callers bound results to at most100 rows.
 		$rows = $wpdb->get_results(
-			$query, // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Every caller prepares its fixed cleanup template and typed values before entering this private reader.
+			$query, // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Each fixed inventory is prepared above using its typed values before execution.
 			ARRAY_A
 		);
 		return is_array( $rows ) && count( $rows ) <= 100 && '' === (string) $wpdb->last_error ? $rows : false;
@@ -377,8 +380,8 @@ final class Uninstaller {
 			return false;
 		}
 		return self::read_cleanup_rows(
-			$wpdb->prepare(
-				'SELECT option_name FROM %i WHERE option_name LIKE %s AND BINARY LEFT(option_name,%d) = BINARY %s AND LENGTH(option_name) > %d AND SUBSTRING(option_name,%d) NOT REGEXP %s AND option_name > %s ORDER BY option_name LIMIT %d',
+			'oauth_pointer',
+			array(
 				$wpdb->options,
 				'cybermaps\\_cf\\_oauth\\_pointer\\_%',
 				27,
@@ -387,7 +390,7 @@ final class Uninstaller {
 				28,
 				'[^0-9]',
 				$after,
-				$limit
+				$limit,
 			)
 		);
 	}

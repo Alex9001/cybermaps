@@ -10,6 +10,57 @@ use Cybermaps\Discovery\MarkdownNegotiation;
 use PHPUnit\Framework\TestCase;
 
 final class RequestInputBoundaryTest extends TestCase {
+	public function test_literal_adapter_rejects_controls_and_limits_before_any_normalization(): void {
+		$before = $_SERVER;
+		try {
+			foreach ( array( "\x00", "\r", "\n", "\t", "\x7F", ' ' ) as $invalid ) {
+				$_SERVER['REQUEST_URI'] = '/cybermaps-' . $invalid . 'openapi.json?version=3.1.2';
+				self::assertSame( '', RequestInput::query_text( 'version', 16 ) );
+			}
+			$_SERVER['REQUEST_URI'] = '/<literal>%2Fpath?version=3%2E1%2E2';
+			self::assertSame( '3.1.2', RequestInput::query_text( 'version', 16 ) );
+			$_SERVER['REQUEST_URI'] = '/' . str_repeat( 'p', 8192 - strlen( '/?version=3.1.2' ) ) . '?version=3.1.2';
+			self::assertSame( 8192, strlen( $_SERVER['REQUEST_URI'] ) );
+			self::assertSame( '3.1.2', RequestInput::query_text( 'version', 16 ) );
+			$_SERVER['REQUEST_URI'] = 'p' . $_SERVER['REQUEST_URI'];
+			self::assertSame( '', RequestInput::query_text( 'version', 16 ) );
+			$_SERVER['REQUEST_URI'] = str_repeat( 'p', 16385 );
+			self::assertSame( '', RequestInput::query_text( 'version', 16 ) );
+			$_SERVER['REQUEST_URI'] = '/?version=' . str_repeat( 'x', 4096 - strlen( 'version=' ) );
+			self::assertSame( str_repeat( 'x', 4088 ), RequestInput::query_text( 'version', 4088 ) );
+			$_SERVER['REQUEST_URI'] .= 'x';
+			self::assertSame( '', RequestInput::query_text( 'version', 4096 ) );
+			foreach ( array( '"opaque%25<tag>"', 'W/"a%2Fb", "b"', '  "a"  ' ) as $literal ) {
+				$_SERVER['HTTP_IF_NONE_MATCH'] = wp_slash( $literal );
+				self::assertSame( $literal, RequestInput::header( 'if-none-match' ) );
+			}
+			$_SERVER['HTTP_IF_NONE_MATCH'] = str_repeat( 'x', 4096 );
+			self::assertSame( $_SERVER['HTTP_IF_NONE_MATCH'], RequestInput::header( 'if-none-match' ) );
+			self::assertSame( '', RequestInput::header( 'if-none-match', 4095 ) );
+			$_SERVER['HTTP_IF_NONE_MATCH'] .= 'x';
+			self::assertSame( '', RequestInput::header( 'if-none-match' ) );
+			foreach ( array( "\x00", "\r", "\n", "\t", "\x7F" ) as $invalid ) {
+				$_SERVER['HTTP_IF_NONE_MATCH'] = '"valid' . $invalid . 'tag"';
+				self::assertSame( '', RequestInput::header( 'if-none-match' ) );
+			}
+			$_SERVER['REQUEST_URI'] = array( '/?version=3.1.2' );
+			$_SERVER['HTTP_IF_NONE_MATCH'] = array( '"tag"' );
+			self::assertSame( '', RequestInput::query_text( 'version', 16 ) );
+			self::assertSame( '', RequestInput::header( 'if-none-match' ) );
+		} finally { $_SERVER = $before; }
+	}
+
+	public function test_slashed_protocol_limits_use_real_unslash_semantics(): void {
+		$process = proc_open( array( PHP_BINARY, __DIR__ . '/fixtures/request-input-slashed.php' ), array( 1 => array( 'pipe', 'w' ), 2 => array( 'pipe', 'w' ) ), $pipes );
+		self::assertIsResource( $process );
+		$output = stream_get_contents( $pipes[1] );
+		$error = stream_get_contents( $pipes[2] );
+		fclose( $pipes[1] ); fclose( $pipes[2] );
+		self::assertSame( 0, proc_close( $process ), $error );
+		$evidence = json_decode( $output, true, 512, JSON_THROW_ON_ERROR );
+		foreach ( $evidence as $check => $passed ) { self::assertTrue( $passed, $check ); }
+	}
+
 	public function test_array_notice_flags_do_not_display_success_or_busy_notices(): void {
 		$before_get          = $_GET;
 		$before_server       = $_SERVER;

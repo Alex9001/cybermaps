@@ -44,10 +44,20 @@ final class RawOptionStore {
 		if ( ! self::supported( $wpdb ) ) {
 			return false;
 		}
-		if ( null !== $fence ) {
-			return self::replace_fenced( $wpdb, $option, $expected, $next, $fence );
-		}
-		$result = $wpdb->query( $wpdb->prepare( 'UPDATE %i SET option_value = %s WHERE option_name = %s AND BINARY option_value = BINARY %s', $wpdb->options, $next, $option, $expected ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$result = $wpdb->query(
+			$wpdb->prepare(
+				'UPDATE %i SET option_value = %s WHERE option_name = %s AND BINARY option_value = BINARY %s AND (%d = 0 OR (IS_USED_LOCK(%s) = %d AND CONNECTION_ID() = %d))',
+				$wpdb->options,
+				$next,
+				$option,
+				$expected,
+				null === $fence ? 0 : 1,
+				$fence['name'] ?? '',
+				$fence['connection_id'] ?? 0,
+				$fence['connection_id'] ?? 0
+			)
+		);
 		return self::result( $wpdb, $result );
 	}
 
@@ -56,10 +66,20 @@ final class RawOptionStore {
 		if ( ! self::supported( $wpdb ) ) {
 			return false;
 		}
-		if ( null !== $fence ) {
-			return self::insert_fenced( $wpdb, $option, $next, $fence );
-		}
-		$result = $wpdb->query( $wpdb->prepare( 'INSERT IGNORE INTO %i (option_name, option_value, autoload) VALUES (%s, %s, %s)', $wpdb->options, $option, $next, 'off' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$result = $wpdb->query(
+			$wpdb->prepare(
+				'INSERT IGNORE INTO %i (option_name, option_value, autoload) SELECT %s, %s, %s WHERE (%d = 0 OR (IS_USED_LOCK(%s) = %d AND CONNECTION_ID() = %d))',
+				$wpdb->options,
+				$option,
+				$next,
+				'off',
+				null === $fence ? 0 : 1,
+				$fence['name'] ?? '',
+				$fence['connection_id'] ?? 0,
+				$fence['connection_id'] ?? 0
+			)
+		);
 		return self::result( $wpdb, $result );
 	}
 
@@ -68,28 +88,19 @@ final class RawOptionStore {
 		if ( ! self::supported( $wpdb ) ) {
 			return false;
 		}
-		if ( null !== $fence ) {
-			return self::remove_fenced( $wpdb, $option, $expected, $fence );
-		}
-		$result = $wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE option_name = %s AND BINARY option_value = BINARY %s', $wpdb->options, $option, $expected ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		return self::result( $wpdb, $result );
-	}
-
-	/** @param array{name:string,connection_id:int} $fence Captured advisory-lock owner. */
-	private static function replace_fenced( mixed $wpdb, string $option, string $expected, string $next, array $fence ): int|false {
-		$result = $wpdb->query( $wpdb->prepare( 'UPDATE %i SET option_value = %s WHERE option_name = %s AND BINARY option_value = BINARY %s AND IS_USED_LOCK(%s) = %d AND CONNECTION_ID() = %d', $wpdb->options, $next, $option, $expected, $fence['name'], $fence['connection_id'], $fence['connection_id'] ) );
-		return self::result( $wpdb, $result );
-	}
-
-	/** @param array{name:string,connection_id:int} $fence Captured advisory-lock owner. */
-	private static function insert_fenced( mixed $wpdb, string $option, string $next, array $fence ): int|false {
-		$result = $wpdb->query( $wpdb->prepare( 'INSERT IGNORE INTO %i (option_name, option_value, autoload) SELECT %s, %s, %s WHERE IS_USED_LOCK(%s) = %d AND CONNECTION_ID() = %d', $wpdb->options, $option, $next, 'off', $fence['name'], $fence['connection_id'], $fence['connection_id'] ) );
-		return self::result( $wpdb, $result );
-	}
-
-	/** @param array{name:string,connection_id:int} $fence Captured advisory-lock owner. */
-	private static function remove_fenced( mixed $wpdb, string $option, string $expected, array $fence ): int|false {
-		$result = $wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE option_name = %s AND BINARY option_value = BINARY %s AND IS_USED_LOCK(%s) = %d AND CONNECTION_ID() = %d', $wpdb->options, $option, $expected, $fence['name'], $fence['connection_id'], $fence['connection_id'] ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$result = $wpdb->query(
+			$wpdb->prepare(
+				'DELETE FROM %i WHERE option_name = %s AND BINARY option_value = BINARY %s AND (%d = 0 OR (IS_USED_LOCK(%s) = %d AND CONNECTION_ID() = %d))',
+				$wpdb->options,
+				$option,
+				$expected,
+				null === $fence ? 0 : 1,
+				$fence['name'] ?? '',
+				$fence['connection_id'] ?? 0,
+				$fence['connection_id'] ?? 0
+			)
+		);
 		return self::result( $wpdb, $result );
 	}
 

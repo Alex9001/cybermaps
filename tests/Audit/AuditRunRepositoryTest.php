@@ -590,7 +590,9 @@ final class AuditRunRepositoryWpdbStub {
 				$this->last_error = 'Insert failed';
 				return false;
 			}
-			preg_match( "/VALUES \(\'([^']+)\', \'((?:[^']|'')*)\', \'off\'\)/", $query, $values );
+			// Audit run acquisition is explicitly unfenced. Accept only the full
+			// literal guard-zero form; never treat a required fence as a plain insert.
+			preg_match( "/^INSERT IGNORE INTO wp_options \(option_name, option_value, autoload\) SELECT '([^']+)', '((?:[^']|'')*)', 'off' WHERE \(0 = 0 OR \(IS_USED_LOCK\(''\) = 0 AND CONNECTION_ID\(\) = 0\)\)$/D", $query, $values );
 			if ( count( $values ) !== 3 ) {
 				throw new \RuntimeException( 'Unexpected audit insert SQL.' );
 			}

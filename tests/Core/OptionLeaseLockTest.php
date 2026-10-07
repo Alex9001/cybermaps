@@ -89,7 +89,8 @@ final class OptionLeaseLockTest extends \WP_UnitTestCase {
 		$this->assertNotSame( $before, $database->raw );
 		$update = $database->queries[ $this->fenced_query_index( $database, 'UPDATE' ) ];
 		$this->assertStringContainsString( 'BINARY option_value = BINARY %s', $update['query'] );
-		$this->assertStringNotContainsString( 'IS_USED_LOCK', $update['query'] );
+		$this->assertStringContainsString( 'AND (%d = 0 OR (IS_USED_LOCK(%s) = %d AND CONNECTION_ID() = %d))', $update['query'] );
+		$this->assertSame( array( 0, '', 0, 0 ), array_slice( $update['args'], -4 ) );
 		$this->assertSame( $before, $update['args'][3] );
 		$this->assertSame( $lock->get_token(), maybe_unserialize( $database->raw )['token'] );
 		$lock->release();

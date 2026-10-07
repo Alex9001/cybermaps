@@ -35,3 +35,6 @@ final class CybermapsAuditFilesystem {
 		return file_get_contents( $path );
 	}
 }
+
+// The stored source resolves the current theme's raw taxonomy identity first.
+$GLOBALS['cybermaps_mock_terms']['wp_theme'] = array( (object) array( 'term_id' => 71, 'term_taxonomy_id' => 171, 'taxonomy' => 'wp_theme', 'name' => 'fixture-theme' ) );

@@ -1115,6 +1115,10 @@ analysis version; other finding categories remain comparable with older runs.
 
 Template inspection reads bounded stored overrides, active-theme files and
 registered template source without rendering dynamic blocks or block hooks.
+Stored overrides use a prepared theme-membership predicate. These reads allow
+ordinary WordPress query filters, so extensions can affect query results. The
+plugin's membership and database-error callbacks apply only to the owning query
+and are removed even when it fails.
 WordPress query-style page links are matched to their canonical resources.
 When literal text extraction is incomplete, saved measurements expose a null
 full word count, omit the full content fingerprint, and record an incomplete

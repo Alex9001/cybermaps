@@ -52,20 +52,42 @@ final class IdentityPageSelector {
 
 	/** Authorize before reading the bounded search payload. */
 	public function ajax_search(): void {
-		if ( 'POST' !== ( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
+		// Project only the exact method comparison; never normalize an invalid verb into POST.
+		if ( ! isset( $_SERVER['REQUEST_METHOD'] ) || ! boolval( 'POST' === $_SERVER['REQUEST_METHOD'] ) ) {
 			wp_send_json_error( array( 'message' => __( 'POST required.', 'cybermaps' ) ), 405 );
 		}
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Not authorized.', 'cybermaps' ) ), 403 );
 		}
-		check_ajax_referer( 'cybermaps_identity_pages', 'nonce' );
-		$query  = isset( $_POST['query'] ) && is_string( $_POST['query'] ) && strlen( $_POST['query'] ) <= self::MAX_QUERY_BYTES ? sanitize_text_field( wp_unslash( $_POST['query'] ) ) : '';
-		$cursor = isset( $_POST['cursor'] ) && is_string( $_POST['cursor'] ) && preg_match( '/^[0-9]{1,18}$/D', $_POST['cursor'] ) ? (int) $_POST['cursor'] : -1;
-		$result = $this->search( $query, $cursor );
+		$request = self::search_request();
+		$query   = $request['query'];
+		$cursor  = $request['cursor'];
+		$result  = $this->search( $query, $cursor );
 		if ( is_wp_error( $result ) ) {
 			wp_send_json_error( array( 'message' => $result->get_error_message() ), 'identity_page_query' === $result->get_error_code() ? 400 : 500 );
 		}
 		wp_send_json_success( $result );
+	}
+
+	/** @return array{query:string,cursor:int} Nonce-checked bounded search fields. */
+	private static function search_request(): array {
+		check_ajax_referer( 'cybermaps_identity_pages', 'nonce' );
+		// Character-index existence enforces the original slashed byte ceiling.
+		$query  = isset( $_POST['query'] ) && is_string( $_POST['query'] ) && ! isset( $_POST['query'][ self::MAX_QUERY_BYTES ] )
+			? sanitize_text_field( wp_unslash( $_POST['query'] ) )
+			: '';
+		$digits = isset( $_POST['cursor'] ) && is_string( $_POST['cursor'] ) && ! isset( $_POST['cursor'][18] ) ? sanitize_key( $_POST['cursor'] ) : '';
+		// A sanitizer may remove punctuation. Accept only an unchanged raw string,
+		// then require the original digit grammar before numeric conversion.
+		$cursor = isset( $_POST['cursor'] ) && boolval( $digits === $_POST['cursor'] ) ? self::parse_cursor( $digits ) : -1;
+		return array(
+			'query'  => $query,
+			'cursor' => $cursor,
+		);
+	}
+
+	private static function parse_cursor( string $digits ): int {
+		return 1 === preg_match( '/^[0-9]{1,18}$/D', $digits ) ? (int) $digits : -1;
 	}
 
 	/** @return array<string,mixed>|\WP_Error Bounded keyset results or a truthful failure. */
@@ -75,8 +97,8 @@ final class IdentityPageSelector {
 		}
 		global $wpdb;
 		$wpdb->last_error = '';
-		$rows             = $wpdb->get_results(
-			$wpdb->prepare( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Bounded live administrator page search must reflect current publication status.
+		$rows             = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Bounded live administrator page search must reflect current publication status.
+			$wpdb->prepare(
 				'SELECT ID, post_title FROM %i WHERE post_type = %s AND post_status = %s AND post_password = %s AND ID > %d AND post_title LIKE %s ORDER BY ID ASC LIMIT %d',
 				$wpdb->posts,
 				'page',

@@ -517,17 +517,19 @@
         "path": "src/Admin/IdentityPageSelector.php",
         "scope": "ajax_search",
         "requests": [
-          "$_POST",
           "$_SERVER"
         ],
         "suppressions": [],
-        "file_code_sha256": "bcd5d27e61aef0893df47099a292f28838ce0b2277f425e9da01486d8e5f2aa6",
-        "code_sha256": "bf27d37dc97af04ee4c3a1ece5dbc616a0dff021b3fa20200300c4a83083c93f",
+        "file_code_sha256": "c64088972c0236c213568fd50a2061b603b4ba9fb39df29534ea35571168076c",
+        "code_sha256": "ce2fa9b42c93e870e671aee902ed7cc2f27154c72c7910c989034243c9dc90d8",
         "findings": {}
       },
-      "rationale": "ajax_search: ajax_search validates POST/manage_options/nonce before bounded term/cursor. search uses fixed prepared LIKE term,typedafterID,public published passwordlesspages LIMIT21 and ascending keyset. Saved private/missing page renders unavailable without title disclosure. Test verifies SQLargs/pagination/selection, not nativeMySQL/searchcost or executed AJAX denial.",
+      "rationale": "IdentityHub registers authenticated wp_ajax only. Exact raw POST comparison is reduced to a boolean, never normalized into POST; manage_options is checked before calling the sole private search_request helper. That helper checks the action nonce before all POST payload reads. Actual handler subprocess cases in IdentityPageSelectorTest::test_actual_ajax_boundary_preserves_raw_rejections_and_authorization_order cover malformed methods, denied capability, denied nonce and query count; native nonce/capability implementations are mocked, while source inspection proves exact ordering and no earlier POST read. Structured JSON error/success and escaped unavailable selection preserve contextual output.",
       "tests": [
-        "tests/Admin/IdentityPageSelectorTest.php"
+        "tests/Admin/RequestInputBoundaryTest.php",
+        "tests/Admin/IdentityPageSelectorTest.php",
+        "tests/Admin/fixtures/request-input-slashed.php",
+        "tests/Admin/fixtures/identity-page-input.php"
       ]
     },
     "src/Admin/IdentityPageSelector.php::search": {
@@ -538,13 +540,36 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Bounded live administrator page search must reflect current publication status."
         ],
-        "file_code_sha256": "bcd5d27e61aef0893df47099a292f28838ce0b2277f425e9da01486d8e5f2aa6",
+        "file_code_sha256": "c64088972c0236c213568fd50a2061b603b4ba9fb39df29534ea35571168076c",
         "code_sha256": "ce26829f3df972beaaad0219e7a17198423afb526690e75c2d0ccb99021321a4",
         "findings": {}
       },
-      "rationale": "search: ajax_search validates POST/manage_options/nonce before bounded term/cursor. search uses fixed prepared LIKE term,typedafterID,public published passwordlesspages LIMIT21 and ascending keyset. Saved private/missing page renders unavailable without title disclosure. Test verifies SQLargs/pagination/selection, not nativeMySQL/searchcost or executed AJAX denial.",
+      "rationale": "Fixed prepared%i table and typed query data retain escaped LIKE, published passwordlesspage status, ID>cursor ASC LIMIT21, bounded20 output and truthful SQL error handling. Called after method/capability/nonce plus bounded payload validation; no public unauthenticated registered handler. Same existing DirectQuery/NoCaching comment is now attached to get_results rather than prepare, with unchanged function code hash and rationale: live administrator page search must reflect current publication status. IdentityPageSelectorTest::test_search_is_keyset_bounded_and_requires_public_passwordless_pages inspects SQLargs/keyset/output/error on adapter; ::test_template_does_not_enumerate_pages_and_private_selection_does_not_expose_title checks title privacy. Neither proves native database cost or concurrent publication isolation.",
       "tests": [
-        "tests/Admin/IdentityPageSelectorTest.php"
+        "tests/Admin/RequestInputBoundaryTest.php",
+        "tests/Admin/IdentityPageSelectorTest.php",
+        "tests/Admin/fixtures/request-input-slashed.php",
+        "tests/Admin/fixtures/identity-page-input.php"
+      ]
+    },
+    "src/Admin/IdentityPageSelector.php::search_request": {
+      "inventory": {
+        "path": "src/Admin/IdentityPageSelector.php",
+        "scope": "search_request",
+        "requests": [
+          "$_POST"
+        ],
+        "suppressions": [],
+        "file_code_sha256": "c64088972c0236c213568fd50a2061b603b4ba9fb39df29534ea35571168076c",
+        "code_sha256": "085da1d032363a87a41088cd07e284f6c20cc9abb69c3ce1839c2483bfeeb8e9",
+        "findings": {}
+      },
+      "rationale": "Private helper is reached only after ajax_search exact method and manage_options checks and itself invokes check_ajax_referer before any POST access. Raw query is string and at most200 slashed bytes before wp_unslash/sanitize_text_field. Raw cursor string is at most18bytes; sanitized projection must strictly equal the original before parse_cursor accepts only1–18digits. No punctuation/backslash normalization can turn rejected raw input into a valid cursor. IdentityPageSelectorTest actual-handler subprocess uses faithful stripslashes and checks raw201bytes reducing after unslash, cursor punctuation/escape/arrays/bounds and successful edges. Authentication is simulated; this is no native request/SQL proof. No new input suppression.",
+      "tests": [
+        "tests/Admin/RequestInputBoundaryTest.php",
+        "tests/Admin/IdentityPageSelectorTest.php",
+        "tests/Admin/fixtures/request-input-slashed.php",
+        "tests/Admin/fixtures/identity-page-input.php"
       ]
     },
     "src/Admin/InternationalPanel.php::save_meta_box_data": {
@@ -1663,7 +1688,7 @@
         "code_sha256": "2a2077371063eda391a32f11df26396e863ede089ed99d3e3c99a6d240a1bae6",
         "findings": {}
       },
-      "rationale": "Site-local service and maintenance callers use a generated UUID and clamped60\u20133600-second TTL. Initial RawOptionStore INSERT IGNORE cannot replace a concurrent first owner; authoritative empty-aware read followed by observed-value wpdb update handles expired/malformed leases. Trusted options-table identifier and typed values; busy and read/write error paths remain distinct. Deterministic interleave, empty-value, expired-owner and insert-failure regressions execute the method; native two-DB fixture is read, not run by this reviewer.",
+      "rationale": "Site-local service and maintenance callers use a generated UUID and clamped60–3600-second TTL. Initial RawOptionStore INSERT IGNORE cannot replace a concurrent first owner; authoritative empty-aware read followed by observed-value wpdb update handles expired/malformed leases. Trusted options-table identifier and typed values; busy and read/write error paths remain distinct. Deterministic interleave, empty-value, expired-owner and insert-failure regressions execute the method; native two-DB fixture is read, not run by this reviewer.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php"
       ]
@@ -1681,7 +1706,7 @@
         "code_sha256": "16deb1d6258a07d316347e2dd8fb2f830903431de28777726c6ca409c021df7c",
         "findings": {}
       },
-      "rationale": "Called by service with evaluator snapshots while run is running; cached running ID or typed prepared status check precedes writes. wpdb insert stores resource fields and findings; errors throw. Incomplete measurement persists marker, placeholder zero restores null on reads. Actual storage\u2192read\u2192JSON regression verifies incomplete fields; runtime service fixture exercises resource writes. No raw request reaches repository.",
+      "rationale": "Called by service with evaluator snapshots while run is running; cached running ID or typed prepared status check precedes writes. wpdb insert stores resource fields and findings; errors throw. Incomplete measurement persists marker, placeholder zero restores null on reads. Actual storage→read→JSON regression verifies incomplete fields; runtime service fixture exercises resource writes. No raw request reaches repository.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php",
         "tests/Audit/AuditRuntimeBudgetTest.php"
@@ -1740,7 +1765,7 @@
           "WordPress.DB.PreparedSQL.NotPrepared:ERROR": 1
         }
       },
-      "rationale": "Private caller holds or renews exact mutation lease. Trusted %i table identifiers; bounded1\u2013100 IDs each have %d placeholder; cutoff %s. Atomic multi-table delete repeats failed/stale-running predicate after selection and preserves complete runs. DB read/delete errors throw. Actual mock query/error/lease regressions inspect prepared predicates and ownership; no native multi-table execution claimed.",
+      "rationale": "Private caller holds or renews exact mutation lease. Trusted %i table identifiers; bounded1–100 IDs each have %d placeholder; cutoff %s. Atomic multi-table delete repeats failed/stale-running predicate after selection and preserves complete runs. DB read/delete errors throw. Actual mock query/error/lease regressions inspect prepared predicates and ownership; no native multi-table execution claimed.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php"
       ]
@@ -1775,7 +1800,7 @@
         "code_sha256": "29f1a4200404c688858544d8566a45f70acb9e959cbe1e9ae4283517b59a526a",
         "findings": {}
       },
-      "rationale": "Authorized Reports view calls metadata-only completed-run list; limit clamped1\u201350 and supplied as %d, trusted tables %i, fixed complete predicate and dependent-baseline EXISTS. DB read errors throw. Existing repository display projection tests exercise neighboring bounded projection, not this exact history method; source review provides the bound proof. Test limits: Generic inherited tests do not invokeevery named method/storagefailure branch; sourcedataflowchecked, no native transaction/DB failure fixture claimed.",
+      "rationale": "Authorized Reports view calls metadata-only completed-run list; limit clamped1–50 and supplied as %d, trusted tables %i, fixed complete predicate and dependent-baseline EXISTS. DB read errors throw. Existing repository display projection tests exercise neighboring bounded projection, not this exact history method; source review provides the bound proof. Test limits: Generic inherited tests do not invokeevery named method/storagefailure branch; sourcedataflowchecked, no native transaction/DB failure fixture claimed.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php"
       ]
@@ -1812,7 +1837,7 @@
         "code_sha256": "c7f7f57b6ee1b462fece5fdfedb7e94ac447cce6608a2796720afa8765d9508d",
         "findings": {}
       },
-      "rationale": "Catch around post-begin generation marks only running ID failed via wpdb update and drops local running marker. This is best effort, with original exception rethrown and lease released in finally. Actual runtime fixture proves running\u2192failed/no complete; forced storage failure during fail is not runtime-tested. Test limits: Generic inherited tests do not invokeevery named method/storagefailure branch; sourcedataflowchecked, no native transaction/DB failure fixture claimed.",
+      "rationale": "Catch around post-begin generation marks only running ID failed via wpdb update and drops local running marker. This is best effort, with original exception rethrown and lease released in finally. Actual runtime fixture proves running→failed/no complete; forced storage failure during fail is not runtime-tested. Test limits: Generic inherited tests do not invokeevery named method/storagefailure branch; sourcedataflowchecked, no native transaction/DB failure fixture claimed.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php",
         "tests/Audit/AuditRuntimeBudgetTest.php"
@@ -1847,7 +1872,7 @@
         "code_sha256": "c7ef29ca4f02ff22d3c2a7b7237993d2056db44e894a70805f6779185e03d580",
         "findings": {}
       },
-      "rationale": "Protected AuditReadAPI/export caller checks row profile before public JSON/HTML hydration; internal service may also read a full immutable snapshot. Three queries use trusted tables %i and run ID %d and require complete status. Read errors throw; JSON arrays hydrate via decoding and null incomplete measurement restored. Actual mock complete/finding-only/storage\u2192JSON regressions execute this path. Row ceilings are not aggregate byte limits.",
+      "rationale": "Protected AuditReadAPI/export caller checks row profile before public JSON/HTML hydration; internal service may also read a full immutable snapshot. Three queries use trusted tables %i and run ID %d and require complete status. Read errors throw; JSON arrays hydrate via decoding and null incomplete measurement restored. Actual mock complete/finding-only/storage→JSON regressions execute this path. Row ceilings are not aggregate byte limits.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php"
       ]
@@ -1898,7 +1923,7 @@
         "code_sha256": "5c5ffc19c29a7c8d311e4c109465b568753df83cc71cbc29c8577bc567c8e179",
         "findings": {}
       },
-      "rationale": "Protected Reports screen calls bounded metadata/finding preview without resource hydration. Preview clamp1\u2013100 passed %d; fixed complete predicate, grouped finding counts and dependent-baseline EXISTS use %i trusted identifiers/%d ID. Checks each DB read. Actual projection test asserts LIMIT and no full resource query; native grouped SQL semantics not separately run.",
+      "rationale": "Protected Reports screen calls bounded metadata/finding preview without resource hydration. Preview clamp1–100 passed %d; fixed complete predicate, grouped finding counts and dependent-baseline EXISTS use %i trusted identifiers/%d ID. Checks each DB read. Actual projection test asserts LIMIT and no full resource query; native grouped SQL semantics not separately run.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php"
       ]
@@ -2383,15 +2408,14 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
         ],
-        "file_code_sha256": "7d247a31e6c8252cbffc78adca1c25f0c18b8e9329b2addefb399b05089929f2",
-        "code_sha256": "27801eac0f6f3cd4f6714a6f0cc0e4560991efcd89e03cbea286f7cc04830f0f",
+        "file_code_sha256": "fac8217875e512237f8b24ca81a72497547537008d5eb1ab8922e0205f5c28ca",
+        "code_sha256": "ce7fe026e3f9bad027ec17df33a663634948747e73ae5317dcaebe16334a4206",
         "findings": {}
       },
-      "rationale": "insert: Internal fixed prepared%i identifiers/%s values;read distinguishes native existingempty via same-query last_result fromabsence/error. BINARY exact bytes inconditional UPDATE/DELETE and insert-onlyabsence. Optional helper variants additionally bind IS_USED_LOCK exactowner and CONNECTION_ID within statement. Only verifiedwrites invalidate single/alloptions/notoptions/requestmemo,never populate superseded values. ConfigurationImportSafety andCloudflarePersistenceBoundary tests exercise empty/conflict/rollback/reconnect semantics through localadapters, not nativeSQL/isolation.",
+      "rationale": "One literal INSERT IGNORE SELECT is prepared adjacent to the sole query sink, with typed identifier/data and autoload off. Unique option_name makes a competing insert zero. The optional fence flag is zero only for null; non-null arrays require IS_USED_LOCK(name) and CONNECTION_ID to equal the captured owner in that same mutation statement. Missing fence values cannot disable the predicate. test_required_fence_is_checked_at_the_mutation_statement covers all three modeled ownership interleavings, and test_sql_failure_stays_false_and_empty_fence_never_disables_ownership checks false versus zero. Existing DirectQuery/NoCaching exceptions cover authoritative internal persistence, not a public request handler. CloudflareOptionStore validates the captured fence and final stored value; ConfigurationMutationStore deliberately uses unfenced exact-byte CAS, and MCPMigration supplies its retirement lease fence. Cache invalidation is explicit at callers, including finally on conflict/error, rather than automatically or only after verified writes. RawOptionStoreTest tests one statement per operation, exact bytes, empty/absent and zero/false distinctions; its strict database adapter is a model. The inspected wporg-raw-option-store fixture covers release/reconnect/error paths. Fresh native execution is a separate mandatory gate; legacy candidate evidence is not a substitute.",
       "tests": [
-        "tests/Admin/CloudflarePersistenceBoundaryTest.php",
-        "tests/mocks/cloudflare-database.php",
-        "tests/Admin/ConfigurationImportSafetyTest.php"
+        "tests/Core/RawOptionStoreTest.php",
+        "tests/integration/wporg-raw-option-store.php"
       ]
     },
     "src/Core/RawOptionStore.php::read": {
@@ -2402,15 +2426,14 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
         ],
-        "file_code_sha256": "7d247a31e6c8252cbffc78adca1c25f0c18b8e9329b2addefb399b05089929f2",
+        "file_code_sha256": "fac8217875e512237f8b24ca81a72497547537008d5eb1ab8922e0205f5c28ca",
         "code_sha256": "ae67c07418a5f7ae5c6c8a833497ddcf161de10effa6990343552aa79711d87c",
         "findings": {}
       },
-      "rationale": "read: Internal fixed prepared%i identifiers/%s values;read distinguishes native existingempty via same-query last_result fromabsence/error. BINARY exact bytes inconditional UPDATE/DELETE and insert-onlyabsence. Optional helper variants additionally bind IS_USED_LOCK exactowner and CONNECTION_ID within statement. Only verifiedwrites invalidate single/alloptions/notoptions/requestmemo,never populate superseded values. ConfigurationImportSafety andCloudflarePersistenceBoundary tests exercise empty/conflict/rollback/reconnect semantics through localadapters, not nativeSQL/isolation.",
+      "rationale": "Fixed prepared %i table and %s option name issue one authoritative SELECT. Native get_var empty-string collapse is resolved from the same-query last_result, without a second observation; SQL error, malformed/NULL row and absence remain distinct. The function body is unchanged but its containing mutation helpers were reviewed. test_unfenced_exact_bytes_empty_absence_and_conflicts_use_one_statement_each checks the modeled empty/absent contract. Existing DirectQuery/NoCaching exceptions cover authoritative internal persistence, not a public request handler. CloudflareOptionStore validates the captured fence and final stored value; ConfigurationMutationStore deliberately uses unfenced exact-byte CAS, and MCPMigration supplies its retirement lease fence. Cache invalidation is explicit at callers, including finally on conflict/error, rather than automatically or only after verified writes. RawOptionStoreTest tests one statement per operation, exact bytes, empty/absent and zero/false distinctions; its strict database adapter is a model. The inspected wporg-raw-option-store fixture covers release/reconnect/error paths. Fresh native execution is a separate mandatory gate; legacy candidate evidence is not a substitute.",
       "tests": [
-        "tests/Admin/CloudflarePersistenceBoundaryTest.php",
-        "tests/mocks/cloudflare-database.php",
-        "tests/Admin/ConfigurationImportSafetyTest.php"
+        "tests/Core/RawOptionStoreTest.php",
+        "tests/integration/wporg-raw-option-store.php"
       ]
     },
     "src/Core/RawOptionStore.php::remove": {
@@ -2421,15 +2444,14 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
         ],
-        "file_code_sha256": "7d247a31e6c8252cbffc78adca1c25f0c18b8e9329b2addefb399b05089929f2",
-        "code_sha256": "5b070dcaf552a664101cb31a1235dd11b788ef83a9661846add036d31c32a626",
+        "file_code_sha256": "fac8217875e512237f8b24ca81a72497547537008d5eb1ab8922e0205f5c28ca",
+        "code_sha256": "ce4927ed7b0680f580303c0ef924723924d012d6d88110786fbf6c956c4d5756",
         "findings": {}
       },
-      "rationale": "remove: Internal fixed prepared%i identifiers/%s values;read distinguishes native existingempty via same-query last_result fromabsence/error. BINARY exact bytes inconditional UPDATE/DELETE and insert-onlyabsence. Optional helper variants additionally bind IS_USED_LOCK exactowner and CONNECTION_ID within statement. Only verifiedwrites invalidate single/alloptions/notoptions/requestmemo,never populate superseded values. ConfigurationImportSafety andCloudflarePersistenceBoundary tests exercise empty/conflict/rollback/reconnect semantics through localadapters, not nativeSQL/isolation.",
+      "rationale": "One literal prepared DELETE binds table, option name and BINARY expected bytes. Optional fence flag zero only for null otherwise requires captured lock owner and current physical connection within the DELETE. An observed stale value, lost owner or empty fence leaves the row. test_unfenced_exact_bytes_empty_absence_and_conflicts_use_one_statement_each checks case/trailing-space preservation, and mutation-time fence/error tests exercise owned, released, reconnected, missing-fence and false results. Existing DirectQuery/NoCaching exceptions cover authoritative internal persistence, not a public request handler. CloudflareOptionStore validates the captured fence and final stored value; ConfigurationMutationStore deliberately uses unfenced exact-byte CAS, and MCPMigration supplies its retirement lease fence. Cache invalidation is explicit at callers, including finally on conflict/error, rather than automatically or only after verified writes. RawOptionStoreTest tests one statement per operation, exact bytes, empty/absent and zero/false distinctions; its strict database adapter is a model. The inspected wporg-raw-option-store fixture covers release/reconnect/error paths. Fresh native execution is a separate mandatory gate; legacy candidate evidence is not a substitute.",
       "tests": [
-        "tests/Admin/CloudflarePersistenceBoundaryTest.php",
-        "tests/mocks/cloudflare-database.php",
-        "tests/Admin/ConfigurationImportSafetyTest.php"
+        "tests/Core/RawOptionStoreTest.php",
+        "tests/integration/wporg-raw-option-store.php"
       ]
     },
     "src/Core/RawOptionStore.php::replace": {
@@ -2440,15 +2462,14 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
         ],
-        "file_code_sha256": "7d247a31e6c8252cbffc78adca1c25f0c18b8e9329b2addefb399b05089929f2",
-        "code_sha256": "6bb3eebfd2698f5a6f260e1601bb44dc832ca6a9c0a498cd6ce9b7534af69221",
+        "file_code_sha256": "fac8217875e512237f8b24ca81a72497547537008d5eb1ab8922e0205f5c28ca",
+        "code_sha256": "363e06fa6acaaa0421c1d57e2afd1fc4bada911ec4d09f33c228af40c9092420",
         "findings": {}
       },
-      "rationale": "replace: Internal fixed prepared%i identifiers/%s values;read distinguishes native existingempty via same-query last_result fromabsence/error. BINARY exact bytes inconditional UPDATE/DELETE and insert-onlyabsence. Optional helper variants additionally bind IS_USED_LOCK exactowner and CONNECTION_ID within statement. Only verifiedwrites invalidate single/alloptions/notoptions/requestmemo,never populate superseded values. ConfigurationImportSafety andCloudflarePersistenceBoundary tests exercise empty/conflict/rollback/reconnect semantics through localadapters, not nativeSQL/isolation.",
+      "rationale": "One literal prepared UPDATE binds table, next bytes, option name and expected bytes; BINARY equality preserves case and trailing-space conflicts. Optional fence flag zero only for null otherwise enforces IS_USED_LOCK and CONNECTION_ID in the same UPDATE, with no preflight-only authority substitution. A no-op zero is not converted to success here. test_unfenced_exact_bytes_empty_absence_and_conflicts_use_one_statement_each checks exact conflict/no-op semantics; the mutation-time fence and error tests cover all modeled ownership states. Existing DirectQuery/NoCaching exceptions cover authoritative internal persistence, not a public request handler. CloudflareOptionStore validates the captured fence and final stored value; ConfigurationMutationStore deliberately uses unfenced exact-byte CAS, and MCPMigration supplies its retirement lease fence. Cache invalidation is explicit at callers, including finally on conflict/error, rather than automatically or only after verified writes. RawOptionStoreTest tests one statement per operation, exact bytes, empty/absent and zero/false distinctions; its strict database adapter is a model. The inspected wporg-raw-option-store fixture covers release/reconnect/error paths. Fresh native execution is a separate mandatory gate; legacy candidate evidence is not a substitute.",
       "tests": [
-        "tests/Admin/CloudflarePersistenceBoundaryTest.php",
-        "tests/mocks/cloudflare-database.php",
-        "tests/Admin/ConfigurationImportSafetyTest.php"
+        "tests/Core/RawOptionStoreTest.php",
+        "tests/integration/wporg-raw-option-store.php"
       ]
     },
     "src/Core/ReadOnlyRequest.php::method": {
@@ -2476,13 +2497,14 @@
           "$_SERVER"
         ],
         "suppressions": [],
-        "file_code_sha256": "397a971433ec3d2a824798bb6eee73abbddabc974a85f4b0e2bc5fe2031c459a",
-        "code_sha256": "1536d62ad5cfe9c63e689e6b551ca1de89c7c5f65e36ce55ff7f31a1dbee9766",
+        "file_code_sha256": "36273665479c47c0ca8503cd6a75e4d9ec900b839343cc06b0cad51226ae7e6c",
+        "code_sha256": "ccfcbc02f206b5a411f258f7465567cde688f5ba5cae77072156dc258f4540bc",
         "findings": {}
       },
-      "rationale": "Reads only three fixed HTTP_ACCEPT/IF_NONE_MATCH/IF_MODIFIED_SINCE keys chosen by literal name match. Scalars are unslashed then exact printable ASCII0-4096bytes and stricter caller limit enforced; CR/LF and arrays produce empty. Value is read-only negotiation data, never an authorization token or arbitrary response header. RequestInputBoundaryTest directly checks quality parameter preservation, malformed arrays and bounded/control cases; contextual conditional response behavior has separate protocol tests.",
+      "rationale": "Reads only the three literal allowed headers through a visible scalar/type guard and bounded unslash/FILTER_CALLBACK ASCII validator. Raw cap8192 preserves decoded4096 maximum; accepted percent, quoting and whitespace bytes are unchanged, then stricter caller cap applies. Integrity uses these as read-only conditional validators, OpenAPI as negotiation metadata. RequestInputBoundaryTest::test_literal_adapter_rejects_controls_and_limits_before_any_normalization and ::test_slashed_protocol_limits_use_real_unslash_semantics cover controls, arrays, literal validators, both bounds and actual stripslashes subprocess behavior. These are not native HTTP authorization tests; no nonce is required for this public read-only metadata adapter.",
       "tests": [
-        "tests/Admin/RequestInputBoundaryTest.php"
+        "tests/Admin/RequestInputBoundaryTest.php",
+        "tests/Admin/fixtures/request-input-slashed.php"
       ]
     },
     "src/Core/RequestInput.php::query_text": {
@@ -2493,13 +2515,14 @@
           "$_SERVER"
         ],
         "suppressions": [],
-        "file_code_sha256": "397a971433ec3d2a824798bb6eee73abbddabc974a85f4b0e2bc5fe2031c459a",
-        "code_sha256": "b542655e0d907b70e171c01d0ffc26ca31a91a9959f31b29d3592a7968320f58",
+        "file_code_sha256": "36273665479c47c0ca8503cd6a75e4d9ec900b839343cc06b0cad51226ae7e6c",
+        "code_sha256": "48d81de806bc64ab6d8108925cdae7a638046896217687fed355e1cbe0e30e88",
         "findings": {}
       },
-      "rationale": "Read-only public metadata adapter accepts a fixed caller key with exact1-64character grammar. REQUEST_URI must be scalar visible ASCII1-8192bytes before URL parsing; query4096bytes, scalar result and caller limit are enforced before final sanitize_text_field. Decoded control bytes and nested arrays are rejected. No nonce is needed for route negotiation alone; callers independently authorize publications. RequestInputBoundaryTest directly challenges malformed/nested/control/encoded URI shapes. WordPress wp_parse_str filters are trusted extension hooks; resulting value is revalidated, no complete request is forwarded.",
+      "rationale": "The requested key retains exact1–64character allowlist. Literal REQUEST_URI stays visible, scalar and raw16384-byte bounded before unslash; callback validates decoded ASCII1–8192bytes without canonicalizing URI/percent markup. Private query_value retains query4096, scalar selected value, decoded control rejection and caller byte cap before text sanitization. OpenAPI requests version16, SettingsPage notice keys64; neither path makes the adapter a mutation authority. RequestInputBoundaryTest covers encoded/nested/control inputs, exact URI/query caps and the real-stripslashes fixture. WordPress parse/sanitizer extension filters remain a documented trust boundary.",
       "tests": [
-        "tests/Admin/RequestInputBoundaryTest.php"
+        "tests/Admin/RequestInputBoundaryTest.php",
+        "tests/Admin/fixtures/request-input-slashed.php"
       ]
     },
     "src/Core/RuntimeCounterStore.php::cleanup": {
@@ -2769,11 +2792,11 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
         ],
-        "file_code_sha256": "9943f2d5a854ef0421bf1529a375a6fd888bb2867d3a979f47a49fe5b036af86",
+        "file_code_sha256": "7226f7beaa597a014c5216ea00002477164a37a38c8b9831be7f8c336453151b",
         "code_sha256": "162ed2186e1cf9e0f018fdd54ed2d286c6da88d3d69f30d02cb62841a734fdb6",
         "findings": {}
       },
-      "rationale": "run verifies uninstall bootstrap and per-site opt-in; partial network cleanup deletes only the opted-in site ID from the fixed shared table. test_partial_multisite_opt_in_preserves_shared_data checks site-scoped DELETE and retained shared data. The public entry is WP_UNINSTALL_PLUGIN plus stored explicit delete_data_on_uninstall; no request SQL datum or arbitrary table selector is accepted.",
+      "rationale": "Fixed prepared %i shared table and %d cleaned site ID DELETE, no request-derived table. The caller supplies only sites that opted in and completed their local cleanup; partial networks retain unrelated rows/shared data. Successful deletion triggers translation/sitemap cache invalidation for surviving sites with switch/restore in finally. test_partial_multisite_opt_in_preserves_shared_data checks modeled site-scoped deletion and shared preservation. It does not prove native distributed-cache convergence; DELETE failures remain best effort rather than guaranteed cleanup. Existing direct/no-cache exception is limited to owned teardown.",
       "tests": [
         "tests/Core/UninstallerTest.php"
       ]
@@ -2786,30 +2809,11 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
         ],
-        "file_code_sha256": "9943f2d5a854ef0421bf1529a375a6fd888bb2867d3a979f47a49fe5b036af86",
+        "file_code_sha256": "7226f7beaa597a014c5216ea00002477164a37a38c8b9831be7f8c336453151b",
         "code_sha256": "c5ea24699e23bef25790bddfd81b4dd02f9755143219c1196dc484eb06c20379",
         "findings": {}
       },
-      "rationale": "Only complete successful all-site opt-in cleanup reaches this fixed prepared table DROP. test_all_multisite_sites_must_opt_in_before_shared_cleanup, test_opt_out_preserves_all_data and test_failed_local_table_drop_prevents_shared_cleanup check gating. The public entry is WP_UNINSTALL_PLUGIN plus stored explicit delete_data_on_uninstall; no request SQL datum or arbitrary table selector is accepted.",
-      "tests": [
-        "tests/Core/UninstallerTest.php"
-      ]
-    },
-    "src/Core/Uninstaller.php::post_meta_was_removed": {
-      "inventory": {
-        "path": "src/Core/Uninstaller.php",
-        "scope": "post_meta_was_removed",
-        "requests": [],
-        "suppressions": [
-          "// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The fixed Core-owned key list supplies exactly one string value per generated placeholder in this single statement."
-        ],
-        "file_code_sha256": "9943f2d5a854ef0421bf1529a375a6fd888bb2867d3a979f47a49fe5b036af86",
-        "code_sha256": "ce9102c830b37342ec521188bafcf59d946476c17c61eb2cca4f8191b8679caf",
-        "findings": {
-          "WordPress.DB.PreparedSQL.InterpolatedNotPrepared:ERROR": 1
-        }
-      },
-      "rationale": "Cleanup verifies only the fixed Core post-meta key list, one %s per key plus %i for wpdb postmeta. Query is prepared before execution; annotation-blind PreparedSQL cannot follow this safe fixed placeholder construction across variables. test_single_site_opt_in_deletes_core_owned_data checks owned deletion and unrelated meta preservation, but its stub uses _cybermaps_ prefix when answering this verification query, so exact IN-list membership is source-reviewed rather than proven by the mock. The public entry is WP_UNINSTALL_PLUGIN plus stored explicit delete_data_on_uninstall; no request SQL datum or arbitrary table selector is accepted.",
+      "rationale": "Fixed %i-prepared shared table DROP reached after all enumerated sites opted in and reported successful local cleanup. test_all_multisite_sites_must_opt_in_before_shared_cleanup, test_opt_out_preserves_all_data and test_failed_local_table_drop_prevents_shared_cleanup verify this gating on mocks. The final shared DROP result itself is not checked, so this rationale does not promise complete deletion or transactional teardown; site/network enumeration also has no global bound. Existing schema/direct/no-cache exceptions cover this exact owned table only.",
       "tests": [
         "tests/Core/UninstallerTest.php"
       ]
@@ -2820,16 +2824,18 @@
         "scope": "read_cleanup_rows",
         "requests": [],
         "suppressions": [
+          "// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The fixed Core-owned key list supplies exactly one string value per generated placeholder in this single statement.",
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Prepared cleanup queries inspect only the fixed owned table, post-meta and numeric OAuth-pointer inventories; callers bound results to at most100 rows.",
-          "// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Every caller prepares its fixed cleanup template and typed values before entering this private reader."
+          "// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Each fixed inventory is prepared above using its typed values before execution."
         ],
-        "file_code_sha256": "9943f2d5a854ef0421bf1529a375a6fd888bb2867d3a979f47a49fe5b036af86",
-        "code_sha256": "350a6b44ba0327dbcd95373569b8af131698988b7c2576b08efa5f724d56236f",
+        "file_code_sha256": "7226f7beaa597a014c5216ea00002477164a37a38c8b9831be7f8c336453151b",
+        "code_sha256": "5209020552410d776649dbac521538c11ff6a7fc07b68b3cc34f2b2cf743e60e",
         "findings": {
+          "WordPress.DB.PreparedSQL.InterpolatedNotPrepared:ERROR": 1,
           "WordPress.DB.PreparedSQL.NotPrepared:ERROR": 1
         }
       },
-      "rationale": "read_cleanup_rows receives only fixed already-prepared owned-table/meta/numericpointer templates from private callers; each typedidentifier/value bound,maximum100returnedrows. WP_UNINSTALL_PLUGIN andper-site uninstallopt-in guardpersistentcleanup; errors/nonarray/over100rows fail and cannotauthorize shareddata deletion. Numericpointer100-rowkeysetpages have10secondbudget, BINARYexactcaseprefix/escapedLIKE/numeric-onlysuffix,finalabsenceverification; extensions/near-matching namespreserved. UninstallerTest375-402/573-583 models321pointerpages andread/deletefailures; regexfake doesnotexecuteSQLcollation/nativeengine. Entire617currentlinefile reread after2fixedManagedHtaccess inventory additions; latter has sourceevidence, no correspondingselectedtest asserted.",
+      "rationale": "Private reader accepts only three fixed inventories. Each is prepared locally immediately before the shared get_results: escaped exact table LIKE, post-meta %i with one generated %s per fixed Core key, or fully typed numeric OAuth-pointer predicate/cursor/limit. The existing post-meta interpolation exception moves here with its SQL; existing NotPrepared now describes local preparation, not caller preparation. Annotation-blind findings are exactly one InterpolatedNotPrepared and one NotPrepared. SQL error/non-array/over-100 results fail. Pointer callers use 100-row pages, ten-second iteration budget, BINARY exact prefix, escaped LIKE, numeric-only suffix and residual verification; this does not guarantee hard SQL wall time. UninstallerTest test_single_site_opt_in_deletes_core_owned_data, test_cloudflare_state_and_all_numeric_pointer_pages_are_removed_but_foreign_names_remain, test_failed_pointer_inventory_preserves_pointer_and_prevents_shared_cleanup and test_failed_pointer_delete_is_verified_before_shared_cleanup exercise ownership/pagination/failure. Post-meta fake uses a broader prefix and pointer fake uses PHP regex, so exact SQL membership/collation is source-reviewed, not native-proven. Private callers are authorized uninstall cleanup or narrow automatic MCP retirement; no caller request selects SQL.",
       "tests": [
         "tests/Core/UninstallerTest.php"
       ]
@@ -2842,11 +2848,11 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
         ],
-        "file_code_sha256": "9943f2d5a854ef0421bf1529a375a6fd888bb2867d3a979f47a49fe5b036af86",
+        "file_code_sha256": "7226f7beaa597a014c5216ea00002477164a37a38c8b9831be7f8c336453151b",
         "code_sha256": "f73a10b166726456826b67785abb4298a1687b1f80e2d0b25d7f7018b490ec7d",
         "findings": {}
       },
-      "rationale": "Only fixed owned suffix inventories are passed by cleanup callers; every table identifier uses %i and no prefix-wide deletion is inferred. test_mcp_retirement_is_narrow_even_with_mcp_in_the_site_prefix and test_failed_local_table_drop_prevents_shared_cleanup cover exact scope and failure. The public entry is WP_UNINSTALL_PLUGIN plus stored explicit delete_data_on_uninstall; no request SQL datum or arbitrary table selector is accepted.",
+      "rationale": "Fixed owned suffix inventory only, every DROP identifier prepared with %i, and native table absence/error checked through table_was_removed/read_cleanup_rows. Ordinary uninstall calls require WP_UNINSTALL_PLUGIN and per-site stored opt-in. A separate MCPMigration lease-gated automatic retirement calls remove_legacy_mcp_tables and selects only the obsolete fixed MCP subset; it does not require uninstall opt-in. test_mcp_retirement_is_narrow_even_with_mcp_in_the_site_prefix and test_failed_local_table_drop_prevents_shared_cleanup verify modeled prefix isolation and failed cleanup gating. Adapter queries do not establish native engine failure behavior. Existing schema/direct/no-cache exceptions remain justified for owned teardown.",
       "tests": [
         "tests/Core/UninstallerTest.php"
       ]

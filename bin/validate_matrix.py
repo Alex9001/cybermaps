@@ -22,6 +22,13 @@ def verify_priming_fixture(path):
             'Native publication priming fixture incomplete')
 
 
+def verify_sql_fixture(path, name):
+    require(name in ('stored_template_source', 'raw_option_store'), 'Unknown native SQL fixture')
+    result = json.loads(Path(path).read_text())
+    require(isinstance(result, dict) and result.get(name + '_passed') is True,
+            f'Native {name} fixture incomplete')
+
+
 def validate_result(result, wp, php, multisite, archive_hash, commit):
     require(result['wordpress_version'] == wp and result['php_version'].startswith(php + '.'), 'Runtime version mismatch')
     require(result['zip_sha256'] == archive_hash and result['commit'] == commit, 'Runtime evidence belongs to another ZIP or commit')
@@ -32,7 +39,7 @@ def validate_result(result, wp, php, multisite, archive_hash, commit):
     require(result.get('sitemap_regressions_passed') is True, 'Sitemap runtime regressions incomplete')
     require(result.get('rest_representation_passed') is True, 'Native REST representation regressions incomplete')
     require(result.get('publication_priming_passed') is True, 'Native publication priming regressions incomplete')
-    for key in ('configuration_persistence', 'cloudflare_persistence', 'audit_run_lock', 'static_ownership', 'state_cutover'):
+    for key in ('configuration_persistence', 'cloudflare_persistence', 'audit_run_lock', 'static_ownership', 'state_cutover', 'stored_template_source', 'raw_option_store'):
         require(result.get(key + '_passed') is True, f'Native {key} regressions incomplete')
     require(result.get('stable_findings') == [] and result.get('experimental_findings') == [], 'Runtime findings remain')
 
@@ -43,6 +50,12 @@ def main():
         return
     if sys.argv[1] == '--verify-priming':
         verify_priming_fixture(sys.argv[2])
+        return
+    if sys.argv[1] == '--verify-template-source':
+        verify_sql_fixture(sys.argv[2], 'stored_template_source')
+        return
+    if sys.argv[1] == '--verify-raw-option-store':
+        verify_sql_fixture(sys.argv[2], 'raw_option_store')
         return
     archive, output = map(Path, sys.argv[1:3])
     _, archive_hash = package_files(archive)

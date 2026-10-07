@@ -28,6 +28,10 @@ publication cache-priming checks. Every runtime case, including converted
 multisite, requires `publication_priming_passed` to be explicitly true. The
 priming fixture reuses 201 posts or seeds and removes its own bounded temporary
 posts; it does not establish performance at any corpus size.
+Each case also runs the stored-template source and direct option CAS fixtures
+after any multisite conversion. Their own `stored_template_source_passed` and
+`raw_option_store_passed` output and matrix flags must be explicitly true after
+cleanup; process success or another fixture's flag cannot substitute.
 Missing or false evidence flags reject the candidate. Relay security, WebMCP
 browser security, admin UI contract tests using a mocked DOM, and
 performance-harness self-tests run in the same candidate gate; harness

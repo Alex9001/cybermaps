@@ -234,6 +234,16 @@ final class CybermapsMockStaticOwnershipDatabase {
 
 	/** Strip only the two audited same-statement session-fence predicates. */
 	private function remove_fence( string $sql, array $args ): array {
+		$optional = '/(?:AND|WHERE) \(%d = 0 OR \(IS_USED_LOCK\(%s\) = %d AND CONNECTION_ID\(\) = %d\)\)$/';
+		if ( 1 === preg_match( $optional, $sql, $match, PREG_OFFSET_CAPTURE ) ) {
+			$offset = $match[0][1];
+			$count = preg_match_all( '/%[ids]/', substr( $sql, 0, $offset ) );
+			$fence = array_splice( $args, $count, 4 );
+			if ( ! in_array( $fence[0], array( 0, 1 ), true ) ) { throw new UnexpectedValueException( 'Optional fence must be explicitly zero or one.' ); }
+			$allowed = 0 === $fence[0] || ( ( $this->locks[ $fence[1] ] ?? null ) === $fence[2] && $this->connection_id === $fence[3] );
+			$replacement = str_starts_with( $match[0][0], 'WHERE' ) ? 'WHERE 1=1' : '';
+			return array( trim( substr_replace( $sql, $replacement, $offset ) ), $args, $allowed );
+		}
 		$pattern = '/(?:AND|WHERE) IS_USED_LOCK\(%s\) = (CONNECTION_ID\(\)|%d) AND CONNECTION_ID\(\) = %d/';
 		if ( 1 !== preg_match( $pattern, $sql, $match, PREG_OFFSET_CAPTURE ) ) {
 			return array( $sql, $args, true );

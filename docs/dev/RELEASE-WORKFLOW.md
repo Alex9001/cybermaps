@@ -75,6 +75,10 @@ including the converted multisite case. The bounded fixture reuses 201 posts or
 creates and removes its own temporary posts; `publication_priming_passed` must
 be explicitly true in both fixture output and matrix evidence. This regression
 check does not replace the separate controlled performance workload.
+Every case also requires native stored-template source and direct option CAS
+checks after any multisite conversion. Normal PHP includes preserve their
+strict-types declarations; their own success flags are checked before matrix
+evidence is accepted. Both fixtures must finish their owned-artifact cleanup.
 
 The installer checks the checksum, stages bounded regular package files,
 verifies them, moves the previous installation to a rollback directory, then

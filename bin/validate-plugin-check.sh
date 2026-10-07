@@ -159,7 +159,7 @@ run_plugin_check() {
 	local output_path="$1"
 	shift
 	set +e
-	wp_cli plugin check cybermaps --mode=new --format=strict-json --include-low-severity-errors --include-low-severity-warnings --require=/var/www/html/wp-content/plugins/plugin-check/cli.php "$@" > "${output_path}" 2> "${output_path}.stderr"
+	wp_cli plugin check cybermaps --mode=new --format=strict-json --fields=file,line,column,type,code,message,docs --include-low-severity-errors --include-low-severity-warnings --require=/var/www/html/wp-content/plugins/plugin-check/cli.php "$@" > "${output_path}" 2> "${output_path}.stderr"
 	local status="$?"
 	set -e
 	python3 -B "${PROJECT_DIR}/bin/plugin_check_result.py" "${output_path}" "${output_path}.stderr" "${status}"
@@ -196,6 +196,10 @@ if [ "${CYBERMAPS_TEST_MULTISITE:-0}" = "1" ]; then
 fi
 wp_cli eval 'putenv( "CYBERMAPS_PRIMING_PROBE=1" ); putenv( "CYBERMAPS_PRIMING_PROBE_SEED=1" ); require "/validation/publication-cache-priming.php";' > "${RUNTIME_DIR}/publication-cache-priming.json"
 python3 -B "${PROJECT_DIR}/bin/validate_matrix.py" --verify-priming "${RUNTIME_DIR}/publication-cache-priming.json"
+wp_cli eval 'putenv( "CYBERMAPS_TEMPLATE_SOURCE_PROBE=1" ); require "/validation/stored-template-source.php";' > "${RUNTIME_DIR}/stored-template-source.json"
+python3 -B "${PROJECT_DIR}/bin/validate_matrix.py" --verify-template-source "${RUNTIME_DIR}/stored-template-source.json"
+wp_cli eval 'putenv( "CYBERMAPS_STATE_FIXTURE_DISPOSABLE=1" ); require "/validation/wporg-raw-option-store.php";' > "${RUNTIME_DIR}/raw-option-store.json"
+python3 -B "${PROJECT_DIR}/bin/validate_matrix.py" --verify-raw-option-store "${RUNTIME_DIR}/raw-option-store.json"
 wp_cli eval 'require "/validation/wporg-lifecycle.php";'  >> "${RUNTIME_DIR}/smoke.txt"
 
 COMMIT="$(git -C "${PROJECT_DIR}" rev-parse HEAD)"
@@ -234,6 +238,8 @@ report = {
     "sitemap_regressions_passed": True,
     "rest_representation_passed": True,
     "publication_priming_passed": True,
+    "stored_template_source_passed": True,
+    "raw_option_store_passed": True,
     "configuration_persistence_passed": True,
     "cloudflare_persistence_passed": True,
     "audit_run_lock_passed": True,

@@ -1103,7 +1103,8 @@ class UpgradeWpdbStub {
 		if ( is_array( $prepared ) && str_contains( $prepared['query'], ' AS lease ' ) ) {
 			return $this->guarded_option_query( $prepared );
 		}
-		if ( is_array( $prepared ) && ! str_contains( $prepared['query'], 'IS_USED_LOCK' ) && preg_match( '/^(UPDATE %i SET option_value|DELETE FROM %i WHERE option_name|INSERT (?:IGNORE )?INTO %i \\(option_name)/', $prepared['query'] ) ) {
+		$unfenced_optional = is_array( $prepared ) && str_contains( $prepared['query'], '(%d = 0 OR (IS_USED_LOCK(%s) = %d AND CONNECTION_ID() = %d))' ) && 0 === ( $prepared['args'][ count( $prepared['args'] ) - 4 ] ?? null );
+		if ( is_array( $prepared ) && ( ! str_contains( $prepared['query'], 'IS_USED_LOCK' ) || $unfenced_optional ) && preg_match( '/^(UPDATE %i SET option_value|DELETE FROM %i WHERE option_name|INSERT (?:IGNORE )?INTO %i \\(option_name)/', $prepared['query'] ) ) {
 			$result = $this->configuration->query( $this->configuration->prepare( $prepared['query'], ...$prepared['args'] ) );
 			$this->last_error = $this->configuration->last_error;
 			$this->last_result = $this->configuration->last_result;

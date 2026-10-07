@@ -57,7 +57,8 @@ final class CybermapsConfigurationDatabase {
 		list( $sql, $args ) = $this->prepared[ $key ] ?? array( $key, array() );
 		$this->queries[] = array( $sql, $args );
 		$this->last_error = '';
-		if ( ! preg_match( '/^(UPDATE %i SET option_value|DELETE FROM %i WHERE option_name|INSERT (?:IGNORE )?INTO %i \\(option_name)/', $sql ) || str_contains( $sql, 'IS_USED_LOCK' ) ) {
+		$unfenced_optional = str_contains( $sql, '(%d = 0 OR (IS_USED_LOCK(%s) = %d AND CONNECTION_ID() = %d))' ) && 0 === ( $args[ count( $args ) - 4 ] ?? null );
+		if ( ! preg_match( '/^(UPDATE %i SET option_value|DELETE FROM %i WHERE option_name|INSERT (?:IGNORE )?INTO %i \\(option_name)/', $sql ) || ( str_contains( $sql, 'IS_USED_LOCK' ) && ! $unfenced_optional ) ) {
 			return $this->ownership_query( $sql, $args );
 		}
 		$update = str_starts_with( $sql, 'UPDATE ' );
