@@ -691,9 +691,11 @@ files.
 Dynamic WordPress handlers are always the routing baseline. The Static File
 Engine is an optional materialization layer:
 
-Dynamic publication-file responses include Cybermaps-managed CORS, ETag, Repr-Digest,
-X-Robots-Tag, CSP, and RFC 9111-oriented cache-policy headers. Content-Digest
-is opt-in and requires a verified identity-encoded response.
+Dynamic sitemap and discovery-file responses use Cybermaps-managed CORS, ETag,
+Repr-Digest and cache-policy headers. Sitemap responses also carry
+`X-Robots-Tag: noindex, follow`; discovery data handlers apply a restrictive CSP
+and can add AI-training restrictions. The XML sitemap handler does not add that
+CSP. Content-Digest is opt-in and requires a verified identity-encoded response.
 Native WordPress REST routes use public cache policy without Cybermaps byte
 digests, entity tags, or conditional `304` responses. WordPress can transform
 their final representation through field selection, embedding, envelope mode,
