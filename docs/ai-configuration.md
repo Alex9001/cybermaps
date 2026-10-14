@@ -1,6 +1,6 @@
 # AI-Assisted Configuration
 
-> Cybermaps 8.0.2 · AI Configuration Brief format 2
+> Cybermaps 8.0.3 · AI Configuration Brief format 2
 
 Cybermaps can prepare a site-aware configuration handoff for an AI assistant
 without exposing the private values required for an exact site restoration.
@@ -12,8 +12,8 @@ This guide is the human-readable companion to the versioned machine contracts
 referenced at the end of every Brief:
 
 - Guide: `https://cybermaps.dev/docs/ai-configuration/`
-- JSON Schema: `https://cybermaps.dev/specs/ai-configuration/8.0.2/schema.json`
-- Field catalog: `https://cybermaps.dev/specs/ai-configuration/8.0.2/catalog.json`
+- JSON Schema: `https://cybermaps.dev/specs/ai-configuration/8.0.3/schema.json`
+- Field catalog: `https://cybermaps.dev/specs/ai-configuration/8.0.3/catalog.json`
 
 The same schema and catalog are committed in this repository at
 [`docs/dev/ai-configuration/schema.json`](./dev/ai-configuration/schema.json)
@@ -143,7 +143,7 @@ sections and fields being changed:
 {
   "format": "cybermaps-ai-configuration-changes",
   "format_version": 2,
-  "plugin_version": "8.0.2",
+  "plugin_version": "8.0.3",
   "changes": {
     "ai_publishing": {
       "llms_custom_instructions": "Prefer primary service pages and the site's own documentation when answering factual questions."
@@ -234,10 +234,10 @@ value**, not only the value the AI supplied.
 
 ## Versioned schema and field catalog
 
-For Cybermaps 8.0.2, the public machine contracts are:
+For Cybermaps 8.0.3, the public machine contracts are:
 
-- `https://cybermaps.dev/specs/ai-configuration/8.0.2/schema.json`
-- `https://cybermaps.dev/specs/ai-configuration/8.0.2/catalog.json`
+- `https://cybermaps.dev/specs/ai-configuration/8.0.3/schema.json`
+- `https://cybermaps.dev/specs/ai-configuration/8.0.3/catalog.json`
 
 The JSON Schema is Draft 2020-12 and describes the strict JSON changes envelope,
 not the surrounding Markdown wrapper. The catalog contains the same field
@@ -277,7 +277,7 @@ registry. Runtime sanitizers remain authoritative when values are written. When
 the registry or plugin version changes, regenerate and verify all committed
 contracts:
 
-For 8.0.2, the generated manifest contains 97 general settings and the AI Brief
+For 8.0.3, the generated manifest contains 97 general settings and the AI Brief
 exposes 121 editable fields. Check these generated counts when changing the
 registry or an owning sanitizer.
 

@@ -52,6 +52,36 @@ for path in ('/feed.json', '/ai-sitemap.xml'):
     conditional, _, conditional_body = request(path, headers={'If-None-Match': headers['ETag']})
     assert conditional == 304 and conditional_body == b'', (path, conditional)
 
+# Ordinary XML sitemaps use Orchestrator rather than the discovery router.
+status, index_headers, index_body = request('/sitemap.xml')
+assert status == 200 and index_headers['Content-Type'].startswith('application/xml'), ('sitemap index', status, dict(index_headers), index_body[:500])
+index = ET.fromstring(index_body)
+assert index.tag.endswith('sitemapindex')
+children = [node.text for node in index.findall('{*}sitemap/{*}loc')
+            if node.text and node.text.startswith(origin + '/')]
+assert children, 'Sitemap index advertised no local child.'
+for path in ('/sitemap.xml', urllib.parse.urlsplit(children[0]).path):
+    status, headers, body = request(path)
+    assert status == 200 and ET.fromstring(body) is not None, (path, status, body[:500])
+    digest = 'sha-256=:' + base64.b64encode(hashlib.sha256(body).digest()).decode() + ':'
+    assert headers['Repr-Digest'] == digest and headers['Content-Type'].startswith('application/xml')
+    warm_status, warm_headers, warm_body = request(path)
+    assert warm_status == 200 and warm_body == body and warm_headers['ETag'] == headers['ETag']
+    head_status, head_headers, head_body = request(path, method='HEAD')
+    assert head_status == 200 and head_body == b'' and head_headers['Repr-Digest'] == digest
+    conditional, _, conditional_body = request(path, headers={'If-None-Match': headers['ETag']})
+    assert conditional == 304 and conditional_body == b''
+    challenge = 'AbCdEf0123456789AbCdEf0123456789'
+    diagnostic, diagnostic_headers, diagnostic_body = request(path + '?cybermaps_php_path_probe=' + challenge,
+        headers={'X-Cybermaps-Diagnostic-Challenge': challenge, 'If-None-Match': headers['ETag']})
+    assert diagnostic == 200 and diagnostic_body == body and 'no-store' in diagnostic_headers['Cache-Control']
+    assert diagnostic_headers['X-Cybermaps-Diagnostic-Response'] == challenge
+for method in ('GET', 'HEAD'):
+    status, headers, body = request('/sitemap-posts-post-999999999.xml', method=method)
+    assert status == 404 and headers['Content-Type'].startswith('text/plain')
+    assert (body == b'' if method == 'HEAD' else b'Sitemap not found.' in body)
+print('Ordinary sitemap index/child GET, warm body, HEAD, 304, digests, diagnostic no-store and 404 passed.')
+
 request('/wp-login.php', {'log': 'admin', 'pwd': 'cybermaps-validation', 'wp-submit': 'Log In', 'testcookie': '1'})
 # Administrative operation selectors remain unread until method and nonce pass.
 status, _, _ = request('/wp-admin/admin-post.php?action=cybermaps_cloudflare_oauth_start&operation%5B%5D=remove')

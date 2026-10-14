@@ -4003,16 +4003,19 @@
           "// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public read-only cache-busting challenge; no state mutation.",
           "// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Same read-only challenge value validated against the request header."
         ],
-        "file_code_sha256": "9864b3f4219df15b1282eb3c5eeb701d881a967b9a984bed94249105b1f3fcd4",
-        "code_sha256": "289ce956b28aa1607186496ec0e7d3a58e90e549dd2705a95382cb71ba6e6d0e",
+        "file_code_sha256": "321ccc376b42c543569c01fa50dcffa6ee43a6aa6aa76a6e4363011aeed58227",
+        "code_sha256": "74895481afdd7c8289551a04d6d62c4afa4080411d403dc5c24f6235c83cbceb",
         "findings": {
           "WordPress.Security.NonceVerification.Recommended:WARNING": 3
         }
       },
-      "rationale": "begin_sitemap_response is reached from the public read-only sitemap GET/HEAD handler after bounded routing/provider/page resolution. It reads only string query/header challenges, unslashes/sanitizes them, then requires exact32-64alphanumeric equality before emitting the fixed diagnostic response header and no-store policy. It grants no destructive operation or administrator authority, so an admin nonce is not its contract. Static repair scheduling is existing bounded ownership-safe fallthrough, not arbitrary publication. OrchestratorRequestContractTest verifies challenge mismatch/length, request-shape and source response policy; it is mostly helper/source testing, not a live HTTP cache proof.",
+      "rationale": "Reached only from the public read-only GET/HEAD sitemap handler after bounded route/provider/page validation. String challenges are unslashed/sanitized and must match exactly as 32–64 ASCII alphanumeric characters before entering the diagnostic header and no-store policy. No administrative nonce is required because this grants no administrator authority or destructive action; static repair remains bounded generated-path scheduling under StaticBridge mode/ownership rules. The 8.0.3 change removes all output-buffer mutation from the begin/serve helpers; complete XML remains generation-fenced and passes ProtocolOutput, and existing caller buffers remain owned by their callers. OrchestratorRequestContractTest covers request/challenge helpers. OutputBufferOwnershipTest and the disposable native fixture cover cached/uncached GET/HEAD, 304, early/late 404 and generation failure with single/nested/non-removable buffers. Real HTTP response coverage is separate: preserving foreign buffer contents does not imply empty wire bodies.",
       "tests": [
         "tests/Sitemap/OrchestratorRequestContractTest.php",
-        "tests/Admin/SitemapStatusTest.php"
+        "tests/Admin/SitemapStatusTest.php",
+        "tests/Sitemap/OutputBufferOwnershipTest.php",
+        "tests/integration/output-buffer-ownership.php",
+        "tests/integration/wporg-http.py"
       ]
     },
     "src/Sitemap/Orchestrator.php::handle_regeneration": {
@@ -4026,7 +4029,7 @@
         "suppressions": [
           "// phpcs:ignore WordPress.Security.NonceVerification.Missing -- The action nonce was verified immediately above."
         ],
-        "file_code_sha256": "9864b3f4219df15b1282eb3c5eeb701d881a967b9a984bed94249105b1f3fcd4",
+        "file_code_sha256": "321ccc376b42c543569c01fa50dcffa6ee43a6aa6aa76a6e4363011aeed58227",
         "code_sha256": "5a66dd3fc8a5064ae3f09ab50b9378745ab5e6154235112daf752430692494dc",
         "findings": {}
       },
@@ -4044,11 +4047,11 @@
         "suppressions": [
           "// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching -- Comment-driven freshness must update the exact persisted post timestamps."
         ],
-        "file_code_sha256": "9864b3f4219df15b1282eb3c5eeb701d881a967b9a984bed94249105b1f3fcd4",
+        "file_code_sha256": "321ccc376b42c543569c01fa50dcffa6ee43a6aa6aa76a6e4363011aeed58227",
         "code_sha256": "e6a36483edd0ee712747c95f097ecea57c3e4fd3400779a8b8e0b19ff69bb8e2",
         "findings": {}
       },
-      "rationale": "touch_post_on_comment is called by trusted WordPress approved-comment hooks, reads the persisted comment/post, respects configured post/page freshness policy and uses wpdb::update for the WordPress-owned posts table with fixed timestamp fields and persisted post ID. WordPress parameterizes values; no request selector or SQL fragment is accepted. Native clean_post_cache runs and publication/occupancy/discovery invalidation follows only a non-false update; exact zero-row/no-change is allowed. This direct update intentionally needs current persisted freshness rather than derived query caching. No direct comment-write/failure regression was found in inherited Inventory/RequestContract citations; referenced request tests cover downstream publication/cache contracts only. Update/error behavior was source-reviewed without claiming native DB proof.",
+      "rationale": "touch_post_on_comment is called by trusted WordPress approved-comment hooks, reads the persisted comment/post, respects configured post/page freshness policy and uses wpdb::update for the WordPress-owned posts table with fixed timestamp fields and persisted post ID. WordPress parameterizes values; no request selector or SQL fragment is accepted. Native clean_post_cache runs after every update attempt. Only publication/occupancy/discovery invalidation is conditional on a non-false update; exact zero-row/no-change is allowed. This direct update intentionally needs current persisted freshness rather than derived query caching. No direct comment-write/failure regression was found in inherited Inventory/RequestContract citations; referenced request tests cover downstream publication/cache contracts only. Update/error behavior was source-reviewed without claiming native DB proof.",
       "tests": [
         "tests/Sitemap/OrchestratorRequestContractTest.php"
       ]

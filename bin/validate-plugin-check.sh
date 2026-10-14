@@ -127,6 +127,8 @@ wp_cli plugin install plugin-check --version="${PLUGIN_CHECK_VERSION}" --activat
 installed_plugin_check="$(wp_cli plugin get plugin-check --field=version | tr -d '\r')"
 [ "${installed_plugin_check}" = "${PLUGIN_CHECK_VERSION}" ] || fail "Plugin Check version is ${installed_plugin_check}, expected ${PLUGIN_CHECK_VERSION}"
 wp_cli plugin activate cybermaps --quiet
+# Exercise ordinary sitemap rewrite URLs under WordPress's pretty permalinks.
+wp_cli rewrite structure '/%postname%/' --quiet
 wp_cli eval-file /validation/wporg-smoke.php > "${RUNTIME_DIR}/smoke.txt"
 wp_cli eval-file /validation/wporg-sitemap-regressions.php --use-include >> "${RUNTIME_DIR}/smoke.txt"
 wp_cli eval 'define( "CYBERMAPS_DISPOSABLE_REST_FIXTURE", true ); require "/validation/rest-representation.php";' > "${RUNTIME_DIR}/rest-representation.json"
@@ -200,6 +202,8 @@ wp_cli eval 'putenv( "CYBERMAPS_TEMPLATE_SOURCE_PROBE=1" ); require "/validation
 python3 -B "${PROJECT_DIR}/bin/validate_matrix.py" --verify-template-source "${RUNTIME_DIR}/stored-template-source.json"
 wp_cli eval 'putenv( "CYBERMAPS_STATE_FIXTURE_DISPOSABLE=1" ); require "/validation/wporg-raw-option-store.php";' > "${RUNTIME_DIR}/raw-option-store.json"
 python3 -B "${PROJECT_DIR}/bin/validate_matrix.py" --verify-raw-option-store "${RUNTIME_DIR}/raw-option-store.json"
+wp_cli eval 'putenv( "CYBERMAPS_BUFFER_FIXTURE=1" ); require "/validation/output-buffer-ownership.php";' > "${RUNTIME_DIR}/output-buffer-ownership.json"
+python3 -B "${PROJECT_DIR}/bin/validate_matrix.py" --verify-output-buffer "${RUNTIME_DIR}/output-buffer-ownership.json"
 wp_cli eval 'require "/validation/wporg-lifecycle.php";'  >> "${RUNTIME_DIR}/smoke.txt"
 
 COMMIT="$(git -C "${PROJECT_DIR}" rev-parse HEAD)"
@@ -240,6 +244,7 @@ report = {
     "publication_priming_passed": True,
     "stored_template_source_passed": True,
     "raw_option_store_passed": True,
+    "output_buffer_ownership_passed": True,
     "configuration_persistence_passed": True,
     "cloudflare_persistence_passed": True,
     "audit_run_lock_passed": True,

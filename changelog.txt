@@ -1,6 +1,12 @@
 Cybermaps release history
 =========================
 
+8.0.3
+-----
+* Remove sitemap output-buffer creation and global cleanup so WordPress and other plugins retain their own buffers.
+* Generate standalone report stylesheet markup through isolated WordPress style accumulation without PHP output capture.
+* Reject buffer-mutating calls in shipped PHP and require native ownership, response and report-style regression checks before release.
+
 8.0.2
 -----
 * Enforce producer byte budgets before Markdown, JSON and link allocations; preserve completeness evidence and avoid caching partial publications.

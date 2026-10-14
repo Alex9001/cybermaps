@@ -252,6 +252,9 @@ throttling, static-parity, and status coverage.
   not weaken or regenerate an allowlist merely to make a validation command
   pass. An unavoidable protocol boundary requires a documented design review
   and an exact entry in `docs/dev/wporg-source-allowlist.json`.
+- Shipped PHP must not mutate output buffers (`ob_start`, cleanup, flush, or
+  capture calls). Build protocol bodies as strings and preserve caller-owned
+  buffers. Standalone report styles use isolated `WP_Styles` accumulation.
 - Run `composer wporg:check` for every shipped-source change. The checker is
   annotation-blind and its exact allowlists are release contracts.
 

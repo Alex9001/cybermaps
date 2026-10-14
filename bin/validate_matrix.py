@@ -29,6 +29,30 @@ def verify_sql_fixture(path, name):
             f'Native {name} fixture incomplete')
 
 
+def verify_output_buffer_fixture(path):
+    result = json.loads(Path(path).read_text())
+    require(isinstance(result, dict) and result.get('schema_version') == 1
+            and result.get('output_buffer_ownership_passed') is True,
+            'Native output_buffer_ownership fixture incomplete')
+    scenarios = {'uncached', 'cached', 'not_modified', 'early_404', 'late_404',
+                 'unavailable_render', 'unavailable_headers', 'unrelated'}
+    expected = {(scenario, mode, method) for scenario in scenarios
+                for mode in ('single', 'nested', 'fixed') for method in ('GET', 'HEAD')}
+    cases = result.get('cases', [])
+    require(isinstance(cases, list) and len(cases) == len(expected), 'Native output_buffer_ownership cases incomplete')
+    observed = set()
+    for case in cases:
+        require(isinstance(case, dict) and case.get('passed') is True
+                and case.get('prefix_preserved') is True and case.get('before') == case.get('after')
+                and isinstance(case.get('before'), dict) and case['before'].get('level', 0) > 0
+                and case.get('callback_phases_before_shutdown') == [],
+                'Native output_buffer_ownership case failed')
+        observed.add((case.get('scenario'), case.get('buffer_mode'), case.get('method')))
+    require(observed == expected and set(result.get('style_checks', [])) == {
+        'native-accumulation-filters-dependencies-repeat', 'both-report-exporters', 'exception-and-global-state'},
+        'Native output_buffer_ownership coverage incomplete')
+
+
 def validate_result(result, wp, php, multisite, archive_hash, commit):
     require(result['wordpress_version'] == wp and result['php_version'].startswith(php + '.'), 'Runtime version mismatch')
     require(result['zip_sha256'] == archive_hash and result['commit'] == commit, 'Runtime evidence belongs to another ZIP or commit')
@@ -39,12 +63,15 @@ def validate_result(result, wp, php, multisite, archive_hash, commit):
     require(result.get('sitemap_regressions_passed') is True, 'Sitemap runtime regressions incomplete')
     require(result.get('rest_representation_passed') is True, 'Native REST representation regressions incomplete')
     require(result.get('publication_priming_passed') is True, 'Native publication priming regressions incomplete')
-    for key in ('configuration_persistence', 'cloudflare_persistence', 'audit_run_lock', 'static_ownership', 'state_cutover', 'stored_template_source', 'raw_option_store'):
+    for key in ('configuration_persistence', 'cloudflare_persistence', 'audit_run_lock', 'static_ownership', 'state_cutover', 'stored_template_source', 'raw_option_store', 'output_buffer_ownership'):
         require(result.get(key + '_passed') is True, f'Native {key} regressions incomplete')
     require(result.get('stable_findings') == [] and result.get('experimental_findings') == [], 'Runtime findings remain')
 
 
 def main():
+    if sys.argv[1] == '--verify-output-buffer':
+        verify_output_buffer_fixture(sys.argv[2])
+        return
     if sys.argv[1] == '--verify-browser':
         verify_browser(sys.argv[2])
         return

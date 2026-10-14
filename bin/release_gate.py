@@ -43,7 +43,7 @@ def now():
 
 def policy():
     value = json.loads(POLICY.read_text())
-    require(value['schema_version'] == 1 and len(value['conditions']) == 17 and {'website_prepared', 'website_live', 'remote_capabilities'} <= value['conditions'].keys(), 'Invalid release policy')
+    require(value['schema_version'] == 1 and len(value['conditions']) == 18 and {'website_prepared', 'website_live', 'remote_capabilities', 'output_buffer_ownership'} <= value['conditions'].keys(), 'Invalid release policy')
     return value
 
 

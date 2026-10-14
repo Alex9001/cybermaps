@@ -32,6 +32,14 @@ Each case also runs the stored-template source and direct option CAS fixtures
 after any multisite conversion. Their own `stored_template_source_passed` and
 `raw_option_store_passed` output and matrix flags must be explicitly true after
 cleanup; process success or another fixture's flag cannot substitute.
+Every case also requires `output_buffer_ownership_passed`: 48 isolated sitemap
+requests cover GET/HEAD, cache hits/misses, 304, early/late 404, generation
+failures and unrelated routes with single, nested and non-removable caller
+buffers. Native report checks cover dependencies, style filters, repeated
+exports, exceptions and unchanged caller/global style state. Granular case
+receipts must be retained; an aggregate success flag alone is insufficient.
+Separate HTTP checks verify ordinary sitemap bodies, digests, HEAD, 304 and
+diagnostic behavior without foreign output.
 Missing or false evidence flags reject the candidate. Relay security, WebMCP
 browser security, admin UI contract tests using a mocked DOM, and
 performance-harness self-tests run in the same candidate gate; harness
@@ -83,6 +91,9 @@ owner sign-off is required. A changed package requires renewed agent review.
 15. Website content matches the exact candidate commit/channel; editorial reviews, tests, build and verification pass before promotion/publication.
 16. The published tag is deployed to cybermaps.dev and its live contracts, download links and changelog are verified before release completion.
 17. The exact artifact exposes only the reviewed read-only Cybermaps MCP surface. `composer mcp:check`, negative ability fixtures, dependency states, legacy migration and real adapter HTTP/CLI checks must pass. The `remote_capabilities` review must assess actual administrative authority, native REST and browser channels; read-only annotations and clean scanners are insufficient. Retired MCP configuration keys are permitted only in deletion/conversion cleanup, never in active runtime paths; empty OAuth upgrade placeholders are forbidden. Any expansion requires a new explicit product/policy decision and reviewer assessment.
+18. Shipped PHP contains no output-buffer mutation calls or imports. The source
+    guard and native ownership fixture must pass; caller buffers are never ours
+    to discard, flush or close.
 
 Website preparation records bind the canonical website content, validation log,
 plugin commit, version and channel; promotion additionally binds its Git commit
@@ -105,12 +116,13 @@ plugin. `website-prepared.json` and `website-live.json` retain the evidence.
 
 ## Reviewer issue map
 
-The private June 15, September 17, September 26 and October 5, 2026 emails were reviewed.
+The private June 15, September 17, September 26, October 5 and October 13, 2026 emails were reviewed.
 The September 26 review concerned 7.5.2; it does not establish approval of 7.5.3
 or this candidate. Do not commit private reviewer mail.
 
 | Reviewer category | Resolution and continuing evidence |
 | --- | --- |
+| Unclosed output buffer (October 13; 8.0.2) | Remove sitemap buffer creation/global cleanup and report stylesheet capture; retain string rendering and isolated registered-style accumulation. Token guard, subprocess ownership cases, native report checks and actual sitemap HTTP tests prevent recurrence. WordPress template enhancement buffering applies to whole HTML templates, not these XML responses. |
 | Remote administration (October 5; 7.5.4) | Retire the custom MCP/OAuth server and arbitrary ability dispatcher; expose only owned read-only resources/search through optional WordPress MCP Adapter. Remove mutation abilities across native and browser channels. Prove the boundary using the reviewed MCP contract and real runtime tests; this agent review is not an independent infrastructure audit. |
 | Account/domain ownership | Owner confirmed resolved September 28; preserve that fact, do not claim another verification occurred. |
 | Trialware/Freemius | Standalone Core; package forbidden-marker checks and CoreBoundaryTest. |

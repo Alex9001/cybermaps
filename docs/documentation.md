@@ -1,6 +1,6 @@
 # Cybermaps — Technical Documentation
 
-> Version 8.0.2 · PHP 8.2 · WordPress 7.1
+> Version 8.0.3 · PHP 8.2 · WordPress 7.1
 
 Public sitemap credit is optional. In **Sitemaps**, enable **Show the CYBER MAPS
 credit on public sitemaps** to opt in. `show_sitemap_attribution` defaults to `0`

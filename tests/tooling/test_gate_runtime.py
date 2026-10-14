@@ -5,7 +5,7 @@ import tempfile
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'bin'))
-from validate_matrix import validate_result, verify_priming_fixture, verify_sql_fixture
+from validate_matrix import validate_result, verify_priming_fixture, verify_sql_fixture, verify_output_buffer_fixture
 from release_gate import validate_runtime_evidence
 
 
@@ -24,6 +24,7 @@ class RuntimeBindingTest(unittest.TestCase):
                       configuration_persistence_passed=True, cloudflare_persistence_passed=True, audit_run_lock_passed=True,
                       static_ownership_passed=True, state_cutover_passed=True,
                       stored_template_source_passed=True, raw_option_store_passed=True,
+                      output_buffer_ownership_passed=True,
                       stable_findings=[], experimental_findings=[])
         validate_result(result, '7.1.2', '8.2', False, 'frozen', 'commit')
         for key, value in [('zip_sha256', 'other'), ('commit', 'other'), ('lifecycle_passed', False),
@@ -44,8 +45,8 @@ class RuntimeBindingTest(unittest.TestCase):
             with self.subTest(priming=value), self.assertRaisesRegex(RuntimeError, 'Native publication priming'):
                 validate_result(incomplete, '7.1.2', '8.2', False, 'frozen', 'commit')
 
-        for key in ('configuration_persistence', 'cloudflare_persistence', 'audit_run_lock', 'static_ownership', 'state_cutover', 'stored_template_source', 'raw_option_store'):
-            for value in (None, False, 1):
+        for key in ('configuration_persistence', 'cloudflare_persistence', 'audit_run_lock', 'static_ownership', 'state_cutover', 'stored_template_source', 'raw_option_store', 'output_buffer_ownership'):
+            for value in (None, False, 1, 'true'):
                 incomplete = dict(result)
                 if value is None:
                     del incomplete[key + '_passed']
@@ -53,6 +54,16 @@ class RuntimeBindingTest(unittest.TestCase):
                     incomplete[key + '_passed'] = value
                 with self.subTest(key=key, value=value), self.assertRaisesRegex(RuntimeError, 'Native ' + key):
                     validate_result(incomplete, '7.1.2', '8.2', False, 'frozen', 'commit')
+
+    def test_output_buffer_fixture_cannot_pass_with_only_an_exit_or_aggregate_flag(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).resolve().parents[2] / 'docs/generated/tmp') as temporary:
+            path = Path(temporary) / 'buffer.json'
+            for result in ({}, [], None, {'output_buffer_ownership_passed': True},
+                           {'schema_version': 1, 'output_buffer_ownership_passed': True, 'cases': []},
+                           {'schema_version': 1, 'output_buffer_ownership_passed': 'true'}):
+                path.write_text(json.dumps(result))
+                with self.subTest(result=result), self.assertRaisesRegex(RuntimeError, 'Native output_buffer_ownership'):
+                    verify_output_buffer_fixture(path)
 
     def test_priming_fixture_requires_an_explicit_boolean_success(self):
         directory = Path(__file__).resolve().parents[2] / 'docs/generated/tmp'

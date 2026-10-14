@@ -3,7 +3,7 @@ Contributors: oreshkin
 Tags: sitemap, llms-txt, technical-seo, content-audit, indexnow
 Requires at least: 7.1
 Tested up to: 7.1
-Stable tag: 8.0.2
+Stable tag: 8.0.3
 Requires PHP: 8.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -23,19 +23,19 @@ Setup: https://cybermaps.dev/docs/mcp/
 
 == Source Code ==
 
-https://github.com/Alex9001/cybermaps/tree/v8.0.2
-JS/CSS source: assets/; setup-wizard.js uses wp.element. No compilation.
+https://github.com/Alex9001/cybermaps/tree/v8.0.3
+JS/CSS: assets/; setup-wizard.js uses wp.element. No compilation.
 Build: composer install; bash bin/package-candidate.sh.
 
 == External Services ==
 
 = Cloudflare and Cybermaps OAuth relay =
 
-Connect Cloudflare sends a PKCE challenge, random state and authorization code
-to https://connect.cybermaps.dev for five minutes. No verifier, access token,
-WordPress identity, site URL or rules reach the relay. Hosting processes network
-metadata; rate limits use salted IP hashes. WordPress sends credentials to
-Cloudflare for exchange/revocation, plus zone, hostname and requested rules.
+Cloudflare OAuth sends PKCE challenge, random state and code to
+https://connect.cybermaps.dev for five minutes. The relay gets no verifier,
+access token, WP identity, site URL or rules. Hosting processes network
+metadata; rate limits use salted IP hashes. WordPress sends Cloudflare
+credentials for exchange/revocation, zone, hostname and requested rules.
 Manual/self-managed modes bypass the relay. Policies:
 https://cybermaps.dev/privacy/#cloudflare-oauth-relay
 https://www.cloudflare.com/website-terms/
@@ -43,7 +43,7 @@ https://www.cloudflare.com/privacypolicy/
 
 = IndexNow =
 
-Publication changes send URLs, host, key and key location to
+Changes send URLs, host, key and key location to
 https://api.indexnow.org/indexnow when enabled. Headless sites must serve the generated `/{key}.txt`.
 Terms/privacy: https://www.indexnow.org/terms
 
@@ -61,7 +61,7 @@ Custom hubs use their own policies.
 
 = Public delivery checks =
 
-Checks GET/HEAD the site or Frontend Base URL with `X-Cybermaps-Diagnostic: 1` to omit analytics. Configured Varnish receives purge requests.
+GET/HEAD checks use the site or Frontend Base URL with `X-Cybermaps-Diagnostic: 1` to omit analytics. Configured Varnish receives purges.
 
 == Privacy ==
 
@@ -72,6 +72,9 @@ but omit IPs, requester keys and User-Agent. Diagnostic probes are excluded.
 Uninstall keeps data unless Uninstall Cleanup is enabled.
 
 == Changelog ==
+
+= 8.0.3 =
+* Fix sitemap/report buffers.
 
 = 8.0.2 =
 * Fix privacy, configuration, ownership, publication limits, reports and admin UI; expand release checks.
@@ -181,9 +184,12 @@ Uninstall keeps data unless Uninstall Cleanup is enabled.
 * Added the experimental current MCP Server Card, draft ARD AI Catalog, and opt-in read-only WebMCP with explicit maturity guidance.
 * Added server/cache/CDN rules and Configured, Advertised, Publicly verified, and canonical-interception diagnostics.
 
-Earlier release history is included in `changelog.txt`.
+More history: `changelog.txt`.
 
 == Upgrade Notice ==
+
+= 8.0.3 =
+Preserves caller output buffers.
 
 = 8.0.2 =
 Ownership migrates in batches. Review file conflicts and incomplete reports. Restart pending Cloudflare authorization.

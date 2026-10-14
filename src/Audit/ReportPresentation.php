@@ -61,16 +61,29 @@ final class ReportPresentation {
 		return '' !== $language ? $language : 'en-US';
 	}
 
-	/** Enqueue and print the registered standalone report stylesheet. */
+	/** Return registered report styles without consuming the caller's output or style queue. */
 	public static function stylesheet_markup(): string {
 		$url = CYBERMAPS_PLUGIN_URL . 'assets/css/report.css';
 		wp_enqueue_style( 'cybermaps-report', $url, array(), CYBERMAPS_VERSION );
 
-		ob_start();
-		wp_print_styles( array( 'cybermaps-report' ) );
-		$markup = ob_get_clean();
+		// WP_Styles can accumulate markup instead of printing it. Keep that state
+		// local so repeated standalone exports do not consume global done/queue state.
+		$styles            = clone wp_styles();
+		$styles->done      = array();
+		$styles->to_do     = array();
+		$styles->groups    = array();
+		$styles->queue     = array();
+		$styles->do_concat = true;
+		// An empty list means every URL is concatenable in WP_Styles. A NUL
+		// cannot prefix a stylesheet URL, so all links accumulate in print_html.
+		$styles->default_dirs   = array( "\0" );
+		$styles->concat         = '';
+		$styles->concat_version = '';
+		$styles->print_html     = '';
+		$styles->print_code     = '';
+		$styles->do_items( array( 'cybermaps-report' ) );
 
-		return \is_string( $markup ) ? $markup : '';
+		return $styles->print_html;
 	}
 
 	/** Return the fixed body class that selects one of the five report themes. */

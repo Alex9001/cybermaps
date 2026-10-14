@@ -819,11 +819,6 @@ class Orchestrator {
 			\ltrim( (string) \Cybermaps\Core\URLManager::get_request_path(), '/' ),
 			'all'
 		);
-		while ( ob_get_level() > 0 ) {
-			ob_end_clean();
-		}
-		ob_start();
-
 		header( 'Content-Type: application/xml; charset=utf-8', true );
 		header( 'X-Robots-Tag: noindex, follow', true );
 		$diagnostic_header = isset( $_SERVER['HTTP_X_CYBERMAPS_DIAGNOSTIC_CHALLENGE'] ) && is_string( $_SERVER['HTTP_X_CYBERMAPS_DIAGNOSTIC_CHALLENGE'] )
@@ -878,11 +873,9 @@ class Orchestrator {
 		$this->assert_current_generation( $this->publication_generation ?? -1 );
 		if ( $not_modified ) {
 			status_header( 304 );
-			ob_end_clean();
 			exit;
 		}
 
-		ob_end_clean();
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
 			\Cybermaps\Core\ProtocolOutput::emit( $xml, 'xml' );
 		}

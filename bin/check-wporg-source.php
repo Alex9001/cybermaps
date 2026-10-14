@@ -89,6 +89,56 @@ function cybermaps_wporg_source_fingerprint( array $entries ): array {
 	);
 }
 
+/** Reject direct PHP output-buffer mutation calls, ignoring comments and literals. */
+function cybermaps_wporg_source_buffer_checks( string $path, string $source ): void {
+	$mutators = array( 'ob_start', 'ob_clean', 'ob_end_clean', 'ob_end_flush', 'ob_flush', 'ob_get_clean', 'ob_get_flush', 'ob_implicit_flush' );
+	$tokens = array_values( array_filter( token_get_all( $source ), static function ( $token ): bool {
+		return ! is_array( $token ) || ! in_array( $token[0], array( T_WHITESPACE, T_COMMENT, T_DOC_COMMENT ), true );
+	} ) );
+	$function_import = false;
+	$import_name = false;
+	$group_depth = 0;
+	foreach ( $tokens as $index => $token ) {
+		if ( is_array( $token ) && T_USE === $token[0] && T_FUNCTION === ( $tokens[ $index + 1 ][0] ?? null ) ) {
+			$function_import = true;
+			$import_name = true;
+			$group_depth = 0;
+		}
+		if ( $function_import && ! is_array( $token ) ) {
+			if ( ';' === $token ) { $function_import = false; $import_name = false; }
+			if ( '{' === $token ) { ++$group_depth; $import_name = false; }
+			if ( '}' === $token ) { --$group_depth; }
+			if ( ',' === $token && 0 === $group_depth ) { $import_name = true; }
+		}
+		if ( ! is_array( $token ) || ! in_array( $token[0], array( T_STRING, T_NAME_FULLY_QUALIFIED, T_NAME_QUALIFIED, T_NAME_RELATIVE ), true ) ) {
+			continue;
+		}
+		$is_import_name = $function_import && $import_name;
+		$import_name = false;
+		$name = strtolower( ltrim( $token[1], '\\' ) );
+		$name = str_starts_with( $name, 'namespace\\' ) ? substr( $name, 10 ) : $name;
+		if ( ! in_array( $name, $mutators, true ) ) {
+			continue;
+		}
+		$previous = $tokens[ $index - 1 ] ?? null;
+		$before_previous = $tokens[ $index - 2 ] ?? null;
+		if ( $is_import_name ) {
+			cybermaps_wporg_source_error( 'output-buffer', "{$path}:{$token[2]} imports PHP output-buffer mutator {$token[1]}." );
+			continue;
+		}
+		if ( '(' !== ( $tokens[ $index + 1 ] ?? null ) ) {
+			continue;
+		}
+		if ( is_array( $previous ) && T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG === $previous[0] ) {
+			$previous = $before_previous;
+		}
+		if ( is_array( $previous ) && in_array( $previous[0], array( T_OBJECT_OPERATOR, T_NULLSAFE_OBJECT_OPERATOR, T_DOUBLE_COLON, T_FUNCTION ), true ) ) {
+			continue;
+		}
+		cybermaps_wporg_source_error( 'output-buffer', "{$path}:{$token[2]} mutates a PHP output buffer with {$token[1]}." );
+	}
+}
+
 /** @param array<string,string> $files */
 function cybermaps_wporg_source_static_checks( array $files, array $config, bool $fixture ): void {
 	$request_boundaries = array_fill_keys( (array) ( $config['request_boundary_files'] ?? array() ), true );
@@ -96,6 +146,7 @@ function cybermaps_wporg_source_static_checks( array $files, array $config, bool
 	$protocol_ignores   = array();
 
 	foreach ( $files as $path => $source ) {
+		cybermaps_wporg_source_buffer_checks( $path, $source );
 		$lines = preg_split( '/\R/', $source ) ?: array();
 		if ( preg_match( '/\$_(?:GET|POST|REQUEST|SERVER|COOKIE|FILES)\s*(?:;|:|,|\))/', $source ) ) {
 			cybermaps_wporg_source_error( 'server-bag', "{$path} copies or forwards the complete server bag instead of reading bounded fields." );

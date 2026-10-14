@@ -79,6 +79,10 @@ Every case also requires native stored-template source and direct option CAS
 checks after any multisite conversion. Normal PHP includes preserve their
 strict-types declarations; their own success flags are checked before matrix
 evidence is accepted. Both fixtures must finish their owned-artifact cleanup.
+Every case also runs the output-buffer ownership fixture after any multisite
+conversion. It requires all 48 granular sitemap cases and native report-style
+checks, then explicitly records `output_buffer_ownership_passed`. Ordinary
+sitemap HTTP checks separately verify response bodies and conditional headers.
 
 The installer checks the checksum, stages bounded regular package files,
 verifies them, moves the previous installation to a rollback directory, then

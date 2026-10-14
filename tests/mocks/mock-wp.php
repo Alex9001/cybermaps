@@ -1368,6 +1368,48 @@ function wp_enqueue_style( $handle, $src = '', $deps = array(), $version = false
 		'version' => $version,
 		'media'   => $media,
 	);
+	wp_styles()->registered[ $handle ] = (object) array( 'src' => $src, 'deps' => $deps, 'ver' => $version, 'args' => $media );
+	wp_styles()->queue[] = $handle;
+}
+
+/** Minimal style dependency double; real accumulation behavior is also tested in WordPress. */
+class WP_Styles {
+	public array $registered = array();
+	public array $queue = array();
+	public array $done = array();
+	public array $to_do = array();
+	public array $groups = array();
+	public array $default_dirs = array();
+	public bool $do_concat = false;
+	public string $concat = '';
+	public string $concat_version = '';
+	public string $print_html = '';
+	public string $print_code = '';
+
+	public function do_items( array $handles ): array {
+		foreach ( apply_filters( 'print_styles_array', $handles ) as $handle ) {
+			if ( in_array( $handle, $this->done, true ) || ! isset( $this->registered[ $handle ] ) ) { continue; }
+			$style = $this->registered[ $handle ];
+			if ( $style->deps ) { $this->do_items( $style->deps ); }
+			$version = false === $style->ver ? '' : '?ver=' . rawurlencode( (string) $style->ver );
+			$href = apply_filters( 'style_loader_src', $style->src . $version, $handle );
+			$tag = '<link rel="stylesheet" id="' . esc_attr( $handle ) . '-css" href="' . esc_url( $href ) . '" media="' . esc_attr( $style->args ) . '">';
+			$tag = apply_filters( 'style_loader_tag', $tag, $handle, $href, $style->args );
+			if ( $this->do_concat ) {
+				$in_default = empty( $this->default_dirs );
+				foreach ( $this->default_dirs as $directory ) { $in_default = $in_default || str_starts_with( $style->src, $directory ); }
+				if ( $in_default ) { $this->concat .= $handle . ','; }
+				else { $this->print_html .= $tag; }
+			} else { echo $tag; }
+			$this->done[] = $handle;
+		}
+		return $this->done;
+	}
+}
+
+function wp_styles(): WP_Styles {
+	if ( ! ( ( $GLOBALS['wp_styles'] ?? null ) instanceof WP_Styles ) ) { $GLOBALS['wp_styles'] = new WP_Styles(); }
+	return $GLOBALS['wp_styles'];
 }
 
 /**

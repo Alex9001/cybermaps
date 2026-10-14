@@ -69,8 +69,8 @@ class Integrity {
 
 	/**
 	 * Send the portable representation-level HTTP contract and return whether a
-	 * conditional request matched. Callers that own an output buffer, such as
-	 * XML sitemap rendering, can clean it before sending the 304 response.
+	 * conditional request matched. Callers provide the completed representation
+	 * and decide whether to send a 304 response or emit its body.
 	 *
 	 * @param array<string,mixed> $policy Normalized publication cache policy.
 	 */
