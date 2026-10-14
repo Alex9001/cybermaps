@@ -277,6 +277,10 @@ providers reachable when a post type and taxonomy share a WordPress slug, and
 keep custom object names such as `news`, `misc`, `authors`, or `archives`
 separate from Cybermaps' canonical system publications.
 
+For dynamic XML sitemap URLs such as `/sitemap.xml`, use a permalink structure
+other than **Plain** under **Settings → Permalinks** and ensure the web server
+routes those requests to WordPress.
+
 ### Sitemap publications and index sources
 
 | Publication or source | Content |
