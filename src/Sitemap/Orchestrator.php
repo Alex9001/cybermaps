@@ -51,6 +51,7 @@ class Orchestrator {
 	 * Register hooks.
 	 */
 	public function register_hooks() {
+		add_filter( 'wp_sitemaps_enabled', array( PublicationPolicy::class, 'filter_core_enabled' ) );
 		add_action( 'init', array( __CLASS__, 'add_rewrite_rules' ) );
 		add_filter( 'query_vars', array( $this, 'add_query_vars' ) );
 		add_action( 'parse_request', array( $this, 'handle_legacy_redirects' ), 0, 1 );
@@ -93,6 +94,9 @@ class Orchestrator {
 	 * Add rewrite rules.
 	 */
 	public static function add_rewrite_rules() {
+		if ( ! PublicationPolicy::enabled() ) {
+			return;
+		}
 		$routes    = PublicationRouteSlugs::current();
 		$base      = \preg_quote( $routes['sitemap_url_base'], '#' );
 		$news_base = \preg_quote( $routes['news_sitemap_url_base'], '#' );
@@ -129,6 +133,20 @@ class Orchestrator {
 			'index.php?cybermaps_sitemap=' . \rawurlencode( ProviderIdentity::TAXONOMY_PREFIX ) . '$matches[1]&cybermaps_page=$matches[2]',
 			'top'
 		);
+	}
+
+	/** Rebuild our route registrations after a persisted ownership or path change. */
+	public static function refresh_rewrite_rules(): void {
+		global $wp_rewrite;
+		if ( \is_object( $wp_rewrite ) && isset( $wp_rewrite->extra_rules_top ) && \is_array( $wp_rewrite->extra_rules_top ) ) {
+			foreach ( $wp_rewrite->extra_rules_top as $pattern => $query ) {
+				if ( \is_string( $query ) && \str_starts_with( $query, 'index.php?cybermaps_sitemap=' ) ) {
+					unset( $wp_rewrite->extra_rules_top[ $pattern ] );
+				}
+			}
+		}
+		self::add_rewrite_rules();
+		\flush_rewrite_rules( false );
 	}
 
 	/**
@@ -534,6 +552,9 @@ class Orchestrator {
 	}
 
 	public function handle_legacy_redirects() {
+		if ( ! PublicationPolicy::enabled() ) {
+			return;
+		}
 		$path             = \Cybermaps\Core\URLManager::get_request_path();
 		$base             = $this->get_sitemap_base();
 		$news_base        = $this->get_news_sitemap_base();
@@ -545,43 +566,23 @@ class Orchestrator {
 		$is_legacy_index  = '/sitemap.xml' === $path && 'sitemap.xml' !== $target_slug;
 		$is_legacy_news   = '/sitemap-news.xml' === $path && 'sitemap-news.xml' !== $target_news_slug;
 
-		if ( ! $is_core_path && ! $is_legacy_index && ! $is_legacy_news ) {
-			return;
+		$settings = \Cybermaps\Core\ConfigurationStore::settings();
+		if ( $is_core_path && PublicationPolicy::replaces_core( $settings ) ) {
+			$this->redirect_sitemap( $target_url );
 		}
+		if ( $is_legacy_index && ! empty( $settings['redirect_default_sitemap'] ) ) {
+			$this->redirect_sitemap( $target_url );
+		}
+		if ( $is_legacy_news && ! empty( $settings['redirect_news_sitemap'] ) ) {
+			$this->redirect_sitemap( $target_news_url );
+		}
+	}
+
+	/** Redirect only a route the administrator has explicitly assigned to us. */
+	private function redirect_sitemap( string $target ): never {
 		\Cybermaps\Core\ReadOnlyRequest::enforce();
-
-		// 1. Core WP sitemaps (/wp-sitemap.xml)
-		if ( $is_core_path ) {
-			$redirect_core = ! array_key_exists( 'redirect_wp_sitemap', $this->settings )
-				|| ! empty( $this->settings['redirect_wp_sitemap'] );
-			if ( $redirect_core ) {
-				wp_safe_redirect( $target_url, 301 );
-				exit;
-			} else {
-				// Explicitly 404 Core sitemaps if not redirected, ensures no "ghost" sitemaps
-				$this->issue_404();
-			}
-		}
-
-		// 2. Legacy/Default sitemap.xml
-		if ( $is_legacy_index ) {
-			if ( ! empty( $this->settings['redirect_default_sitemap'] ) ) {
-				wp_safe_redirect( $target_url, 301 );
-				exit;
-			} else {
-				$this->issue_404();
-			}
-		}
-
-		// 3. Legacy/Default sitemap-news.xml
-		if ( $is_legacy_news ) {
-			if ( ! empty( $this->settings['redirect_news_sitemap'] ) ) {
-				wp_safe_redirect( $target_news_url, 301 );
-				exit;
-			} else {
-				$this->issue_404();
-			}
-		}
+		wp_safe_redirect( $target, 301 );
+		exit;
 	}
 
 	/**
@@ -601,6 +602,9 @@ class Orchestrator {
 	 * Handle sitemap request.
 	 */
 	public function handle_sitemap_request( $wp = null ) {
+		if ( ! PublicationPolicy::enabled() ) {
+			return;
+		}
 		$query_vars   = $this->request_query_vars( $wp );
 		$sitemap_type = $this->requested_sitemap_type( $query_vars );
 		if ( empty( $sitemap_type ) ) {
@@ -611,6 +615,9 @@ class Orchestrator {
 
 		try {
 			$this->begin_publication();
+			if ( ! PublicationPolicy::enabled( $this->settings ) ) {
+				return;
+			}
 			list( $provider_id, $provider ) = $this->resolve_request_provider( $sitemap_type );
 			$this->validate_network_request( $sitemap_type );
 			$page = $this->requested_sitemap_page( $query_vars );
@@ -1068,6 +1075,9 @@ class Orchestrator {
 	 */
 	public function get_internal_sitemap_entries(): array {
 		$generation = $this->begin_publication();
+		if ( ! PublicationPolicy::enabled( $this->settings ) ) {
+			return array();
+		}
 		if ( null !== $this->internal_sitemap_entries ) {
 			return $this->internal_sitemap_entries;
 		}
@@ -1270,7 +1280,10 @@ class Orchestrator {
 	 */
 	public function generate_xml( string $type, int $page, ?array $preloaded_urls = null ) {
 		$generation = $this->begin_publication();
-		$xml        = $this->render_xml( $type, $page, $preloaded_urls );
+		if ( 'ai_sitemap' !== $type && ! PublicationPolicy::enabled( $this->settings ) ) {
+			return '';
+		}
+		$xml = $this->render_xml( $type, $page, $preloaded_urls );
 		$this->assert_current_generation( $generation );
 		return $xml;
 	}

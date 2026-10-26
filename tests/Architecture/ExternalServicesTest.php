@@ -20,7 +20,7 @@ class ExternalServicesTest extends TestCase {
 		$this->assertStringContainsString( 'https://www.indexnow.org/terms', $readme );
 		$this->assertStringNotContainsString( 'https://www.indexnow.org/privacypolicy', $readme );
 		$this->assertStringContainsString(
-			'Headless sites must serve the generated `/{key}.txt`.',
+			'Headless sites must serve `/{key}.txt`.',
 			$readme
 		);
 	}
@@ -45,7 +45,7 @@ class ExternalServicesTest extends TestCase {
 		$readme = (string) file_get_contents( $root . '/readme.txt' );
 		$search = (string) file_get_contents( $root . '/src/Discovery/Search.php' );
 
-		$this->assertStringContainsString( 'Public routes have 60-second rate limits.', $readme );
+		$this->assertStringContainsString( 'Public rate limits: 60 seconds.', $readme );
 		$this->assertStringContainsString( 'REST search stores no raw IPs or queries.', $readme );
 		$this->assertStringContainsString( 'AtomicMinuteCounter::requester_bucket', $search );
 		$this->assertStringContainsString( 'AtomicMinuteCounter::increment', $search );

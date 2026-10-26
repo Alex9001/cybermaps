@@ -106,7 +106,7 @@ class NetworkRenderer extends BaseRenderer {
 	protected function site_locations( int $blog_id ): array {
 		switch_to_blog( $blog_id );
 		try {
-			if ( ! $this->is_active_member() ) {
+			if ( ! $this->is_active_member() || ! \Cybermaps\Sitemap\PublicationPolicy::enabled() ) {
 				return array();
 			}
 			$member   = new Orchestrator();

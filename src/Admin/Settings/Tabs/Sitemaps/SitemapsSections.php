@@ -130,6 +130,7 @@ class SitemapsSections {
 	 * Core sitemap path, response, redirect, and last-modified controls.
 	 */
 	public static function general_section_callback(): void {
+		self::render_publication_control();
 		echo '<div class="cm-section-prose"><strong>' . esc_html__( 'Control sitemap addresses and delivery.', 'cybermaps' ) . '</strong> ' . esc_html__( 'Configure the main XML path, redirects, response caching, and last-modified signals in one place.', 'cybermaps' ) . '</div>';
 		$options      = \Cybermaps\Core\ConfigurationStore::settings();
 		$sitemap_base = \Cybermaps\Sitemap\Orchestrator::get_sitemap_base();
@@ -191,7 +192,18 @@ class SitemapsSections {
 		echo '<label class="cm-toggle-wrapper">';
 		echo '<input type="checkbox" name="cybermaps_settings[redirect_wp_sitemap]" value="1" class="cm-toggle-input" ' . checked( $redirect_wp_sitemap, true, false ) . '>';
 		echo '<span class="cm-toggle-switch"></span><span class="cm-toggle-label">' . esc_html__( 'Redirect WordPress Core Sitemaps', 'cybermaps' ) . '</span></label>';
-		echo '<p class="cybermaps-desc">' . wp_kses_post( __( 'Redirects <code>/wp-sitemap.xml</code> and its child routes to the Cybermaps sitemap.', 'cybermaps' ) ) . '</p>';
+		echo '<p class="cybermaps-desc">' . wp_kses_post( __( 'Replaces WordPress Core sitemaps only while Cybermaps manages XML sitemaps and non-Plain permalinks are enabled. Turn off to leave Core sitemap routes to WordPress.', 'cybermaps' ) ) . '</p>';
+	}
+
+	/** Render the single owner control for search-engine sitemap publication. */
+	private static function render_publication_control(): void {
+		$enabled = \Cybermaps\Sitemap\PublicationPolicy::enabled();
+		echo '<div class="cm-sitemap-settings-group">';
+		echo '<label class="cm-toggle-wrapper">';
+		echo '<input type="checkbox" name="cybermaps_settings[enable_xml_sitemaps]" value="1" class="cm-toggle-input" ' . checked( $enabled, true, false ) . '>';
+		echo '<span class="cm-toggle-switch"></span><span class="cm-toggle-label">' . esc_html__( 'Manage XML sitemaps with Cybermaps', 'cybermaps' ) . '</span></label>';
+		echo '<p class="cybermaps-desc">' . esc_html__( 'Controls the sitemap index, children, Google News, RSS and network sitemaps. Turn off when WordPress or another plugin manages your search-engine sitemaps. Cybermaps removes its unchanged static sitemap files and leaves other sitemap routes alone. AI publications and the HTML shortcode have their own controls.', 'cybermaps' ) . '</p>';
+		echo '</div>';
 	}
 
 	/**

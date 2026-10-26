@@ -1169,7 +1169,7 @@ final class MigrationHub {
 		return array(
 			'discovery_hub_enabled' => ! empty( $settings['enable_discovery_hub'] ),
 			'xml_sitemap_base'      => $routes['sitemap_url_base'],
-			'rss_sitemap_enabled'   => ! empty( $settings['enable_rss_sitemap'] ),
+			'rss_sitemap_enabled'   => \Cybermaps\Sitemap\PublicationPolicy::enabled( $settings ) && ! empty( $settings['enable_rss_sitemap'] ),
 			'html_sitemap_enabled'  => ! empty( $settings['enable_shortcode'] ),
 			'static_engine_mode'    => \Cybermaps\Discovery\StaticBridge::get_mode( $settings ),
 			'analytics_enabled'     => ! empty( $settings['enable_analytics'] ),

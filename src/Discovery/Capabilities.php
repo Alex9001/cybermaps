@@ -67,7 +67,9 @@ final class Capabilities {
 		if ( $registry->is_enabled( 'llms_tldr', $settings ) ) {
 			$output .= '- [Experimental budgeted site briefing](' . $registry->get_url( 'llms_tldr' ) . ")\n";
 		}
-		$output .= '- [XML sitemap](' . \Cybermaps\Core\URLManager::get_home_url( '/' . $base . '.xml' ) . ")\n";
+		if ( \Cybermaps\Sitemap\PublicationPolicy::enabled( $settings ) ) {
+			$output .= '- [XML sitemap](' . \Cybermaps\Core\URLManager::get_home_url( '/' . $base . '.xml' ) . ")\n";
+		}
 		$output .= '- [JSON Feed](' . $registry->get_url( 'feed' ) . ")\n";
 		$output .= '- [Schema.org graph publication](' . $registry->get_url( 'knowledge_graph' ) . ")\n\n";
 

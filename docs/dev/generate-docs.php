@@ -1251,6 +1251,7 @@ $manifest = [
     'discovery_endpoint_count' => count( $discovery_endpoints ),
 
     'sitemap_features' => [
+        'Optional XML management with conditional WordPress Core replacement and ownership-safe static handover; independent AI and HTML publication',
         'XML sitemaps with configurable base URL slug',
         'Automatic 2,000 URL children with collision-safe post-type and taxonomy route namespaces',
         'Post types, taxonomies, authors, archives, and Google News sitemaps',

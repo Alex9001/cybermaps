@@ -105,7 +105,7 @@ function cybermaps_website_routes( array $manifest ): array {
         $routes[ $path ] = [
             'path' => $path, 'category' => 'sitemap', 'media_type' => 'rss' === $matched['route'] ? 'application/rss+xml' : 'application/xml',
             'label' => 'Sitemap (default slug)',
-            'condition' => 'Enabled sitemap/provider; network index requires multisite',
+            'condition' => 'enable_xml_sitemaps and enabled provider; network index requires multisite and XML management on the main site',
             'static_mode' => 'network' === $matched['route'] ? 'dynamic' : 'all (single site only)',
         ];
     }

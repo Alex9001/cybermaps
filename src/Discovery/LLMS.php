@@ -342,7 +342,7 @@ class LLMS {
 		}
 
 		$resources = array();
-		if ( ! empty( $settings['llms_include_sitemap_link'] ) || $eligible_count > $selected_count || $truncated ) {
+		if ( \Cybermaps\Sitemap\PublicationPolicy::enabled( $settings ) && ( ! empty( $settings['llms_include_sitemap_link'] ) || $eligible_count > $selected_count || $truncated ) ) {
 			$base        = Orchestrator::get_sitemap_base();
 			$resources[] = '- [XML sitemap](' . URLManager::get_home_url( '/' . $base . '.xml' ) . ')';
 		}

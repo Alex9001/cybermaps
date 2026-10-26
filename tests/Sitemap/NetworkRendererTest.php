@@ -89,6 +89,13 @@ final class NetworkRendererTest extends TestCase {
 		$this->assertSame( 1, substr_count( $this->render(), '<sitemap>' ) );
 	}
 
+	public function test_opted_out_active_member_is_omitted_without_rebuilding_its_inventory(): void {
+		$GLOBALS['cybermaps_mock_options_by_blog'][42]['cybermaps_settings'] = array( 'enable_xml_sitemaps' => '0' );
+		unset( $GLOBALS['cybermaps_mock_options_by_blog'][42][ PageOccupancyManifest::MANIFEST_OPTION ] );
+		$this->assertSame( 1, substr_count( $this->render(), '<sitemap>' ) );
+		$this->assertSame( 1, $GLOBALS['cybermaps_mock_current_blog_id'] );
+	}
+
 	public function test_missing_manifest_is_unavailable_and_restores_blog_context(): void {
 		unset( $GLOBALS['cybermaps_mock_options_by_blog'][41][ PageOccupancyManifest::MANIFEST_OPTION ] );
 		try {

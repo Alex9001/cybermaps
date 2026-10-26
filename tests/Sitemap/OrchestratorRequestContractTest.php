@@ -102,17 +102,15 @@ final class OrchestratorRequestContractTest extends TestCase {
 		$this->assertStringNotContainsString( 'HTTP_IF_NONE_MATCH', $source );
 	}
 
-	public function test_legacy_routes_enforce_read_only_methods_before_redirect_or_404(): void {
-		$source         = $this->method_source( 'handle_legacy_redirects' );
+	public function test_owned_redirects_enforce_read_only_methods_and_unclaimed_routes_fall_through(): void {
+		$source         = $this->method_source( 'redirect_sitemap' );
 		$enforce        = strpos( $source, 'ReadOnlyRequest::enforce' );
 		$first_redirect = strpos( $source, 'wp_safe_redirect' );
-		$first_404      = strpos( $source, 'issue_404' );
 
 		$this->assertNotFalse( $enforce );
 		$this->assertNotFalse( $first_redirect );
-		$this->assertNotFalse( $first_404 );
 		$this->assertLessThan( $first_redirect, $enforce );
-		$this->assertLessThan( $first_404, $enforce );
+		$this->assertStringNotContainsString( 'issue_404', $this->method_source( 'handle_legacy_redirects' ) );
 	}
 
 	public function test_404_helper_returns_a_small_theme_independent_response(): void {

@@ -293,9 +293,9 @@ final class StaticSyncRunner {
 	): string {
 		return match ( $phase ) {
 			self::PHASE_LEGACY_PURGE => $this->advance_legacy_purge( $phases, $context, $report, $cursor ),
-			self::PHASE_SITEMAP_CHILDREN => $this->advance_sitemap_children( $write_all, $phases, $services, $context, $report, $cursor ),
+			self::PHASE_SITEMAP_CHILDREN => $this->advance_sitemap_children( $write_all && \Cybermaps\Sitemap\PublicationPolicy::enabled( $settings ), $phases, $services, $context, $report, $cursor ),
 			self::PHASE_RSS => $this->advance_rss( $settings, $write_all, $phases, $context, $report, $cursor ),
-			self::PHASE_SITEMAP_INDEX => $this->advance_sitemap_index( $write_all, $phases, $services, $context, $report, $cursor ),
+			self::PHASE_SITEMAP_INDEX => $this->advance_sitemap_index( $write_all && \Cybermaps\Sitemap\PublicationPolicy::enabled( $settings ), $phases, $services, $context, $report, $cursor ),
 			self::PHASE_STALE_RECONCILIATION => $this->advance_stale_reconciliation( $mode, $context, $report, $cursor ),
 			default => $this->advance_discovery_phase( $phase, $settings, $mode, $write_all, $phases, $services, $context, $report, $cursor ),
 		};
@@ -392,7 +392,7 @@ final class StaticSyncRunner {
 		array &$report,
 		array &$cursor
 	): string {
-		if ( ! $write_all || empty( $settings['enable_rss_sitemap'] ) ) {
+		if ( ! $write_all || ! \Cybermaps\Sitemap\PublicationPolicy::enabled( $settings ) || empty( $settings['enable_rss_sitemap'] ) ) {
 			$cursor = array();
 			return $this->next_scheduled_phase( self::PHASE_RSS, $phases );
 		}
@@ -735,7 +735,7 @@ final class StaticSyncRunner {
 		return $this->validate_generated_route_claims(
 			$claims,
 			$claim_bytes,
-			(string) $routes[ PublicationRouteSlugs::SITEMAP_KEY ],
+			\Cybermaps\Sitemap\PublicationPolicy::enabled( $settings ) ? (string) $routes[ PublicationRouteSlugs::SITEMAP_KEY ] : '',
 			! empty( $settings['enable_discovery_hub'] ) && ! empty( $settings['enable_rag_chunks'] )
 		);
 	}
@@ -752,6 +752,9 @@ final class StaticSyncRunner {
 		array &$claims,
 		int &$claim_bytes
 	): ?array {
+		if ( ! \Cybermaps\Sitemap\PublicationPolicy::enabled( $settings ) ) {
+			return null;
+		}
 		$targets = array(
 			array( $routes[ PublicationRouteSlugs::SITEMAP_KEY ] . '.xml', 'sitemap:index' ),
 		);

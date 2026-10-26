@@ -12,7 +12,7 @@ from workspace import ROOT, require, package_files, git
 def verify_browser(path):
     result = json.loads(Path(path).read_text())
     require(result.get('schema_version') == 1 and result.get('passed') is True
-            and set(result.get('checks', [])) == {'wizard', 'icons', 'attribution-save', 'tooltip', 'mcp-setup'}
+            and set(result.get('checks', [])) == {'wizard', 'icons', 'attribution-save', 'sitemap-ownership-save', 'tooltip', 'mcp-setup'}
             and result.get('errors') == [] and result.get('browser'), 'Browser validation incomplete')
 
 
@@ -53,6 +53,23 @@ def verify_output_buffer_fixture(path):
         'Native output_buffer_ownership coverage incomplete')
 
 
+def verify_sitemap_ownership_fixture(path):
+    result = json.loads(Path(path).read_text())
+    require(isinstance(result, dict) and result.get('schema_version') == 1
+            and result.get('sitemap_ownership_passed') is True
+            and type(result.get('multisite')) is bool, 'Native sitemap_ownership fixture incomplete')
+    expected = {'active_replacement', 'disabled_handover', 'foreign_filter', 'private_site',
+                'rewrite_handover', 'redirect_opt_out', 'plain_permalinks'}
+    expected.add('site_isolation' if result['multisite'] else 'static_handover')
+    cases = result.get('cases')
+    require(isinstance(cases, dict) and set(cases) == expected
+            and all(value is True for value in cases.values()), 'Native sitemap_ownership cases incomplete')
+    for state in ('enabled', 'disabled', 'retained', 'plain', 'restored'):
+        receipt = json.loads(Path(path).with_name('sitemap-ownership-' + state + '.json').read_text())
+        require(receipt.get('schema_version') == 1 and receipt.get('state') == state
+                and receipt.get('passed') is True and receipt.get('checks'), 'Sitemap ownership HTTP coverage incomplete')
+
+
 def validate_result(result, wp, php, multisite, archive_hash, commit):
     require(result['wordpress_version'] == wp and result['php_version'].startswith(php + '.'), 'Runtime version mismatch')
     require(result['zip_sha256'] == archive_hash and result['commit'] == commit, 'Runtime evidence belongs to another ZIP or commit')
@@ -63,12 +80,15 @@ def validate_result(result, wp, php, multisite, archive_hash, commit):
     require(result.get('sitemap_regressions_passed') is True, 'Sitemap runtime regressions incomplete')
     require(result.get('rest_representation_passed') is True, 'Native REST representation regressions incomplete')
     require(result.get('publication_priming_passed') is True, 'Native publication priming regressions incomplete')
-    for key in ('configuration_persistence', 'cloudflare_persistence', 'audit_run_lock', 'static_ownership', 'state_cutover', 'stored_template_source', 'raw_option_store', 'output_buffer_ownership'):
+    for key in ('configuration_persistence', 'cloudflare_persistence', 'audit_run_lock', 'static_ownership', 'state_cutover', 'stored_template_source', 'raw_option_store', 'output_buffer_ownership', 'sitemap_ownership'):
         require(result.get(key + '_passed') is True, f'Native {key} regressions incomplete')
     require(result.get('stable_findings') == [] and result.get('experimental_findings') == [], 'Runtime findings remain')
 
 
 def main():
+    if sys.argv[1] == '--verify-sitemap-ownership':
+        verify_sitemap_ownership_fixture(sys.argv[2])
+        return
     if sys.argv[1] == '--verify-output-buffer':
         verify_output_buffer_fixture(sys.argv[2])
         return

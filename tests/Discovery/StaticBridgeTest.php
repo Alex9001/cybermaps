@@ -32,6 +32,38 @@ class StaticBridgeTest extends \WP_UnitTestCase {
 		$this->assertInstanceOf( \Cybermaps\Discovery\StaticBridge::class, $instance );
 	}
 
+	public function test_relinquishing_xml_management_purges_only_unchanged_owned_search_files(): void {
+		$bridge = \Cybermaps\Discovery\StaticBridge::get_instance();
+		$names = array( 'sitemap.xml', 'sitemap-posts-post-1.xml', 'sitemap-news.xml', 'sitemap-rss.xml', 'sitemap-network.xml', 'ai-sitemap.xml', 'ai.json' );
+		try {
+			foreach ( $names as $name ) {
+				wp_delete_file( $bridge->get_file_path( $name ) );
+				self::assertTrue( $bridge->write_file( $name, '<owned/>' ), $name );
+			}
+			global $wp_filesystem;
+			$wp_filesystem->put_contents( $bridge->get_file_path( 'sitemap-news.xml' ), '<changed-by-someone-else/>' );
+			$old = $GLOBALS['cybermaps_mock_options']['cybermaps_settings'];
+			$new = array_replace( $old, array( 'enable_xml_sitemaps' => '0' ) );
+			$GLOBALS['cybermaps_mock_options']['cybermaps_settings'] = $new;
+			( new \Cybermaps\Admin\Settings() )->on_settings_updated( $old, $new );
+			foreach ( array( 'sitemap.xml', 'sitemap-posts-post-1.xml', 'sitemap-rss.xml', 'sitemap-network.xml' ) as $name ) {
+				self::assertFileDoesNotExist( $bridge->get_file_path( $name ), $name );
+				self::assertFalse( $bridge->write_file( $name, '<obsolete/>' ) );
+				self::assertSame( 'sitemaps_disabled', $bridge->get_last_write_result()['code'] );
+			}
+			self::assertSame( '<changed-by-someone-else/>', $wp_filesystem->get_contents( $bridge->get_file_path( 'sitemap-news.xml' ) ) );
+			self::assertFileExists( $bridge->get_file_path( 'ai-sitemap.xml' ) );
+			self::assertFileExists( $bridge->get_file_path( 'ai.json' ) );
+			self::assertFalse( wp_next_scheduled( \Cybermaps\Sitemap\PageOccupancyBuilder::HOOK ) );
+			$GLOBALS['cybermaps_mock_options']['cybermaps_settings'] = $old;
+			self::assertTrue( $bridge->write_file( 'sitemap.xml', '<restored/>' ) );
+		} finally {
+			foreach ( $names as $name ) {
+				wp_delete_file( $bridge->get_file_path( $name ) );
+			}
+		}
+	}
+
 	public function test_get_file_path() {
 		$bridge = \Cybermaps\Discovery\StaticBridge::get_instance();
 		$path = $bridge->get_file_path( 'sitemap.xml' );

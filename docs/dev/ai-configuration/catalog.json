@@ -1,7 +1,7 @@
 {
     "format": "cybermaps-ai-configuration-catalog",
     "format_version": 2,
-    "plugin_version": "8.0.3",
+    "plugin_version": "8.0.4",
     "sections": [
         {
             "id": "core_settings",
@@ -551,13 +551,13 @@
             "risk": "high"
         },
         {
-            "id": "redirect_wp_sitemap",
+            "id": "enable_xml_sitemaps",
             "section_id": "core_settings",
             "section_label": "Core Settings",
             "option": "cybermaps_settings",
-            "field": "redirect_wp_sitemap",
-            "label": "Redirect WordPress sitemaps",
-            "purpose": "Redirects WordPress Core sitemap routes to the Cybermaps sitemap.",
+            "field": "enable_xml_sitemaps",
+            "label": "Manage XML sitemaps with Cybermaps",
+            "purpose": "Controls search-engine XML, News, RSS and network sitemap publication. Disabling preserves WordPress and other providers, removes unchanged owned static sitemap files and suppresses Cybermaps sitemap links. AI discovery and HTML shortcodes remain independently controlled.",
             "json_type": "boolean",
             "allowed": {
                 "enum": [
@@ -567,6 +567,32 @@
             },
             "effective_default": true,
             "dependencies": [],
+            "example": true,
+            "risk": "high"
+        },
+        {
+            "id": "redirect_wp_sitemap",
+            "section_id": "core_settings",
+            "section_label": "Core Settings",
+            "option": "cybermaps_settings",
+            "field": "redirect_wp_sitemap",
+            "label": "Redirect WordPress sitemaps",
+            "purpose": "Replaces Core sitemaps only while XML management and non-Plain permalinks are enabled. Disabling leaves Core routes to WordPress.",
+            "json_type": "boolean",
+            "allowed": {
+                "enum": [
+                    true,
+                    false
+                ]
+            },
+            "effective_default": true,
+            "dependencies": [
+                {
+                    "field": "enable_xml_sitemaps",
+                    "condition": "equals",
+                    "value": true
+                }
+            ],
             "example": true,
             "risk": "high"
         },

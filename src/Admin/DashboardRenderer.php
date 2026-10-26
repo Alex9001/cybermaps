@@ -25,6 +25,7 @@ final class DashboardRenderer {
 	 * @return array<int,array{label:string,active:bool,status:string,detail:string}> Capability items.
 	 */
 	private static function capability_items( string $mode, bool $hub, bool $full, bool $tldr ): array {
+		$xml_enabled  = \Cybermaps\Sitemap\PublicationPolicy::enabled();
 		$static_state = self::static_publication_state( $mode, $hub );
 		$full_state   = self::publication_state(
 			$hub,
@@ -48,9 +49,9 @@ final class DashboardRenderer {
 			),
 			array(
 				'label'  => __( 'XML sitemaps', 'cybermaps' ),
-				'active' => true,
-				'status' => __( 'Available', 'cybermaps' ),
-				'detail' => __( 'Index and eligible child sitemaps are registered.', 'cybermaps' ),
+				'active' => $xml_enabled,
+				'status' => $xml_enabled ? __( 'Available', 'cybermaps' ) : __( 'Disabled', 'cybermaps' ),
+				'detail' => $xml_enabled ? __( 'Index and eligible child sitemaps are registered.', 'cybermaps' ) : __( 'WordPress or another plugin can manage search-engine sitemaps.', 'cybermaps' ),
 			),
 			array(
 				'label'  => __( 'Static publication', 'cybermaps' ),

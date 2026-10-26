@@ -1,6 +1,13 @@
 Cybermaps release history
 =========================
 
+8.0.4
+-----
+* Add one XML sitemap management control covering routes, News/RSS/network output, static publication, background indexing and advertisements.
+* Replace WordPress Core sitemaps only while XML management and Core redirects are enabled with non-Plain permalinks; otherwise preserve Core and other plugins’ decisions.
+* Hand unclaimed URLs back without forced 404 responses; remove only unchanged owned sitemap files and preserve independent AI publications.
+* Require native ownership, multisite isolation and fresh HTTP handover/restore checks before release.
+
 8.0.3
 -----
 * Remove sitemap output-buffer creation and global cleanup so WordPress and other plugins retain their own buffers.

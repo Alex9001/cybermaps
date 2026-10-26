@@ -19,8 +19,9 @@ class SVGMapper {
 		$base      = \Cybermaps\Sitemap\Orchestrator::get_sitemap_base();
 		$news_base = \Cybermaps\Sitemap\Orchestrator::get_news_sitemap_base();
 		$rss_base  = \Cybermaps\Sitemap\Orchestrator::get_rss_sitemap_base();
-		$has_news  = ! empty( $settings['enable_google_news'] );
-		$has_rss   = ! empty( $settings['enable_rss_sitemap'] );
+		$has_xml   = \Cybermaps\Sitemap\PublicationPolicy::enabled( $settings );
+		$has_news  = $has_xml && ! empty( $settings['enable_google_news'] );
+		$has_rss   = $has_xml && ! empty( $settings['enable_rss_sitemap'] );
 
 		$cache_key = 'cybermaps_arch_v7_' . md5(
 			(string) wp_json_encode(
@@ -48,7 +49,7 @@ class SVGMapper {
 					array(
 						'path'   => '/' . $base . '.xml',
 						'label'  => __( 'Sitemap Index', 'cybermaps' ),
-						'active' => true,
+						'active' => $has_xml,
 					),
 					array(
 						'path'   => '/' . $news_base . '.xml',

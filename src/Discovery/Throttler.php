@@ -250,7 +250,10 @@ class Throttler {
 
 	private function sitemap_path_active( string $path ): bool {
 		$settings = \Cybermaps\Core\ConfigurationStore::settings();
-		$route    = \Cybermaps\Sitemap\SitemapRouteMatcher::match_path( $path, $settings );
+		if ( ! \Cybermaps\Sitemap\PublicationPolicy::enabled( $settings ) ) {
+			return false;
+		}
+		$route = \Cybermaps\Sitemap\SitemapRouteMatcher::match_path( $path, $settings );
 		if ( null === $route ) {
 			return false;
 		}

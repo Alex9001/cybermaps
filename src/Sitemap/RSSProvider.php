@@ -28,7 +28,7 @@ class RSSProvider {
 		$path     = \Cybermaps\Core\URLManager::get_request_path();
 		$settings = \Cybermaps\Core\ConfigurationStore::settings();
 
-		if ( empty( $settings['enable_rss_sitemap'] ) ) {
+		if ( ! PublicationPolicy::enabled( $settings ) || empty( $settings['enable_rss_sitemap'] ) ) {
 			return;
 		}
 
@@ -49,6 +49,9 @@ class RSSProvider {
 		} catch ( \Cybermaps\Core\BuildUnavailableException $error ) {
 			\Cybermaps\Discovery\PublicationRequestGuard::serve_unavailable( $error );
 		}
+		if ( '' === $output ) {
+			return;
+		}
 
 		\Cybermaps\Discovery\Integrity::send_headers( $output, 3600 );
 		header( 'Content-Type: application/rss+xml; charset=utf-8' );
@@ -64,6 +67,9 @@ class RSSProvider {
 	public function generate(): string {
 		$generation = \Cybermaps\Core\CacheManager::get_generation( 'sitemap', true );
 		$settings   = \Cybermaps\Core\ConfigurationStore::publication_settings();
+		if ( ! PublicationPolicy::enabled( $settings ) ) {
+			return '';
+		}
 		\Cybermaps\Core\ConfigurationStore::publication_discovery();
 		$cache_enabled = ! empty( $settings['enable_caching'] );
 		$cached        = $this->get_cached_sitemap( $cache_enabled );

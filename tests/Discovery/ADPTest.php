@@ -7,6 +7,13 @@ use Cybermaps\Core\EndpointRegistry;
 use Cybermaps\Discovery\ADP;
 
 final class ADPTest extends \WP_UnitTestCase {
+	public function test_xml_opt_out_removes_only_search_sitemap_advertisements(): void {
+		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['enable_xml_sitemaps'] = '0';
+		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['enable_google_news'] = '1';
+		$endpoints = ( new ADP() )->get_manifest_data()['endpoints'];
+		self::assertSame( array(), $endpoints['sitemaps'] );
+		self::assertStringEndsWith( '/ai-sitemap.xml', $endpoints['ai_sitemap'] );
+	}
 
 	protected function setUp(): void {
 		parent::setUp();

@@ -96,6 +96,9 @@ class ADP {
 	 * @return string[]
 	 */
 	private function sitemaps( array $settings ): array {
+		if ( ! \Cybermaps\Sitemap\PublicationPolicy::enabled( $settings ) ) {
+			return array();
+		}
 		$base     = \Cybermaps\Sitemap\Orchestrator::get_sitemap_base();
 		$sitemaps = array( \Cybermaps\Core\URLManager::get_home_url( '/' . $base . '.xml' ) );
 		if ( ! empty( $settings['enable_google_news'] ) ) {

@@ -7,6 +7,21 @@ use Cybermaps\Discovery\Robots;
 use PHPUnit\Framework\TestCase;
 
 final class RobotsTest extends TestCase {
+	public function test_native_sitemap_advertisements_survive_xml_handover_even_in_takeover_mode(): void {
+		foreach ( array( false, true ) as $takeover ) {
+			$GLOBALS['cybermaps_mock_options'] = array(
+				'cybermaps_settings' => array( 'enable_xml_sitemaps' => '0', 'inject_robots' => '1', 'enable_discovery_hub' => '1', 'enable_google_news' => '1', 'enable_rss_sitemap' => '1' ),
+				'cybermaps_robots_manager' => array( 'takeover_enabled' => $takeover ),
+			);
+			$output = ( new Robots() )->filter_robots_txt( "User-agent: *\nSitemap: https://example.com/wp-sitemap.xml\n", true );
+			self::assertSame( 1, substr_count( $output, 'Sitemap: https://example.com/wp-sitemap.xml' ) );
+			self::assertStringNotContainsString( 'Sitemap: https://example.com/sitemap.xml', $output );
+			self::assertStringNotContainsString( 'sitemap-news.xml', $output );
+			self::assertStringNotContainsString( 'sitemap-rss.xml', $output );
+			self::assertStringContainsString( 'AI-Sitemap:', $output );
+		}
+	}
+
     protected function setUp(): void {
         parent::setUp();
 

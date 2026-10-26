@@ -40,6 +40,11 @@ exports, exceptions and unchanged caller/global style state. Granular case
 receipts must be retained; an aggregate success flag alone is insufficient.
 Separate HTTP checks verify ordinary sitemap bodies, digests, HEAD, 304 and
 diagnostic behavior without foreign output.
+Every case requires `sitemap_ownership_passed`: fresh HTTP checks exercise XML
+enabled, disabled, Core retained, Plain permalinks and restored states. Native
+checks preserve third-party/private-site decisions, remove only owned rewrite
+rules, test static file handover on single sites and isolate settings after
+multisite conversion. Their granular JSON receipts must be retained.
 Missing or false evidence flags reject the candidate. Relay security, WebMCP
 browser security, admin UI contract tests using a mocked DOM, and
 performance-harness self-tests run in the same candidate gate; harness
@@ -94,6 +99,10 @@ owner sign-off is required. A changed package requires renewed agent review.
 18. Shipped PHP contains no output-buffer mutation calls or imports. The source
     guard and native ownership fixture must pass; caller buffers are never ours
     to discard, flush or close.
+19. Core sitemaps are disabled only while Cybermaps manages XML and owns the
+    Core redirect on non-Plain permalinks. Opt-out must release routes, static
+    files, background work and advertisements without overriding another
+    plugin's decision. Native and fresh-request handover checks are mandatory.
 
 Website preparation records bind the canonical website content, validation log,
 plugin commit, version and channel; promotion additionally binds its Git commit
@@ -122,6 +131,7 @@ or this candidate. Do not commit private reviewer mail.
 
 | Reviewer category | Resolution and continuing evidence |
 | --- | --- |
+| Unconditional Core sitemap disable (October 26, quoted by owner) | Shared publication policy, explicit XML management switch, conditional Core filter and redirect, fallthrough for unclaimed routes, ownership-safe static cleanup, native and HTTP handover/restore fixtures. |
 | Unclosed output buffer (October 13; 8.0.2) | Remove sitemap buffer creation/global cleanup and report stylesheet capture; retain string rendering and isolated registered-style accumulation. Token guard, subprocess ownership cases, native report checks and actual sitemap HTTP tests prevent recurrence. WordPress template enhancement buffering applies to whole HTML templates, not these XML responses. |
 | Remote administration (October 5; 7.5.4) | Retire the custom MCP/OAuth server and arbitrary ability dispatcher; expose only owned read-only resources/search through optional WordPress MCP Adapter. Remove mutation abilities across native and browser channels. Prove the boundary using the reviewed MCP contract and real runtime tests; this agent review is not an independent infrastructure audit. |
 | Account/domain ownership | Owner confirmed resolved September 28; preserve that fact, do not claim another verification occurred. |

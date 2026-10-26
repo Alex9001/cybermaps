@@ -1948,7 +1948,7 @@ class StaticBridge {
 			'observed_at'      => $now,
 		);
 
-		if ( ! empty( $settings['enable_google_news'] ) ) {
+		if ( \Cybermaps\Sitemap\PublicationPolicy::enabled( $settings ) && ! empty( $settings['enable_google_news'] ) ) {
 			$this->collect_time_sensitive_news_state( $state, $checkpoint, $now );
 		}
 
@@ -3771,12 +3771,21 @@ class StaticBridge {
 			'discovery'           => $this->is_discovery_generated_path( $file ),
 			'xml'                 => str_ends_with( $file, '.xml' ),
 			'sitemaps'            => \in_array( $file, $sitemap_targets, true ),
+			'sitemap_family'      => $this->is_sitemap_family_target( $file, $sitemap_targets, $desired_lookup ),
 			'legacy_publications' => \in_array( $file, self::LEGACY_GENERATED_FILES, true ),
 			'stale'               => ! isset( $desired_lookup[ $file ] ),
 			'stale_generation'    => null === $desired_generation || $this->ownership_store->get_generation( $file ) !== $desired_generation,
 			'failed_publication'  => isset( $desired_lookup[ $file ] ),
 		);
 		return $included[ $scope ] ?? true;
+	}
+
+	/** Match the frozen index/News/RSS paths and index child family for an opt-out purge. */
+	private function is_sitemap_family_target( string $file, array $sitemap_targets, array $extra_targets ): bool {
+		$index = (string) ( $sitemap_targets[0] ?? '' );
+		return \in_array( $file, $sitemap_targets, true )
+			|| isset( $extra_targets[ $file ] )
+			|| \Cybermaps\Sitemap\PublicationRouteSlugs::is_generated_child_filename( $file, \substr( $index, 0, -4 ) );
 	}
 
 	/** Resolve and verify an inventory record before purge deletion. */
@@ -3930,6 +3939,7 @@ class StaticBridge {
 			'web_root'            => $this->is_well_known_mode_static_path( $file ),
 			'discovery'           => ! $this->is_discovery_generated_path( $file ),
 			'sitemaps'            => ! \in_array( $file, $sitemap_targets, true ),
+			'sitemap_family'      => ! $this->is_sitemap_family_target( $file, $sitemap_targets, $desired_lookup ),
 			'legacy_publications' => ! \in_array( $file, self::LEGACY_GENERATED_FILES, true ),
 		);
 		return $retain[ $scope ] ?? false;
@@ -5417,10 +5427,18 @@ class StaticBridge {
 			return 'configuration_changed';
 		}
 
+		return $this->get_configuration_write_block_reason( $filename );
+	}
+
+	/** Apply the current publication switches independently of operation fences. */
+	private function get_configuration_write_block_reason( string $filename ): ?string {
 		$settings = \Cybermaps\Core\ConfigurationStore::settings();
 		$mode     = self::get_mode( $settings );
 		if ( 'off' === $mode ) {
 			return 'engine_disabled';
+		}
+		if ( ! \Cybermaps\Sitemap\PublicationPolicy::enabled( $settings ) && null !== \Cybermaps\Sitemap\SitemapRouteMatcher::match_path( '/' . $filename, $settings ) ) {
+			return 'sitemaps_disabled';
 		}
 
 		if ( $this->is_discovery_generated_path( $filename ) && empty( $settings['enable_discovery_hub'] ) ) {
@@ -5443,6 +5461,7 @@ class StaticBridge {
 			'generation_suspended'   => __( 'Static generation is suspended while the plugin is inactive or uninstalling.', 'cybermaps' ),
 			'configuration_changed'  => __( 'Settings changed during generation, so the obsolete write was cancelled.', 'cybermaps' ),
 			'engine_disabled'        => __( 'The Static File Engine is disabled.', 'cybermaps' ),
+			'sitemaps_disabled'      => __( 'Cybermaps XML sitemap management is disabled.', 'cybermaps' ),
 			'discovery_hub_disabled' => __( 'The AI Publication Hub is disabled.', 'cybermaps' ),
 			'outside_static_mode'    => __( 'This file is outside the active Static File Engine mode.', 'cybermaps' ),
 			'operation_lock_lost'    => __( 'The generated-file operation no longer owns its coordination lock and was stopped before another write.', 'cybermaps' ),

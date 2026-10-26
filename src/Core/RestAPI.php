@@ -262,7 +262,6 @@ class RestAPI {
 	 * @return \WP_REST_Response
 	 */
 	public function get_discovery() {
-		$base     = \Cybermaps\Sitemap\Orchestrator::get_sitemap_base();
 		$settings = ConfigurationStore::settings();
 		$data     = array(
 			'adp'                => $this->endpoints->get_url( 'adp_discovery' ),
@@ -276,8 +275,10 @@ class RestAPI {
 			'ai_catalog'         => $this->endpoints->get_url( 'ai_catalog' ),
 			'openapi'            => $this->endpoints->get_url( 'openapi' ),
 			'health'             => $this->endpoints->get_url( 'public_health' ),
-			'sitemap_index'      => \Cybermaps\Core\URLManager::get_home_url( '/' . $base . '.xml' ),
 		);
+		if ( \Cybermaps\Sitemap\PublicationPolicy::enabled( $settings ) ) {
+			$data['sitemap_index'] = \Cybermaps\Sitemap\PublicationPolicy::index_url( $settings );
+		}
 		if ( $this->endpoints->is_enabled( 'llms_tldr', $settings ) ) {
 			$data['llms_tldr'] = $this->endpoints->get_url( 'llms_tldr' );
 		}
@@ -379,7 +380,6 @@ class RestAPI {
 	public function get_urls( $request ) {
 		unset( $request );
 
-		$base    = \Cybermaps\Sitemap\Orchestrator::get_sitemap_base();
 		$index   = new \Cybermaps\Discovery\DiscoveryIndex();
 		$payload = array(
 			'version'           => CYBERMAPS_VERSION,
@@ -388,7 +388,7 @@ class RestAPI {
 			'discovery'         => $this->get_discovery()->get_data(),
 			'index'             => $index->get_index(),
 			'rest_api'          => rest_url( EndpointRegistry::REST_NAMESPACE ),
-			'sitemap_xml'       => \Cybermaps\Core\URLManager::get_home_url( '/' . $base . '.xml' ),
+			'sitemap_xml'       => \Cybermaps\Sitemap\PublicationPolicy::index_url(),
 		);
 
 		return $this->private_response( $payload );
@@ -416,14 +416,14 @@ class RestAPI {
 		$last_success     = self::string_value( get_option( 'cybermaps_last_static_sync', '' ) );
 		$last_attempt     = self::string_value( get_option( 'cybermaps_last_static_sync_attempt', '' ) );
 		$report_succeeded = self::report_succeeded( $report['success'] ?? false );
-		$base             = \Cybermaps\Sitemap\Orchestrator::get_sitemap_base();
 		return $this->private_response(
 			array(
 				'version'            => CYBERMAPS_VERSION,
 				'status'             => $status,
 				'generated'          => gmdate( 'c' ),
 				'sitemap'            => array(
-					'index_url'     => \Cybermaps\Core\URLManager::get_home_url( '/' . $base . '.xml' ),
+					'enabled'       => \Cybermaps\Sitemap\PublicationPolicy::enabled( $settings ),
+					'index_url'     => \Cybermaps\Sitemap\PublicationPolicy::index_url( $settings ),
 					'cache_enabled' => self::enabled_setting( $settings, 'enable_caching' ),
 					'cache_store'   => self::cache_store_name(),
 				),

@@ -378,6 +378,7 @@ class SettingsPage {
 	 */
 	private function render_sidebar( string $active_tab ): void {
 		$options                 = \Cybermaps\Core\ConfigurationStore::settings();
+		$enable_xml              = \Cybermaps\Sitemap\PublicationPolicy::enabled( $options );
 		$base                    = \Cybermaps\Sitemap\Orchestrator::get_sitemap_base();
 		$news_base               = \Cybermaps\Sitemap\Orchestrator::get_news_sitemap_base();
 		$enable_ai               = ! empty( $options['enable_discovery_hub'] );
@@ -421,24 +422,28 @@ class SettingsPage {
 			<div class="postbox">
 				<h2 class="hndle"><span><?php esc_html_e( 'Sitemaps', 'cybermaps' ); ?></span></h2>
 				<div class="inside">
+					<?php if ( $enable_xml ) : ?>
 					<a href="<?php echo esc_url( $sitemap_url ); ?>" target="_blank" rel="noopener noreferrer" class="cm-sidebar-link">
 						<span class="dashicons dashicons-media-spreadsheet"></span>
 						<span class="cm-sidebar-link-label"><?php esc_html_e( 'Sitemap Index', 'cybermaps' ); ?></span>
 						<span class="dashicons dashicons-external cm-sidebar-ext-icon"></span>
 					</a>
-					<?php if ( $enable_news ) : ?>
+						<?php if ( $enable_news ) : ?>
 					<a href="<?php echo esc_url( $news_url ); ?>" target="_blank" rel="noopener noreferrer" class="cm-sidebar-link">
 						<span class="dashicons dashicons-media-document"></span>
 						<span class="cm-sidebar-link-label"><?php esc_html_e( 'Google News', 'cybermaps' ); ?></span>
 						<span class="dashicons dashicons-external cm-sidebar-ext-icon"></span>
 					</a>
 					<?php endif; ?>
-					<?php if ( $enable_rss ) : ?>
+						<?php if ( $enable_rss ) : ?>
 					<a href="<?php echo esc_url( $rss_url ); ?>" target="_blank" rel="noopener noreferrer" class="cm-sidebar-link">
 						<span class="dashicons dashicons-rss"></span>
 						<span class="cm-sidebar-link-label"><?php esc_html_e( 'RSS Sitemap', 'cybermaps' ); ?></span>
 						<span class="dashicons dashicons-external cm-sidebar-ext-icon"></span>
 					</a>
+					<?php endif; ?>
+					<?php else : ?>
+					<p><?php esc_html_e( 'Cybermaps XML sitemap management is disabled.', 'cybermaps' ); ?></p>
 					<?php endif; ?>
 				</div>
 			</div>

@@ -3,27 +3,27 @@ Contributors: oreshkin
 Tags: sitemap, llms-txt, technical-seo, content-audit, indexnow
 Requires at least: 7.1
 Tested up to: 7.1
-Stable tag: 8.0.3
+Stable tag: 8.0.4
 Requires PHP: 8.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-WordPress sitemaps, AI discovery, static delivery and reports.
+Sitemaps, AI discovery and reports.
 
 == Description ==
 
-Optional MCP requires MCP Adapter 0.7.0+.
+XML management is optional. MCP requires MCP Adapter 0.7.0+.
 
 == Installation ==
 
-Activate; open Cybermaps → Overview → Quick Setup.
-MCP: activate MCP Adapter; enable read-only MCP in AI Publishing and save.
-Use HTTPS and a Subscriber Application Password, or WP-CLI.
-Setup: https://cybermaps.dev/docs/mcp/
+Cybermaps → Overview → Quick Setup.
+MCP: activate MCP Adapter; save read-only opt-in in AI Publishing.
+Use HTTPS + Subscriber Application Password, or WP-CLI.
+https://cybermaps.dev/docs/mcp/
 
 == Source Code ==
 
-https://github.com/Alex9001/cybermaps/tree/v8.0.3
+https://github.com/Alex9001/cybermaps/tree/v8.0.4
 JS/CSS: assets/; setup-wizard.js uses wp.element. No compilation.
 Build: composer install; bash bin/package-candidate.sh.
 
@@ -31,11 +31,10 @@ Build: composer install; bash bin/package-candidate.sh.
 
 = Cloudflare and Cybermaps OAuth relay =
 
-Cloudflare OAuth sends PKCE challenge, random state and code to
-https://connect.cybermaps.dev for five minutes. The relay gets no verifier,
-access token, WP identity, site URL or rules. Hosting processes network
-metadata; rate limits use salted IP hashes. WordPress sends Cloudflare
-credentials for exchange/revocation, zone, hostname and requested rules.
+Opt-in Cloudflare OAuth sends PKCE challenge, state and code to
+https://connect.cybermaps.dev for five minutes. No verifier, token, WP identity, site URL or rules. Hosting processes
+network metadata; limits use salted IP hashes. WordPress sends Cloudflare credentials for exchange/revocation, zone,
+hostname and rules.
 Manual/self-managed modes bypass the relay. Policies:
 https://cybermaps.dev/privacy/#cloudflare-oauth-relay
 https://www.cloudflare.com/website-terms/
@@ -43,35 +42,37 @@ https://www.cloudflare.com/privacypolicy/
 
 = IndexNow =
 
-Changes send URLs, host, key and key location to
-https://api.indexnow.org/indexnow when enabled. Headless sites must serve the generated `/{key}.txt`.
+Opt-in changes send URLs, host, key and key location to
+https://api.indexnow.org/indexnow. Headless sites must serve `/{key}.txt`.
 Terms/privacy: https://www.indexnow.org/terms
 
 = WebSub =
 
-Opt-in WebSub sends public /feed.json notifications to configured HTTPS hubs.
-Defaults and policies:
+Opt-in WebSub notifies HTTPS hubs of public /feed.json. Hubs/policies:
 https://pubsubhubbub.appspot.com/
 https://policies.google.com/terms
 https://policies.google.com/privacy
 https://pubsubhubbub.superfeedr.com/
 https://superfeedr.com/terms
 https://superfeedr.com/privacy
-Custom hubs use their own policies.
+Custom hubs: own policies.
 
 = Public delivery checks =
 
-GET/HEAD checks use the site or Frontend Base URL with `X-Cybermaps-Diagnostic: 1` to omit analytics. Configured Varnish receives purges.
+GET/HEAD probes use the site/Frontend Base URL; `X-Cybermaps-Diagnostic: 1` excludes analytics. Configured Varnish receives purges.
 
 == Privacy ==
 
 Opt-in analytics is local: /24 IPv4, /64 IPv6 by default; 1–365-day retention,
-export and clear. Public routes have 60-second rate limits.
+export and clear. Public rate limits: 60 seconds.
 REST search stores no raw IPs or queries. Logged-in rows keep WP user IDs,
 but omit IPs, requester keys and User-Agent. Diagnostic probes are excluded.
-Uninstall keeps data unless Uninstall Cleanup is enabled.
+Uninstall retains data unless cleanup is enabled.
 
 == Changelog ==
+
+= 8.0.4 =
+* Condition Core sitemap replacement on XML ownership.
 
 = 8.0.3 =
 * Fix sitemap/report buffers.
@@ -187,6 +188,9 @@ Uninstall keeps data unless Uninstall Cleanup is enabled.
 More history: `changelog.txt`.
 
 == Upgrade Notice ==
+
+= 8.0.4 =
+XML management switch added; defaults stay enabled.
 
 = 8.0.3 =
 Preserves caller output buffers.

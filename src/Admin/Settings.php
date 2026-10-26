@@ -149,6 +149,7 @@ class Settings {
 		if ( $old_value === $new_value ) {
 			return;
 		}
+		\Cybermaps\Core\ConfigurationStore::reset_memo();
 
 		$old_settings = is_array( $old_value ) ? $old_value : array();
 		$new_settings = is_array( $new_value ) ? $new_value : array();
@@ -164,6 +165,7 @@ class Settings {
 
 		$bridge = \Cybermaps\Discovery\StaticBridge::get_instance();
 		$bridge->invalidate();
+		self::reconcile_sitemap_ownership( $bridge, $old_settings, $new_settings );
 		if ( '1' === ( $old_settings['show_sitemap_attribution'] ?? '0' ) && '1' !== ( $new_settings['show_sitemap_attribution'] ?? '0' ) ) {
 			self::purge_credited_xml( $bridge );
 		}
@@ -181,6 +183,21 @@ class Settings {
 	}
 
 	/**
+	 * Remove only owned search-engine files when management is relinquished.
+	 *
+	 * @param array<string,mixed> $old_settings Previous settings.
+	 * @param array<string,mixed> $new_settings Persisted settings.
+	 */
+	private static function reconcile_sitemap_ownership( \Cybermaps\Discovery\StaticBridge $bridge, array $old_settings, array $new_settings ): void {
+		if ( ! \Cybermaps\Sitemap\PublicationPolicy::enabled( $old_settings ) || \Cybermaps\Sitemap\PublicationPolicy::enabled( $new_settings ) ) {
+			return;
+		}
+		$routes = \Cybermaps\Sitemap\PublicationRouteSlugs::resolve( $old_settings );
+		$bridge->purge_all( $routes['sitemap_url_base'], $routes['news_sitemap_url_base'], 'sitemap_family', array( $routes['rss_sitemap_url_base'] . '.xml', 'sitemap-network.xml' ) );
+		wp_clear_scheduled_hook( \Cybermaps\Sitemap\PageOccupancyBuilder::HOOK );
+	}
+
+	/**
 	 * Apply targeted cache, rewrite, and media side effects for persisted changes.
 	 *
 	 * @param array<string,mixed> $old_settings Previous settings.
@@ -188,23 +205,7 @@ class Settings {
 	 */
 	private static function apply_setting_side_effects( array $old_settings, array $new_settings ): void {
 		self::apply_markdown_negotiation_side_effects( $old_settings, $new_settings );
-
-		$old_routes = \Cybermaps\Sitemap\PublicationRouteSlugs::resolve( $old_settings );
-		$new_routes = \Cybermaps\Sitemap\PublicationRouteSlugs::resolve( $new_settings );
-		if (
-			$old_routes['sitemap_url_base'] !== $new_routes['sitemap_url_base']
-			|| $old_routes['news_sitemap_url_base'] !== $new_routes['news_sitemap_url_base']
-		) {
-			// Rewrite flushing belongs to the persisted-change hook, not the
-			// sanitizer: previews and failed Settings API writes must be pure.
-			add_action(
-				'shutdown',
-				static function (): void {
-					\Cybermaps\Sitemap\Orchestrator::add_rewrite_rules();
-					flush_rewrite_rules();
-				}
-			);
-		}
+		self::schedule_sitemap_rewrite_refresh( $old_settings, $new_settings );
 
 		if (
 			(string) ( $old_settings['media_discovery_intensity'] ?? 'none' )
@@ -243,6 +244,20 @@ class Settings {
 			// Re-enabling must not resurrect a sitemap transient that became
 			// stale while cache reads were disabled.
 			\Cybermaps\Core\CacheManager::clear_family( 'sitemap' );
+		}
+	}
+
+	/**
+	 * Refresh rules only after a successful settings write, never during preview.
+	 *
+	 * @param array<string,mixed> $old_settings Previous settings.
+	 * @param array<string,mixed> $new_settings Persisted settings.
+	 */
+	private static function schedule_sitemap_rewrite_refresh( array $old_settings, array $new_settings ): void {
+		$changed = \Cybermaps\Sitemap\PublicationRouteSlugs::resolve( $old_settings ) !== \Cybermaps\Sitemap\PublicationRouteSlugs::resolve( $new_settings )
+			|| \Cybermaps\Sitemap\PublicationPolicy::enabled( $old_settings ) !== \Cybermaps\Sitemap\PublicationPolicy::enabled( $new_settings );
+		if ( $changed ) {
+			add_action( 'shutdown', array( \Cybermaps\Sitemap\Orchestrator::class, 'refresh_rewrite_rules' ) );
 		}
 	}
 

@@ -81,6 +81,9 @@ final class PageOccupancyBuilder {
 	}
 
 	public function ensure_scheduled(): void {
+		if ( ! PublicationPolicy::enabled() ) {
+			return;
+		}
 		if ( PageOccupancyManifest::is_usable() ) {
 			return;
 		}
@@ -103,6 +106,9 @@ final class PageOccupancyBuilder {
 	}
 
 	public function process_slice(): void {
+		if ( ! PublicationPolicy::enabled() ) {
+			return;
+		}
 		if ( ! $this->acquire_lock() ) {
 			$this->ensure_retry_scheduled();
 			return;
@@ -627,6 +633,9 @@ final class PageOccupancyBuilder {
 	}
 
 	private function schedule_slice( int $delay ): bool {
+		if ( ! PublicationPolicy::enabled() ) {
+			return true;
+		}
 		if ( \wp_next_scheduled( self::HOOK ) ) {
 			return true;
 		}

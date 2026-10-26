@@ -62,7 +62,11 @@ class SitemapStatus {
 			wp_die( esc_html__( 'You do not have permission to access this page.', 'cybermaps' ) );
 		}
 
-		$settings                    = \Cybermaps\Core\ConfigurationStore::settings();
+		$settings = \Cybermaps\Core\ConfigurationStore::settings();
+		if ( ! \Cybermaps\Sitemap\PublicationPolicy::enabled( $settings ) ) {
+			self::render_disabled_state();
+			return;
+		}
 		$robots_manager              = \Cybermaps\Core\ConfigurationStore::robots();
 		$robots_reference_configured = self::robots_sitemap_reference_configured(
 			$settings,
@@ -286,7 +290,7 @@ class SitemapStatus {
 	 * @return array<int, array<string, mixed>>
 	 */
 	private static function append_rss_sitemap( array $sitemaps, array $settings, string $home_url ): array {
-		if ( empty( $settings['enable_rss_sitemap'] ) ) {
+		if ( ! \Cybermaps\Sitemap\PublicationPolicy::enabled( $settings ) || empty( $settings['enable_rss_sitemap'] ) ) {
 			return $sitemaps;
 		}
 		$rss_base   = \Cybermaps\Sitemap\Orchestrator::get_rss_sitemap_base();
@@ -624,6 +628,10 @@ class SitemapStatus {
 			wp_die( esc_html__( 'You do not have permission to access this page.', 'cybermaps' ) );
 		}
 		check_admin_referer( 'cybermaps_verify_sitemap_php_path' );
+		if ( ! \Cybermaps\Sitemap\PublicationPolicy::enabled() ) {
+			wp_safe_redirect( admin_url( 'admin.php?page=cybermaps-sitemap-status' ) );
+			exit;
+		}
 
 		$base      = \Cybermaps\Sitemap\Orchestrator::get_sitemap_base();
 		$index_url = \Cybermaps\Core\URLManager::get_home_url( '/' . $base . '.xml' );
@@ -643,6 +651,15 @@ class SitemapStatus {
 
 		wp_safe_redirect( admin_url( 'admin.php?page=cybermaps-sitemap-status' ) );
 		exit;
+	}
+
+	/** Display a truthful state without probing or advertising unowned URLs. */
+	private static function render_disabled_state(): void {
+		echo '<div class="wrap cybermaps-wrap">';
+		PageHeader::render( __( 'Sitemap Status', 'cybermaps' ), __( 'Cybermaps XML sitemap management is disabled.', 'cybermaps' ) );
+		echo '<p>' . esc_html__( 'WordPress or another plugin can manage your search-engine sitemaps. AI publications and the HTML sitemap shortcode use their own controls.', 'cybermaps' ) . '</p>';
+		echo '<p><a class="button" href="' . esc_url( admin_url( 'admin.php?page=cybermaps-settings&tab=sitemaps' ) ) . '">' . esc_html__( 'Sitemap settings', 'cybermaps' ) . '</a></p>';
+		echo '</div>';
 	}
 
 	/**

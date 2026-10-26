@@ -176,7 +176,10 @@ final class CrawlerRequestClassifier {
 	 * Match configured sitemap and compatibility routes.
 	 */
 	private function match_sitemap( string $path ): string {
-		$settings  = \Cybermaps\Core\ConfigurationStore::settings();
+		$settings = \Cybermaps\Core\ConfigurationStore::settings();
+		if ( ! \Cybermaps\Sitemap\PublicationPolicy::enabled( $settings ) ) {
+			return '';
+		}
 		$routes    = \Cybermaps\Sitemap\PublicationRouteSlugs::resolve( $settings );
 		$base      = $routes['sitemap_url_base'];
 		$news_base = $routes['news_sitemap_url_base'];
@@ -187,13 +190,13 @@ final class CrawlerRequestClassifier {
 		}
 
 		if ( 1 === \preg_match( '#^/wp-sitemap(?:-[a-z0-9-]+)?\.xml$#i', $path ) ) {
-			return 'wordpress_sitemap';
+			return \Cybermaps\Sitemap\PublicationPolicy::replaces_core( $settings ) ? 'wordpress_sitemap' : '';
 		}
 		if ( '/sitemap.xml' === $path && 'sitemap' !== $base ) {
-			return 'legacy_sitemap';
+			return ! empty( $settings['redirect_default_sitemap'] ) ? 'legacy_sitemap' : '';
 		}
 		if ( '/sitemap-news.xml' === $path && 'sitemap-news' !== $news_base ) {
-			return 'legacy_news_sitemap';
+			return ! empty( $settings['redirect_news_sitemap'] ) ? 'legacy_news_sitemap' : '';
 		}
 
 		return '';

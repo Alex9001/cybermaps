@@ -1,8 +1,8 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://cybermaps.dev/specs/ai-configuration/8.0.3/schema.json",
+    "$id": "https://cybermaps.dev/specs/ai-configuration/8.0.4/schema.json",
     "format_version": 2,
-    "plugin_version": "8.0.3",
+    "plugin_version": "8.0.4",
     "title": "Cybermaps AI configuration changes",
     "description": "A merge-only set of reviewed Cybermaps configuration changes. Null and omitted values preserve the destination.",
     "type": "object",
@@ -21,7 +21,7 @@
         },
         "plugin_version": {
             "type": "string",
-            "const": "8.0.3"
+            "const": "8.0.4"
         },
         "changes": {
             "type": "object",
@@ -646,9 +646,34 @@
                                 }
                             ]
                         },
+                        "enable_xml_sitemaps": {
+                            "title": "Manage XML sitemaps with Cybermaps",
+                            "description": "Controls search-engine XML, News, RSS and network sitemap publication. Disabling preserves WordPress and other providers, removes unchanged owned static sitemap files and suppresses Cybermaps sitemap links. AI discovery and HTML shortcodes remain independently controlled. Set null or omit the field to preserve the destination.",
+                            "anyOf": [
+                                {
+                                    "type": "boolean",
+                                    "enum": [
+                                        true,
+                                        false
+                                    ]
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "default": null,
+                            "examples": [
+                                true
+                            ],
+                            "x-cybermaps-option": "cybermaps_settings",
+                            "x-cybermaps-field": "enable_xml_sitemaps",
+                            "x-cybermaps-risk": "high",
+                            "x-cybermaps-default": true,
+                            "x-cybermaps-depends": []
+                        },
                         "redirect_wp_sitemap": {
                             "title": "Redirect WordPress sitemaps",
-                            "description": "Redirects WordPress Core sitemap routes to the Cybermaps sitemap. Set null or omit the field to preserve the destination.",
+                            "description": "Replaces Core sitemaps only while XML management and non-Plain permalinks are enabled. Disabling leaves Core routes to WordPress. Set null or omit the field to preserve the destination.",
                             "anyOf": [
                                 {
                                     "type": "boolean",
@@ -669,7 +694,13 @@
                             "x-cybermaps-field": "redirect_wp_sitemap",
                             "x-cybermaps-risk": "high",
                             "x-cybermaps-default": true,
-                            "x-cybermaps-depends": []
+                            "x-cybermaps-depends": [
+                                {
+                                    "field": "enable_xml_sitemaps",
+                                    "condition": "equals",
+                                    "value": true
+                                }
+                            ]
                         },
                         "redirect_default_sitemap": {
                             "title": "Redirect conventional sitemap.xml",

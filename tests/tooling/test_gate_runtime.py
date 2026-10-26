@@ -5,11 +5,32 @@ import tempfile
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'bin'))
-from validate_matrix import validate_result, verify_priming_fixture, verify_sql_fixture, verify_output_buffer_fixture
+from validate_matrix import validate_result, verify_priming_fixture, verify_sql_fixture, verify_output_buffer_fixture, verify_sitemap_ownership_fixture
 from release_gate import validate_runtime_evidence
 
 
 class RuntimeBindingTest(unittest.TestCase):
+    def test_sitemap_ownership_requires_native_cases_and_all_http_states(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).resolve().parents[2] / 'docs/generated/tmp') as temporary:
+            path = Path(temporary) / 'sitemap-ownership.json'
+            cases = {name: True for name in ('active_replacement', 'disabled_handover', 'foreign_filter',
+                     'private_site', 'rewrite_handover', 'redirect_opt_out', 'plain_permalinks', 'static_handover')}
+            result = dict(schema_version=1, sitemap_ownership_passed=True, multisite=False, cases=cases)
+            for state in ('enabled', 'disabled', 'retained', 'plain', 'restored'):
+                path.with_name('sitemap-ownership-' + state + '.json').write_text(json.dumps(
+                    dict(schema_version=1, state=state, passed=True, checks=['fixture-check'])))
+            path.write_text(json.dumps(result))
+            verify_sitemap_ownership_fixture(path)
+            for name in cases:
+                path.write_text(json.dumps({**result, 'cases': {**cases, name: False}}))
+                with self.subTest(name=name), self.assertRaisesRegex(RuntimeError, 'cases incomplete'):
+                    verify_sitemap_ownership_fixture(path)
+            path.write_text(json.dumps(result))
+            path.with_name('sitemap-ownership-disabled.json').write_text(json.dumps(
+                dict(schema_version=1, state='disabled', passed=False, checks=[])))
+            with self.assertRaisesRegex(RuntimeError, 'HTTP coverage incomplete'):
+                verify_sitemap_ownership_fixture(path)
+
     def test_missing_runtime_reports_cannot_be_replaced_by_a_passed_log(self):
         with self.assertRaisesRegex(RuntimeError, 'Required runtime reports missing'):
             validate_runtime_evidence({'upstream': {'wordpress_version': '7.1.2'}, 'evidence': {}})
@@ -24,7 +45,7 @@ class RuntimeBindingTest(unittest.TestCase):
                       configuration_persistence_passed=True, cloudflare_persistence_passed=True, audit_run_lock_passed=True,
                       static_ownership_passed=True, state_cutover_passed=True,
                       stored_template_source_passed=True, raw_option_store_passed=True,
-                      output_buffer_ownership_passed=True,
+                      output_buffer_ownership_passed=True, sitemap_ownership_passed=True,
                       stable_findings=[], experimental_findings=[])
         validate_result(result, '7.1.2', '8.2', False, 'frozen', 'commit')
         for key, value in [('zip_sha256', 'other'), ('commit', 'other'), ('lifecycle_passed', False),
@@ -45,7 +66,7 @@ class RuntimeBindingTest(unittest.TestCase):
             with self.subTest(priming=value), self.assertRaisesRegex(RuntimeError, 'Native publication priming'):
                 validate_result(incomplete, '7.1.2', '8.2', False, 'frozen', 'commit')
 
-        for key in ('configuration_persistence', 'cloudflare_persistence', 'audit_run_lock', 'static_ownership', 'state_cutover', 'stored_template_source', 'raw_option_store', 'output_buffer_ownership'):
+        for key in ('configuration_persistence', 'cloudflare_persistence', 'audit_run_lock', 'static_ownership', 'state_cutover', 'stored_template_source', 'raw_option_store', 'output_buffer_ownership', 'sitemap_ownership'):
             for value in (None, False, 1, 'true'):
                 incomplete = dict(result)
                 if value is None:

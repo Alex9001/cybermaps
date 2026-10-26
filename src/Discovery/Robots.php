@@ -125,19 +125,34 @@ class Robots {
 			return "User-agent: *\nDisallow: /\n";
 		}
 
-		$settings = \Cybermaps\Core\ConfigurationStore::settings();
-		$manager  = \Cybermaps\Core\ConfigurationStore::robots();
-		$context  = self::robots_output_context( $manager );
-		$takeover = ! empty( $manager['takeover_enabled'] );
-		$output   = $takeover
+		$settings           = \Cybermaps\Core\ConfigurationStore::settings();
+		$manager            = \Cybermaps\Core\ConfigurationStore::robots();
+		$context            = self::robots_output_context( $manager );
+		$takeover           = ! empty( $manager['takeover_enabled'] );
+		$inherited_sitemaps = self::inherited_sitemaps( (string) $output, $settings, $takeover );
+		$output             = $takeover
 			? self::takeover_output( $context )
 			: self::append_output( (string) $output, $settings, $context );
+		$output            .= $inherited_sitemaps;
 
 		if ( $takeover || ! empty( $settings['inject_robots'] ) ) {
 			$output .= self::publication_map( $settings );
 		}
 
 		return $output;
+	}
+
+	/**
+	 * Preserve upstream sitemap advertisements when our robots editor leaves ownership elsewhere.
+	 *
+	 * @param array<string,mixed> $settings General settings.
+	 */
+	private static function inherited_sitemaps( string $output, array $settings, bool $takeover ): string {
+		if ( ! $takeover || \Cybermaps\Sitemap\PublicationPolicy::replaces_core( $settings ) ) {
+			return '';
+		}
+		\preg_match_all( '/^Sitemap:[^\r\n]*$/mi', $output, $matches );
+		return empty( $matches[0] ) ? '' : \implode( "\n", $matches[0] ) . "\n";
 	}
 
 	/**
@@ -274,9 +289,20 @@ class Robots {
 	 * @param array<string, mixed> $settings General settings.
 	 */
 	private static function publication_map( array $settings ): string {
-		$base    = \Cybermaps\Sitemap\Orchestrator::get_sitemap_base();
-		$output  = "# --- CYBERMAPS PUBLICATION MAP ---\n";
-		$output .= 'Sitemap: ' . \Cybermaps\Core\URLManager::get_home_url( '/' . $base . '.xml' ) . "\n";
+		$output = "# --- CYBERMAPS PUBLICATION MAP ---\n" . self::sitemap_map( $settings );
+		if ( ! empty( $settings['enable_discovery_hub'] ) ) {
+			$output .= self::discovery_map();
+		}
+		return $output . "# --- END CYBERMAPS ---\n";
+	}
+
+	/** @param array<string,mixed> $settings General settings. */
+	private static function sitemap_map( array $settings ): string {
+		$index = \Cybermaps\Sitemap\PublicationPolicy::index_url( $settings );
+		if ( '' === $index ) {
+			return '';
+		}
+		$output = 'Sitemap: ' . $index . "\n";
 		if ( ! empty( $settings['enable_google_news'] ) ) {
 			$news_base = \Cybermaps\Sitemap\Orchestrator::get_news_sitemap_base();
 			$output   .= 'Sitemap: ' . \Cybermaps\Core\URLManager::get_home_url( '/' . $news_base . '.xml' ) . "\n";
@@ -285,11 +311,7 @@ class Robots {
 			$rss_base = \Cybermaps\Sitemap\Orchestrator::get_rss_sitemap_base();
 			$output  .= 'Sitemap: ' . \Cybermaps\Core\URLManager::get_home_url( '/' . $rss_base . '.xml' ) . "\n";
 		}
-		if ( ! empty( $settings['enable_discovery_hub'] ) ) {
-			$output .= self::discovery_map();
-		}
-
-		return $output . "# --- END CYBERMAPS ---\n";
+		return $output;
 	}
 
 	/**

@@ -1,6 +1,6 @@
-# Cybermaps 8.0.3 Feature Reference
+# Cybermaps 8.0.4 Feature Reference
 
-This reference describes Cybermaps 8.0.3 using the
+This reference describes Cybermaps 8.0.4 using the
 [generated source inventory](./dev/manifest.json). Cloudflare automation,
 Debugging, compatibility publication, and independent LiteSpeed/APCu controls
 are included; availability and public delivery depend on the configuration.
@@ -14,6 +14,9 @@ reports without requiring an external AI account.
 
 ## Sitemap publishing
 
+- One XML management switch hands search sitemaps back to WordPress or another
+  plugin, including owned static cleanup. Core replacement also requires the
+  Core redirect setting and non-Plain permalinks. AI and HTML remain independent.
 - Configurable XML sitemap index with automatic 2,000-URL child files and
   collision-safe post-type/taxonomy route namespaces.
 - Post type, taxonomy, author, date archive, and miscellaneous providers.
@@ -408,8 +411,8 @@ media, generated files and caches, network-wide settings, and cross-site
 translation relationships.
 
 The separate AI Configuration Brief is a credential-excluding, site-aware
-Markdown handoff with current non-secret context, 121 editable fields in the
-8.0.3 generated contract, field guidance,
+Markdown handoff with current non-secret context, 122 editable fields in the
+8.0.4 generated contract, field guidance,
 dependencies, examples, risk levels, and an initially null JSON changes
 envelope. Imports are merge-only and require a server-generated preview that
 shows canonical sanitized values. Unknown or malformed input is rejected;

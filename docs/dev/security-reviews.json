@@ -564,7 +564,7 @@
         "code_sha256": "085da1d032363a87a41088cd07e284f6c20cc9abb69c3ce1839c2483bfeeb8e9",
         "findings": {}
       },
-      "rationale": "Private helper is reached only after ajax_search exact method and manage_options checks and itself invokes check_ajax_referer before any POST access. Raw query is string and at most200 slashed bytes before wp_unslash/sanitize_text_field. Raw cursor string is at most18bytes; sanitized projection must strictly equal the original before parse_cursor accepts only1–18digits. No punctuation/backslash normalization can turn rejected raw input into a valid cursor. IdentityPageSelectorTest actual-handler subprocess uses faithful stripslashes and checks raw201bytes reducing after unslash, cursor punctuation/escape/arrays/bounds and successful edges. Authentication is simulated; this is no native request/SQL proof. No new input suppression.",
+      "rationale": "Private helper is reached only after ajax_search exact method and manage_options checks and itself invokes check_ajax_referer before any POST access. Raw query is string and at most200 slashed bytes before wp_unslash/sanitize_text_field. Raw cursor string is at most18bytes; sanitized projection must strictly equal the original before parse_cursor accepts only1\u201318digits. No punctuation/backslash normalization can turn rejected raw input into a valid cursor. IdentityPageSelectorTest actual-handler subprocess uses faithful stripslashes and checks raw201bytes reducing after unslash, cursor punctuation/escape/arrays/bounds and successful edges. Authentication is simulated; this is no native request/SQL proof. No new input suppression.",
       "tests": [
         "tests/Admin/RequestInputBoundaryTest.php",
         "tests/Admin/IdentityPageSelectorTest.php",
@@ -886,13 +886,13 @@
         "suppressions": [
           "// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Validation diagnostics are JSON-encoded for the authenticated admin response; React owns the eventual text output boundary."
         ],
-        "file_code_sha256": "722b971bde84c6d08df938da041ad214d4b4f674d724d75988e7537c5e0b1535",
+        "file_code_sha256": "a8367e2f03e24999f178307e16b869ba1e3a503afdca3f2aa33d3c468c5b9010",
         "code_sha256": "7fab5cda856306704a6646b1d286e09370dec27534d0edbceef652b56d7a024e",
         "findings": {
           "WordPress.Security.EscapeOutput.ExceptionNotEscaped:ERROR": 1
         }
       },
-      "rationale": "apply_prepared_import: Internal parser/apply/encoder exceptions are data, consumed by authenticated SettingsAjax wp_json_encode or escaped export error; ExchangeHub uses React text children. Strict bounded schema/depth/checksum/whitelist input and authoritative raw snapshots/CAS plus owned-only rollback preserve competing saves. Unknown/nested values rejected. Migration/import/AI fixtures supply data/rollback/drift evidence; mocks are not multi-option atomicity/nativeDB proof.",
+      "rationale": "apply_prepared_import: Internal parser/apply/encoder exceptions are data, consumed by authenticated SettingsAjax wp_json_encode or escaped export error; ExchangeHub uses React text children. Strict bounded schema/depth/checksum/whitelist input and authoritative raw snapshots/CAS plus owned-only rollback preserve competing saves. Unknown/nested values rejected. Migration/import/AI fixtures supply data/rollback/drift evidence; mocks are not multi-option atomicity/nativeDB proof. 8.0.4 review: the only file change conditions the reported RSS state on XML ownership. Import validation, bounded encoders, transaction guards and authenticated output sinks retain their exact bodies. Reconciliation still runs ordinary Settings hooks after a verified commit and after applying_prepared_import is cleared.",
       "tests": [
         "tests/Admin/ConfigurationImportSafetyTest.php",
         "tests/Admin/AIConfigurationBriefTest.php",
@@ -908,13 +908,13 @@
         "suppressions": [
           "// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- The template is an internal translated string supplied by the import parser, and the JSON error detail is escaped here."
         ],
-        "file_code_sha256": "722b971bde84c6d08df938da041ad214d4b4f674d724d75988e7537c5e0b1535",
+        "file_code_sha256": "a8367e2f03e24999f178307e16b869ba1e3a503afdca3f2aa33d3c468c5b9010",
         "code_sha256": "64753302a1f2adbfdeb047575edb0459c1a85b10b928581d771069988a31386a",
         "findings": {
           "WordPress.Security.EscapeOutput.ExceptionNotEscaped:ERROR": 1
         }
       },
-      "rationale": "decode_json_object: Internal parser/apply/encoder exceptions are data, consumed by authenticated SettingsAjax wp_json_encode or escaped export error; ExchangeHub uses React text children. Strict bounded schema/depth/checksum/whitelist input and authoritative raw snapshots/CAS plus owned-only rollback preserve competing saves. Unknown/nested values rejected. Migration/import/AI fixtures supply data/rollback/drift evidence; mocks are not multi-option atomicity/nativeDB proof.",
+      "rationale": "decode_json_object: Internal parser/apply/encoder exceptions are data, consumed by authenticated SettingsAjax wp_json_encode or escaped export error; ExchangeHub uses React text children. Strict bounded schema/depth/checksum/whitelist input and authoritative raw snapshots/CAS plus owned-only rollback preserve competing saves. Unknown/nested values rejected. Migration/import/AI fixtures supply data/rollback/drift evidence; mocks are not multi-option atomicity/nativeDB proof. 8.0.4 review: the only file change conditions the reported RSS state on XML ownership. Import validation, bounded encoders, transaction guards and authenticated output sinks retain their exact bodies. Reconciliation still runs ordinary Settings hooks after a verified commit and after applying_prepared_import is cleared.",
       "tests": [
         "tests/Admin/ConfigurationImportSafetyTest.php",
         "tests/Admin/AIConfigurationBriefTest.php",
@@ -930,13 +930,13 @@
         "suppressions": [
           "// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception text is not HTML output."
         ],
-        "file_code_sha256": "722b971bde84c6d08df938da041ad214d4b4f674d724d75988e7537c5e0b1535",
+        "file_code_sha256": "a8367e2f03e24999f178307e16b869ba1e3a503afdca3f2aa33d3c468c5b9010",
         "code_sha256": "142fb2b55a3ea182c7dc5a24e90ee9cdf992ef60ff1065397d603035f43f7704",
         "findings": {
           "WordPress.Security.EscapeOutput.ExceptionNotEscaped:ERROR": 1
         }
       },
-      "rationale": "encode_json_member: Internal parser/apply/encoder exceptions are data, consumed by authenticated SettingsAjax wp_json_encode or escaped export error; ExchangeHub uses React text children. Strict bounded schema/depth/checksum/whitelist input and authoritative raw snapshots/CAS plus owned-only rollback preserve competing saves. Unknown/nested values rejected. Migration/import/AI fixtures supply data/rollback/drift evidence; mocks are not multi-option atomicity/nativeDB proof.",
+      "rationale": "encode_json_member: Internal parser/apply/encoder exceptions are data, consumed by authenticated SettingsAjax wp_json_encode or escaped export error; ExchangeHub uses React text children. Strict bounded schema/depth/checksum/whitelist input and authoritative raw snapshots/CAS plus owned-only rollback preserve competing saves. Unknown/nested values rejected. Migration/import/AI fixtures supply data/rollback/drift evidence; mocks are not multi-option atomicity/nativeDB proof. 8.0.4 review: the only file change conditions the reported RSS state on XML ownership. Import validation, bounded encoders, transaction guards and authenticated output sinks retain their exact bodies. Reconciliation still runs ordinary Settings hooks after a verified commit and after applying_prepared_import is cleared.",
       "tests": [
         "tests/Admin/ConfigurationImportSafetyTest.php",
         "tests/Admin/AIConfigurationBriefTest.php",
@@ -952,13 +952,13 @@
         "suppressions": [
           "// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception text is not HTML output."
         ],
-        "file_code_sha256": "722b971bde84c6d08df938da041ad214d4b4f674d724d75988e7537c5e0b1535",
+        "file_code_sha256": "a8367e2f03e24999f178307e16b869ba1e3a503afdca3f2aa33d3c468c5b9010",
         "code_sha256": "5de8c5b0a077d0ef98a6b09070ed171f8e55b9f9811a0e346b1860628e0ef9af",
         "findings": {
           "WordPress.Security.EscapeOutput.ExceptionNotEscaped:ERROR": 1
         }
       },
-      "rationale": "encode_json_scalar: Internal parser/apply/encoder exceptions are data, consumed by authenticated SettingsAjax wp_json_encode or escaped export error; ExchangeHub uses React text children. Strict bounded schema/depth/checksum/whitelist input and authoritative raw snapshots/CAS plus owned-only rollback preserve competing saves. Unknown/nested values rejected. Migration/import/AI fixtures supply data/rollback/drift evidence; mocks are not multi-option atomicity/nativeDB proof.",
+      "rationale": "encode_json_scalar: Internal parser/apply/encoder exceptions are data, consumed by authenticated SettingsAjax wp_json_encode or escaped export error; ExchangeHub uses React text children. Strict bounded schema/depth/checksum/whitelist input and authoritative raw snapshots/CAS plus owned-only rollback preserve competing saves. Unknown/nested values rejected. Migration/import/AI fixtures supply data/rollback/drift evidence; mocks are not multi-option atomicity/nativeDB proof. 8.0.4 review: the only file change conditions the reported RSS state on XML ownership. Import validation, bounded encoders, transaction guards and authenticated output sinks retain their exact bodies. Reconciliation still runs ordinary Settings hooks after a verified commit and after applying_prepared_import is cleared.",
       "tests": [
         "tests/Admin/ConfigurationImportSafetyTest.php",
         "tests/Admin/AIConfigurationBriefTest.php",
@@ -974,13 +974,13 @@
         "suppressions": [
           "// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception text is not HTML output."
         ],
-        "file_code_sha256": "722b971bde84c6d08df938da041ad214d4b4f674d724d75988e7537c5e0b1535",
+        "file_code_sha256": "a8367e2f03e24999f178307e16b869ba1e3a503afdca3f2aa33d3c468c5b9010",
         "code_sha256": "23ef8ceedf8be223ec62c510ef3277f418b08e57337da66d308912a710b41c8a",
         "findings": {
           "WordPress.Security.EscapeOutput.ExceptionNotEscaped:ERROR": 1
         }
       },
-      "rationale": "encode_json_value: Internal parser/apply/encoder exceptions are data, consumed by authenticated SettingsAjax wp_json_encode or escaped export error; ExchangeHub uses React text children. Strict bounded schema/depth/checksum/whitelist input and authoritative raw snapshots/CAS plus owned-only rollback preserve competing saves. Unknown/nested values rejected. Migration/import/AI fixtures supply data/rollback/drift evidence; mocks are not multi-option atomicity/nativeDB proof.",
+      "rationale": "encode_json_value: Internal parser/apply/encoder exceptions are data, consumed by authenticated SettingsAjax wp_json_encode or escaped export error; ExchangeHub uses React text children. Strict bounded schema/depth/checksum/whitelist input and authoritative raw snapshots/CAS plus owned-only rollback preserve competing saves. Unknown/nested values rejected. Migration/import/AI fixtures supply data/rollback/drift evidence; mocks are not multi-option atomicity/nativeDB proof. 8.0.4 review: the only file change conditions the reported RSS state on XML ownership. Import validation, bounded encoders, transaction guards and authenticated output sinks retain their exact bodies. Reconciliation still runs ordinary Settings hooks after a verified commit and after applying_prepared_import is cleared.",
       "tests": [
         "tests/Admin/ConfigurationImportSafetyTest.php",
         "tests/Admin/AIConfigurationBriefTest.php",
@@ -998,13 +998,13 @@
           "// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Previous exception is not output.",
           "// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Previous exception is not output."
         ],
-        "file_code_sha256": "722b971bde84c6d08df938da041ad214d4b4f674d724d75988e7537c5e0b1535",
+        "file_code_sha256": "a8367e2f03e24999f178307e16b869ba1e3a503afdca3f2aa33d3c468c5b9010",
         "code_sha256": "9bedd7b18415bc1c86fb6a51d78587174edbdc1a2e623484194a3a79c8e733bc",
         "findings": {
           "WordPress.Security.EscapeOutput.ExceptionNotEscaped:ERROR": 3
         }
       },
-      "rationale": "throw_apply_transaction_failure: Internal parser/apply/encoder exceptions are data, consumed by authenticated SettingsAjax wp_json_encode or escaped export error; ExchangeHub uses React text children. Strict bounded schema/depth/checksum/whitelist input and authoritative raw snapshots/CAS plus owned-only rollback preserve competing saves. Unknown/nested values rejected. Migration/import/AI fixtures supply data/rollback/drift evidence; mocks are not multi-option atomicity/nativeDB proof.",
+      "rationale": "throw_apply_transaction_failure: Internal parser/apply/encoder exceptions are data, consumed by authenticated SettingsAjax wp_json_encode or escaped export error; ExchangeHub uses React text children. Strict bounded schema/depth/checksum/whitelist input and authoritative raw snapshots/CAS plus owned-only rollback preserve competing saves. Unknown/nested values rejected. Migration/import/AI fixtures supply data/rollback/drift evidence; mocks are not multi-option atomicity/nativeDB proof. 8.0.4 review: the only file change conditions the reported RSS state on XML ownership. Import validation, bounded encoders, transaction guards and authenticated output sinks retain their exact bodies. Reconciliation still runs ordinary Settings hooks after a verified commit and after applying_prepared_import is cleared.",
       "tests": [
         "tests/Admin/ConfigurationImportSafetyTest.php",
         "tests/Admin/AIConfigurationBriefTest.php",
@@ -1022,13 +1022,13 @@
         "suppressions": [
           "// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Presence-only notice flags cannot perform an action or supply message text."
         ],
-        "file_code_sha256": "86a104b7a669d2ea664bf4f6277d2d31ddaf19d48ba934f7e6e8a635ada3bae9",
-        "code_sha256": "d5134c3a481a530a7f441bed6c2b1d6528f852fef703940dae1624a1117eca9f",
+        "file_code_sha256": "4586bc0caa03597683622d28c72fcd4d3b7308592e86d4f98163fb1ee9d31779",
+        "code_sha256": "31e279b4078fb7dc60e1075df3e18447bde953656b287c9ac8114579a2cc325e",
         "findings": {
           "WordPress.Security.NonceVerification.Recommended:WARNING": 2
         }
       },
-      "rationale": "Network menu capability is manage_network_options; view emits settings through checked and matching HTML/URL escaping. Query flags are presence-only fixed notice choices, with no supplied message text or mutation. The form emits a fixed nonce. NetworkSettingsPersistenceTest exercises downstream terminating save failure/no-op/success, not native menu capability or network-option cache semantics; those rendering boundaries were inspected in the whole129-line source.",
+      "rationale": "Network menu capability is manage_network_options; view emits settings through checked and matching HTML/URL escaping. Query flags are presence-only fixed notice choices, with no supplied message text or mutation. The form emits a fixed nonce. NetworkSettingsPersistenceTest exercises downstream terminating save failure/no-op/success, not native menu capability or network-option cache semantics; those rendering boundaries were inspected in the whole129-line source. 8.0.4 review: only escaped, fixed explanatory UI text changed to disclose main-site XML management and opted-out children. The network capability, method, nonce, scalar checkbox and safe redirect boundaries are unchanged.",
       "tests": [
         "tests/Admin/NetworkSettingsPersistenceTest.php"
       ]
@@ -1042,11 +1042,11 @@
           "$_SERVER"
         ],
         "suppressions": [],
-        "file_code_sha256": "86a104b7a669d2ea664bf4f6277d2d31ddaf19d48ba934f7e6e8a635ada3bae9",
+        "file_code_sha256": "4586bc0caa03597683622d28c72fcd4d3b7308592e86d4f98163fb1ee9d31779",
         "code_sha256": "5a2a86931a7dbb164f3943205578c0c2fb67ae1968366f1539e71c7cf98c32bf",
         "findings": {}
       },
-      "rationale": "Requires manage_network_options, POST and the exact network-settings nonce before reading nested payload. Accepts only array root plus scalar flag, unslashes/sanitize_key and stores exact1/0. Safe redirect uses fixed network admin path and fixed notice flags. False update verifies matching persisted state to distinguish no-op from failure; three actual terminating mocked save fixtures cover failure/no-op/success. Native multisite persistent-cache concurrency is not claimed by these tests.",
+      "rationale": "Requires manage_network_options, POST and the exact network-settings nonce before reading nested payload. Accepts only array root plus scalar flag, unslashes/sanitize_key and stores exact1/0. Safe redirect uses fixed network admin path and fixed notice flags. False update verifies matching persisted state to distinguish no-op from failure; three actual terminating mocked save fixtures cover failure/no-op/success. Native multisite persistent-cache concurrency is not claimed by these tests. 8.0.4 review: only escaped, fixed explanatory UI text changed to disclose main-site XML management and opted-out children. The network capability, method, nonce, scalar checkbox and safe redirect boundaries are unchanged.",
       "tests": [
         "tests/Admin/NetworkSettingsPersistenceTest.php",
         "tests/fixtures/network-settings-save.php"
@@ -1183,11 +1183,11 @@
           "$_SERVER"
         ],
         "suppressions": [],
-        "file_code_sha256": "65c17a6690e9020161a4538354d6b6905d65b7a691b42506f27cfa8a8aacf665",
+        "file_code_sha256": "f3de4c13a397a1aa37cf5007d855a4d184e0fa216baccb393119b8c3c360f28f",
         "code_sha256": "ca0b540363206745c5676ee256a1686c3258976655935039cc1b51e1ddf946e8",
         "findings": {}
       },
-      "rationale": "The registered authenticated admin-post handler requires a string POST method, manage_options and the fixed cybermaps_verify_indexnow_key nonce before IndexNow::verify_public_key_remote(true). No request URL or action selector is forwarded. The downstream service constructs the public key URL from the configured publication home and validated/generated key, uses wp_safe_remote_get with a two-second timeout, and accepts only HTTP 200 with the expected key body. The redirect is a fixed local admin URL. SettingsActionBoundaryTest::test_wrong_methods_reject_before_authorization_or_side_effects and test_expected_methods_still_require_capability_and_valid_nonce execute wrong/missing/array method, capability and nonce failures. The authorized case deliberately terminates at the nonce seam, so it does not prove live verification, full successful handler completion, a network response-byte bound or real WordPress nonce execution. Whole current containing file, registered caller and remote sink were independently inspected; only the containing-file fingerprint changed.",
+      "rationale": "The registered authenticated admin-post handler requires a string POST method, manage_options and the fixed cybermaps_verify_indexnow_key nonce before IndexNow::verify_public_key_remote(true). No request URL or action selector is forwarded. The downstream service constructs the public key URL from the configured publication home and validated/generated key, uses wp_safe_remote_get with a two-second timeout, and accepts only HTTP 200 with the expected key body. The redirect is a fixed local admin URL. SettingsActionBoundaryTest::test_wrong_methods_reject_before_authorization_or_side_effects and test_expected_methods_still_require_capability_and_valid_nonce execute wrong/missing/array method, capability and nonce failures. The authorized case deliberately terminates at the nonce seam, so it does not prove live verification, full successful handler completion, a network response-byte bound or real WordPress nonce execution. Whole current containing file, registered caller and remote sink were independently inspected; only the containing-file fingerprint changed. 8.0.4 review: new ownership reconciliation is reached after a persisted Settings API write or verified import; sanitization previews remain pure. Old normalized routes freeze a sitemap-family purge under existing locks and ownership hashes. Only Cybermaps occupancy jobs and rewrite registrations are removed. The two request adapters and their authorization order are unchanged.",
       "tests": [
         "tests/Admin/SettingsActionBoundaryTest.php"
       ]
@@ -1201,11 +1201,11 @@
           "$_SERVER"
         ],
         "suppressions": [],
-        "file_code_sha256": "65c17a6690e9020161a4538354d6b6905d65b7a691b42506f27cfa8a8aacf665",
+        "file_code_sha256": "f3de4c13a397a1aa37cf5007d855a4d184e0fa216baccb393119b8c3c360f28f",
         "code_sha256": "fa313ade270e97294d551d5a0896d3acb1d4009953f9e1f464787cc8131a52bf",
         "findings": {}
       },
-      "rationale": "The private helper is reached by the registered authenticated admin-post handle_resolve_static_intent action. It requires POST, manage_options and the fixed base action nonce before reading the intent ID, then checks the intent-bound nonce. Only scalar sanitized ID, nonce, confirmation and an allowlisted local return tab are returned. The handler passes the first three to StaticBridge::resolve_pending_intent, which independently rechecks capability, exact quiescence confirmation and intent nonce, compares the current pending intent identity and acquires the static-operation lock before recovery. SettingsPage supplies the matching POST form and two authorization values. AdminActionContractAuditTest::test_destructive_admin_post_actions_enforce_post_and_nonce_contracts checks source ordering and helper linkage; it is not a terminating HTTP execution. StaticBridgeLockTest::test_operator_recovery_requires_capability_exact_confirmation_and_intent_nonce executes the service rejection paths and retained intent in the WordPress mock. These tests do not execute static_intent_request method/capability/nonce failures through native admin-post or prove that workers were actually quiesced. Manual confirmation remains the documented operator contract. Whole current containing file and the actual form/caller/service were inspected; only the containing-file fingerprint changed.",
+      "rationale": "The private helper is reached by the registered authenticated admin-post handle_resolve_static_intent action. It requires POST, manage_options and the fixed base action nonce before reading the intent ID, then checks the intent-bound nonce. Only scalar sanitized ID, nonce, confirmation and an allowlisted local return tab are returned. The handler passes the first three to StaticBridge::resolve_pending_intent, which independently rechecks capability, exact quiescence confirmation and intent nonce, compares the current pending intent identity and acquires the static-operation lock before recovery. SettingsPage supplies the matching POST form and two authorization values. AdminActionContractAuditTest::test_destructive_admin_post_actions_enforce_post_and_nonce_contracts checks source ordering and helper linkage; it is not a terminating HTTP execution. StaticBridgeLockTest::test_operator_recovery_requires_capability_exact_confirmation_and_intent_nonce executes the service rejection paths and retained intent in the WordPress mock. These tests do not execute static_intent_request method/capability/nonce failures through native admin-post or prove that workers were actually quiesced. Manual confirmation remains the documented operator contract. Whole current containing file and the actual form/caller/service were inspected; only the containing-file fingerprint changed. 8.0.4 review: new ownership reconciliation is reached after a persisted Settings API write or verified import; sanitization previews remain pure. Old normalized routes freeze a sitemap-family purge under existing locks and ownership hashes. Only Cybermaps occupancy jobs and rewrite registrations are removed. The two request adapters and their authorization order are unchanged.",
       "tests": [
         "tests/Admin/AdminActionContractAuditTest.php",
         "tests/Discovery/StaticBridgeLockTest.php"
@@ -1427,13 +1427,13 @@
           "// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only admin workspace selection.",
           "// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only admin workspace selection."
         ],
-        "file_code_sha256": "8e38419355cd4e88fdade9579e76c62b1c44a2523309a088e685502f8b610780",
+        "file_code_sha256": "76e63eeb009cc28b9975523771ffb6a5b4bd54b16fd80f13f0ffb4e2a6cb0fb7",
         "code_sha256": "77a00474b0d3a6fc674f1e6f7c6a36c36b5bcd8172cc9e25acfb69f5be77115b",
         "findings": {
           "WordPress.Security.NonceVerification.Recommended:WARNING": 6
         }
       },
-      "rationale": "Read-only view/tab selection controls fixed whitelist; WordPress menu registration manage_options gates callback; output notices RequestInput-bounded and escaped; no mutation via selector. Test limits: RequestInputBoundaryTest unrelated to SettingsPage::render; menu authorization traced source, not real WordPress admin dispatch.",
+      "rationale": "Read-only view/tab selection controls fixed whitelist; WordPress menu registration manage_options gates callback; output notices RequestInput-bounded and escaped; no mutation via selector. Test limits: RequestInputBoundaryTest unrelated to SettingsPage::render; menu authorization traced source, not real WordPress admin dispatch. 8.0.4 review: XML ownership now hides unowned index/News/RSS sidebar links; the fixed disabled message is HTML-escaped. Registered admin access, sanitized read-only tab selection, Settings API nonce/completeness marker and separate destructive-action forms retain their bodies.",
       "tests": [
         "tests/Admin/SettingsControlsAccessibilityTest.php",
         "tests/Admin/RegenerationNoticeTest.php"
@@ -1688,7 +1688,7 @@
         "code_sha256": "2a2077371063eda391a32f11df26396e863ede089ed99d3e3c99a6d240a1bae6",
         "findings": {}
       },
-      "rationale": "Site-local service and maintenance callers use a generated UUID and clamped60–3600-second TTL. Initial RawOptionStore INSERT IGNORE cannot replace a concurrent first owner; authoritative empty-aware read followed by observed-value wpdb update handles expired/malformed leases. Trusted options-table identifier and typed values; busy and read/write error paths remain distinct. Deterministic interleave, empty-value, expired-owner and insert-failure regressions execute the method; native two-DB fixture is read, not run by this reviewer.",
+      "rationale": "Site-local service and maintenance callers use a generated UUID and clamped60\u20133600-second TTL. Initial RawOptionStore INSERT IGNORE cannot replace a concurrent first owner; authoritative empty-aware read followed by observed-value wpdb update handles expired/malformed leases. Trusted options-table identifier and typed values; busy and read/write error paths remain distinct. Deterministic interleave, empty-value, expired-owner and insert-failure regressions execute the method; native two-DB fixture is read, not run by this reviewer.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php"
       ]
@@ -1706,7 +1706,7 @@
         "code_sha256": "16deb1d6258a07d316347e2dd8fb2f830903431de28777726c6ca409c021df7c",
         "findings": {}
       },
-      "rationale": "Called by service with evaluator snapshots while run is running; cached running ID or typed prepared status check precedes writes. wpdb insert stores resource fields and findings; errors throw. Incomplete measurement persists marker, placeholder zero restores null on reads. Actual storage→read→JSON regression verifies incomplete fields; runtime service fixture exercises resource writes. No raw request reaches repository.",
+      "rationale": "Called by service with evaluator snapshots while run is running; cached running ID or typed prepared status check precedes writes. wpdb insert stores resource fields and findings; errors throw. Incomplete measurement persists marker, placeholder zero restores null on reads. Actual storage\u2192read\u2192JSON regression verifies incomplete fields; runtime service fixture exercises resource writes. No raw request reaches repository.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php",
         "tests/Audit/AuditRuntimeBudgetTest.php"
@@ -1765,7 +1765,7 @@
           "WordPress.DB.PreparedSQL.NotPrepared:ERROR": 1
         }
       },
-      "rationale": "Private caller holds or renews exact mutation lease. Trusted %i table identifiers; bounded1–100 IDs each have %d placeholder; cutoff %s. Atomic multi-table delete repeats failed/stale-running predicate after selection and preserves complete runs. DB read/delete errors throw. Actual mock query/error/lease regressions inspect prepared predicates and ownership; no native multi-table execution claimed.",
+      "rationale": "Private caller holds or renews exact mutation lease. Trusted %i table identifiers; bounded1\u2013100 IDs each have %d placeholder; cutoff %s. Atomic multi-table delete repeats failed/stale-running predicate after selection and preserves complete runs. DB read/delete errors throw. Actual mock query/error/lease regressions inspect prepared predicates and ownership; no native multi-table execution claimed.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php"
       ]
@@ -1800,7 +1800,7 @@
         "code_sha256": "29f1a4200404c688858544d8566a45f70acb9e959cbe1e9ae4283517b59a526a",
         "findings": {}
       },
-      "rationale": "Authorized Reports view calls metadata-only completed-run list; limit clamped1–50 and supplied as %d, trusted tables %i, fixed complete predicate and dependent-baseline EXISTS. DB read errors throw. Existing repository display projection tests exercise neighboring bounded projection, not this exact history method; source review provides the bound proof. Test limits: Generic inherited tests do not invokeevery named method/storagefailure branch; sourcedataflowchecked, no native transaction/DB failure fixture claimed.",
+      "rationale": "Authorized Reports view calls metadata-only completed-run list; limit clamped1\u201350 and supplied as %d, trusted tables %i, fixed complete predicate and dependent-baseline EXISTS. DB read errors throw. Existing repository display projection tests exercise neighboring bounded projection, not this exact history method; source review provides the bound proof. Test limits: Generic inherited tests do not invokeevery named method/storagefailure branch; sourcedataflowchecked, no native transaction/DB failure fixture claimed.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php"
       ]
@@ -1837,7 +1837,7 @@
         "code_sha256": "c7f7f57b6ee1b462fece5fdfedb7e94ac447cce6608a2796720afa8765d9508d",
         "findings": {}
       },
-      "rationale": "Catch around post-begin generation marks only running ID failed via wpdb update and drops local running marker. This is best effort, with original exception rethrown and lease released in finally. Actual runtime fixture proves running→failed/no complete; forced storage failure during fail is not runtime-tested. Test limits: Generic inherited tests do not invokeevery named method/storagefailure branch; sourcedataflowchecked, no native transaction/DB failure fixture claimed.",
+      "rationale": "Catch around post-begin generation marks only running ID failed via wpdb update and drops local running marker. This is best effort, with original exception rethrown and lease released in finally. Actual runtime fixture proves running\u2192failed/no complete; forced storage failure during fail is not runtime-tested. Test limits: Generic inherited tests do not invokeevery named method/storagefailure branch; sourcedataflowchecked, no native transaction/DB failure fixture claimed.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php",
         "tests/Audit/AuditRuntimeBudgetTest.php"
@@ -1872,7 +1872,7 @@
         "code_sha256": "c7ef29ca4f02ff22d3c2a7b7237993d2056db44e894a70805f6779185e03d580",
         "findings": {}
       },
-      "rationale": "Protected AuditReadAPI/export caller checks row profile before public JSON/HTML hydration; internal service may also read a full immutable snapshot. Three queries use trusted tables %i and run ID %d and require complete status. Read errors throw; JSON arrays hydrate via decoding and null incomplete measurement restored. Actual mock complete/finding-only/storage→JSON regressions execute this path. Row ceilings are not aggregate byte limits.",
+      "rationale": "Protected AuditReadAPI/export caller checks row profile before public JSON/HTML hydration; internal service may also read a full immutable snapshot. Three queries use trusted tables %i and run ID %d and require complete status. Read errors throw; JSON arrays hydrate via decoding and null incomplete measurement restored. Actual mock complete/finding-only/storage\u2192JSON regressions execute this path. Row ceilings are not aggregate byte limits.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php"
       ]
@@ -1923,7 +1923,7 @@
         "code_sha256": "5c5ffc19c29a7c8d311e4c109465b568753df83cc71cbc29c8577bc567c8e179",
         "findings": {}
       },
-      "rationale": "Protected Reports screen calls bounded metadata/finding preview without resource hydration. Preview clamp1–100 passed %d; fixed complete predicate, grouped finding counts and dependent-baseline EXISTS use %i trusted identifiers/%d ID. Checks each DB read. Actual projection test asserts LIMIT and no full resource query; native grouped SQL semantics not separately run.",
+      "rationale": "Protected Reports screen calls bounded metadata/finding preview without resource hydration. Preview clamp1\u2013100 passed %d; fixed complete predicate, grouped finding counts and dependent-baseline EXISTS use %i trusted identifiers/%d ID. Checks each DB read. Actual projection test asserts LIMIT and no full resource query; native grouped SQL semantics not separately run.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php"
       ]
@@ -2519,7 +2519,7 @@
         "code_sha256": "48d81de806bc64ab6d8108925cdae7a638046896217687fed355e1cbe0e30e88",
         "findings": {}
       },
-      "rationale": "The requested key retains exact1–64character allowlist. Literal REQUEST_URI stays visible, scalar and raw16384-byte bounded before unslash; callback validates decoded ASCII1–8192bytes without canonicalizing URI/percent markup. Private query_value retains query4096, scalar selected value, decoded control rejection and caller byte cap before text sanitization. OpenAPI requests version16, SettingsPage notice keys64; neither path makes the adapter a mutation authority. RequestInputBoundaryTest covers encoded/nested/control inputs, exact URI/query caps and the real-stripslashes fixture. WordPress parse/sanitizer extension filters remain a documented trust boundary.",
+      "rationale": "The requested key retains exact1\u201364character allowlist. Literal REQUEST_URI stays visible, scalar and raw16384-byte bounded before unslash; callback validates decoded ASCII1\u20138192bytes without canonicalizing URI/percent markup. Private query_value retains query4096, scalar selected value, decoded control rejection and caller byte cap before text sanitization. OpenAPI requests version16, SettingsPage notice keys64; neither path makes the adapter a mutation authority. RequestInputBoundaryTest covers encoded/nested/control inputs, exact URI/query caps and the real-stripslashes fixture. WordPress parse/sanitizer extension filters remain a documented trust boundary.",
       "tests": [
         "tests/Admin/RequestInputBoundaryTest.php",
         "tests/Admin/fixtures/request-input-slashed.php"
@@ -3397,13 +3397,13 @@
         "suppressions": [
           "// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Domain exception data is later JSON-encoded or escaped by status views."
         ],
-        "file_code_sha256": "0056d6d3ef2c7c2d036cfa01f176b2e3ac6e09c3a1df5e679243dff4e047ceed",
+        "file_code_sha256": "f46125eb571855e7b0aea9d476e911a73eae3e9446b813e5a9afaac19d7bf1b3",
         "code_sha256": "9cb67da27001f831f3f7d9653cf90aa8cc80d54c4f8577eed505850d893e4d73",
         "findings": {
           "WordPress.Security.EscapeOutput.ExceptionNotEscaped:ERROR": 2
         }
       },
-      "rationale": "Private summary/full append helper checks the remaining complete-output capacity before concatenation, then delegates memory reserve. PublicationSizeLimitException carries a fixed publication label and integer bound, not HTML. Dynamic LLMS catches it and PublicationRequestGuard emits structured application/problem+json using ProtocolOutput; StaticBridge records failure and ownership-safe purge reports, with escaped admin rendering. LLMSTLDRTest::test_full_publication_includes_every_eligible_literal_body and LLMSSummaryTest::test_concise_map_is_bounded_discloses_coverage_and_links_markdown exercise successful append paths. DiscoveryResourceBoundsTest::test_llms_summary_rejects_title_expansion_before_caching_a_partial_publication covers rejection before cache admission, but its large fixture was only source-inspected here. LLMSTLDRGeneratorTraversalTest concerns another generator and is not evidence for this helper. Full final LLMS573-line source and activation/body/cached-return privacy fences independently reviewed; PublicationFailureBoundaryTest runs actual producers/handlers for generation races, stale production policy memo and opt-out. These tests support surrounding publication failure boundaries, not every size or low-memory branch. Final whole573-line source carries captured generation through Integrity and catches late header failures. MarkdownPrivacyBoundaryTest::test_known_privacy_changes_reject_get_head_and_conditional_requests_before_output executes healthy summary/full controls and actual policy/encoding GET/HEAD/conditional revocations.503 responses omit private body/stalevalidators. Surrounding boundary coverage does not prove every size/low-memory branch.",
+      "rationale": "Private summary/full append helper checks the remaining complete-output capacity before concatenation, then delegates memory reserve. PublicationSizeLimitException carries a fixed publication label and integer bound, not HTML. Dynamic LLMS catches it and PublicationRequestGuard emits structured application/problem+json using ProtocolOutput; StaticBridge records failure and ownership-safe purge reports, with escaped admin rendering. LLMSTLDRTest::test_full_publication_includes_every_eligible_literal_body and LLMSSummaryTest::test_concise_map_is_bounded_discloses_coverage_and_links_markdown exercise successful append paths. DiscoveryResourceBoundsTest::test_llms_summary_rejects_title_expansion_before_caching_a_partial_publication covers rejection before cache admission, but its large fixture was only source-inspected here. LLMSTLDRGeneratorTraversalTest concerns another generator and is not evidence for this helper. Full final LLMS573-line source and activation/body/cached-return privacy fences independently reviewed; PublicationFailureBoundaryTest runs actual producers/handlers for generation races, stale production policy memo and opt-out. These tests support surrounding publication failure boundaries, not every size or low-memory branch. Final whole573-line source carries captured generation through Integrity and catches late header failures. MarkdownPrivacyBoundaryTest::test_known_privacy_changes_reject_get_head_and_conditional_requests_before_output executes healthy summary/full controls and actual policy/encoding GET/HEAD/conditional revocations.503 responses omit private body/stalevalidators. Surrounding boundary coverage does not prove every size/low-memory branch. 8.0.4 review: only the advertised XML index link gains the ownership condition. Size/memory guard bodies and exception-to-protocol/status sinks are unchanged; AI text generation is independent of XML management.",
       "tests": [
         "tests/Discovery/DiscoveryResourceBoundsTest.php",
         "tests/Discovery/LLMSSummaryTest.php",
@@ -3420,13 +3420,13 @@
         "suppressions": [
           "// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Domain exception data is later JSON-encoded or escaped by status views."
         ],
-        "file_code_sha256": "0056d6d3ef2c7c2d036cfa01f176b2e3ac6e09c3a1df5e679243dff4e047ceed",
+        "file_code_sha256": "f46125eb571855e7b0aea9d476e911a73eae3e9446b813e5a9afaac19d7bf1b3",
         "code_sha256": "225c518aaba8fab9e1e73b50ae380a257b99a482c205881959c8d16fe91a9734",
         "findings": {
           "WordPress.Security.EscapeOutput.ExceptionNotEscaped:ERROR": 1
         }
       },
-      "rationale": "Called by generate_full after PublicationInventory AI eligibility. It reserves raw title/URL and source capacity, requires complete literal ContentAnalyzer output, and appends complete metadata/body pieces. It never executes stored shortcodes/blocks. Raw domain exception messages are not an HTML sink: dynamic LLMS uses the structured problem response; static generators record/report failure and retain foreign files by ownership hash. LLMSTLDRTest::test_full_publication_includes_every_eligible_literal_body and test_full_publication_is_never_written_to_a_transient passed; test_full_publication_fails_instead_of_returning_a_partial_body source demonstrates raw-source overflow but was not rerun due its32MiB allocation. ContentAnalyzerNativeBoundsTest::test_native_attribute_parsing_and_publication_completeness invokes the actual full producer with incomplete analysis; source inspected only. Full final LLMS573-line source and activation/body/cached-return privacy fences independently reviewed; PublicationFailureBoundaryTest runs actual producers/handlers for generation races, stale production policy memo and opt-out. These tests support surrounding publication failure boundaries, not every size or low-memory branch. Final whole573-line source carries captured generation through Integrity and catches late header failures. MarkdownPrivacyBoundaryTest::test_known_privacy_changes_reject_get_head_and_conditional_requests_before_output executes healthy summary/full controls and actual policy/encoding GET/HEAD/conditional revocations.503 responses omit private body/stalevalidators. Surrounding boundary coverage does not prove every size/low-memory branch.",
+      "rationale": "Called by generate_full after PublicationInventory AI eligibility. It reserves raw title/URL and source capacity, requires complete literal ContentAnalyzer output, and appends complete metadata/body pieces. It never executes stored shortcodes/blocks. Raw domain exception messages are not an HTML sink: dynamic LLMS uses the structured problem response; static generators record/report failure and retain foreign files by ownership hash. LLMSTLDRTest::test_full_publication_includes_every_eligible_literal_body and test_full_publication_is_never_written_to_a_transient passed; test_full_publication_fails_instead_of_returning_a_partial_body source demonstrates raw-source overflow but was not rerun due its32MiB allocation. ContentAnalyzerNativeBoundsTest::test_native_attribute_parsing_and_publication_completeness invokes the actual full producer with incomplete analysis; source inspected only. Full final LLMS573-line source and activation/body/cached-return privacy fences independently reviewed; PublicationFailureBoundaryTest runs actual producers/handlers for generation races, stale production policy memo and opt-out. These tests support surrounding publication failure boundaries, not every size or low-memory branch. Final whole573-line source carries captured generation through Integrity and catches late header failures. MarkdownPrivacyBoundaryTest::test_known_privacy_changes_reject_get_head_and_conditional_requests_before_output executes healthy summary/full controls and actual policy/encoding GET/HEAD/conditional revocations.503 responses omit private body/stalevalidators. Surrounding boundary coverage does not prove every size/low-memory branch. 8.0.4 review: only the advertised XML index link gains the ownership condition. Size/memory guard bodies and exception-to-protocol/status sinks are unchanged; AI text generation is independent of XML management.",
       "tests": [
         "tests/Content/ContentAnalyzerNativeBoundsTest.php",
         "tests/Discovery/LLMSTLDRTest.php",
@@ -3442,13 +3442,13 @@
         "suppressions": [
           "// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Domain exception data is later JSON-encoded or escaped by status views."
         ],
-        "file_code_sha256": "0056d6d3ef2c7c2d036cfa01f176b2e3ac6e09c3a1df5e679243dff4e047ceed",
+        "file_code_sha256": "f46125eb571855e7b0aea9d476e911a73eae3e9446b813e5a9afaac19d7bf1b3",
         "code_sha256": "f34783c1992e9db1c2ea2b787f0a6cb1bb70f707aca2ce49fc06b577b3d0d971",
         "findings": {
           "WordPress.Security.EscapeOutput.ExceptionNotEscaped:ERROR": 2
         }
       },
-      "rationale": "Private helper reached from full-post source processing and complete summary/full appends. It reads PHP memory_limit/current usage, reserves16MiB then uses a factor4 estimate; error contains a fixed label and numeric calculated bound and reaches structured JSON or escaped admin reporting. This is a conservative estimate, not proof of a hard total-memory guarantee. Existing LLMSTLDRTest and LLMSSummaryTest successful builds traverse the helper. No dedicated existing low-headroom regression for this exact method was located; PublicationCacheLeaseTest tests PublicationScanBudget instead, and LLMSTLDRGeneratorTraversalTest tests another class. Do not cite either as direct proof. Full final LLMS573-line source and activation/body/cached-return privacy fences independently reviewed; PublicationFailureBoundaryTest runs actual producers/handlers for generation races, stale production policy memo and opt-out. These tests support surrounding publication failure boundaries, not every size or low-memory branch. Final whole573-line source carries captured generation through Integrity and catches late header failures. MarkdownPrivacyBoundaryTest::test_known_privacy_changes_reject_get_head_and_conditional_requests_before_output executes healthy summary/full controls and actual policy/encoding GET/HEAD/conditional revocations.503 responses omit private body/stalevalidators. Surrounding boundary coverage does not prove every size/low-memory branch.",
+      "rationale": "Private helper reached from full-post source processing and complete summary/full appends. It reads PHP memory_limit/current usage, reserves16MiB then uses a factor4 estimate; error contains a fixed label and numeric calculated bound and reaches structured JSON or escaped admin reporting. This is a conservative estimate, not proof of a hard total-memory guarantee. Existing LLMSTLDRTest and LLMSSummaryTest successful builds traverse the helper. No dedicated existing low-headroom regression for this exact method was located; PublicationCacheLeaseTest tests PublicationScanBudget instead, and LLMSTLDRGeneratorTraversalTest tests another class. Do not cite either as direct proof. Full final LLMS573-line source and activation/body/cached-return privacy fences independently reviewed; PublicationFailureBoundaryTest runs actual producers/handlers for generation races, stale production policy memo and opt-out. These tests support surrounding publication failure boundaries, not every size or low-memory branch. Final whole573-line source carries captured generation through Integrity and catches late header failures. MarkdownPrivacyBoundaryTest::test_known_privacy_changes_reject_get_head_and_conditional_requests_before_output executes healthy summary/full controls and actual policy/encoding GET/HEAD/conditional revocations.503 responses omit private body/stalevalidators. Surrounding boundary coverage does not prove every size/low-memory branch. 8.0.4 review: only the advertised XML index link gains the ownership condition. Size/memory guard bodies and exception-to-protocol/status sinks are unchanged; AI text generation is independent of XML management.",
       "tests": [
         "tests/Discovery/LLMSSummaryTest.php",
         "tests/Discovery/LLMSTLDRTest.php",
@@ -3611,11 +3611,11 @@
           "$_SERVER"
         ],
         "suppressions": [],
-        "file_code_sha256": "6fef09e22d953958b83f3e2413d22523c42bab78d91d37309dc4502ea9179dfc",
+        "file_code_sha256": "1890c8f9fea3cd413333119da2eec91894c4d98dcbebd647d751e6a459354b3f",
         "code_sha256": "e09f473cc421094223138a6ec3a272f071f8cb3734528f16cf8630b2bb67255a",
         "findings": {}
       },
-      "rationale": "Request adapter or authenticated caller owns this boundary; scalar guards and contextual sanitization are frozen with the body. Review caller authorization again whenever this scope changes.",
+      "rationale": "Request adapter or authenticated caller owns this boundary; scalar guards and contextual sanitization are frozen with the body. Review caller authorization again whenever this scope changes. 8.0.4 review: sitemap-map output is conditional and takeover preserves upstream Sitemap lines when Core is not replaced. Input is the trusted WordPress robots filter result, not a request bag; protocol output remains text. The bounded Content-Usage request/header adapter is unchanged.",
       "tests": [
         "tests/Admin/RobotsFieldsAccessibilityTest.php",
         "tests/Discovery/RobotsTest.php"
@@ -3629,13 +3629,13 @@
         "suppressions": [
           "// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Static-sync exceptions become status data; the admin view escapes at its output boundary."
         ],
-        "file_code_sha256": "bbe2dca5a97b58e6513c56e8d598e2143631ba1fc070bff84704eb0012f30859",
+        "file_code_sha256": "a37cb01f70ce842eb826369a501af6ce005de8ebbf9b2095f96c12857ea910be",
         "code_sha256": "814bdd77ed3ce1ff3b06f97ec2c4b0a7f56ddf3548a6c2bd88d898d4cf7401f4",
         "findings": {
           "WordPress.Security.EscapeOutput.ExceptionNotEscaped:ERROR": 1
         }
       },
-      "rationale": "refresh_time_sensitive_publications constructs eligible AI selection state; the chunk callback throws a fixed translated message only when selected payload disappears. publish_for_sync catches the exception into bounded report data; AIDiscoveryStatus renders summaries through esc_html, and JSON responses retain structured encoding. TimeSensitivePublicationTest::test_transition_refresh_updates_only_affected_ai_publications and test_failed_publication_preserves_due_state_and_retry_republishes cover real bounded publication/retry. They do not trigger this specific null-payload throw or prove malicious translated diagnostic escaping; retain that explicit coverage limitation.",
+      "rationale": "refresh_time_sensitive_publications constructs eligible AI selection state; the chunk callback throws a fixed translated message only when selected payload disappears. publish_for_sync catches the exception into bounded report data; AIDiscoveryStatus renders summaries through esc_html, and JSON responses retain structured encoding. TimeSensitivePublicationTest::test_transition_refresh_updates_only_affected_ai_publications and test_failed_publication_preserves_due_state_and_retry_republishes cover real bounded publication/retry. They do not trigger this specific null-payload throw or prove malicious translated diagnostic escaping; retain that explicit coverage limitation. 8.0.4 review: a sitemap-family scope uses frozen normalized names and a pure child-route matcher. Existing operation fences, hash ownership, conflict retention and persisted purge continuation still govern every deletion. Current settings block new sitemap writes and News refresh when ownership is off; RAG error data/sinks remain unchanged.",
       "tests": [
         "tests/Discovery/TimeSensitivePublicationTest.php"
       ]
@@ -3648,13 +3648,13 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- Private helper receives fixed SQL templates; appended lock predicates are literal and all values/identifiers are prepared."
         ],
-        "file_code_sha256": "d572534d5ee4536288b92cf11f81f06d9bc81fd881ab001a59cf07ed7435257f",
+        "file_code_sha256": "ddfc16bc1f089b8841912776e5f0dbbc8af6f250d0b2c62a63b6e89553952ef8",
         "code_sha256": "e4f2348e1fc0eda5465879c25f0a4b32521d11dce35bb6972ef2c83270fd9561",
         "findings": {
           "WordPress.DB.PreparedSQL.NotPrepared:ERROR": 7
         }
       },
-      "rationale": "Private callers are direct_option_mutation/noop verification and table_query for StaticOwnershipTable/StaticOwnershipMigration fixed SQL templates. No request text becomes SQL; WordPress identifiers use %i and all row/option data and LIMIT values are typed. fenced_query inserts a literal same-statement session predicate before ORDER BY/LIMIT and correctly preserves argument order. query failure/last_error fails closed; SELECT results are reset and copied as at most100rows. StaticOwnershipDatabaseAdapterTest::test_same_statement_fences_fail_reads_and_mutations_after_connection_loss, test_production_table_rejects_stale_update_delete_and_path_collision, test_unknown_sql_is_rejected_instead_of_reporting_success and test_placeholder_count_mismatch_is_rejected exercise template dispatch/CAS/bounds in a strict mock, not actual MySQL SQL parsing or DDL. Migration cutover fixed transaction-control/session checks, row locks and atomic schema/revision/source retirement were independently reviewed. StaticOwnershipMigrationTest test_failed_ready_cutover_revalidates_a_supported_fenced_legacy_source_edit, test_failed_ready_cutover_with_unchanged_source_can_finish_on_retry, test_failed_commit_rolls_back_marker_and_deleted_sources, test_caller_transaction_is_preserved_before_any_schema_ddl_or_staging_write, test_uncooperative_source_aba_during_binary_chunk_read_cannot_publish_unpinned_bytes and test_row_lock_timeout_is_scoped_and_restored_after_commit_and_failure cover modeled recovery. Source digest pinning per chunk adds whole-blob hash work; no linear migration cost or real lock/isolation claim. No blanket real concurrency claim.",
+      "rationale": "Private callers are direct_option_mutation/noop verification and table_query for StaticOwnershipTable/StaticOwnershipMigration fixed SQL templates. No request text becomes SQL; WordPress identifiers use %i and all row/option data and LIMIT values are typed. fenced_query inserts a literal same-statement session predicate before ORDER BY/LIMIT and correctly preserves argument order. query failure/last_error fails closed; SELECT results are reset and copied as at most100rows. StaticOwnershipDatabaseAdapterTest::test_same_statement_fences_fail_reads_and_mutations_after_connection_loss, test_production_table_rejects_stale_update_delete_and_path_collision, test_unknown_sql_is_rejected_instead_of_reporting_success and test_placeholder_count_mismatch_is_rejected exercise template dispatch/CAS/bounds in a strict mock, not actual MySQL SQL parsing or DDL. Migration cutover fixed transaction-control/session checks, row locks and atomic schema/revision/source retirement were independently reviewed. StaticOwnershipMigrationTest test_failed_ready_cutover_revalidates_a_supported_fenced_legacy_source_edit, test_failed_ready_cutover_with_unchanged_source_can_finish_on_retry, test_failed_commit_rolls_back_marker_and_deleted_sources, test_caller_transaction_is_preserved_before_any_schema_ddl_or_staging_write, test_uncooperative_source_aba_during_binary_chunk_read_cannot_publish_unpinned_bytes and test_row_lock_timeout_is_scoped_and_restored_after_commit_and_failure cover modeled recovery. Source digest pinning per chunk adds whole-blob hash work; no linear migration cost or real lock/isolation claim. No blanket real concurrency claim. 8.0.4 review: the only change adds sitemap_family to the exact allowed purge scopes. Persisted intent validation, prepared identifiers/data, database session fences and bounded row reads retain their bodies; no SQL or request boundary expanded.",
       "tests": [
         "tests/Discovery/StaticOwnershipDatabaseAdapterTest.php",
         "tests/Discovery/StaticOwnershipMigrationTest.php"
@@ -3668,11 +3668,11 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
         ],
-        "file_code_sha256": "d572534d5ee4536288b92cf11f81f06d9bc81fd881ab001a59cf07ed7435257f",
+        "file_code_sha256": "ddfc16bc1f089b8841912776e5f0dbbc8af6f250d0b2c62a63b6e89553952ef8",
         "code_sha256": "ba929e9ee71235716c83a98dc8cebd146a9d9911dda9e511282ee7938171d7da",
         "findings": {}
       },
-      "rationale": "Only ownership coordination reads use this uncached fixed option SELECT, with separately prepared wpdb options identifier and exact option name; read failure is distinct from absence, preserving legacy/corrupt authority. StaticOwnershipDatabaseAdapterTest::test_production_store_migrates_legacy_options_and_preserves_new_row_updates traverses these option reads. test_read_failure_clears_rows_and_production_table_fails_closed tests the adjacent table executor, and test_existing_option_failure_hook_can_interleave_a_successor tests the mock CAS itself, not this observation helper. No direct injected read_direct_observation failure test was found; add one that distinguishes error from absence. This is an internal database boundary, not a request authorization endpoint. Real driver last_error/reconnect behavior remains an integration requirement.",
+      "rationale": "Only ownership coordination reads use this uncached fixed option SELECT, with separately prepared wpdb options identifier and exact option name; read failure is distinct from absence, preserving legacy/corrupt authority. StaticOwnershipDatabaseAdapterTest::test_production_store_migrates_legacy_options_and_preserves_new_row_updates traverses these option reads. test_read_failure_clears_rows_and_production_table_fails_closed tests the adjacent table executor, and test_existing_option_failure_hook_can_interleave_a_successor tests the mock CAS itself, not this observation helper. No direct injected read_direct_observation failure test was found; add one that distinguishes error from absence. This is an internal database boundary, not a request authorization endpoint. Real driver last_error/reconnect behavior remains an integration requirement. 8.0.4 review: the only change adds sitemap_family to the exact allowed purge scopes. Persisted intent validation, prepared identifiers/data, database session fences and bounded row reads retain their bodies; no SQL or request boundary expanded.",
       "tests": [
         "tests/Discovery/StaticOwnershipDatabaseAdapterTest.php"
       ]
@@ -3685,13 +3685,13 @@
         "suppressions": [
           "// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped"
         ],
-        "file_code_sha256": "980fb9cc99d784a32aa61e7d403e99cf75a889425911f53b8de78b901672ab50",
+        "file_code_sha256": "cb7686f4ed6d4c5a8b3abed4a7c5b3cb02810e9cdfa2e493302370329ba934e2",
         "code_sha256": "1abe24fa7c765aa7091c5960ea76272fc96d61a573009845d24f0d24f968cab7",
         "findings": {
           "WordPress.Security.EscapeOutput.ExceptionNotEscaped:ERROR": 1
         }
       },
-      "rationale": "run_rag_phase supplies already selected positive post IDs; the private callback throws a fixed translated diagnostic when a selected chunk disappears. StaticBridge::publish_for_sync catches it and records structured failure data, not executable HTML; downstream admin summary uses esc_html and JSON consumers encode response structures. StaticSyncRunnerTest::test_rag_phase_materializes_exact_selected_ids_across_partial_batches exercises real generator/file phase and test_dependency_failure_from_an_earlier_slice_fences_discovery_indexes verifies recorded dependency failure, but does not trigger this null-payload exception or prove a malicious localized string is escaped. Add an explicit exception-to-HTML/JSON sink regression rather than claim existing path tests are output-safety tests.",
+      "rationale": "run_rag_phase supplies already selected positive post IDs; the private callback throws a fixed translated diagnostic when a selected chunk disappears. StaticBridge::publish_for_sync catches it and records structured failure data, not executable HTML; downstream admin summary uses esc_html and JSON consumers encode response structures. StaticSyncRunnerTest::test_rag_phase_materializes_exact_selected_ids_across_partial_batches exercises real generator/file phase and test_dependency_failure_from_an_earlier_slice_fences_discovery_indexes verifies recorded dependency failure, but does not trigger this null-payload exception or prove a malicious localized string is escaped. Add an explicit exception-to-HTML/JSON sink regression rather than claim existing path tests are output-safety tests. 8.0.4 review: XML child/index/RSS phases and target claims now honor management state. Discovery/AI phases remain independent, generation-bound continuation and final stale reconciliation remain in place. The RAG exception/sinks and authority are unchanged.",
       "tests": [
         "tests/Discovery/StaticSyncRunnerTest.php"
       ]
@@ -3757,11 +3757,11 @@
           "$_SERVER"
         ],
         "suppressions": [],
-        "file_code_sha256": "ab0caf5113243b017bf03dc239aabe0d639a0d446067d90f702e1984645d2ed4",
+        "file_code_sha256": "bedb6f3bcfeb2a0f0002358a5b79435560a7ab903fe1dd07011848b75091f974",
         "code_sha256": "b0e0fa736a802d1a62528f1bb3ce5f7f831fe76ee48937c9c776fb671b6bf783",
         "findings": {}
       },
-      "rationale": "Public read-only Accept classification selects the throttle cost tier. It grants no authorization or mutation capability. Caller checks the request method and route feature state; Accept is scalar-checked and sanitized before negotiation. Full containing-file and caller review recorded in review-http-coordinator.json; tests cover canonical negotiated route, disabled and unsupported routes. Specific inspected regressions: test_negotiated_canonical_page_uses_the_medium_tier, test_disabled_publications_do_not_consume_throttle_counters, test_unsupported_fixed_path_method_does_not_consume_a_counter.",
+      "rationale": "Public read-only Accept classification selects the throttle cost tier. It grants no authorization or mutation capability. Caller checks the request method and route feature state; Accept is scalar-checked and sanitized before negotiation. Full containing-file and caller review recorded in review-http-coordinator.json; tests cover canonical negotiated route, disabled and unsupported routes. Specific inspected regressions: test_negotiated_canonical_page_uses_the_medium_tier, test_disabled_publications_do_not_consume_throttle_counters, test_unsupported_fixed_path_method_does_not_consume_a_counter. 8.0.4 review: disabled sitemap paths no longer consume Cybermaps throttle counters. Active-route request/cost checks and bounded sanitized Accept/User-Agent adapters retain their exact bodies; this is resource accounting, not authorization.",
       "tests": [
         "tests/Discovery/ThrottlerTest.php"
       ]
@@ -3774,11 +3774,11 @@
           "$_SERVER"
         ],
         "suppressions": [],
-        "file_code_sha256": "ab0caf5113243b017bf03dc239aabe0d639a0d446067d90f702e1984645d2ed4",
+        "file_code_sha256": "bedb6f3bcfeb2a0f0002358a5b79435560a7ab903fe1dd07011848b75091f974",
         "code_sha256": "15deab6ad1745730df7250cecfbc872f440bcb9a6e545a4731edc973650f8b8d",
         "findings": {}
       },
-      "rationale": "Public resource limiting reads a scalar User-Agent, validates rate-override shapes, resolves a client IP, and derives a salted minute bucket. Unknown/empty user agents still consume a counter. The caller gates active route and method. Counter storage is atomic only on supported cache/owned-table paths; the last-resort Transients fallback is best-effort. This is cost protection, not authorization. Full caller/backend inspection recorded in review-http-coordinator.json. Specific inspected regressions: test_unidentified_and_empty_user_agents_still_receive_cost_protection, test_malformed_user_agent_and_override_shapes_fail_closed_without_warnings, test_same_bot_from_different_clients_has_independent_counter.",
+      "rationale": "Public resource limiting reads a scalar User-Agent, validates rate-override shapes, resolves a client IP, and derives a salted minute bucket. Unknown/empty user agents still consume a counter. The caller gates active route and method. Counter storage is atomic only on supported cache/owned-table paths; the last-resort Transients fallback is best-effort. This is cost protection, not authorization. Full caller/backend inspection recorded in review-http-coordinator.json. Specific inspected regressions: test_unidentified_and_empty_user_agents_still_receive_cost_protection, test_malformed_user_agent_and_override_shapes_fail_closed_without_warnings, test_same_bot_from_different_clients_has_independent_counter. 8.0.4 review: disabled sitemap paths no longer consume Cybermaps throttle counters. Active-route request/cost checks and bounded sanitized Accept/User-Agent adapters retain their exact bodies; this is resource accounting, not authorization.",
       "tests": [
         "tests/Discovery/ThrottlerTest.php"
       ]
@@ -4003,13 +4003,13 @@
           "// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public read-only cache-busting challenge; no state mutation.",
           "// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Same read-only challenge value validated against the request header."
         ],
-        "file_code_sha256": "321ccc376b42c543569c01fa50dcffa6ee43a6aa6aa76a6e4363011aeed58227",
+        "file_code_sha256": "b03a84a0e2963294631aebb2712c30a17c70a4b50d80673b0cc8096c41b1b98b",
         "code_sha256": "74895481afdd7c8289551a04d6d62c4afa4080411d403dc5c24f6235c83cbceb",
         "findings": {
           "WordPress.Security.NonceVerification.Recommended:WARNING": 3
         }
       },
-      "rationale": "Reached only from the public read-only GET/HEAD sitemap handler after bounded route/provider/page validation. String challenges are unslashed/sanitized and must match exactly as 32–64 ASCII alphanumeric characters before entering the diagnostic header and no-store policy. No administrative nonce is required because this grants no administrator authority or destructive action; static repair remains bounded generated-path scheduling under StaticBridge mode/ownership rules. The 8.0.3 change removes all output-buffer mutation from the begin/serve helpers; complete XML remains generation-fenced and passes ProtocolOutput, and existing caller buffers remain owned by their callers. OrchestratorRequestContractTest covers request/challenge helpers. OutputBufferOwnershipTest and the disposable native fixture cover cached/uncached GET/HEAD, 304, early/late 404 and generation failure with single/nested/non-removable buffers. Real HTTP response coverage is separate: preserving foreign buffer contents does not imply empty wire bodies.",
+      "rationale": "Reached only from the public read-only GET/HEAD sitemap handler after bounded route/provider/page validation. String challenges are unslashed/sanitized and must match exactly as 32\u201364 ASCII alphanumeric characters before entering the diagnostic header and no-store policy. No administrative nonce is required because this grants no administrator authority or destructive action; static repair remains bounded generated-path scheduling under StaticBridge mode/ownership rules. The 8.0.3 change removes all output-buffer mutation from the begin/serve helpers; complete XML remains generation-fenced and passes ProtocolOutput, and existing caller buffers remain owned by their callers. OrchestratorRequestContractTest covers request/challenge helpers. OutputBufferOwnershipTest and the disposable native fixture cover cached/uncached GET/HEAD, 304, early/late 404 and generation failure with single/nested/non-removable buffers. Real HTTP response coverage is separate: preserving foreign buffer contents does not imply empty wire bodies. 8.0.4 review: the new Core filter is conditional and preserves incoming false decisions. Disabled requests fall through before response mutation; owned redirects retain GET/HEAD enforcement. A fresh publication snapshot is checked before serving XML; generation fences and ProtocolOutput remain. Rewrite refresh removes only Cybermaps query targets. Regeneration/comment/diagnostic boundaries retain their exact bodies.",
       "tests": [
         "tests/Sitemap/OrchestratorRequestContractTest.php",
         "tests/Admin/SitemapStatusTest.php",
@@ -4029,11 +4029,11 @@
         "suppressions": [
           "// phpcs:ignore WordPress.Security.NonceVerification.Missing -- The action nonce was verified immediately above."
         ],
-        "file_code_sha256": "321ccc376b42c543569c01fa50dcffa6ee43a6aa6aa76a6e4363011aeed58227",
+        "file_code_sha256": "b03a84a0e2963294631aebb2712c30a17c70a4b50d80673b0cc8096c41b1b98b",
         "code_sha256": "5a66dd3fc8a5064ae3f09ab50b9378745ab5e6154235112daf752430692494dc",
         "findings": {}
       },
-      "rationale": "handle_regeneration requires manage_options, scalar POST request method and the fixed cybermaps_regenerate nonce before return-tab selector or any cache/rewrite/static mutation. Return tab is scalar sanitized fixed allowlist; redirect is native safe admin URL with bounded structured status/counts, no path-bearing full report. Cache families and owned static reconciliation are authorized local administrator work. AdminActionContractAuditTest relevant test asserts source gates/form contract; it does not execute negative regeneration authorization. RegenerationNoticeTest proves partial/failed/pending/dynamic result truthfulness, and Inventory/RequestContract citations alone would not prove this boundary.",
+      "rationale": "handle_regeneration requires manage_options, scalar POST request method and the fixed cybermaps_regenerate nonce before return-tab selector or any cache/rewrite/static mutation. Return tab is scalar sanitized fixed allowlist; redirect is native safe admin URL with bounded structured status/counts, no path-bearing full report. Cache families and owned static reconciliation are authorized local administrator work. AdminActionContractAuditTest relevant test asserts source gates/form contract; it does not execute negative regeneration authorization. RegenerationNoticeTest proves partial/failed/pending/dynamic result truthfulness, and Inventory/RequestContract citations alone would not prove this boundary. 8.0.4 review: the new Core filter is conditional and preserves incoming false decisions. Disabled requests fall through before response mutation; owned redirects retain GET/HEAD enforcement. A fresh publication snapshot is checked before serving XML; generation fences and ProtocolOutput remain. Rewrite refresh removes only Cybermaps query targets. Regeneration/comment/diagnostic boundaries retain their exact bodies.",
       "tests": [
         "tests/Admin/AdminActionContractAuditTest.php",
         "tests/Admin/RegenerationNoticeTest.php"
@@ -4047,11 +4047,11 @@
         "suppressions": [
           "// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching -- Comment-driven freshness must update the exact persisted post timestamps."
         ],
-        "file_code_sha256": "321ccc376b42c543569c01fa50dcffa6ee43a6aa6aa76a6e4363011aeed58227",
+        "file_code_sha256": "b03a84a0e2963294631aebb2712c30a17c70a4b50d80673b0cc8096c41b1b98b",
         "code_sha256": "e6a36483edd0ee712747c95f097ecea57c3e4fd3400779a8b8e0b19ff69bb8e2",
         "findings": {}
       },
-      "rationale": "touch_post_on_comment is called by trusted WordPress approved-comment hooks, reads the persisted comment/post, respects configured post/page freshness policy and uses wpdb::update for the WordPress-owned posts table with fixed timestamp fields and persisted post ID. WordPress parameterizes values; no request selector or SQL fragment is accepted. Native clean_post_cache runs after every update attempt. Only publication/occupancy/discovery invalidation is conditional on a non-false update; exact zero-row/no-change is allowed. This direct update intentionally needs current persisted freshness rather than derived query caching. No direct comment-write/failure regression was found in inherited Inventory/RequestContract citations; referenced request tests cover downstream publication/cache contracts only. Update/error behavior was source-reviewed without claiming native DB proof.",
+      "rationale": "touch_post_on_comment is called by trusted WordPress approved-comment hooks, reads the persisted comment/post, respects configured post/page freshness policy and uses wpdb::update for the WordPress-owned posts table with fixed timestamp fields and persisted post ID. WordPress parameterizes values; no request selector or SQL fragment is accepted. Native clean_post_cache runs after every update attempt. Only publication/occupancy/discovery invalidation is conditional on a non-false update; exact zero-row/no-change is allowed. This direct update intentionally needs current persisted freshness rather than derived query caching. No direct comment-write/failure regression was found in inherited Inventory/RequestContract citations; referenced request tests cover downstream publication/cache contracts only. Update/error behavior was source-reviewed without claiming native DB proof. 8.0.4 review: the new Core filter is conditional and preserves incoming false decisions. Disabled requests fall through before response mutation; owned redirects retain GET/HEAD enforcement. A fresh publication snapshot is checked before serving XML; generation fences and ProtocolOutput remain. Rewrite refresh removes only Cybermaps query targets. Regeneration/comment/diagnostic boundaries retain their exact bodies.",
       "tests": [
         "tests/Sitemap/OrchestratorRequestContractTest.php"
       ]

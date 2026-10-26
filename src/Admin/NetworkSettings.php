@@ -58,7 +58,7 @@ class NetworkSettings {
 								<?php esc_html_e( 'Publish a centralized sitemap index', 'cybermaps' ); ?>
 							</label>
 							<p class="description">
-								<?php esc_html_e( 'The index lists the Cybermaps sitemap for each public site where the plugin is active:', 'cybermaps' ); ?>
+								<?php esc_html_e( 'Requires XML sitemap management on the main site. Lists public sites where Cybermaps is active and XML sitemap management is enabled:', 'cybermaps' ); ?>
 								<code><?php echo esc_url( network_home_url( 'sitemap-network.xml' ) ); ?></code>
 							</p>
 						</td>

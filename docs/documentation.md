@@ -1,6 +1,6 @@
 # Cybermaps — Technical Documentation
 
-> Version 8.0.3 · PHP 8.2 · WordPress 7.1
+> Version 8.0.4 · PHP 8.2 · WordPress 7.1
 
 Public sitemap credit is optional. In **Sitemaps**, enable **Show the CYBER MAPS
 credit on public sitemaps** to opt in. `show_sitemap_attribution` defaults to `0`
@@ -267,6 +267,30 @@ surfaces. It excludes `attachment` consistently; attachments can still be
 discovered as media belonging to an eligible page or post.
 
 ## 3. Sitemap engine
+
+**Manage XML sitemaps with Cybermaps** in **XML Sitemaps** controls the search
+sitemap index, its children, News, RSS and the network index. It defaults to on,
+including existing installations. Turn it off to let WordPress or another
+plugin manage search sitemaps while keeping Cybermaps' independent AI
+publications and HTML shortcode available.
+
+Cybermaps disables Core sitemaps only when XML management and **Redirect
+WordPress Core Sitemaps** are both enabled and permalinks are not **Plain**.
+Otherwise it preserves WordPress's incoming enabled/disabled decision, including
+private-site and other-plugin filters. Disabling the redirect alone keeps both
+sets of URLs available. Unclaimed Core and legacy paths fall through to
+WordPress; Cybermaps does not force a 404 on them. Plugin presence alone is not
+used to guess whether another plugin owns sitemap publication.
+
+Saving the management switch refreshes only Cybermaps' rewrite registrations,
+invalidates publication caches, stops its sitemap indexing work and reconciles
+static files. Unchanged owned index, child, News, RSS and network files are
+removed on opt-out; independently modified files are retained and reported as
+conflicts. AI files are preserved. Check static-file diagnostics and clear any
+independently managed CDN cache after handover. Static File Engine mode **off**
+only stops disk publication; it does not turn off dynamic XML management.
+On multisite this choice belongs to each site, and the network index omits
+sites that have opted out. The main site must manage XML to serve that index.
 
 The default sitemap index is `/sitemap.xml`; the base slug is configurable.
 Internal child files contain no more than 2,000 URLs and are numbered when a

@@ -153,6 +153,18 @@ HTTP_ADDRESS="$("${CONTAINER_CLI}" port "${HTTP_NAME}" 8080/tcp)"
 wp_cli option update home "http://${HTTP_ADDRESS}" --quiet
 wp_cli option update siteurl "http://${HTTP_ADDRESS}" --quiet
 python3 -B "${PROJECT_DIR}/tests/integration/wporg-http.py" "http://${HTTP_ADDRESS}" >> "${RUNTIME_DIR}/smoke.txt"
+# Persist ownership switches through WordPress, then inspect fresh HTTP requests.
+wp_cli eval '$s = get_option("cybermaps_settings", array()); $s["enable_xml_sitemaps"] = "1"; $s["redirect_wp_sitemap"] = "1"; update_option("cybermaps_settings", $s);'
+python3 -B "${PROJECT_DIR}/tests/integration/sitemap-ownership-http.py" "http://${HTTP_ADDRESS}" enabled > "${RUNTIME_DIR}/sitemap-ownership-enabled.json"
+wp_cli eval '$s = get_option("cybermaps_settings", array()); $s["enable_xml_sitemaps"] = "0"; update_option("cybermaps_settings", $s);'
+python3 -B "${PROJECT_DIR}/tests/integration/sitemap-ownership-http.py" "http://${HTTP_ADDRESS}" disabled > "${RUNTIME_DIR}/sitemap-ownership-disabled.json"
+wp_cli eval '$s = get_option("cybermaps_settings", array()); $s["enable_xml_sitemaps"] = "1"; $s["redirect_wp_sitemap"] = "0"; update_option("cybermaps_settings", $s);'
+python3 -B "${PROJECT_DIR}/tests/integration/sitemap-ownership-http.py" "http://${HTTP_ADDRESS}" retained > "${RUNTIME_DIR}/sitemap-ownership-retained.json"
+wp_cli eval '$s = get_option("cybermaps_settings", array()); $s["redirect_wp_sitemap"] = "1"; update_option("cybermaps_settings", $s);'
+wp_cli rewrite structure '' --quiet
+python3 -B "${PROJECT_DIR}/tests/integration/sitemap-ownership-http.py" "http://${HTTP_ADDRESS}" plain > "${RUNTIME_DIR}/sitemap-ownership-plain.json"
+wp_cli rewrite structure '/%postname%/' --quiet
+python3 -B "${PROJECT_DIR}/tests/integration/sitemap-ownership-http.py" "http://${HTTP_ADDRESS}" restored > "${RUNTIME_DIR}/sitemap-ownership-restored.json"
 if [ -n "${CYBERMAPS_BROWSER_REPORT:-}" ]; then
 	node "${PROJECT_DIR}/tests/browser/release-smoke.mjs" "http://${HTTP_ADDRESS}" "${CYBERMAPS_BROWSER_REPORT}"
 fi
@@ -196,6 +208,8 @@ if [ "${CYBERMAPS_TEST_MULTISITE:-0}" = "1" ]; then
 	wp_cli plugin activate mcp-adapter --network --quiet
 	wp_cli eval 'require "/validation/wporg-multisite.php";' >> "${RUNTIME_DIR}/smoke.txt"
 fi
+wp_cli eval 'putenv( "CYBERMAPS_SITEMAP_FIXTURE=1" ); require "/validation/sitemap-ownership.php";' > "${RUNTIME_DIR}/sitemap-ownership.json"
+python3 -B "${PROJECT_DIR}/bin/validate_matrix.py" --verify-sitemap-ownership "${RUNTIME_DIR}/sitemap-ownership.json"
 wp_cli eval 'putenv( "CYBERMAPS_PRIMING_PROBE=1" ); putenv( "CYBERMAPS_PRIMING_PROBE_SEED=1" ); require "/validation/publication-cache-priming.php";' > "${RUNTIME_DIR}/publication-cache-priming.json"
 python3 -B "${PROJECT_DIR}/bin/validate_matrix.py" --verify-priming "${RUNTIME_DIR}/publication-cache-priming.json"
 wp_cli eval 'putenv( "CYBERMAPS_TEMPLATE_SOURCE_PROBE=1" ); require "/validation/stored-template-source.php";' > "${RUNTIME_DIR}/stored-template-source.json"
@@ -240,6 +254,7 @@ report = {
     "wp_debug_clean": True,
     "lifecycle_passed": True,
     "sitemap_regressions_passed": True,
+    "sitemap_ownership_passed": True,
     "rest_representation_passed": True,
     "publication_priming_passed": True,
     "stored_template_source_passed": True,

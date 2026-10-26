@@ -25,6 +25,23 @@ class SettingsSanitizerTest extends TestCase {
         parent::tearDown();
     }
 
+	public function test_xml_management_checkbox_preserves_other_tabs_and_accepts_only_booleans(): void {
+		$GLOBALS['cybermaps_mock_options']['cybermaps_settings'] = array( 'enable_xml_sitemaps' => '0' );
+		$_POST = array( 'option_page' => 'cybermaps_options_group', 'cybermaps_active_tab' => 'ai', 'cybermaps_form_complete' => '1' );
+		self::assertSame( '0', SettingsSanitizer::sanitize( array() )['enable_xml_sitemaps'] );
+		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['enable_xml_sitemaps'] = '1';
+		self::assertSame( '1', SettingsSanitizer::sanitize( array() )['enable_xml_sitemaps'] );
+		$_POST['cybermaps_active_tab'] = 'sitemaps';
+		self::assertSame( '0', SettingsSanitizer::sanitize( array() )['enable_xml_sitemaps'] );
+		foreach ( array( '1', 1, true ) as $value ) {
+			self::assertSame( '1', SettingsSanitizer::sanitize( array( 'enable_xml_sitemaps' => $value ) )['enable_xml_sitemaps'] );
+		}
+		foreach ( array( 'true', array( '1' ), null ) as $value ) {
+			self::assertSame( '0', SettingsSanitizer::sanitize( array( 'enable_xml_sitemaps' => $value ) )['enable_xml_sitemaps'] );
+		}
+		self::assertSame( array(), $GLOBALS['wp_hooks'], 'Sanitizing or previewing must not schedule rewrite changes.' );
+	}
+
     public function test_static_engine_mode_defaults_to_well_known(): void {
         global $cybermaps_mock_options;
         $cybermaps_mock_options['cybermaps_settings'] = array();

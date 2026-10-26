@@ -3,7 +3,7 @@
  * Plugin Name: CYBERMAPS: XML Sitemaps & llms.txt
  * Plugin URI: https://cybermaps.dev
  * Description: XML sitemaps, literal Markdown and llms.txt publishing, diagnostics, analytics, and reports for WordPress.
- * Version: 8.0.3
+ * Version: 8.0.4
  * Requires at least: 7.1
  * Requires PHP: 8.2
  * Author: Aleksandr Oreshkin
@@ -36,7 +36,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants
-define( 'CYBERMAPS_VERSION', '8.0.3' );
+define( 'CYBERMAPS_VERSION', '8.0.4' );
 define( 'CYBERMAPS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'CYBERMAPS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'CYBERMAPS_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
@@ -47,9 +47,6 @@ require_once CYBERMAPS_PLUGIN_DIR . 'src/Autoloader.php';
 
 // Initialize classes
 function cybermaps_init(): void {
-	// Cybermaps owns sitemap publication only after the plugin has initialized.
-	add_filter( 'wp_sitemaps_enabled', '__return_false' );
-
 	$container = new \Cybermaps\Core\Container();
 	$plugin    = new \Cybermaps\Core\Plugin( $container );
 	$plugin->run();
