@@ -9,6 +9,7 @@ import math
 import os
 from pathlib import Path
 import platform
+import re
 import shutil
 import subprocess
 import time
@@ -17,17 +18,32 @@ import urllib.request
 import uuid
 import zipfile
 import threading
+from datetime import datetime, timezone
 import xml.etree.ElementTree as ET
 from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[2]
 TEMP = ROOT / 'docs/generated/tmp'
-REPORTS = ROOT / 'docs/generated/releases/8.0.2/audit/performance'
+REPORTS = ROOT / 'docs/generated/releases'
 IMAGE = 'docker.io/library/wordpress:cli-php8.2'
 DB_IMAGE = 'docker.io/library/mariadb:10.11'
 MYSQL_IMAGE = 'docker.io/library/mysql:8.0'
 REDIS_IMAGE = 'docker.io/library/redis:7-alpine'
 BASELINE_SHA = '5eb0b49877b3b4ab1d92642133f96427d3e4def607c89ca25592f1732483ba8e'
+DEFAULT_OPERATIONS = 'sitemap_index,sitemap_early,sitemap_deep,sitemaps,llms,llms_full,llms_tldr,rag,search_hit,search_miss,audit_batch,links,audit,queue,static_sync'
+
+
+def utc_now():
+    return datetime.now(timezone.utc).isoformat()
+
+
+def package_version(path):
+    with zipfile.ZipFile(path) as archive:
+        header = archive.read('cybermaps/cybermaps.php').decode('utf-8')
+    match = re.search(r'^\s*\*?\s*Version:\s*(\d+\.\d+\.\d+)\s*$', header, re.MULTILINE)
+    if not match:
+        raise ValueError('Exact package has no supported plugin version header')
+    return match.group(1)
 
 
 def write_json(path, value):
@@ -69,7 +85,7 @@ def finite_metric(value, integer=False, positive=False):
             and math.isfinite(value) and (value > 0 if positive else value >= 0))
 
 
-def valid_sample(sample):
+def valid_metrics(sample):
     if not isinstance(sample, dict) or sample.get('error') or sample.get('fatal') or sample.get('skipped'):
         return False
     for key in ('queries', 'peak_memory_bytes'):
@@ -82,6 +98,34 @@ def valid_sample(sample):
         return False
     if type(sample.get('exit_code', 0)) is not int or sample.get('exit_code', 0) != 0:
         return False
+    return True
+
+
+def valid_static_slice(sample):
+    if not valid_metrics(sample) or not finite_metric(sample.get('operation_seconds')):
+        return False
+    result = sample.get('result')
+    if not isinstance(result, dict) or not isinstance(result.get('report'), dict):
+        return False
+    report = result['report']
+    if report.get('status') not in ('complete', 'pending'):
+        return False
+    counts = report.get('counts', {})
+    if not isinstance(counts, dict) or any(counts.get(key, 0) != 0 for key in ('failed', 'conflicted', 'retained', 'skipped')):
+        return False
+    if any(report.get(key) for key in ('failed', 'conflicted', 'retained', 'skipped')):
+        return False
+    state = result.get('state')
+    if state in ([], {}):
+        return report.get('status') == 'complete' and report.get('success') is True
+    return (isinstance(state, dict) and state.get('status') == 'pending'
+            and not state.get('last_error') and isinstance(state.get('phase'), str)
+            and isinstance(state.get('cursor'), (dict, list)))
+
+
+def valid_sample(sample):
+    if not valid_metrics(sample):
+        return False
     if 'state' in sample:
         return (type(sample.get('status')) is int and sample['status'] == 200
                 and finite_metric(sample.get('bytes'), integer=True, positive=True)
@@ -90,7 +134,7 @@ def valid_sample(sample):
     if not isinstance(result, dict) or not result or not finite_metric(sample.get('operation_seconds')):
         return False
     operation = sample.get('operation')
-    if operation not in ('audit', 'links', 'audit_batch', 'queue', 'static_sync', 'ownership'):
+    if operation not in ('audit', 'links', 'audit_batch', 'queue', 'static_sync', 'ownership', 'sitemaps'):
         return False
     if operation in ('audit', 'links'):
         analysis = result.get('analysis')
@@ -116,7 +160,33 @@ def valid_sample(sample):
         # completion. A successful slice may still report status=complete.
         if 'state' not in result or result['state'] not in ([], {}):
             return False
+        if 'slices' in result and (not result['slices'] or not all(valid_static_slice(item) for item in result['slices'])):
+            return False
+    if operation == 'sitemaps':
+        samples = result.get('responses')
+        expected = result.get('expected_paths')
+        if (not isinstance(samples, list) or not isinstance(expected, list) or len(expected) < 2
+                or len(set(expected)) != len(expected) or len(samples) != len(expected)
+                or [item.get('path') for item in samples] != expected
+                or not all(valid_sample(item) for item in samples)):
+            return False
     return True
+
+
+def aggregate_samples(operation, samples, elapsed, result):
+    first = samples[0] if samples else {}
+    aggregate = {'operation': operation, 'process_seconds': elapsed, 'operation_seconds': elapsed,
+                 'exit_code': 0, 'result': result}
+    for key in ('plugin', 'wordpress', 'php'):
+        aggregate[key] = first.get(key)
+        if any(sample.get(key) != aggregate[key] for sample in samples):
+            aggregate['error'] = 'runtime_identity_changed'
+    for key in ('queries', 'query_seconds', 'php_seconds'):
+        aggregate[key] = sum(sample.get(key, 0) for sample in samples)
+    aggregate['peak_memory_bytes'] = max((sample.get('peak_memory_bytes', 0) for sample in samples), default=0)
+    aggregate['slow_queries'] = sorted([query for sample in samples for query in sample.get('slow_queries', [])],
+                                       key=lambda query: query['seconds'], reverse=True)[:12]
+    return aggregate
 
 
 def resident_bytes(status):
@@ -163,7 +233,8 @@ class Runtime:
         self.identifier = 'cybermaps-perf-' + uuid.uuid4().hex[:10]
         self.work = TEMP / self.identifier
         self.web = self.work / 'wordpress'
-        self.output = REPORTS / (args.label + '-' + time.strftime('%Y%m%dT%H%M%SZ', time.gmtime()))
+        self.output = REPORTS / args.release_version / 'audit/performance' / (args.label + '-' + time.strftime('%Y%m%dT%H%M%SZ', time.gmtime()))
+        self.started_at = utc_now()
         self.output.mkdir(parents=True)
         self.web.mkdir(parents=True)
         (self.work / 'db').mkdir()
@@ -267,8 +338,8 @@ class Runtime:
                      '-w', '/var/www/html', self.php_image, self.cpus, '1024', 'php', '-d', 'memory_limit=1024M', '-d', 'max_execution_time=120',
                      '-S', '0.0.0.0:8080', '/performance/router.php')
         self.base = 'http://' + self.command('podman', 'port', self.http, '8080/tcp').stdout.strip()
-        archive = self.work / 'wordpress-7.1.zip'
-        urllib.request.urlretrieve('https://wordpress.org/wordpress-7.1.zip', archive)
+        archive = self.work / ('wordpress-' + self.args.wordpress_version + '.zip')
+        urllib.request.urlretrieve('https://wordpress.org/' + archive.name, archive)
         with zipfile.ZipFile(archive) as source:
             for member in source.infolist():
                 relative = Path(member.filename).relative_to('wordpress')
@@ -303,6 +374,7 @@ class Runtime:
         self.verify_limits()
         self.wp('core', 'verify-checksums')
         write_json(self.output / 'environment.json', {
+            'schema': 2, 'started_at': self.started_at, 'package_version': self.args.package_version,
             'zip': str(self.args.zip), 'staged_zip': str(self.archive), 'zip_sha256': self.zip_sha256,
             'harness_sha256': {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in (self.work / 'performance').iterdir() if p.is_file()},
             'label': self.args.label, 'args': {key: str(value) if isinstance(value, Path) else value for key, value in vars(self.args).items()},
@@ -452,18 +524,21 @@ class Runtime:
             raise RuntimeError('90 GiB disposable storage stop limit reached')
         return size
 
-    def reset_audit_fixture(self, stem):
+    def wait_for_worker_exit(self):
         # BusyBox timeout briefly outlives its completed PHP child. Wait for the
         # complete bounded exec to exit instead of racing lease reset against it.
         for attempt in range(51):
             processes = self.command('podman', 'top', self.http, 'pid', 'state', 'args').stdout
             try:
                 self.verify_worker_exit(processes)
-                break
+                return processes
             except RuntimeError:
                 if attempt == 50:
                     raise
                 time.sleep(.1)
+
+    def reset_audit_fixture(self, stem):
+        processes = self.wait_for_worker_exit()
         result = self.operation('reset_audit_lease')
         write_json(self.output / (stem + '-setup.json'), {
             'at_utc': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), 'container': self.http,
@@ -529,7 +604,7 @@ class Runtime:
 
     def all_valid(self):
         lock = json.loads((self.output / 'lock-contention.json').read_text())
-        files = [p for p in self.output.glob('*.json') if p.name[0].isdigit() and not p.name.endswith(('-plans.json', '-setup.json'))]
+        files = [p for p in self.output.glob('*.json') if p.name[0].isdigit() and not p.name.endswith(('-plans.json', '-setup.json', '-continuations.json'))]
         queue = json.loads((self.output / 'queue-contention.json').read_text())
         self.check_watchdog()
         return not self.storage_exceeded and self.resource_stop is None and self.watch_error is None and lock['passed'] and queue['passed'] and (bool(files) or self.args.lock_only) and all(
@@ -591,7 +666,100 @@ class Runtime:
             body, status, headers = error.read(), error.code, dict(error.headers)
         elapsed = time.perf_counter() - started
         body_error = validate_http(operation, status, body)
-        return {'body_valid': body_error is None, 'error': body_error, 'id': identifier, 'seconds': elapsed, 'status': status, 'bytes': len(body), 'sha256': hashlib.sha256(body).hexdigest(), 'headers': headers, 'failure_body_prefix': body[:2048].decode('utf-8', errors='replace') if body_error else None}
+        sample = {'body_valid': body_error is None, 'error': body_error, 'id': identifier, 'seconds': elapsed, 'status': status, 'bytes': len(body), 'sha256': hashlib.sha256(body).hexdigest(), 'headers': headers, 'failure_body_prefix': body[:2048].decode('utf-8', errors='replace') if body_error else None}
+        if operation == 'sitemap_index' and body_error is None:
+            sample['sitemap_locations'] = [element.text for element in ET.fromstring(body).iter() if element.tag.split('}')[-1] == 'loc']
+        return sample
+
+    def cli_sample(self, operation, stem, *arguments, timeout=None):
+        limit = timeout or self.args.long_timeout
+        started = time.perf_counter()
+        try:
+            result = self.operation(operation, *arguments, timeout=limit, check=False)
+            (self.output / (stem + '.stdout')).write_text(result.stdout)
+            (self.output / (stem + '.stderr')).write_text(result.stderr)
+            sample = {'operation': operation, 'process_seconds': time.perf_counter() - started, 'exit_code': result.returncode}
+            if result.returncode != 0:
+                return sample | {'error': 'operation_terminated_or_failed', 'timeout_seconds': limit}
+            decoded = json.loads(result.stdout)
+            if not isinstance(decoded, dict):
+                raise ValueError('CLI metrics must be an object')
+            return sample | decoded
+        except subprocess.TimeoutExpired:
+            # A killed host client must not leave a container PHP worker running.
+            self.command('podman', 'exec', self.http, 'sh', '-c', "pkill -f '/performance/runner.php' || true", check=False)
+            return {'operation': operation, 'error': 'operation_timeout', 'timeout_seconds': limit}
+        except (ValueError, TypeError) as error:
+            return {'operation': operation, 'error': 'invalid_operation_metrics: ' + str(error)}
+
+    def prepare_static_fixture(self, stem):
+        processes = self.wait_for_worker_exit()
+        started = time.monotonic()
+        resets = []
+        while time.monotonic() - started < self.args.long_timeout:
+            remaining = max(1, int(self.args.long_timeout - (time.monotonic() - started)))
+            reset = self.operation('static_reset', timeout=remaining, check=False)
+            if reset.returncode:
+                raise RuntimeError('Static fixture reset failed: ' + reset.stderr[:1000])
+            result = json.loads(reset.stdout)
+            resets.append(result)
+            write_json(self.output / (stem + '-setup.json'), {
+                'at_utc': utc_now(), 'verified_processes': processes, 'resets': resets,
+                'reason': 'Independent first static publication; prior files purged through the plugin API.'})
+            if result.get('success') is True:
+                self.operation('static_prepare')
+                self.operation('clear')
+                return
+            if result.get('status') != 'incomplete':
+                raise RuntimeError('Static fixture reset did not finish safely')
+        raise RuntimeError('Static fixture reset deadline reached')
+
+    def measure_static(self, stem):
+        self.prepare_static_fixture(stem)
+        started = time.perf_counter()
+        slices = []
+        previous = None
+        for index in range(self.args.static_slices):
+            remaining = self.args.static_timeout - (time.perf_counter() - started)
+            if remaining < 1:
+                break
+            self.storage_check()
+            sample = self.cli_sample('static_sync', f'{stem}-slice-{index:03d}',
+                                     timeout=min(self.args.long_timeout, int(remaining)))
+            slices.append(sample)
+            write_json(self.output / (stem + '-continuations.json'), slices)
+            if not valid_static_slice(sample):
+                return {'operation': 'static_sync', 'error': 'static_slice_failed', 'result': {'slices': slices}}
+            result = sample['result']
+            state = result['state']
+            if state in ([], {}):
+                return aggregate_samples('static_sync', slices, time.perf_counter() - started,
+                                         result | {'slices': slices, 'independent_publication': True})
+            progress = json.dumps({key: state.get(key) for key in ('generation', 'epoch', 'phase', 'cursor', 'writes')}, sort_keys=True)
+            if previous == progress:
+                return {'operation': 'static_sync', 'error': 'static_continuation_stalled', 'result': {'slices': slices}}
+            previous = progress
+        return {'operation': 'static_sync', 'error': 'static_completion_budget_exhausted',
+                'timeout_seconds': self.args.static_timeout, 'result': {'slices': slices}}
+
+    def measure_sitemaps(self, stem, inventory):
+        expected = ['/sitemap.xml'] + sorted({urlsplit(entry['loc']).path for entry in inventory['entries']})
+        responses = []
+        started = time.perf_counter()
+        for index, path in enumerate(expected):
+            operation = 'sitemap_index' if index == 0 else 'sitemap_child'
+            sample = self.http_sample(path, f'{stem}-{index}', operation)
+            sample = self.read_http_metric(sample | {'state': 'complete_inventory', 'warmup': False, 'path': path})
+            responses.append(sample)
+            if not valid_sample(sample):
+                return {'operation': 'sitemaps', 'error': 'sitemap_response_failed', 'result': {'responses': responses, 'expected_paths': expected}}
+            if index == 0:
+                locations = sample.get('sitemap_locations', [])
+                if (not locations or any(not isinstance(url, str) or urlsplit(url).netloc != urlsplit(self.base).netloc for url in locations)
+                        or sorted(urlsplit(url).path for url in locations) != expected[1:]):
+                    return {'operation': 'sitemaps', 'error': 'sitemap_index_inventory_mismatch', 'result': {'responses': responses, 'expected_paths': expected}}
+        return aggregate_samples('sitemaps', responses, time.perf_counter() - started,
+                                 {'responses': responses, 'expected_paths': expected})
 
     def read_http_metric(self, sample):
         if not hasattr(self, 'metrics_offset'):
@@ -673,21 +841,12 @@ class Runtime:
                     self.operation('clear')
                     if operation == 'audit':
                         self.reset_audit_fixture(stem)
-                    started = time.perf_counter()
-                    try:
-                        result = self.operation(operation, *([str(size)] if operation == 'ownership' else []), timeout=self.args.long_timeout, check=False)
-                        (self.output / (stem + '.stdout')).write_text(result.stdout)
-                        (self.output / (stem + '.stderr')).write_text(result.stderr)
-                        sample = {'operation': operation, 'process_seconds': time.perf_counter() - started, 'exit_code': result.returncode}
-                        if result.returncode in (124, 137, 143):
-                            sample['error'] = 'operation_terminated_or_timed_out'
-                        if result.returncode == 0:
-                            sample |= json.loads(result.stdout)
-                        samples.append(sample)
-                    except subprocess.TimeoutExpired:
-                        # timeout kills the host client; explicitly kill that PHP exec too.
-                        self.command('podman', 'exec', self.http, 'sh', '-c', "pkill -f '/performance/runner.php' || true", check=False)
-                        samples.append({'error': 'operation_timeout', 'timeout_seconds': self.args.long_timeout})
+                    if operation == 'static_sync':
+                        samples.append(self.measure_static(stem))
+                    elif operation == 'sitemaps':
+                        samples.append(self.measure_sitemaps(stem, inventory))
+                    else:
+                        samples.append(self.cli_sample(operation, stem, *([str(size)] if operation == 'ownership' else [])))
                 for sample in samples:
                     sample['valid'] = valid_sample(sample)
                 write_json(self.output / (stem + '.json'), samples)
@@ -697,7 +856,7 @@ class Runtime:
     def summarize(self):
         rows = []
         for path in sorted(self.output.glob('*.json')):
-            if not path.name[0].isdigit() or path.name.endswith(('-plans.json', '-setup.json')):
+            if not path.name[0].isdigit() or path.name.endswith(('-plans.json', '-setup.json', '-continuations.json')):
                 continue
             samples = json.loads(path.read_text())
             if samples and 'state' not in samples[0]:
@@ -741,6 +900,8 @@ class Runtime:
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--zip', type=lambda s: Path(s).resolve(), required=True)
+    parser.add_argument('--release-version', help='Release evidence owner; defaults to the measured package version.')
+    parser.add_argument('--wordpress-version', default='7.1')
     parser.add_argument('--image-manifest', type=lambda value: Path(value).resolve())
     parser.add_argument('--label', required=True)
     parser.add_argument('--sizes', type=int, nargs='+', default=[1000, 10000, 100000, 1000000])
@@ -748,7 +909,9 @@ def main():
     parser.add_argument('--cold', type=int, default=3)
     parser.add_argument('--timeout', type=int, default=150)
     parser.add_argument('--long-timeout', type=int, default=600)
-    parser.add_argument('--operations', default='sitemap_index,sitemap_early,sitemap_deep,llms,llms_full,llms_tldr,rag,search_hit,search_miss,audit_batch,links,audit,queue,static_sync')
+    parser.add_argument('--static-timeout', type=int, default=600, help='Total deadline across fresh PHP continuation requests.')
+    parser.add_argument('--static-slices', type=int, default=50)
+    parser.add_argument('--operations', default=DEFAULT_OPERATIONS)
     parser.add_argument('--stress-page-lists', type=int, default=0)
     parser.add_argument('--database', choices=['mariadb', 'mysql'], default='mariadb')
     parser.add_argument('--lock-only', action='store_true')
@@ -756,8 +919,16 @@ def main():
     args = parser.parse_args()
     if not args.label.replace('-', '').replace('_', '').isalnum():
         parser.error('Label must contain only letters, numbers, underscore and hyphen')
-    if args.warm < 1 or args.cold < 1 or args.timeout < 1 or args.long_timeout < 1:
+    if args.warm < 1 or args.cold < 1 or args.timeout < 1 or args.long_timeout < 1 or args.static_timeout < 1 or args.static_slices < 1:
         parser.error('Sample counts and timeouts must be positive')
+    if not re.fullmatch(r'\d+\.\d+(?:\.\d+)?', args.wordpress_version):
+        parser.error('WordPress version must be an explicit release number')
+    if not set(args.operations.split(',')) <= set(DEFAULT_OPERATIONS.split(',')) | {'ownership'}:
+        parser.error('Unknown operation requested')
+    args.package_version = package_version(args.zip)
+    args.release_version = args.release_version or args.package_version
+    if not re.fullmatch(r'\d+\.\d+\.\d+', args.release_version):
+        parser.error('Release version must have major.minor.patch format')
     if args.database == 'mysql' and not args.lock_only:
         parser.error('MySQL compatibility run is --lock-only; corpus benchmarks use MariaDB')
     digest = hashlib.sha256(args.zip.read_bytes()).hexdigest()
@@ -777,7 +948,8 @@ def main():
         runtime.verify_package()
         complete = runtime.all_valid()
         runtime.verify_package()
-        write_json(runtime.output / 'completion.json', {'complete': complete, 'executed': True, 'zip_sha256': digest})
+        write_json(runtime.output / 'completion.json', {'schema': 2, 'complete': complete, 'executed': True, 'zip_sha256': digest,
+                   'package_version': args.package_version, 'completed_at': utc_now()})
         if not complete:
             raise SystemExit(2)
     except SystemExit:

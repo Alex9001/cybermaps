@@ -72,6 +72,29 @@ class CandidateRetryTest(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, 'final artifact differs'):
             gate.retained_candidate(self.record)
 
+    def test_inflight_svn_states_never_allow_evidence_regeneration(self):
+        path = self.directory / 'wordpress-publication.json'
+        before = (self.directory / 'validation.json').read_bytes()
+        for state in ('svn-prepared', 'svn-committing', 'svn-outcome-unknown', 'svn-committed'):
+            with self.subTest(state=state):
+                path.write_text(json.dumps(dict(state=state)))
+                with self.assertRaises(RuntimeError):
+                    gate.build()
+                with self.assertRaises(RuntimeError):
+                    gate.ready()
+                self.assertEqual((self.directory / 'validation.json').read_bytes(), before)
+
+    def test_tool_only_refresh_revalidates_retained_bytes(self):
+        original = dict(self.identity, dependencies={'browser': 'old'})
+        self.identity['dependencies'] = {'browser': 'new'}
+        proof = dict(id=1, tag='v8.0.1', commit='commit')
+        fake = SimpleNamespace(verify_retry_candidate=lambda _: proof)
+        loader = SimpleNamespace(loader=SimpleNamespace(exec_module=lambda _: None))
+        with patch.object(gate.importlib.util, 'spec_from_file_location', return_value=loader), \
+                patch.object(gate.importlib.util, 'module_from_spec', return_value=fake):
+            digest, checked = gate.retained_candidate({**self.record, 'identity': original})
+        self.assertEqual((digest, checked), ('zip', proof))
+
 
 class RemoteRetryTest(unittest.TestCase):
     def test_published_or_conflicting_draft_is_refused_without_writes(self):

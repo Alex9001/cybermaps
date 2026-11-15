@@ -1,6 +1,6 @@
-# Cybermaps 8.0.4 Feature Reference
+# Cybermaps 8.1.0 Feature Reference
 
-This reference describes Cybermaps 8.0.4 using the
+This reference describes Cybermaps 8.1.0 using the
 [generated source inventory](./dev/manifest.json). Cloudflare automation,
 Debugging, compatibility publication, and independent LiteSpeed/APCu controls
 are included; availability and public delivery depend on the configuration.
@@ -412,7 +412,7 @@ translation relationships.
 
 The separate AI Configuration Brief is a credential-excluding, site-aware
 Markdown handoff with current non-secret context, 122 editable fields in the
-8.0.4 generated contract, field guidance,
+8.1.0 generated contract, field guidance,
 dependencies, examples, risk levels, and an initially null JSON changes
 envelope. Imports are merge-only and require a server-generated preview that
 shows canonical sanitized values. Unknown or malformed input is rejected;

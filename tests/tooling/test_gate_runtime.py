@@ -1,11 +1,13 @@
 from pathlib import Path
 import json
+import copy
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'bin'))
-from validate_matrix import validate_result, verify_priming_fixture, verify_sql_fixture, verify_output_buffer_fixture, verify_sitemap_ownership_fixture
+from validate_matrix import validate_result, verify_priming_fixture, verify_sql_fixture, verify_output_buffer_fixture, verify_sitemap_ownership_fixture, verify_audit_batching_fixture
 from release_gate import validate_runtime_evidence
 
 
@@ -43,6 +45,7 @@ class RuntimeBindingTest(unittest.TestCase):
                       rest_representation_passed=True,
                       publication_priming_passed=True,
                       configuration_persistence_passed=True, cloudflare_persistence_passed=True, audit_run_lock_passed=True,
+                      audit_batching_passed=True,
                       static_ownership_passed=True, state_cutover_passed=True,
                       stored_template_source_passed=True, raw_option_store_passed=True,
                       output_buffer_ownership_passed=True, sitemap_ownership_passed=True,
@@ -66,7 +69,7 @@ class RuntimeBindingTest(unittest.TestCase):
             with self.subTest(priming=value), self.assertRaisesRegex(RuntimeError, 'Native publication priming'):
                 validate_result(incomplete, '7.1.2', '8.2', False, 'frozen', 'commit')
 
-        for key in ('configuration_persistence', 'cloudflare_persistence', 'audit_run_lock', 'static_ownership', 'state_cutover', 'stored_template_source', 'raw_option_store', 'output_buffer_ownership', 'sitemap_ownership'):
+        for key in ('configuration_persistence', 'cloudflare_persistence', 'audit_run_lock', 'audit_batching', 'static_ownership', 'state_cutover', 'stored_template_source', 'raw_option_store', 'output_buffer_ownership', 'sitemap_ownership'):
             for value in (None, False, 1, 'true'):
                 incomplete = dict(result)
                 if value is None:
@@ -75,6 +78,68 @@ class RuntimeBindingTest(unittest.TestCase):
                     incomplete[key + '_passed'] = value
                 with self.subTest(key=key, value=value), self.assertRaisesRegex(RuntimeError, 'Native ' + key):
                     validate_result(incomplete, '7.1.2', '8.2', False, 'frozen', 'commit')
+
+    def audit_batching_receipt(self):
+        resources = [{'resource_key': 'post:1:' + str(index), 'modified_gmt': None, 'age_days': None,
+                      'title': "L'été café '" + str(index)} for index in range(1, 4)]
+        findings = [{'resource_key': row['resource_key'], 'summary': "Quoted 'café' \\ path",
+                     'evidence_json': json.dumps({'unicode': '東京', 'quote': "'\\"})}
+                    for row in resources for _ in range(2)]
+        return dict(schema_version=1, audit_batching_passed=True, cleanup_passed=True, database='10.11',
+                    resources=dict(legacy=resources, batch=copy.deepcopy(resources)),
+                    findings=dict(legacy=findings, batch=copy.deepcopy(findings)),
+                    rejections={case: {method: dict(rejected=True, exception='RuntimeException')
+                                       for method in ('legacy', 'batch')} for case in ('length', 'invalid_utf8')})
+
+    def test_audit_batching_requires_actual_parity_negative_cases_and_cleanup(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).resolve().parents[2] / 'docs/generated/tmp') as temporary:
+            path = Path(temporary) / 'audit-batching.json'
+            good = self.audit_batching_receipt()
+            path.write_text(json.dumps(good))
+            verify_audit_batching_fixture(path)
+            mutations = [
+                lambda value: value.update(audit_batching_passed=1),
+                lambda value: value.update(cleanup_passed=False),
+                lambda value: value['resources']['batch'][0].update(title='lost Unicode'),
+                lambda value: value['findings']['batch'].pop(),
+                lambda value: value['rejections']['length']['batch'].update(rejected=False),
+                lambda value: value['rejections'].pop('invalid_utf8'),
+                lambda value: value.update(resources={}),
+            ]
+            for index, mutation in enumerate(mutations):
+                bad = copy.deepcopy(good)
+                mutation(bad)
+                path.write_text(json.dumps(bad))
+                with self.subTest(index=index), self.assertRaisesRegex(RuntimeError, 'Native audit_batching'):
+                    verify_audit_batching_fixture(path)
+            path.write_text(json.dumps({'schema_version': 1, 'audit_batching_passed': True, 'cleanup_passed': True, 'database': '10.11'}))
+            with self.assertRaisesRegex(RuntimeError, 'row parity incomplete'):
+                verify_audit_batching_fixture(path)
+
+    def test_runtime_cannot_omit_hash_bound_audit_batching_receipt(self):
+        root = Path(__file__).resolve().parents[2]
+        with tempfile.TemporaryDirectory(dir=root / 'docs/generated/tmp') as temporary:
+            evidence = {}
+            for suffix in ('', '-multisite'):
+                path = Path(temporary) / ('wp-7.1-php-8.2' + suffix + '.json')
+                path.write_text(json.dumps({'plugin_check_version': '2.2.0'}))
+                evidence[str(path.relative_to(root))] = 'hash'
+            record = dict(upstream={'wordpress_version': '7.1'}, evidence=evidence,
+                          zip_sha256='zip', identity={'commit': 'commit'})
+            policy = dict(minimum_wordpress='7.1', php_versions=['8.2'], plugin_check_version='2.2.0')
+            with mock.patch('release_gate.policy', return_value=policy), mock.patch('validate_matrix.validate_result'):
+                with self.assertRaisesRegex(RuntimeError, 'Native audit batching evidence missing'):
+                    validate_runtime_evidence(record)
+                for report in list(evidence):
+                    path = (root / report).with_suffix('.evidence') / 'audit-batching.json'
+                    path.parent.mkdir()
+                    path.write_text(json.dumps(self.audit_batching_receipt()))
+                    evidence[str(path.relative_to(root))] = 'hash'
+                validate_runtime_evidence(record)
+                missing = next(path for path in evidence if path.endswith('/audit-batching.json'))
+                del evidence[missing]
+                with self.assertRaisesRegex(RuntimeError, 'Native audit batching evidence missing'):
+                    validate_runtime_evidence(record)
 
     def test_output_buffer_fixture_cannot_pass_with_only_an_exit_or_aggregate_flag(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).resolve().parents[2] / 'docs/generated/tmp') as temporary:

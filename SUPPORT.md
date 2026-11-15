@@ -6,11 +6,15 @@
    [technical documentation](docs/documentation.md).
 2. Use **Sitemap Status** or **AI Discovery Status** to capture the exact public
    URL, response status, media type, and delivery mode.
-3. Re-test with the current Cybermaps beta or release on WordPress 7.1+ and
+3. Re-test with the current stable Cybermaps release on WordPress 7.1+ and
    PHP 8.2+; PHP 8.3+ is recommended.
 4. Search [existing GitHub issues](https://github.com/Alex9001/cybermaps/issues)
-   before opening a new one. The settings sidebar has an **Open beta feedback**
-   card with links to report an issue, suggest an improvement, and open Debugging.
+   before opening a new one. The settings sidebar has a **Help and feedback**
+   card with WordPress.org support, GitHub issues, private security reporting,
+   and Debugging links.
+
+For setup questions, use the [WordPress.org support forum](https://wordpress.org/support/plugin/cybermaps/).
+GitHub remains the issue tracker for reproducible bugs and feature requests.
 
 ## Bug reports
 

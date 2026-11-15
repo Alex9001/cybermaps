@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "plugin_check_version": "2.1.0",
+  "plugin_check_version": "2.2.0",
   "minimum_wordpress": "7.1",
   "php_versions": [
     "8.2",
@@ -9,6 +9,15 @@
     "8.5"
   ],
   "evidence_max_age_hours": 24,
+  "upgrade_baseline": {
+    "version": "8.0.4",
+    "zip_sha256": "b63cb6f54f800d758cfe49e2056bb82bfc4e122121c46c98c19ed7f6bab9e7f9"
+  },
+  "first_stable_version": "8.1.0",
+  "presentation": {
+    "directory_screenshots": 8,
+    "website_screenshots": 14
+  },
   "review_sections": [
     "security",
     "assets_licenses",
@@ -41,7 +50,12 @@
     "website_live": "Published tag deployed to cybermaps.dev; production contracts, downloads and changelog verified",
     "remote_capabilities": "Only reviewed owned read-only MCP resources/search; no generic ability bridge, custom MCP authentication, or remote mutation abilities; dependency/migration/negative runtime evidence required",
     "output_buffer_ownership": "No shipped PHP buffer mutation calls/imports; native caller-ownership cases and registered report stylesheet checks pass with retained granular evidence",
-    "sitemap_ownership": "Core sitemaps are replaced only while Cybermaps actively manages XML and owns the redirect; native filter/private-site decisions, opt-out handover, static ownership cleanup, per-site isolation and fresh HTTP enable/disable/restore cases must pass"
+    "sitemap_ownership": "Core sitemaps are replaced only while Cybermaps actively manages XML and owns the redirect; native filter/private-site decisions, opt-out handover, static ownership cleanup, per-site isolation and fresh HTTP enable/disable/restore cases must pass",
+    "stable_presentation": "Current benefit-led stable wording, accurately disclosed optional features, Directory images with provenance and matching captions, exact-candidate screenshots and evidence-backed responsive/keyboard/zoom/empty/error/save/destructive visual review",
+    "native_updates": "Exact candidate passes real dashboard and WP-CLI updates from the reviewed latest-stable baseline on single sites and networks (the first stable launch uses the explicit beta baseline); stable basename/native updates and settings, tables, cron, rewrites, files and activation are preserved; public WordPress.org update verification follows SVN publication",
+    "everyday_workloads": "Complete 1000-item and 10000-item sitemap, report and full static-publication workloads in all four cache configurations within existing resource limits; controlled reviewed-baseline comparison, raw evidence and truthful larger-corpus limitations",
+    "wordpress_distribution": "One atomic SVN release from frozen bytes and reviewed separate Directory assets; immutable new tag, exact downloaded file parity, verified listing/artwork and native update before public GitHub/website launch; ambiguous writes inspected before retry",
+    "release_channels": "Stable is the default; beta is explicit and cannot reach WordPress.org or replace stable production docs; exact source, metadata, assets and receipts stay consistent across resumable channels"
   },
   "references": [
     "https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/",

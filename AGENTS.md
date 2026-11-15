@@ -126,7 +126,10 @@ When you bump the version, update **all** of these so they agree:
    and `docs/ai-configuration.md`, add the release to `changelog.txt`, and run
    `composer i18n:generate` so the POT project version matches.
 
-Historical changelog/upgrade-notice entries stay as-is — only add new ones.
+Keep the five latest changelog and upgrade-notice entries in `readme.txt`.
+Archive older entries verbatim in `changelog.txt` before removing them from the
+directory readme; never rewrite historical release claims. Keep useful setup,
+feature, privacy and service disclosures within the readme's 10 KB limit.
 
 The public Astro docs are part of the automated release workflow. Follow
 `docs/dev/RELEASE-WORKFLOW.md` and `docs/dev/WEBSITE-SYNC.md`. `composer release`

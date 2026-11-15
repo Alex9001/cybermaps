@@ -128,7 +128,7 @@ final class SystemStatus {
 			<?php foreach ( $status['sections'] as $section ) : ?>
 				<section class="cm-card-sm cm-mb-20">
 					<h2><?php echo esc_html( (string) $section['label'] ); ?></h2>
-					<div class="cm-status-table-wrap">
+					<div class="cm-status-table-wrap" tabindex="0" role="region" aria-label="<?php echo esc_attr( (string) $section['label'] ); ?>">
 						<table class="widefat striped cm-status-table">
 							<thead><tr>
 								<th><?php esc_html_e( 'Component', 'cybermaps' ); ?></th>

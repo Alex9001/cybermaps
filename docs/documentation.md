@@ -1,6 +1,6 @@
 # Cybermaps — Technical Documentation
 
-> Version 8.0.4 · PHP 8.2 · WordPress 7.1
+> Version 8.1.0 · PHP 8.2 · WordPress 7.1
 
 Public sitemap credit is optional. In **Sitemaps**, enable **Show the CYBER MAPS
 credit on public sitemaps** to opt in. `show_sitemap_attribution` defaults to `0`
@@ -1090,6 +1090,13 @@ batch objects are released from the runtime cache. Posts and pages use the
 configurable rules; another public post type uses a 150-word fallback with no
 age or required-media finding. Report generation is synchronous. It is not a
 background job that resumes after a request timeout.
+
+Resource snapshots retain WordPress's normal insert validation and assigned
+database IDs. Finding writes use small prepared batches after WordPress column
+validation, with individual inserts for the remainder, oversized payloads, and
+environments that cannot validate the column text locally.
+Storage failures fail the run; batching does not omit findings or mark a partial
+report complete.
 
 When an object-cache implementation cannot release its runtime data, both scan
 passes share a fallback budget of 1,000 candidate hydrations, a 20-second

@@ -3,27 +3,94 @@ Contributors: oreshkin
 Tags: sitemap, llms-txt, technical-seo, content-audit, indexnow
 Requires at least: 7.1
 Tested up to: 7.1
-Stable tag: 8.0.4
+Stable tag: 8.1.0
 Requires PHP: 8.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Sitemaps, AI discovery and reports.
+Publish XML sitemaps, llms.txt and readable Markdown. Check delivery, understand crawler visits, and find content issues in WordPress.
 
 == Description ==
 
-XML management is optional. MCP requires MCP Adapter 0.7.0+.
+CYBERMAPS helps you publish a map of your WordPress content, check that it reaches visitors and crawlers, and understand what needs attention.
+
+Start with the three-step Quick Setup, choose what to publish, then check the results from your dashboard. The plugin is free and open source, with no license key or paid feature locks.
+
+= Sitemaps for search engines and visitors =
+
+* XML sitemap index and child sitemaps for public posts, pages, custom post types and taxonomies.
+* News, image, video, author, archive and RSS output, with content-selection controls.
+* A configurable HTML sitemap for visitors using the [cybermap] shortcode.
+* Optional XML management: keep another sitemap solution in charge while using Cybermaps discovery and reporting features.
+
+= Readable content for AI clients =
+
+* llms.txt with selected links, and Markdown versions of eligible public pages.
+* Optional full-text llms-full.txt and bounded retrieval chunks.
+* An opt-in AI Publication Hub with an AI manifest, JSON Feed, knowledge graph, AI sitemap, API Catalog, OpenAPI and public search.
+* Site identity, crawler preferences and a read-only Agent Skills guide.
+* Optional read-only MCP connections through the separate WordPress MCP Adapter plugin. Core features work without it.
+
+These publications make content available to compatible clients; they do not guarantee search rankings, AI training, citations or traffic. Some discovery formats are emerging conventions or drafts, as identified in the documentation.
+
+= Check delivery and improve your content =
+
+* Sitemap Status and AI Discovery Status check public URLs, response headers and routing.
+* Content reports highlight metadata, media and internal-link findings, with saved comparisons and printable, CSV or JSON exports.
+* Opt-in local analytics show crawler requests, with retention, export and clearing controls.
+* The optional Static File Engine publishes supported files with ownership checks; multisite uses dynamic delivery.
+* Optional IndexNow notifications, WebSub notifications and Cloudflare configuration are explained below. Each requires configuration or consent.
+
+Cybermaps can work alongside supported SEO and translation integrations. Choose one XML sitemap owner, then verify your site's public output. Server, cache and CDN behavior can affect delivery; diagnostics show what was actually observed.
+
+[Getting started](https://cybermaps.dev/docs/getting-started/) | [Feature guide](https://cybermaps.dev/features/) | [Documentation](https://cybermaps.dev/docs/)
 
 == Installation ==
 
-Cybermaps → Overview → Quick Setup.
-MCP: activate MCP Adapter; save read-only opt-in in AI Publishing.
-Use HTTPS + Subscriber Application Password, or WP-CLI.
-https://cybermaps.dev/docs/mcp/
+1. Install and activate CYBERMAPS from Plugins → Add New Plugin, or upload the installable release ZIP.
+2. Open Cybermaps → Overview → Quick Setup and choose your publishing settings.
+3. In XML Sitemaps, choose the content to include. Turn XML management off if another plugin handles your sitemaps.
+4. Review Sitemap Status. Enable the AI Publication Hub in AI Publishing only if you want those publications, then review AI Discovery Status.
+5. Enable analytics, external notifications or static publication separately if needed.
+
+Requires WordPress 7.1+ and PHP 8.2+; PHP 8.3+ is recommended. Back up your site before updating.
+
+== Frequently Asked Questions ==
+
+= Does Cybermaps replace WordPress sitemaps? =
+
+Cybermaps replaces the built-in sitemap only when XML management and the Core sitemap redirect are enabled and your site uses pretty permalinks (any setting other than Plain). Turn XML management off to let WordPress handle its built-in sitemap again, subject to your site's privacy settings and other plugins.
+
+= Do I need MCP Adapter? =
+
+Only for MCP clients. Install WordPress MCP Adapter 0.7.0+, then save the read-only opt-in in AI Publishing. Connect over HTTPS with a Subscriber Application Password, or use WP-CLI. This exposes reviewed public resources and search, not remote site administration. [MCP setup](https://cybermaps.dev/docs/mcp/).
+
+= Does it send analytics to a service? =
+
+No. Optional crawler analytics stays in your WordPress database. External services run only for their configured purpose, as disclosed below. Review diagnostic bundles before sharing them publicly.
+
+= Can I use it on a large site? =
+
+Publications have documented byte, query and scan limits. Large full-text exports or reports may be incomplete or reach a limit; the plugin reports that instead of claiming a complete result. Check your own site's workload and hosting resources.
+
+= Where can I get help? =
+
+Use the [WordPress.org support forum](https://wordpress.org/support/plugin/cybermaps/) for help, or [GitHub issues](https://github.com/Alex9001/cybermaps/issues) for reproducible bugs and feature requests. Cybermaps → Debugging can create a support bundle. Report security issues [privately](https://github.com/Alex9001/cybermaps/security/advisories/new).
+
+== Screenshots ==
+
+1. Overview and Quick Setup: choose what your site publishes.
+2. XML Sitemaps: select content and choose who manages sitemap generation.
+3. AI Publishing: configure optional discovery publications and read-only MCP guidance.
+4. Site Identity: describe your organization and public content.
+5. Sitemap Status: inspect public sitemap delivery.
+6. AI Discovery Status: see configured publications and their delivery checks.
+7. Content Reports: review saved findings and export results.
+8. Analytics: inspect local crawler observations after opting in.
 
 == Source Code ==
 
-https://github.com/Alex9001/cybermaps/tree/v8.0.4
+https://github.com/Alex9001/cybermaps/tree/v8.1.0
 JS/CSS: assets/; setup-wizard.js uses wp.element. No compilation.
 Build: composer install; bash bin/package-candidate.sh.
 
@@ -71,6 +138,13 @@ Uninstall retains data unless cleanup is enabled.
 
 == Changelog ==
 
+= 8.1.0 =
+* Stable WordPress.org launch with clearer setup, directory presentation and support links.
+* Improve dashboard contrast, mobile tables and keyboard navigation.
+* Reduce content-report database writes while preserving findings and WordPress field validation.
+* Stronger release checks for installation, upgrades, complete workloads, screenshots and website consistency.
+
+
 = 8.0.4 =
 * Condition Core sitemap replacement on XML ownership.
 
@@ -83,111 +157,13 @@ Uninstall retains data unless cleanup is enabled.
 = 8.0.1 =
 * Delete obsolete MCP settings and upgrade code; use one adapter switch.
 
-= 8.0.0 =
-* Optional WordPress MCP Adapter replaces custom MCP/OAuth. Only public resources and search remain; remote operations and arbitrary abilities are removed.
-* Guided setup, migration and release checks.
-
-= 7.5.4 =
-* Made public sitemap attribution an explicit, default-off choice.
-* Added evidence-bound release gates and stricter WordPress.org validation.
-
-= 7.5.3 =
-* Sanitized Quick Setup at the request boundary and bounded client-IP headers.
-* Escaped admin markup at output and separated HTML/JSON from other protocols.
-* Documented editable asset sources and expanded real-WordPress security checks.
-
-= 7.5.2 =
-* Hardened request authorization, exact setup input schemas, contextual protocol output, SQL lists, and client-IP hook data.
-* Moved report CSS to an enqueued asset, removed reserved transient-option access, and added fail-closed WordPress.org release checks.
-* Restored the WordPress 7.1/PHP 8.2 baseline with native Abilities API checks.
-
-= 7.5.1 =
-* Added local orphan, homepage-path, and three-click-depth content findings.
-* Preserved headings and links across Markdown output.
-
-= 7.5.0 =
-* Added three-step Quick Setup with site presets, basic identity, and a settings receipt.
-* Fixed setup asset caching and rendering; synchronized release documentation.
-
-= 7.4.2 =
-* Bounded LLMS work, prevented overlapping rebuilds, reduced cache reads, and corrected scan coverage.
-
-= 7.4.1 =
-* Hardened request sanitization and SQL identifiers; documented Plugin Check false positives.
-
-= 7.4.0 =
-* Fixed delivery and reports.
-
-= 7.3.4 =
-* Fixed cross-site origin caching for `/ai-discovery` without changing its public URL.
-
-= 7.3.3 =
-
-* Added an ownership-safe `/ai-discovery` fallback for origins with unpurgeable path caches.
-
-= 7.3.2 =
-
-* Isolated APCu and shared object-cache entries across independent WordPress installations.
-
-= 7.3.1 =
-
-* Fixed the Advanced Cloudflare eligibility control fatal and confirmation-row visibility.
-
-= 7.3.0 =
-
-* Added opt-in, expiring redacted diagnostics/support bundles; renamed System Status to Debugging.
-
-= 7.2.2 =
-
-* Disabled Cloudflare mutations when proxy traffic is not detected, with an
-  exact-host, page-scoped manual confirmation for advanced deployments.
-
-= 7.2.1 =
-
-* Fixed recoverable OAuth completion, canonical rule paths, and automatic
-  browser-visible verification with per-resource diagnostics.
-* Added Cloudflare execution proof and complete OAuth metadata cache bypass.
-
-= 7.2.0 =
-
-* Added public Cloudflare OAuth with PKCE, account consent, automatic combined
-  rule installation, immediate token revocation, and no stored credential.
-* Added a bounded open-source callback relay, ambiguity-safe zone selection,
-  OAuth lifecycle status, and a one-time-token fallback.
-* Added self-managed Cloudflare OAuth for organizations that want the callback,
-  PKCE transaction, code exchange, and token revocation to remain on WordPress.
-
-= 7.1.0 =
-
-* Added System Status with stack detection and explicit optimization-utilization evidence.
-* Added one-time-token Cloudflare header and cache-safety automation plus default-on LiteSpeed and APCu controls.
-* Unified edge diagnostics with the static publication header contract and added scoped Cybermaps-only cache invalidation.
-
-= 7.0.1 =
-
-* Added ownership-safe `.well-known` fallbacks with explicit conformance status.
-* Unified OAuth metadata, bounded LLMS scans, and fixed duplicate-header diagnostics.
-
-= 7.0.0 =
-
-* Raised the minimum to WordPress 7.1 and added a native public Ability kernel shared by MCP, WebMCP, API Catalog, OpenAPI, and ARD discovery.
-* Replaced nested well-known configuration with exact WordPress global rewrite rules, removed physical well-known defaults, and retained ownership-safe cleanup and public verification.
-
-= 6.6.1 =
-
-* Added automatic ownership-safe `/.well-known/` routing for header-sensitive discovery endpoints on compatible Apache and LiteSpeed servers.
-* Added public GET/HEAD verification and explicit blocked-before-WordPress diagnostics without substituting wrong-MIME static files.
-
-= 6.6.0 =
-
-* Added enriched per-API RFC 9727/RFC 9264 Linksets and a public REST health endpoint.
-* Added OAuth metadata, optional RFC 8628 device approval, and opt-in Auth.md without unsupported OIDC or fabricated JWKS claims.
-* Added the experimental current MCP Server Card, draft ARD AI Catalog, and opt-in read-only WebMCP with explicit maturity guidance.
-* Added server/cache/CDN rules and Configured, Advertised, Publicly verified, and canonical-interception diagnostics.
-
-More history: `changelog.txt`.
+Full release history and archived upgrade notices: `changelog.txt`.
 
 == Upgrade Notice ==
+
+= 8.1.0 =
+Stable release. Existing settings are retained; GitHub issue reporting remains available. Back up before updating. MCP still requires the optional adapter and explicit opt-in.
+
 
 = 8.0.4 =
 XML management switch added; defaults stay enabled.
@@ -200,82 +176,3 @@ Ownership migrates in batches. Review file conflicts and incomplete reports. Res
 
 = 8.0.1 =
 Removes legacy MCP settings; preserves 8.0 adapter consent.
-
-= 8.0.0 =
-MCP users: install MCP Adapter 0.7.0+, enable read-only MCP in AI Publishing and reconnect. Old endpoints, credentials and tasks are retired.
-
-
-= 7.5.4 =
-Public sitemap credits are now off by default. Enable them explicitly in XML Sitemaps if desired.
-
-= 7.5.3 =
-WordPress.org review fixes for input validation, output escaping, and source access.
-
-= 7.5.2 =
-Security and WordPress.org hardening with the WordPress 7.1 Abilities API baseline.
-
-= 7.5.1 =
-Reports now find potential orphans and deep pages from stored links and menus.
-
-= 7.5.0 =
-Quick Setup now applies a three-step preset while preserving advanced configuration.
-
-= 7.4.2 =
-Prevents overlapping LLMS rebuilds and bounds scans of excluded posts.
-
-= 7.4.1 =
-Improves request handling and WordPress.org Plugin Check compatibility.
-
-= 7.4.0 =
-Delivery fixes.
-
-= 7.3.4 =
-Reconnect Cloudflare once.
-
-= 7.3.3 =
-
-Compatibility mode now materializes the discovery index when nginx bypasses WordPress.
-
-= 7.3.2 =
-
-Prevents cross-site cache collisions on shared PHP/cache infrastructure.
-
-= 7.3.1 =
-
-Fixes a fatal error when opening Advanced settings.
-
-= 7.3.0 =
-
-Debugging is off by default and auto-expires.
-
-= 7.2.2 =
-
-Cloudflare controls now unlock only after automatic detection or explicit
-confirmation that the configured hostname is orange-cloud proxied.
-
-= 7.2.1 =
-
-Cloudflare setup now confirms browser-visible delivery after updating rules and
-recovers a completed authorization after a missed poll or reload.
-
-= 7.2.0 =
-
-Cloudflare optimization now uses a guided OAuth consent flow by default.
-Organizations can instead register a site-local secretless OAuth client, while
-the existing scoped API-token workflow remains available under Troubleshooting.
-
-= 7.1.0 =
-
-Review System Status after upgrading. LiteSpeed and APCu integrations default on when available; Cloudflare automation remains optional and never stores its token.
-
-= 7.0.1 =
-
-Regenerate Core discovery files to materialize enabled `.well-known` fallbacks.
-
-= 7.0.0 =
-
-Requires WordPress 7.1. Well-known protocols now use WordPress-owned global routing; Cybermaps removes only its verified legacy nested routing block.
-
-= 6.6.1 =
-
-Automatically repairs compatible Apache/LiteSpeed well-known routing so the RFC 9727 API Catalog can retain its required status, media type, and Link header.

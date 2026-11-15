@@ -32,6 +32,11 @@ Each case also runs the stored-template source and direct option CAS fixtures
 after any multisite conversion. Their own `stored_template_source_passed` and
 `raw_option_store_passed` output and matrix flags must be explicitly true after
 cleanup; process success or another fixture's flag cannot substitute.
+Each case also requires `audit_batching_passed` and its hash-bound
+`audit-batching.json` receipt. Isolated native database tables compare individual
+and batched finding writes, resource IDs, Unicode, quotes and nullable fields;
+both paths must reject overlong fields and invalid UTF-8. The receipt retains
+the actual compared rows, each negative result and verified fixture cleanup.
 Every case also requires `output_buffer_ownership_passed`: 48 isolated sitemap
 requests cover GET/HEAD, cache hits/misses, 304, early/late 404, generation
 failures and unrelated routes with single, nested and non-removable caller
@@ -103,6 +108,49 @@ owner sign-off is required. A changed package requires renewed agent review.
     Core redirect on non-Plain permalinks. Opt-out must release routes, static
     files, background work and advertisements without overriding another
     plugin's decision. Native and fresh-request handover checks are mandatory.
+20. Stable copy describes current behavior and optional dependencies accurately;
+    retain GitHub issues and WordPress.org support without beta recruitment.
+    Directory artwork has exact provenance, licenses, dimensions and captions.
+    All pictured interfaces come from the candidate ZIP. Responsive, keyboard,
+    200% reflow, default/empty/error, save and destructive journeys require
+    specific visual review evidence, not screenshots alone.
+21. Stable native upgrades must pass through both the dashboard and WP-CLI on
+    single sites and networks. Preserve the plugin basename, native updater,
+    settings, tables, cron, rewrites, owned files and activation state. Prove the
+    controlled pre-publication offer, then the real WordPress.org offer after
+    publication. The first stable baseline is the reviewed 8.0.4 beta; future
+    releases must update the policy baseline to the latest published stable ZIP.
+    Keep the 7.5.3 lifecycle regression in addition to this transition coverage.
+22. The exact stable ZIP must finish the controlled 1,000- and 10,000-item
+    sitemap/report/full static-publication workloads in all four cache modes,
+    within the documented resource limits and deadlines. Run both baseline and
+    candidate serially against identical corpora, harness and images. A completed
+    first slice is not full static completion. Preserve larger-corpus limitations
+    and failed samples; do not turn harness self-tests into performance claims.
+23. Publish one atomic SVN transaction from the frozen package and separate
+    reviewed Directory assets. Preserve immutable version tags, verify actual
+    Directory downloads by file bytes, and prove the public native update offer
+    before publishing the GitHub stable release or website announcement.
+    Pending confirmation, security review, CDN propagation and update cooldown
+    remain pending. Record and inspect ambiguous SVN outcomes before retrying.
+24. Stable is the default release channel. Betas require `--beta`, cannot reach
+    WordPress.org and cannot replace the stable production website. Publication
+    and recovery use the shared pipeline; compatibility entry points cannot
+    bypass installation, Directory publication, or website verification.
+
+Stable promotion additionally checks `everyday-workloads.json`,
+`native-upgrade-controlled.json`, and `presentation/review.json` under the
+versioned release directory. Each binds the exact ZIP and source commit to
+granular evidence. The presentation review names its reviewer and actual checks;
+its evidence includes the browser output and capture manifest. Writing a pass
+flag or advancing a date without doing the review is forbidden. A changed
+depicted UI invalidates screenshot evidence even if the product version is unchanged.
+
+The Directory asset contract lives in `docs/wporg/manifest.json`, while the images
+live in `.wordpress-org/`. Icons and banners have the official fixed dimensions;
+numbered screenshots match the readme captions. Retain full historical changelog
+text in `changelog.txt`; the Directory readme keeps the five latest entries so
+useful installation, feature, service and privacy information fits within 10 KB.
 
 Website preparation records bind the canonical website content, validation log,
 plugin commit, version and channel; promotion additionally binds its Git commit
@@ -111,7 +159,8 @@ another website check, not an unchanged plugin runtime matrix. A candidate alone
 cannot satisfy the deployment condition.
 
 `release:status` distinguishes `candidate-pending`, `candidate-validated`,
-`release-ready`, `published-website-pending` and `release-complete`. A completed
+`release-ready`, `svn-committed`, pending WordPress distribution/assets/update,
+`published-website-pending`, `beta-published` and `release-complete`. A completed
 release reports the time of its recorded production verification. Publication
 readiness still leaves publication and website verification pending. Historical
 completion evidence is separate from uncommitted work for a later candidate.
@@ -119,6 +168,10 @@ completion evidence is separate from uncommitted work for a later candidate.
 The workflow verifies https://cybermaps.dev after deployment, with at most two
 minutes of propagation retries. It compares live product contracts and versioned
 schemas with the built files and checks download/checksum links and changelog.
+Stable launches also compare the home/blog/launch page text, canonical URLs,
+links and social artwork, both publication feeds and all current gallery images
+against the reviewed build. Current WordPress.org availability is separately
+checked before production deployment.
 Failure preserves the published package and leaves the website step incomplete;
 use `composer release:resume -- --tag vX.Y.Z`. It never rebuilds or republishes the
 plugin. `website-prepared.json` and `website-live.json` retain the evidence.
@@ -128,6 +181,9 @@ plugin. `website-prepared.json` and `website-live.json` retain the evidence.
 The private June 15, September 17, September 26, October 5 and October 13, 2026 emails were reviewed.
 The September 26 review concerned 7.5.2; it does not establish approval of 7.5.3
 or this candidate. Do not commit private reviewer mail.
+Hosting approval for the reviewed 8.0.4 package arrived on October 30. It does not
+certify future versions, security, performance, ranking or compatibility. Every
+stable release must still satisfy the current gates.
 
 | Reviewer category | Resolution and continuing evidence |
 | --- | --- |
@@ -152,6 +208,10 @@ Policy references: [Directory guidelines](https://developer.wordpress.org/plugin
 [common issues](https://developer.wordpress.org/plugins/wordpress-org/common-issues/),
 [security handbook](https://developer.wordpress.org/apis/security/) and
 [Plugin Check](https://wordpress.org/plugins/plugin-check/).
+Distribution references: [SVN publication](https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/),
+[Directory assets](https://developer.wordpress.org/plugins/wordpress-org/plugin-assets/),
+[release confirmation](https://developer.wordpress.org/plugins/wordpress-org/release-confirmation-emails/),
+and [automated release security review](https://make.wordpress.org/plugins/2026/09/09/automated-security-review-for-plugin-releases/).
 
 ## Development skills
 

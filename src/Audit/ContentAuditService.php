@@ -75,6 +75,7 @@ final class ContentAuditService {
 					$this->renew_run_lock( $lock_token );
 					try {
 						$attached_image_parents = $this->post_source->attached_image_parent_ids( $posts );
+						$batch_results          = array();
 						foreach ( $posts as $post ) {
 							if ( ! is_object( $post ) || ! isset( $post->ID ) ) {
 								continue;
@@ -94,7 +95,7 @@ final class ContentAuditService {
 								$result['findings'],
 								$link_results['findings'][ $post_id ] ?? array()
 							);
-							$this->repository->add_resource( $run_id, $result['resource'], $result['findings'] );
+							$batch_results[]                                     = $result;
 							++$resource_count;
 							$finding_count += count( $result['findings'] );
 							$this->update_snapshot_hash(
@@ -105,6 +106,7 @@ final class ContentAuditService {
 								)
 							);
 						}
+						$this->repository->add_resources( $run_id, $batch_results );
 					} finally {
 						$this->flush_runtime_cache();
 					}

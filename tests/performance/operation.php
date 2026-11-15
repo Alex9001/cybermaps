@@ -41,6 +41,20 @@ if ( 'fixture_reset' === $operation ) {
 	\Cybermaps\Discovery\StaticBridge::get_instance()->invalidate();
 	return;
 }
+if ( 'static_reset' === $operation ) {
+	// This is a disposable fixture. Preserve the actual ownership-safe purge API
+	// and never erase files/checkpoints behind the plugin's back to obtain a pass.
+	echo json_encode( \Cybermaps\Discovery\StaticBridge::get_instance()->cancel_and_purge( 'all', true ) ) . "\n";
+	return;
+}
+if ( 'static_prepare' === $operation ) {
+	$settings = (array) get_option( 'cybermaps_settings', array() );
+	$settings['static_engine_mode'] = 'all';
+	update_option( 'cybermaps_settings', $settings, false );
+	\Cybermaps\Core\ConfigurationStore::reset_memo();
+	\Cybermaps\Discovery\StaticBridge::get_instance()->resume();
+	return;
+}
 if ( 'clear' === $operation ) {
 	foreach ( array( 'admin', 'analytics', 'chunks', 'discovery', 'legacy', 'schema', 'settings', 'sitemap', 'translations' ) as $family ) {
 		\Cybermaps\Core\CacheManager::clear_family( $family );
@@ -131,10 +145,9 @@ try {
 			}
 			break;
 		case 'static_sync':
-			$settings = (array) get_option( 'cybermaps_settings' );
-			$settings['static_engine_mode'] = 'all';
-			update_option( 'cybermaps_settings', $settings, false );
-			\Cybermaps\Core\ConfigurationStore::reset_memo();
+			if ( 'all' !== \Cybermaps\Discovery\StaticBridge::get_mode() ) {
+				throw new RuntimeException( 'Full static fixture must be prepared before measurement' );
+			}
 			$bridge = \Cybermaps\Discovery\StaticBridge::get_instance();
 			$result = array( 'report' => $bridge->sync_all(), 'state' => $bridge->get_sync_state() );
 			break;

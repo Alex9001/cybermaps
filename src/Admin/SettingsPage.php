@@ -417,7 +417,7 @@ class SettingsPage {
 				</div>
 			</div>
 
-			<?php $this->render_beta_feedback_sidebar(); ?>
+			<?php $this->render_support_sidebar(); ?>
 
 			<div class="postbox">
 				<h2 class="hndle"><span><?php esc_html_e( 'Sitemaps', 'cybermaps' ); ?></span></h2>
@@ -556,13 +556,18 @@ class SettingsPage {
 		<?php
 	}
 
-	/** Render open-beta feedback links and the diagnostic collection shortcut. */
-	private function render_beta_feedback_sidebar(): void {
+	/** Render support links and the diagnostic collection shortcut. */
+	private function render_support_sidebar(): void {
 		?>
 		<div class="postbox">
-			<h2 class="hndle"><span><?php esc_html_e( 'Open beta feedback', 'cybermaps' ); ?></span></h2>
+			<h2 class="hndle"><span><?php esc_html_e( 'Help and feedback', 'cybermaps' ); ?></span></h2>
 			<div class="inside">
-				<p class="description"><?php esc_html_e( 'Help improve Cybermaps. Report a problem or suggest an improvement on GitHub.', 'cybermaps' ); ?></p>
+				<p class="description"><?php esc_html_e( 'Get help on WordPress.org, or report a problem and suggest improvements on GitHub.', 'cybermaps' ); ?></p>
+				<a href="<?php echo esc_url( 'https://wordpress.org/support/plugin/cybermaps/' ); ?>" target="_blank" rel="noopener noreferrer" class="cm-sidebar-link">
+					<span class="dashicons dashicons-sos" aria-hidden="true"></span>
+					<span class="cm-sidebar-link-label"><?php esc_html_e( 'WordPress.org support', 'cybermaps' ); ?></span>
+					<span class="dashicons dashicons-external cm-sidebar-ext-icon" aria-hidden="true"></span>
+				</a>
 				<a href="<?php echo esc_url( 'https://github.com/Alex9001/cybermaps/issues/new?template=bug_report.yml' ); ?>" target="_blank" rel="noopener noreferrer" class="cm-sidebar-link">
 					<span class="dashicons dashicons-flag" aria-hidden="true"></span>
 					<span class="cm-sidebar-link-label"><?php esc_html_e( 'Report an issue', 'cybermaps' ); ?></span>
@@ -579,6 +584,11 @@ class SettingsPage {
 					<span class="dashicons dashicons-external cm-sidebar-ext-icon" aria-hidden="true"></span>
 				</a>
 				<p class="description"><?php esc_html_e( 'Before reporting, open Cybermaps → Debugging and choose Copy GitHub support bundle. Include it in your report after reviewing it for private information.', 'cybermaps' ); ?></p>
+				<a href="<?php echo esc_url( 'https://github.com/Alex9001/cybermaps/security/advisories/new' ); ?>" target="_blank" rel="noopener noreferrer" class="cm-sidebar-link">
+					<span class="dashicons dashicons-shield" aria-hidden="true"></span>
+					<span class="cm-sidebar-link-label"><?php esc_html_e( 'Report a security issue privately', 'cybermaps' ); ?></span>
+					<span class="dashicons dashicons-external cm-sidebar-ext-icon" aria-hidden="true"></span>
+				</a>
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=cybermaps-system-status' ) ); ?>" target="_blank" rel="noopener noreferrer" class="cm-sidebar-link">
 					<span class="dashicons dashicons-admin-tools" aria-hidden="true"></span>
 					<span class="cm-sidebar-link-label"><?php esc_html_e( 'Open Debugging', 'cybermaps' ); ?></span>

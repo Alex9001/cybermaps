@@ -1,4 +1,4 @@
-name: Open beta bug report
+name: Bug report
 description: Help improve Cybermaps with reproduction steps and the plugin's diagnostic support bundle.
 title: "[Bug]: "
 labels:
@@ -7,7 +7,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for testing the Cybermaps open beta! Report one problem per issue.
+        Thanks for helping improve Cybermaps. Report one problem per issue.
         Give the title a specific symptom, for example: "News sitemap returns 404 after enabling static publication."
         [Search existing issues](https://github.com/Alex9001/cybermaps/issues?q=is%3Aissue) first; add your evidence to an existing report if it matches.
 
@@ -23,9 +23,9 @@ body:
   - type: input
     id: cybermaps_version
     attributes:
-      label: Cybermaps version or beta build
+      label: Cybermaps version
       description: Use the exact version from Plugins or the support bundle. Include the commit or ZIP build identifier if known.
-      placeholder: "7.4.0; installed from the beta release ZIP"
+      placeholder: "8.1.0; installed from WordPress.org"
     validations:
       required: true
   - type: dropdown

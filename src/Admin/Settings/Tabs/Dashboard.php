@@ -51,7 +51,7 @@ class Dashboard implements SettingsTab {
 		<div class="cm-card cm-mb-25">
 			<div class="section-header">
 				<h2><?php esc_html_e( 'Discovery Architecture', 'cybermaps' ); ?></h2>
-				<?php echo wp_kses( \Cybermaps\Admin\AccessibleTooltip::get( __( 'Key endpoints your site exposes to search engines and AI agents. Enabled endpoints are shown in full color; disabled ones are dimmed. Click any endpoint to visit it.', 'cybermaps' ), 'tip-left' ), \Cybermaps\Admin\AccessibleTooltip::allowed_html() ); ?>
+				<?php echo wp_kses( \Cybermaps\Admin\AccessibleTooltip::get( __( 'Key endpoints your site exposes to search engines and AI agents. Enabled endpoints have a filled status dot; disabled ones have an outlined dot. Click any endpoint to visit it.', 'cybermaps' ), 'tip-left' ), \Cybermaps\Admin\AccessibleTooltip::allowed_html() ); ?>
 			</div>
 			<?php echo wp_kses_post( \Cybermaps\Admin\SVGMapper::generate_html() ); ?>
 			<p class="cm-field-help cm-mt-15"><?php esc_html_e( 'This grid summarizes the primary sitemap and discovery publications. The AI Publication Hub controls the AI publication surface; manifest visibility controls decide which enabled publications the AI manifest advertises.', 'cybermaps' ); ?></p>

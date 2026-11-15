@@ -1,1 +1,9 @@
-{"name":"cybermaps-release-browser-tests","private":true,"type":"module","devDependencies":{"playwright":"1.63.0"}}
+{
+  "name": "cybermaps-release-browser-tests",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "playwright": "1.63.0",
+    "@axe-core/playwright": "4.13.0"
+  }
+}

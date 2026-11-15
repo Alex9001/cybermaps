@@ -23,7 +23,7 @@ class SVGMapper {
 		$has_news  = $has_xml && ! empty( $settings['enable_google_news'] );
 		$has_rss   = $has_xml && ! empty( $settings['enable_rss_sitemap'] );
 
-		$cache_key = 'cybermaps_arch_v7_' . md5(
+		$cache_key = 'cybermaps_arch_v8_' . md5(
 			(string) wp_json_encode(
 				array(
 					'settings'  => $settings,
@@ -60,7 +60,7 @@ class SVGMapper {
 			),
 			array(
 				'label'  => __( 'RSS Feed', 'cybermaps' ),
-				'color'  => '#f59e0b',
+				'color'  => '#b45309',
 				'always' => false,
 				'items'  => array(
 					array(
@@ -109,7 +109,7 @@ class SVGMapper {
 			),
 			array(
 				'label'  => __( 'AI Structured Data', 'cybermaps' ),
-				'color'  => '#059669',
+				'color'  => '#047857',
 				'always' => false,
 				'items'  => array(
 					array(
@@ -138,7 +138,7 @@ class SVGMapper {
 			),
 			array(
 				'label'  => __( 'AI Policy', 'cybermaps' ),
-				'color'  => '#0891b2',
+				'color'  => '#0e7490',
 				'always' => false,
 				'items'  => array(
 					array(
@@ -174,13 +174,13 @@ class SVGMapper {
 				static fn( array $item ): bool => ! empty( $item['active'] )
 			);
 			$output .= '<div class="cm-arch-group' . ( $ga ? '' : ' cm-arch-group-inactive' ) . '">';
-			$output .= '<div class="cm-arch-group-head" style="background:' . ( $ga ? $group['color'] : '#94a3b8' ) . '">';
+			$output .= '<div class="cm-arch-group-head" style="background:' . ( $ga ? $group['color'] : '#475569' ) . '">';
 			$output .= '<span class="cm-arch-group-dot"></span>' . esc_html( $group['label'] );
 			$output .= '</div><div class="cm-arch-items">';
 			foreach ( $group['items'] as $item ) {
 				$ia      = $item['active'];
 				$output .= '<a href="' . esc_url( \Cybermaps\Core\URLManager::get_home_url( $item['path'] ) ) . '" target="_blank" rel="noopener noreferrer" class="cm-arch-item' . ( $ia ? ' cm-arch-item-active' : ' cm-arch-item-off' ) . '">';
-				$output .= '<span class="cm-arch-item-dot" style="background:' . ( $ia ? '#10b981' : '#cbd5e1' ) . '"></span>';
+				$output .= '<span class="cm-arch-item-dot cm-arch-item-dot-' . ( $ia ? 'active' : 'off' ) . '"></span>';
 				$output .= '<code>' . esc_html( $item['path'] ) . '</code>';
 				$output .= '<span class="cm-arch-item-label">' . esc_html( $item['label'] ) . '</span>';
 				$output .= '</a>';
@@ -190,8 +190,8 @@ class SVGMapper {
 		$output .= '</div>';
 
 		$output .= '<div class="cm-arch-legend">';
-		$output .= '<span class="cm-arch-item-dot" style="background:#10b981"></span> ' . esc_html__( 'Active', 'cybermaps' );
-		$output .= '<span class="cm-arch-item-dot" style="background:#cbd5e1; margin-left:16px;"></span> ' . esc_html__( 'Disabled', 'cybermaps' );
+		$output .= '<span class="cm-arch-item-dot cm-arch-item-dot-active"></span> ' . esc_html__( 'Active', 'cybermaps' );
+		$output .= '<span class="cm-arch-item-dot cm-arch-item-dot-off"></span> ' . esc_html__( 'Disabled', 'cybermaps' );
 		$output .= '</div></div>';
 
 		\Cybermaps\Core\CacheManager::set( $cache_key, $output, 24 * HOUR_IN_SECONDS, 'admin' );

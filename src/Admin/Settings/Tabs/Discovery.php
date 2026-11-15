@@ -47,7 +47,7 @@ class Discovery implements SettingsTab {
 			array(
 				'label_for'   => 'enable_discovery_hub',
 				'label'       => __( 'Enable AI Publication Hub', 'cybermaps' ),
-				'description' => __( 'Master switch for the public AI discovery surface. WordPress 7.1 native routing publishes fixed and well-known protocols without requiring Cloudflare or host-specific installation steps. Cybermaps publishes its own read-only search ability. Optional MCP connections require WordPress MCP Adapter. <span class="cm-desc-example">These emerging integrations put enabled sites ahead of common discovery tooling; client adoption still varies.</span>', 'cybermaps' ),
+				'description' => __( 'Enable AI-readable publications and public search. Check AI Discovery Status to confirm public delivery; server and cache settings can affect routing. MCP connections additionally require WordPress MCP Adapter. <span class="cm-desc-example">Choose the formats your clients support. Emerging formats may not be supported by every client.</span>', 'cybermaps' ),
 				'maturity'    => 'publication_hub',
 			)
 		);
@@ -508,7 +508,7 @@ class Discovery implements SettingsTab {
 	public function render(): void {
 		?>
 		<div class="cm-section-desc">
-			<strong><?php esc_html_e( 'AI Publishing', 'cybermaps' ); ?></strong> &mdash; <?php esc_html_e( 'Configure literal LLMS output, vendor publications, usage assertions, and delivery.', 'cybermaps' ); ?>
+			<strong><?php esc_html_e( 'AI Publishing', 'cybermaps' ); ?></strong> &mdash; <?php esc_html_e( 'Choose the AI-readable publications, content preferences, and delivery options for your site.', 'cybermaps' ); ?>
 		</div>
 		<?php do_settings_sections( $this->settings_page() ); ?>
 		<section class="cm-ai-robots-workspace" aria-labelledby="cybermaps-crawler-policy-heading">

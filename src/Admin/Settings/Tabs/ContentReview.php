@@ -546,21 +546,23 @@ final class ContentReview implements SettingsTab {
 				</div>
 				<p><?php esc_html_e( 'The printable report includes recommendations and the measurement summary for every finding.', 'cybermaps' ); ?></p>
 			</div>
-			<table class="widefat cm-report-findings-table">
-				<thead><tr><th><?php esc_html_e( 'Resource', 'cybermaps' ); ?></th><th><?php esc_html_e( 'Finding', 'cybermaps' ); ?></th><th><?php esc_html_e( 'Measurement', 'cybermaps' ); ?></th></tr></thead>
-				<tbody>
-				<?php foreach ( array_slice( $findings, 0, 25 ) as $finding ) : ?>
-					<tr>
-						<td><a href="<?php echo esc_url( (string) $finding['url'] ); ?>"><?php echo esc_html( (string) $finding['title'] ); ?></a></td>
-						<td><span class="cm-report-finding-badge"><?php echo esc_html( self::finding_label( $finding, $catalog ) ); ?></span></td>
-						<td><?php echo esc_html( (string) $finding['summary'] ); ?></td>
-					</tr>
-				<?php endforeach; ?>
-				<?php if ( empty( $findings ) ) : ?>
-					<tr><td colspan="3"><?php esc_html_e( 'This run recorded no policy findings.', 'cybermaps' ); ?></td></tr>
-				<?php endif; ?>
-				</tbody>
-			</table>
+			<div class="cm-report-table-scroll" tabindex="0" role="region" aria-label="<?php esc_attr_e( 'Current report findings', 'cybermaps' ); ?>">
+				<table class="widefat cm-report-findings-table">
+					<thead><tr><th><?php esc_html_e( 'Resource', 'cybermaps' ); ?></th><th><?php esc_html_e( 'Finding', 'cybermaps' ); ?></th><th><?php esc_html_e( 'Measurement', 'cybermaps' ); ?></th></tr></thead>
+					<tbody>
+					<?php foreach ( array_slice( $findings, 0, 25 ) as $finding ) : ?>
+						<tr>
+							<td><a href="<?php echo esc_url( (string) $finding['url'] ); ?>"><?php echo esc_html( (string) $finding['title'] ); ?></a></td>
+							<td><span class="cm-report-finding-badge"><?php echo esc_html( self::finding_label( $finding, $catalog ) ); ?></span></td>
+							<td><?php echo esc_html( (string) $finding['summary'] ); ?></td>
+						</tr>
+					<?php endforeach; ?>
+					<?php if ( empty( $findings ) ) : ?>
+						<tr><td colspan="3"><?php esc_html_e( 'This run recorded no policy findings.', 'cybermaps' ); ?></td></tr>
+					<?php endif; ?>
+					</tbody>
+				</table>
+			</div>
 			<?php if ( (int) $run['finding_count'] > count( $findings ) ) : ?>
 				<p class="description"><?php esc_html_e( 'Showing the first 25 findings. Export the report for the complete inventory.', 'cybermaps' ); ?></p>
 			<?php endif; ?>
@@ -591,28 +593,30 @@ final class ContentReview implements SettingsTab {
 				</div>
 				<p><?php esc_html_e( 'Open or export another saved report.', 'cybermaps' ); ?></p>
 			</div>
-			<table class="widefat cm-report-history-table">
-				<thead><tr><th><?php esc_html_e( 'Run', 'cybermaps' ); ?></th><th><?php esc_html_e( 'Completed', 'cybermaps' ); ?></th><th><?php esc_html_e( 'Resources', 'cybermaps' ); ?></th><th><?php esc_html_e( 'Findings', 'cybermaps' ); ?></th><th><?php esc_html_e( 'Exports', 'cybermaps' ); ?></th></tr></thead>
-				<tbody>
-				<?php foreach ( $history as $historical_run ) : ?>
-					<?php $historical_id = (int) self::report_value( $historical_run, 'id', 0 ); ?>
-					<?php if ( $historical_id === $current_run_id ) : ?>
-						<?php continue; ?>
-					<?php endif; ?>
-					<tr>
-						<td><a href="<?php echo esc_url( self::report_url( $historical_id ) ); ?>">#<?php echo esc_html( (string) $historical_id ); ?></a></td>
-						<td><?php echo esc_html( (string) self::report_value( $historical_run, 'completed_gmt' ) ); ?> GMT</td>
-						<td><?php echo esc_html( (string) self::report_value( $historical_run, 'resource_count', 0 ) ); ?></td>
-						<td><?php echo esc_html( (string) self::report_value( $historical_run, 'finding_count', 0 ) ); ?></td>
-						<td>
-							<a href="<?php echo esc_url( self::export_url( $historical_id, 'html' ) ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'HTML', 'cybermaps' ); ?></a>
-							<span aria-hidden="true"> · </span>
-							<a href="<?php echo esc_url( self::export_url( $historical_id, 'csv' ) ); ?>"><?php esc_html_e( 'CSV', 'cybermaps' ); ?></a>
-						</td>
-					</tr>
-				<?php endforeach; ?>
-				</tbody>
-			</table>
+			<div class="cm-report-table-scroll" tabindex="0" role="region" aria-label="<?php esc_attr_e( 'Saved report history', 'cybermaps' ); ?>">
+				<table class="widefat cm-report-history-table">
+					<thead><tr><th><?php esc_html_e( 'Run', 'cybermaps' ); ?></th><th><?php esc_html_e( 'Completed', 'cybermaps' ); ?></th><th><?php esc_html_e( 'Resources', 'cybermaps' ); ?></th><th><?php esc_html_e( 'Findings', 'cybermaps' ); ?></th><th><?php esc_html_e( 'Exports', 'cybermaps' ); ?></th></tr></thead>
+					<tbody>
+					<?php foreach ( $history as $historical_run ) : ?>
+						<?php $historical_id = (int) self::report_value( $historical_run, 'id', 0 ); ?>
+						<?php if ( $historical_id === $current_run_id ) : ?>
+							<?php continue; ?>
+						<?php endif; ?>
+						<tr>
+							<td><a href="<?php echo esc_url( self::report_url( $historical_id ) ); ?>">#<?php echo esc_html( (string) $historical_id ); ?></a></td>
+							<td><?php echo esc_html( (string) self::report_value( $historical_run, 'completed_gmt' ) ); ?> GMT</td>
+							<td><?php echo esc_html( (string) self::report_value( $historical_run, 'resource_count', 0 ) ); ?></td>
+							<td><?php echo esc_html( (string) self::report_value( $historical_run, 'finding_count', 0 ) ); ?></td>
+							<td>
+								<a href="<?php echo esc_url( self::export_url( $historical_id, 'html' ) ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'HTML', 'cybermaps' ); ?></a>
+								<span aria-hidden="true"> · </span>
+								<a href="<?php echo esc_url( self::export_url( $historical_id, 'csv' ) ); ?>"><?php esc_html_e( 'CSV', 'cybermaps' ); ?></a>
+							</td>
+						</tr>
+					<?php endforeach; ?>
+					</tbody>
+				</table>
+			</div>
 		</section>
 		<?php
 	}

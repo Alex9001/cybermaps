@@ -3,15 +3,28 @@
     --cm-soft-bg: #f1f5f9;
     --cm-border: #e2e8f0;
     --cm-border-hover: #cbd5e1;
-    --cm-high: #f43f5e;
-    --cm-med: #f59e0b;
-    --cm-low: #10b981;
+    --cm-high: #be123c;
+    --cm-med: #b45309;
+    --cm-low: #047857;
     --cm-accent: #2271b1;
     --cm-accent-dark: #1a5a8e;
     --primary: #0f172a;      /* Deep Navy */
     --primary-light: #1e293b;
     --text-main: #1d2327;
-    --text-muted: #64748b;
+    --text-muted: #475569;
+}
+
+/* Keep WordPress component controls readable on Cybermaps' pale panels.
+   Scope theme variables to plugin content, preserving the global admin chrome. */
+.wp-admin[class*="cybermaps"] #wpbody-content {
+    --wp-admin-theme-color: #2271b1;
+    --wp-admin-theme-color--rgb: 34, 113, 177;
+    --wp-admin-theme-color-darker-10: #1a5a8e;
+    --wp-admin-theme-color-darker-20: #164b77;
+}
+
+.wp-admin[class*="cybermaps"] #wpbody-content .button-link-delete {
+    color: #b32d2e;
 }
 
 /* Optional Quick Setup launcher on the Overview workspace. */
@@ -431,13 +444,13 @@
 }
 
 .cm-cap-status.inactive {
-    color: #94a3b8;
+    color: var(--text-muted);
 }
 
 /* --- Self-Documenting UI Helpers --- */
 .cybermaps-desc {
     font-size: 13px;
-    color: #64748b;
+    color: var(--text-muted);
     margin-top: 4px;
     margin-bottom: 8px;
     line-height: 1.4;
@@ -1037,7 +1050,7 @@ tr.cybermaps-matrix-category td:first-child {
 }
 
 .cm-config-change-title code {
-    color: #64748b;
+    color: var(--text-muted);
     font-size: 10px;
     overflow-wrap: anywhere;
 }
@@ -1079,7 +1092,7 @@ tr.cybermaps-matrix-category td:first-child {
 
 .cm-config-change dt {
     margin-bottom: 4px;
-    color: #64748b;
+    color: var(--text-muted);
     font-size: 9px;
     font-weight: 800;
     letter-spacing: 0.05em;
@@ -1129,7 +1142,7 @@ tr.cybermaps-matrix-category td:first-child {
 
 .cm-config-preview-fingerprint {
     margin: 0;
-    color: #64748b;
+    color: var(--text-muted);
     font-size: 11px;
     line-height: 1.5;
 }
@@ -1343,7 +1356,7 @@ tr.cybermaps-matrix-category td:first-child {
 .cm-report-kicker {
     display: block;
     margin-bottom: 5px;
-    color: #64748b;
+    color: var(--text-muted);
     font-size: 10px;
     font-weight: 800;
     letter-spacing: 0.09em;
@@ -1365,7 +1378,7 @@ tr.cybermaps-matrix-category td:first-child {
 
 .cm-report-feature-copy p {
     margin: 8px 0 0;
-    color: #64748b;
+    color: var(--text-muted);
     font-size: 12px;
     line-height: 1.55;
 }
@@ -1394,7 +1407,7 @@ tr.cybermaps-matrix-category td:first-child {
 
 .cm-report-run-header p {
     margin: 4px 0 0;
-    color: #64748b;
+    color: var(--text-muted);
     font-size: 11px;
 }
 
@@ -1428,7 +1441,7 @@ tr.cybermaps-matrix-category td:first-child {
 }
 
 .cm-report-metric span {
-    color: #64748b;
+    color: var(--text-muted);
     font-size: 10px;
     font-weight: 750;
     line-height: 1.35;
@@ -1461,7 +1474,7 @@ tr.cybermaps-matrix-category td:first-child {
 .cm-report-section-heading > p {
     max-width: 570px;
     margin: 0;
-    color: #64748b;
+    color: var(--text-muted);
     font-size: 11px;
     line-height: 1.5;
     text-align: right;
@@ -1476,8 +1489,19 @@ tr.cybermaps-matrix-category td:first-child {
     flex: 1;
 }
 
+.cm-report-table-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.cm-report-table-scroll:focus-visible {
+    outline: 2px solid var(--cm-accent);
+    outline-offset: 2px;
+}
+
 .cm-report-findings-table,
 .cm-report-history-table {
+    min-width: 580px;
     border-color: #dcdcde;
     border-radius: 7px;
     box-shadow: none;
@@ -1785,7 +1809,7 @@ tr.cybermaps-matrix-category td:first-child {
 
 .cm-feed-time {
     font-size: 11px;
-    color: #64748b;
+    color: var(--text-muted);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -1969,7 +1993,7 @@ tr.cybermaps-matrix-category td:first-child {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #64748b;
+    color: var(--text-muted);
 }
 
 .cm-matrix-row {
@@ -2038,14 +2062,14 @@ tr.cybermaps-matrix-category td:first-child {
 }
 
 .cm-matrix-group-description {
-    color: #64748b;
+    color: var(--text-muted);
     font-size: 11px;
     line-height: 1.35;
 }
 
 .cm-matrix-type-key {
     font-size: 11px;
-    color: #64748b;
+    color: var(--text-muted);
     background: transparent;
     padding: 0;
 }
@@ -2111,7 +2135,7 @@ tr.cybermaps-matrix-category td:first-child {
 }
 
 .cm-discovery-save-row > span {
-    color: #64748b;
+    color: var(--text-muted);
     font-size: 11px;
     line-height: 1.4;
 }
@@ -2202,7 +2226,7 @@ tr.cybermaps-matrix-category td:first-child {
     .cm-matrix-col-priority::before,
     .cm-matrix-col-source::before {
         content: attr(data-label);
-        color: #64748b;
+        color: var(--text-muted);
         font-size: 10px;
         font-weight: 700;
         letter-spacing: 0.05em;
@@ -2382,7 +2406,7 @@ tr.cybermaps-matrix-category td:first-child {
 }
 
 .cm-sitemap-redundant {
-    color: #64748b;
+    color: var(--text-muted);
 }
 
 .cm-sitemap-analytics-link {
@@ -2396,7 +2420,7 @@ tr.cybermaps-matrix-category td:first-child {
     max-width: 680px;
     margin: 0 0 2px;
     margin-inline-start: 46px;
-    color: #64748b;
+    color: var(--text-muted);
     font-size: 12px;
     line-height: 1.5;
 }
@@ -2445,7 +2469,7 @@ tr.cybermaps-matrix-category td:first-child {
 }
 
 #cybermaps-sync-progress-text {
-    color: #64748b;
+    color: var(--text-muted);
     font-size: 11px;
 }
 
@@ -2537,7 +2561,7 @@ tr.cybermaps-matrix-category td:first-child {
 .cm-status-notice-desc {
     font-size: 13px;
     line-height: 1.5;
-    color: #64748b;
+    color: var(--text-muted);
 }
 
 .cm-status-notice-action {
@@ -2573,12 +2597,12 @@ tr.cybermaps-matrix-category td:first-child {
 }
 
 .cm-btn-destructive {
-    color: #d63638 !important;
-    border-color: #d63638 !important;
+    color: #b32d2e !important;
+    border-color: #b32d2e !important;
 }
 
 .cm-btn-destructive:hover {
-    background: #d63638 !important;
+    background: #b32d2e !important;
     color: #fff !important;
 }
 
@@ -2757,7 +2781,8 @@ tr.cybermaps-matrix-category td:first-child {
 .cm-discovery-status-table .cm-discovery-status-field--disk,
 .cm-discovery-status-table .cm-discovery-status-field--observed,
 .cm-discovery-status-table .cm-discovery-status-field--php,
-.cm-discovery-status-table .cm-discovery-status-field--http {
+.cm-discovery-status-table .cm-discovery-status-field--http,
+.cm-discovery-status-table .cm-discovery-status-field--headers {
     background: #fbfcfd;
     border-top: 1px solid #eef0f2;
 }
@@ -2765,7 +2790,7 @@ tr.cybermaps-matrix-category td:first-child {
 .cm-discovery-status-field-label {
     display: block;
     margin-bottom: 6px;
-    color: #64748b;
+    color: var(--text-muted);
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.055em;
@@ -2782,6 +2807,7 @@ tr.cybermaps-matrix-category td:first-child {
 .cm-discovery-status-field--observed { grid-column: 5 / span 2; grid-row: 2; }
 .cm-discovery-status-field--php { grid-column: 7 / span 3; grid-row: 2; }
 .cm-discovery-status-field--http { grid-column: 10 / span 3; grid-row: 2; }
+.cm-discovery-status-field--headers { grid-column: 1 / -1; grid-row: 3; }
 
 .cm-discovery-status-publication code {
     white-space: normal;
@@ -2804,6 +2830,7 @@ tr.cybermaps-matrix-category td:first-child {
     .cm-discovery-status-field--php { grid-column: 4 / span 4; grid-row: 3; }
     .cm-discovery-status-field--http { grid-column: 8 / span 4; grid-row: 3; }
     .cm-discovery-status-field--view { grid-column: 12 / span 1; grid-row: 3; }
+    .cm-discovery-status-field--headers { grid-column: 1 / -1; grid-row: 4; }
 }
 
 @media screen and (max-width: 782px) {
@@ -2816,6 +2843,7 @@ tr.cybermaps-matrix-category td:first-child {
     .cm-discovery-status-field--php { grid-column: 1 / span 12; grid-row: 5; }
     .cm-discovery-status-field--http { grid-column: 1 / span 10; grid-row: 6; }
     .cm-discovery-status-field--view { grid-column: 11 / span 2; grid-row: 6; }
+    .cm-discovery-status-field--headers { grid-column: 1 / -1; grid-row: 7; }
 }
 
 /* --- Discovery Architecture Grid --- */
@@ -2832,7 +2860,7 @@ tr.cybermaps-matrix-category td:first-child {
     color: #334155;
 }
 .cm-arch-domain {
-    color: #64748b;
+    color: var(--text-muted);
     font-size: 12px;
     max-width: 200px;
     overflow: hidden;
@@ -2840,12 +2868,12 @@ tr.cybermaps-matrix-category td:first-child {
     white-space: nowrap;
 }
 .cm-arch-arrow {
-    color: #94a3b8;
+    color: var(--text-muted);
     font-weight: 300;
 }
 .cm-arch-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
     gap: 16px;
 }
 .cm-arch-group {
@@ -2855,7 +2883,7 @@ tr.cybermaps-matrix-category td:first-child {
     overflow: hidden;
 }
 .cm-arch-group-inactive {
-    opacity: 0.5;
+    background: var(--cm-surface);
 }
 .cm-arch-group-head {
     padding: 10px 16px;
@@ -2902,16 +2930,16 @@ tr.cybermaps-matrix-category td:first-child {
     word-break: break-all;
 }
 .cm-arch-item-off code {
-    color: #94a3b8;
+    color: var(--text-muted);
     background: #f8fafc;
 }
 .cm-arch-item-label {
-    color: #64748b;
+    color: var(--text-muted);
     margin-left: auto;
     font-size: 11px;
 }
 .cm-arch-item-off .cm-arch-item-label {
-    color: #cbd5e1;
+    color: var(--text-muted);
 }
 .cm-arch-item-dot {
     width: 7px;
@@ -2919,6 +2947,19 @@ tr.cybermaps-matrix-category td:first-child {
     border-radius: 50%;
     flex-shrink: 0;
 }
+.cm-arch-item-dot-active {
+    background: #047857;
+}
+
+.cm-arch-item-dot-off {
+    border: 1px solid #64748b;
+    box-sizing: border-box;
+}
+
+.cm-arch-legend .cm-arch-item-dot-off {
+    margin-inline-start: 16px;
+}
+
 .cm-arch-legend {
     display: flex;
     align-items: center;
@@ -2926,7 +2967,7 @@ tr.cybermaps-matrix-category td:first-child {
     gap: 6px;
     padding-top: 16px;
     font-size: 11px;
-    color: #94a3b8;
+    color: var(--text-muted);
 }
 
 /* --- Informational toggletips and the defensive compatibility path --- */
@@ -3029,7 +3070,7 @@ tr.cybermaps-matrix-category td:first-child {
 /* Field help text */
 .cm-field-help {
     font-size: 12px;
-    color: #64748b;
+    color: var(--text-muted);
     margin-top: 4px;
     line-height: 1.45;
 }
@@ -3092,7 +3133,7 @@ tr.cybermaps-matrix-category td:first-child {
     font-size: 12px;
     width: 12px;
     height: 12px;
-    color: #94a3b8;
+    color: var(--text-muted);
     opacity: 0;
     transform: translateX(-4px);
     transition: all 0.2s ease;
@@ -3135,7 +3176,7 @@ tr.cybermaps-matrix-category td:first-child {
 /* Placeholder styling — greyed-out sample text */
 .cybermaps-tab-content input::placeholder,
 .cybermaps-tab-content textarea::placeholder {
-    color: #94a3b8;
+    color: var(--text-muted);
     font-style: italic;
     opacity: 1;
 }
@@ -3175,7 +3216,7 @@ tr.cybermaps-matrix-category td:first-child {
 .cm-field-hint {
     display: inline-block;
     font-size: 11px;
-    color: #94a3b8;
+    color: var(--text-muted);
     font-weight: 400;
     margin-left: 6px;
 }
@@ -3432,7 +3473,7 @@ tr.cybermaps-matrix-category td:first-child {
 }
 
 .cm-shortcode-option-unavailable {
-    color: #64748b;
+    color: var(--text-muted);
 }
 
 .cm-shortcode-option-unavailable > span {
@@ -3471,7 +3512,8 @@ tr.cybermaps-matrix-category td:first-child {
     line-height: 1.4;
 }
 
-.cm-shortcode-control-wide {
+.cm-shortcode-control-wide,
+#cm-sc-mode-wrap {
     grid-column: 1 / -1;
 }
 
@@ -3497,8 +3539,8 @@ tr.cybermaps-matrix-category td:first-child {
 }
 
 .cm-sc-exclude[aria-invalid="true"] {
-    border-color: #d63638;
-    box-shadow: 0 0 0 1px #d63638;
+    border-color: #b32d2e;
+    box-shadow: 0 0 0 1px #b32d2e;
 }
 
 .cm-shortcode-output-card {
@@ -3544,7 +3586,7 @@ tr.cybermaps-matrix-category td:first-child {
 }
 
 .cybermaps-command-center .cm-shortcode-copy-button:disabled {
-    color: #64748b !important;
+    color: var(--text-muted) !important;
     background: #e2e8f0 !important;
     border-color: #cbd5e1 !important;
     box-shadow: none;
@@ -3616,7 +3658,7 @@ tr.cybermaps-matrix-category td:first-child {
 .cm-shortcode-example > span {
     display: block;
     margin-top: 3px;
-    color: #64748b;
+    color: var(--text-muted);
     font-size: 11px;
     line-height: 1.4;
 }
@@ -3638,7 +3680,7 @@ tr.cybermaps-matrix-category td:first-child {
 .cm-shortcode-reference-header > p {
     max-width: 420px;
     margin: 0;
-    color: #64748b;
+    color: var(--text-muted);
     font-size: 11px;
     line-height: 1.45;
     text-align: end;
@@ -3902,7 +3944,7 @@ tr.cybermaps-matrix-category td:first-child {
 
 .cm-deployment-state small {
     grid-column: 1 / -1;
-    color: #64748b;
+    color: var(--text-muted);
     line-height: 1.45;
 }
 
@@ -4034,7 +4076,7 @@ tr.cybermaps-matrix-category td:first-child {
 .cm-analytics-section-heading p {
     max-width: 680px;
     margin: 0;
-    color: #64748b;
+    color: var(--text-muted);
     font-size: 12px;
     line-height: 1.55;
 }
@@ -4082,7 +4124,7 @@ tr.cybermaps-matrix-category td:first-child {
 
 .cm-analytics-metric small {
     margin-top: 6px;
-    color: #64748b;
+    color: var(--text-muted);
     font-size: 10px;
     line-height: 1.45;
 }
@@ -4168,7 +4210,7 @@ tr.cybermaps-matrix-category td:first-child {
 
 .cm-analytics-category-list small {
     margin-top: 3px;
-    color: #64748b;
+    color: var(--text-muted);
 }
 
 .cm-analytics-log-heading {
@@ -4255,7 +4297,7 @@ tr.cybermaps-matrix-category td:first-child {
 .cm-analytics-empty {
     margin: 0;
     padding: 24px;
-    color: #64748b;
+    color: var(--text-muted);
     text-align: center;
 }
 
@@ -4284,7 +4326,7 @@ tr.cybermaps-matrix-category td:first-child {
 }
 
 .cm-analytics-danger-zone {
-    border-left: 4px solid #d63638;
+    border-left: 4px solid #b32d2e;
 }
 
 .cm-analytics-danger-zone h3 {
@@ -4368,6 +4410,7 @@ tr.cybermaps-matrix-category td:first-child {
 
 .cm-robots-workspace {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 24px;
 }
 
@@ -4381,6 +4424,10 @@ tr.cybermaps-matrix-category td:first-child {
     margin: 0 0 8px;
 }
 
+.cm-robots-panel {
+    min-width: 0;
+}
+
 .cm-robots-panel .section-header {
     margin-bottom: 12px;
 }
@@ -4388,6 +4435,20 @@ tr.cybermaps-matrix-category td:first-child {
 .cm-robots-panel .section-header p {
     margin: 4px 0 0;
     color: var(--text-muted);
+}
+
+.cm-content-signal-control {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+    margin-bottom: 10px;
+}
+
+.cm-content-signal-control select {
+    min-width: 9rem;
+    max-width: 100%;
 }
 
 .cm-schema-header {
@@ -4544,7 +4605,7 @@ tr.cybermaps-matrix-category td:first-child {
         display: block;
         margin-bottom: 6px;
         content: attr(data-label);
-        color: #64748b;
+        color: var(--text-muted);
         font-size: 9px;
         font-weight: 700;
         letter-spacing: 0.05em;
@@ -4655,7 +4716,7 @@ tr.cybermaps-matrix-category td:first-child {
         display: block;
         margin-bottom: 5px;
         content: attr(data-label);
-        color: #64748b;
+        color: var(--text-muted);
         font-size: 9px;
         font-weight: 700;
         letter-spacing: 0.05em;
@@ -4741,7 +4802,7 @@ tr.cybermaps-matrix-category td:first-child {
 
     .cybermaps-crawler-matrix td:not(:first-child)::before {
         content: attr(data-label);
-        color: #64748b;
+        color: var(--text-muted);
         font-size: 9px;
         font-weight: 700;
         letter-spacing: 0.04em;

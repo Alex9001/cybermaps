@@ -369,7 +369,7 @@ class SitemapStatus {
 					);
 					?>
 				<?php else : ?>
-					<?php esc_html_e( 'Run a nonce-protected dynamic-only check when static delivery may bypass PHP.', 'cybermaps' ); ?>
+					<?php esc_html_e( 'Check the WordPress-generated sitemap when static files may be serving requests instead.', 'cybermaps' ); ?>
 				<?php endif; ?>
 			</div>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="margin-top: 8px;">

@@ -624,22 +624,152 @@ KEY severity (severity)
 		$resource_id = (int) $wpdb->insert_id;
 
 		foreach ( $findings as $finding ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching
-			$inserted = $wpdb->insert(
-				$wpdb->prefix . 'cybermaps_audit_findings',
-				array(
-					'run_id'         => $run_id,
-					'resource_id'    => $resource_id,
-					'finding_key'    => (string) $finding['key'],
-					'severity'       => (string) $finding['severity'],
-					'summary'        => (string) $finding['summary'],
-					'evidence_json'  => (string) wp_json_encode( $finding['evidence'] ),
-					'recommendation' => (string) $finding['recommendation'],
-				)
-			);
-			if ( false === $inserted ) {
-				throw new \RuntimeException( esc_html__( 'Cybermaps could not store an audit finding.', 'cybermaps' ) );
+			$this->insert_finding( $run_id, $resource_id, $finding );
+		}
+	}
+
+	/**
+	 * Store a bounded source batch, preserving the assigned resource IDs.
+	 *
+	 * @param int $run_id Running report ID.
+	 * @param array<int,array{resource:array<string,mixed>,findings:array<int,array<string,mixed>>}> $results Evaluated posts.
+	 */
+	public function add_resources( int $run_id, array $results ): void {
+		global $wpdb;
+		$pending = array();
+		foreach ( $results as $result ) {
+			$this->add_resource( $run_id, $result['resource'], array() );
+			$resource_id = (int) $wpdb->insert_id;
+			foreach ( $result['findings'] as $finding ) {
+				$pending[] = array( $resource_id, $finding );
+				if ( count( $pending ) === 5 ) {
+					$this->insert_finding_batch( $run_id, $pending );
+					$pending = array();
+				}
 			}
+		}
+		foreach ( $pending as list( $resource_id, $finding ) ) {
+			$this->insert_finding( $run_id, $resource_id, $finding );
+		}
+	}
+
+	/** Store one finding using WordPress's standard field validation. */
+	private function insert_finding( int $run_id, int $resource_id, array $finding ): void {
+		global $wpdb;
+		$inserted = $wpdb->insert( $wpdb->prefix . 'cybermaps_audit_findings', $this->finding_data( $run_id, $resource_id, $finding ) );
+		if ( false === $inserted ) {
+			throw new \RuntimeException( esc_html__( 'Cybermaps could not store an audit finding.', 'cybermaps' ) );
+		}
+	}
+
+	/** @return array<string,int|string> */
+	private function finding_data( int $run_id, int $resource_id, array $finding ): array {
+		return array(
+			'run_id'         => $run_id,
+			'resource_id'    => $resource_id,
+			'finding_key'    => (string) $finding['key'],
+			'severity'       => (string) $finding['severity'],
+			'summary'        => (string) $finding['summary'],
+			'evidence_json'  => (string) wp_json_encode( $finding['evidence'] ),
+			'recommendation' => (string) $finding['recommendation'],
+		);
+	}
+
+	/** Store five findings in a single bounded statement. */
+	private function insert_finding_batch( int $run_id, array $pending ): void {
+		global $wpdb;
+		$table = $wpdb->prefix . 'cybermaps_audit_findings';
+		if ( ! $this->batch_finding_columns_supported( $table ) ) {
+			$this->insert_findings_individually( $run_id, $pending );
+			return;
+		}
+		$rows  = array();
+		$bytes = 0;
+		foreach ( $pending as list( $resource_id, $finding ) ) {
+			$row = $this->finding_data( $run_id, $resource_id, $finding );
+			foreach ( $row as $column => $value ) {
+				if ( is_string( $value ) ) {
+					if ( is_wp_error( $wpdb->get_col_length( $table, $column ) ) ) {
+						throw new \RuntimeException( esc_html__( 'Cybermaps could not store an audit finding.', 'cybermaps' ) );
+					}
+					$checked = $wpdb->strip_invalid_text_for_column( $table, $column, $value );
+					if ( is_wp_error( $checked ) || $checked !== $value ) {
+						throw new \RuntimeException( esc_html__( 'Cybermaps could not store an audit finding.', 'cybermaps' ) );
+					}
+					$bytes += strlen( $value );
+				}
+			}
+			$rows[] = array_values( $row );
+		}
+		if ( $bytes > 262144 ) {
+			$this->insert_findings_individually( $run_id, $pending );
+			return;
+		}
+		$inserted = $wpdb->query(
+			$wpdb->prepare(
+				'INSERT INTO %i (run_id, resource_id, finding_key, severity, summary, evidence_json, recommendation) VALUES (%d,%d,%s,%s,%s,%s,%s),(%d,%d,%s,%s,%s,%s,%s),(%d,%d,%s,%s,%s,%s,%s),(%d,%d,%s,%s,%s,%s,%s),(%d,%d,%s,%s,%s,%s,%s)',
+				$table,
+				$rows[0][0],
+				$rows[0][1],
+				$rows[0][2],
+				$rows[0][3],
+				$rows[0][4],
+				$rows[0][5],
+				$rows[0][6],
+				$rows[1][0],
+				$rows[1][1],
+				$rows[1][2],
+				$rows[1][3],
+				$rows[1][4],
+				$rows[1][5],
+				$rows[1][6],
+				$rows[2][0],
+				$rows[2][1],
+				$rows[2][2],
+				$rows[2][3],
+				$rows[2][4],
+				$rows[2][5],
+				$rows[2][6],
+				$rows[3][0],
+				$rows[3][1],
+				$rows[3][2],
+				$rows[3][3],
+				$rows[3][4],
+				$rows[3][5],
+				$rows[3][6],
+				$rows[4][0],
+				$rows[4][1],
+				$rows[4][2],
+				$rows[4][3],
+				$rows[4][4],
+				$rows[4][5],
+				$rows[4][6],
+			)
+		);
+		if ( 5 !== $inserted ) {
+			throw new \RuntimeException( esc_html__( 'Cybermaps could not store an audit finding.', 'cybermaps' ) );
+		}
+	}
+
+	/** Avoid per-column database validation when WordPress cannot validate locally. */
+	private function batch_finding_columns_supported( string $table ): bool {
+		global $wpdb;
+		if ( ! function_exists( 'mb_strlen' ) ) {
+			return false;
+		}
+		foreach ( array( 'finding_key', 'severity', 'summary', 'evidence_json', 'recommendation' ) as $column ) {
+			$charset = $wpdb->get_col_charset( $table, $column );
+			if ( ! in_array( $charset, array( false, 'latin1', 'utf8', 'utf8mb3', 'utf8mb4' ), true ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/** Use WordPress's row validation and insert path for every finding. */
+	private function insert_findings_individually( int $run_id, array $pending ): void {
+		foreach ( $pending as list( $resource_id, $finding ) ) {
+			$this->insert_finding( $run_id, $resource_id, $finding );
 		}
 	}
 

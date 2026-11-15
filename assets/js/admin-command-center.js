@@ -164,7 +164,7 @@ const NuclearPurge = () => {
             isDestructive: true,
             variant: 'secondary',
             onClick: () => setIsModalOpen( true ),
-            style: { color: '#d63638', borderColor: '#d63638' }
+            className: 'cm-btn-destructive'
         }, __( 'Remove Core-Owned Static Files', 'cybermaps' ) ),
         el( 'p', { className: 'description' }, 
             __( 'Deletes only unchanged files that Cybermaps can verify it created. Pre-existing or edited files are retained and reported. Files return on a later content or settings sync while static delivery is enabled.', 'cybermaps' )

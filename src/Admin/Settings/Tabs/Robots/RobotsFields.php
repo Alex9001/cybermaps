@@ -463,9 +463,9 @@ class RobotsFields {
 			$select_id = 'cybermaps-content-signal-' . sanitize_key( (string) $key );
 			?>
 			<div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #f0f0f1;">
-				<div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+				<div class="cm-content-signal-control">
 					<label for="<?php echo esc_attr( $select_id ); ?>"><strong style="font-size:14px;"><?php echo esc_html( $meta['label'] ); ?></strong></label>
-					<select id="<?php echo esc_attr( $select_id ); ?>" name="cybermaps_robots_manager[content_signals][<?php echo esc_attr( $key ); ?>]" style="width:90px;">
+					<select id="<?php echo esc_attr( $select_id ); ?>" name="cybermaps_robots_manager[content_signals][<?php echo esc_attr( $key ); ?>]">
 						<option value="" <?php selected( $value, '' ); ?>><?php esc_html_e( 'Not published', 'cybermaps' ); ?></option>
 						<option value="yes" <?php selected( $value, 'yes' ); ?>><?php esc_html_e( 'Allow', 'cybermaps' ); ?></option>
 						<option value="no" <?php selected( $value, 'no' ); ?>><?php esc_html_e( 'Deny', 'cybermaps' ); ?></option>

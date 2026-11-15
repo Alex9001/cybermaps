@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Alex9001/cybermaps/releases"><img src="https://img.shields.io/github/v/release/Alex9001/cybermaps?include_prereleases&amp;style=flat&amp;color=0ea5e9&amp;label=release" alt="Latest release including open beta"></a>
+  <a href="https://github.com/Alex9001/cybermaps/releases"><img src="https://img.shields.io/github/v/release/Alex9001/cybermaps?style=flat&amp;color=0ea5e9&amp;label=release" alt="Latest stable release"></a>
   <a href="https://github.com/Alex9001/cybermaps/releases"><img src="https://img.shields.io/github/downloads/Alex9001/cybermaps/total?style=flat&amp;color=22d3ee" alt="Release downloads"></a>
   <a href="#install"><img src="https://img.shields.io/badge/WordPress-7.1%2B-21759b?style=flat" alt="WordPress 7.1 or newer"></a>
   <a href="#install"><img src="https://img.shields.io/badge/PHP-8.2%2B-777bb4?style=flat" alt="PHP 8.2 or newer"></a>
@@ -24,7 +24,7 @@
 
 <p align="center">
   <a href="https://cybermaps.dev/">Homepage</a> ·
-  <a href="https://github.com/Alex9001/cybermaps/releases">Download beta</a> ·
+  <a href="https://github.com/Alex9001/cybermaps/releases">Download</a> ·
   <a href="#install">Install</a> ·
   <a href="https://cybermaps.dev/docs/">Documentation</a> ·
   <a href="https://github.com/Alex9001/cybermaps/issues">Issues</a>
@@ -100,16 +100,20 @@ without executing shortcodes or dynamic blocks.
 
 ## Install
 
-**Open beta is available on [GitHub Releases](https://github.com/Alex9001/cybermaps/releases).**
+**Install the stable release from WordPress.org.**
 
-The open beta is ready for use on live WordPress sites. Feedback and bug reports
-are welcome.
+1. In WordPress, open **Plugins → Add New Plugin** and search for **CYBERMAPS**.
+2. Choose **CYBERMAPS: XML Sitemaps & llms.txt**, install it, and activate it.
+3. Open **Cybermaps → Overview → Quick Setup** to choose your publishing settings.
 
-1. Open the [releases page](https://github.com/Alex9001/cybermaps/releases), choose
-   the newest release, and download **`cybermaps_<version>.zip`** from its assets.
-   GitHub's automatic “Source code” archives are development copies.
-2. In WordPress, open **Plugins → Add New Plugin → Upload Plugin**.
-3. Select the ZIP, install it, and activate **Cybermaps**.
+[WordPress.org listing](https://wordpress.org/plugins/cybermaps/) ·
+[Latest stable GitHub release](https://github.com/Alex9001/cybermaps/releases/latest)
+
+For a manual installation, download **`cybermaps_<version>.zip`** from the release
+assets and use **Plugins → Add New Plugin → Upload Plugin**. GitHub's automatic
+“Source code” archives are development copies. Existing installations using
+`cybermaps/cybermaps.php` can receive the stable update through WordPress;
+back up your site before upgrading.
 
 | Requirement | Minimum | Recommended |
 |---|---|---|
@@ -120,7 +124,9 @@ Each release includes a `.sha256` checksum for the installable ZIP.
 
 ## Quick start
 
-1. Open **Cybermaps → XML Sitemaps** and choose the content to include.
+1. Start with **Cybermaps → Overview → Quick Setup**, then choose the content
+   to include in **XML Sitemaps**. If another plugin handles XML sitemaps, turn
+   Cybermaps XML management off.
 2. Open **Cybermaps → AI Publishing** to configure AI publications. The AI
    Publication Hub is opt-in.
 3. Review **Sitemap Status** and **AI Discovery Status** to inspect delivery.
@@ -128,7 +134,9 @@ Each release includes a `.sha256` checksum for the installable ZIP.
 
 [WordPress readme](readme.txt) · [Setup and technical documentation](docs/documentation.md)
 
-## Help shape the beta
+## Help and feedback
+
+For setup questions, visit [WordPress.org support](https://wordpress.org/support/plugin/cybermaps/).
 
 Found a problem? [Open a bug report](https://github.com/Alex9001/cybermaps/issues/new?template=bug_report.yml)
 with reproduction steps and the diagnostic support bundle from
@@ -149,7 +157,8 @@ posting it. Use **Download support bundle** if copying is unavailable.
 - `/ai.json` implements Cybermaps AI Discovery Manifest 1.0, a vendor extension.
 - The AI Discovery Protocol 3.0 Level 3 surface includes the manifest, bounded
   seven-day updates, and four `/news/*` context, speakable, changelog, and JSONL
-  archive publications. Optional MCP operations use authorized, consented access.
+  archive publications. Optional MCP exposes only Cybermaps public resources and read-only search
+  through WordPress MCP Adapter after explicit opt-in.
 - The Agent Skills guide includes a digest-bound 0.2.0 draft discovery index
   and the retained `/skill.md` compatibility URL.
 - Dynamic publication files include CORS, ETag, and Repr-Digest headers.
@@ -186,7 +195,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) before changing code. The public surface
 is inventoried in `docs/dev/manifest.json`; changes to endpoints, settings,
 classes, routes, or contracts require regenerating the documented artifacts.
 
-## Publish a GitHub release
+## Publish a stable release
 
 Install and authenticate the [GitHub CLI](https://cli.github.com/manual/gh_release_create)
 (`gh auth login --hostname github.com`), and install Composer dependencies. Run
@@ -196,18 +205,18 @@ repository. Python 3 and the existing local packaging tools are required.
 
 ```bash
 cp .cybermaps-workspace.example.json .cybermaps-workspace.json
-composer release                        # Validate, install, publish beta, deploy docs
-composer release -- --stable            # Same workflow for a stable release
+composer release                        # Validate, publish stable to WordPress.org/GitHub, deploy site
+composer release -- --beta              # Explicit GitHub prerelease; no WordPress.org publication
 composer dev:install                    # Build and install locally; no website or publication
-composer release:resume -- --tag vX.Y.Z  # Verify published assets, finish website handoff only
+composer release:resume -- --tag vX.Y.Z  # Resume verified publication and website handoff
 ```
 
 Review the two destination paths in the ignored local configuration first.
 `composer release` requires committed, pushed plugin source and a clean
 canonical website. It imports the exact candidate, pauses with affected pages
 when explanations need review, validates and installs the package with a rollback
-copy, publishes through the existing draft/checksum/download-verification
-safeguards, then freezes the published website snapshot and runs its guarded
+copy, publishes the frozen package to WordPress.org, verifies installation and updates,
+publishes the matching stable GitHub release, then freezes the website snapshot and runs its guarded
 `npm run deploy`. Only workflow-generated website files are committed.
 
 Packages, checksums, reports, logs and release state live in

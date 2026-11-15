@@ -1,10 +1,12 @@
 # Disposable real-WordPress performance measurements
 
-`python3 tests/performance/run.py --zip <exact ZIP> --label baseline --sizes 1000 10000 100000 1000000`
+`python3 -B tests/performance/run.py --zip <exact ZIP> --label baseline --sizes 1000 10000 100000 1000000`
 installs the ZIP in a disposable Podman WordPress 7.1 / PHP 8.2 / MariaDB 10.11
 environment. Nothing is installed in Local Sites. Run only when the audit
 coordinator grants the shared profiling slot. A development smoke may use
 `--sizes 100 --warm 2 --cold 1 --operations sitemap_index,llms,search_hit`.
+Use `--wordpress-version` to pin a later WordPress release, identically for both
+packages. Official core checksums are still required.
 
 The harness pins its workload to six shared CPU cores and applies individual address-space limits, with a 1 GiB PHP process/request ceiling, per-operation timeout, a combined observed-RSS stop at 12 GiB, and a 90 GiB workspace stop. The named database/Redis/PHP/SQL-helper limit sum is 10.5 GiB; it excludes inherited limits on small timeout supervisors and is not an absolute worst-case aggregate address-space bound.
 Its MariaDB volume is disposable and its network does not publish the database.
@@ -38,11 +40,23 @@ Full audit and static synchronization are separately bounded operations, not
 claimed complete when a deadline or process memory cap stops them. Full audit
 uses one sample per cache mode by default because it writes the complete report;
 the HTTP sampling rule applies to read-only endpoints. Static synchronization
-runs one slice and records resumable state; a pending/partial slice fails the completion flag. A successful slice report is insufficient: the final continuation state must also be cleared, as StaticBridge does at terminal completion. It is never reported as a completed whole-site synchronization. The separate `ownership` operation measures forced per-file ownership persistence, including total SQL bytes, at each requested fixture size. `--stress-page-lists N` replaces the
+runs fresh PHP requests until the plugin clears its continuation checkpoint.
+It retains every slice and fails on errors, stalled progress, the request limit,
+or the total deadline. A successful slice report is insufficient: the final
+continuation state must also be cleared, as StaticBridge does at terminal
+completion. Prior output is purged through the plugin's ownership-safe API
+before each cache mode; publication no longer inherits a previous mode's files
+or progress. Production per-slice limits remain unchanged. The `sitemaps`
+operation compares the actual index with the full internal inventory and fetches
+every advertised child, in addition to early/deep latency samples. The separate
+`ownership` operation measures forced per-file ownership persistence, including
+total SQL bytes, at each requested fixture size. `--stress-page-lists N` replaces the
 fixture with N published pages containing a stored page-list block, measuring
 the real internal-link analyzer under its PHP memory and time limits.
 
-All results go to `docs/generated/releases/8.0.2/audit/performance/`; disposable
+All results go to `docs/generated/releases/<release-version>/audit/performance/`;
+the version defaults to the exact ZIP's plugin header. Set `--release-version`
+to retain a baseline comparison under the candidate's evidence directory. Disposable
 files and subprocess temporary directories stay under `docs/generated/tmp/`.
 The harness never edits plugin source, repairs a package, commits, or releases.
 
@@ -72,7 +86,7 @@ Each PHP operation has a container-side wall-clock timeout so killing a host
 client cannot leave work behind. No benchmark changes the plugin source.
 
 Run harness self-tests with
-`python3 -B -m unittest discover -s tests/performance -p test_harness.py`.
+`python3 -B -m unittest discover -s tests/performance -p 'test_*.py'`.
 
 The launcher requires a Linux C compiler capable of static linking. Compiler failure or mismatched live-process limits abort setup. Early evidence directories without `verified-process-limits.json` predate verified enforcement and are diagnostic only; use the final bounded runs for comparison.
 
@@ -102,3 +116,54 @@ lease value, runtime identity, process list, timestamp and reset reason are save
 as setup evidence. This does not change the plugin or erase earlier timeout and
 lease-retention evidence. Page-list stress discovers the advertised page sitemap
 when that fixture contains no posts.
+
+## Stable release completion gate
+
+The required baseline is versioned in `docs/dev/release-policy.json` under
+`upgrade_baseline`, shared with the native upgrade check. Each future stable
+release must use the previous published stable version and its actual ZIP
+checksum. The first 8.1.0 stable launch is the documented exception: its baseline
+is the published 8.0.4 beta ZIP, SHA-256
+`b63cb6f54f800d758cfe49e2056bb82bfc4e122121c46c98c19ed7f6bab9e7f9`.
+Run the two packages **serially**, with no native matrix or competing load test:
+
+```sh
+python3 -B tests/performance/run.py --zip docs/generated/releases/8.0.4/cybermaps_8.0.4.zip --label baseline-8-0-4 --release-version 8.1.0 --wordpress-version 7.1.4 --sizes 1000 10000 --timeout 90 --long-timeout 120 --static-timeout 600 --static-slices 50
+python3 -B tests/performance/run.py --zip docs/generated/releases/8.1.0/cybermaps_8.1.0.zip --label candidate-8-1-0 --release-version 8.1.0 --wordpress-version 7.1.4 --sizes 1000 10000 --timeout 90 --long-timeout 120 --static-timeout 600 --static-slices 50 --image-manifest <baseline-run>/environment.json
+python3 -B tests/performance/check_release.py --version 8.1.0 --commit <full-candidate-commit> --zip docs/generated/releases/8.1.0/cybermaps_8.1.0.zip --candidate <candidate-run> --baseline <baseline-run>
+```
+
+Use the actual frozen candidate filename if promotion has not happened yet.
+The comparison keeps the historical 90-second HTTP and 120-second report/slice
+deadlines. Complete sitemap-inventory traversal also has a 120-second acceptance
+deadline, checked against its aggregate measured duration; each child request
+still has its own 90-second transport timeout. A full static publication may use up to 50 bounded requests within
+600 seconds; this new whole-operation measurement does not relax production
+slice limits or treat a timeout as success. The ordinary harness defaults are
+diagnostic settings, not the stricter release acceptance profile.
+
+The receipt writer requires all 1k/10k candidate workloads to complete across
+both plugin-cache settings and both native/Redis modes, plus all requested cold
+and warm observations. A completed baseline collection may contain recorded
+failures; they remain visible and do not become successful samples. Both runs
+must use the same reviewed harness, corpus, WordPress version, immutable images,
+hardware, and resource limits. This is a controlled completion claim, not a
+claim that 100k/1m workloads or arbitrary hosting configurations complete.
+
+The selected `everyday-workloads.json` receipt binds the candidate ZIP and full
+source commit and hashes every retained evidence file. The release gate calls
+`validate_receipt(path, zip_sha256, commit, max_age_hours=24)` from
+`check_release.py`; it recomputes raw validity and hashes instead of trusting a
+saved pass flag. Before publication, stale measurements must be rerun against
+the same frozen ZIP. The writer stores each new immutable receipt attempt under
+`audit/performance/receipts/`, preserves the previous receipt bytes by their hash,
+then atomically updates the selected receipt only after validating fresh raw
+evidence. An expired receipt does not require deleting old measurements. Never
+edit passing results or copy timestamps forward.
+
+Allow approximately 15–35 minutes per package on the existing six-core fixture,
+depending on database/cache speed and observed continuations. This is a planning
+estimate, not a performance result. Existing 10k reports have previously hit the
+120-second bound; a candidate that does so is a release blocker requiring a real
+fix and a new exact-package run. Do not increase the acceptance deadline to make
+the release pass. Historical 8.0.2 measurements remain unchanged.

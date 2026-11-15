@@ -24,6 +24,12 @@ ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / '.cybermaps-workspace.json'
 
 
+class CommandFailure(RuntimeError):
+    def __init__(self, returncode, message):
+        super().__init__(message)
+        self.returncode = returncode
+
+
 def require(condition, message):
     if not condition:
         raise RuntimeError(message)
@@ -87,7 +93,7 @@ def run(*args, cwd=None, capture=True):
                 print('Running: ' + ' '.join(map(str, args)), flush=True)
                 result = subprocess.run(args, cwd=cwd, text=True, stdout=stream, stderr=subprocess.STDOUT)
                 if result.returncode:
-                    raise RuntimeError(f'Command failed ({result.returncode}); see {path}')
+                    raise CommandFailure(result.returncode, f'Command failed ({result.returncode}); see {path}')
                 return None
     result = subprocess.run(args, cwd=cwd, check=False, text=True,
                             stdout=subprocess.PIPE if capture else None,
@@ -174,14 +180,50 @@ def load_config(website_required=True):
     return website, install_destination(data['install'], website)
 
 
+def process_identity(pid):
+    try:
+        fields = Path('/proc/' + str(pid) + '/stat').read_text().rsplit(')', 1)[1].split()
+        return dict(pid=pid, parent=int(fields[1]), started=fields[19])
+    except (OSError, ValueError, IndexError):
+        return None
+
+
+def owned_by_ancestor(record):
+    """Allow only an actual workflow descendant to enter its parent's lock."""
+    pid = os.getppid()
+    for _ in range(64):
+        identity = process_identity(pid)
+        if not identity:
+            return False
+        if identity['pid'] == record.get('pid') and identity['started'] == record.get('started'):
+            return True
+        if identity['parent'] <= 1:
+            return False
+        pid = identity['parent']
+    return False
+
+
 @contextmanager
-def lock():
+def lock(allow_parent=False):
     configure()
-    with generated('tmp/workflow.lock').open('a') as stream:
+    with generated('tmp/workflow.lock').open('a+') as stream:
         try:
             fcntl.flock(stream, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError as error:
-            raise RuntimeError('Another local release/install workflow is running.') from error
+            stream.seek(0)
+            try:
+                owner = json.load(stream)
+            except ValueError:
+                owner = {}
+            require(allow_parent and owned_by_ancestor(owner), 'Another local release/install workflow is running.')
+            yield
+            return
+        identity = process_identity(os.getpid())
+        require(identity is not None, 'Release locking requires Linux process identity support.')
+        stream.seek(0)
+        stream.truncate()
+        json.dump(identity, stream)
+        stream.flush()
         yield
 
 

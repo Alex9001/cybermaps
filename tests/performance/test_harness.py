@@ -175,7 +175,7 @@ class WatchdogAndImageTests(unittest.TestCase):
                         return True
                     def cleanup(self):
                         self.cleaned_up = True
-                with patch.object(run, 'Runtime', FakeRuntime), patch.object(sys, 'argv', ['run.py', '--zip', str(source), '--label', 'frozen-proof', '--sizes', '1']), patch('builtins.print'):
+                with patch.object(run, 'Runtime', FakeRuntime), patch.object(run, 'package_version', return_value='8.1.0'), patch.object(sys, 'argv', ['run.py', '--zip', str(source), '--label', 'frozen-proof', '--sizes', '1']), patch('builtins.print'):
                     with self.assertRaisesRegex(RuntimeError, 'Frozen performance package changed'):
                         run.main()
                 completion = json.loads((root / 'evidence/completion.json').read_text())
@@ -241,6 +241,17 @@ class WatchdogAndImageTests(unittest.TestCase):
                 runtime.verify_worker_exit(inventory)
         runtime.operation.assert_not_called()
 
+    def test_fixture_waits_for_completed_timeout_supervisor_without_resetting_early(self):
+        runtime = object.__new__(run.Runtime)
+        runtime.http = 'fixture-http'
+        running = 'PID STATE ARGS\n1 S php /performance/router.php\n2 S timeout 300 php /performance/runner.php clear\n'
+        exited = 'PID STATE ARGS\n1 S php /performance/router.php\n2 Z [timeout]\n'
+        runtime.command = Mock(side_effect=[SimpleNamespace(stdout=running), SimpleNamespace(stdout=exited)])
+        with patch.object(run.time, 'sleep') as sleep:
+            self.assertEqual(exited, runtime.wait_for_worker_exit())
+        sleep.assert_called_once_with(.1)
+        self.assertEqual(2, runtime.command.call_count)
+
     def test_cleanup_joins_watchdog(self):
         run.TEMP.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory(prefix='perf-cleanup-', dir=run.TEMP) as directory:
@@ -272,6 +283,88 @@ class WatchdogAndImageTests(unittest.TestCase):
             runtime.pin_images()
             self.assertEqual(ids, runtime.image_roles)
             self.assertEqual(list(ids.values()), [call.args[-1] for call in runtime.command.call_args_list])
+
+
+class CompletionTests(unittest.TestCase):
+    def slice(self, terminal=False, **changes):
+        sample = dict(queries=3, query_seconds=.01, peak_memory_bytes=1000, php_seconds=.1,
+                      plugin='8.1.0', wordpress='7.1.4', php='8.2', operation='static_sync', operation_seconds=.1,
+                      result={'report': {'status': 'complete' if terminal else 'pending', 'success': terminal,
+                                         'counts': {'failed': 0, 'conflicted': 0, 'retained': 0, 'skipped': 0}},
+                              'state': [] if terminal else {'status': 'pending', 'last_error': '', 'phase': 'rag_chunks',
+                                                           'generation': 1, 'epoch': 1, 'cursor': {'after_id': 1}, 'writes': 250}})
+        sample.update(changes)
+        return sample
+
+    def runtime(self, directory):
+        runtime = object.__new__(run.Runtime)
+        runtime.output = Path(directory)
+        runtime.args = SimpleNamespace(long_timeout=120, static_timeout=600, static_slices=10)
+        runtime.prepare_static_fixture = Mock()
+        runtime.storage_check = Mock()
+        return runtime
+
+    def test_continuations_aggregate_only_after_terminal_state(self):
+        run.TEMP.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix='perf-continuations-', dir=run.TEMP) as directory:
+            runtime = self.runtime(directory)
+            runtime.cli_sample = Mock(side_effect=[self.slice(), self.slice(True)])
+            result = runtime.measure_static('1000-redis-off-plugin-on-static_sync')
+            self.assertTrue(run.valid_sample(result))
+            self.assertEqual(6, result['queries'])
+            self.assertEqual(1000, result['peak_memory_bytes'])
+            self.assertEqual(2, len(result['result']['slices']))
+            runtime.prepare_static_fixture.assert_called_once()
+            self.assertEqual(2, runtime.cli_sample.call_count)
+
+    def test_failed_timed_out_or_stalled_slice_never_retried_into_success(self):
+        run.TEMP.mkdir(parents=True, exist_ok=True)
+        cases = [([self.slice(error='timeout'), self.slice(True)], 'static_slice_failed', 1),
+                 ([self.slice(), self.slice(), self.slice(True)], 'static_continuation_stalled', 2),
+                 ([self.slice(True, exit_code=124), self.slice(True)], 'static_slice_failed', 1)]
+        for samples, error, calls in cases:
+            with self.subTest(error=error), tempfile.TemporaryDirectory(prefix='perf-continuations-', dir=run.TEMP) as directory:
+                runtime = self.runtime(directory)
+                runtime.cli_sample = Mock(side_effect=samples)
+                result = runtime.measure_static('case')
+                self.assertFalse(run.valid_sample(result))
+                self.assertEqual(error, result['error'])
+                self.assertEqual(calls, runtime.cli_sample.call_count)
+
+    def test_completed_final_slice_does_not_hide_previous_error(self):
+        final = self.slice(True)
+        final['result']['slices'] = [self.slice(error='failure')]
+        self.assertFalse(run.valid_sample(final))
+        partial = self.slice()
+        partial['result']['report']['counts']['failed'] = 1
+        self.assertFalse(run.valid_static_slice(partial))
+
+    def test_slice_limit_is_incomplete(self):
+        run.TEMP.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix='perf-continuations-', dir=run.TEMP) as directory:
+            runtime = self.runtime(directory)
+            runtime.args.static_slices = 1
+            runtime.cli_sample = Mock(return_value=self.slice())
+            result = runtime.measure_static('case')
+            self.assertEqual('static_completion_budget_exhausted', result['error'])
+            self.assertFalse(run.valid_sample(result))
+
+    def test_all_sitemaps_require_every_advertised_child(self):
+        sample = EvidenceTests().sample()
+        samples = [sample | {'path': path} for path in ['/sitemap.xml', '/posts-1.xml', '/pages.xml']]
+        result = run.aggregate_samples('sitemaps', samples, .6, {'expected_paths': [s['path'] for s in samples], 'responses': samples})
+        self.assertTrue(run.valid_sample(result))
+        result['result']['responses'] = samples[:-1]
+        self.assertFalse(run.valid_sample(result))
+
+    def test_package_version_comes_from_plugin_header(self):
+        import zipfile
+        run.TEMP.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix='perf-package-version-', dir=run.TEMP) as directory:
+            path = Path(directory) / 'misleading-name.zip'
+            with zipfile.ZipFile(path, 'w') as archive:
+                archive.writestr('cybermaps/cybermaps.php', '<?php\n/**\n * Version: 8.1.0\n */\n')
+            self.assertEqual('8.1.0', run.package_version(path))
 
 
 class ProcessLimitTests(unittest.TestCase):

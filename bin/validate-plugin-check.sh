@@ -216,6 +216,8 @@ wp_cli eval 'putenv( "CYBERMAPS_TEMPLATE_SOURCE_PROBE=1" ); require "/validation
 python3 -B "${PROJECT_DIR}/bin/validate_matrix.py" --verify-template-source "${RUNTIME_DIR}/stored-template-source.json"
 wp_cli eval 'putenv( "CYBERMAPS_STATE_FIXTURE_DISPOSABLE=1" ); require "/validation/wporg-raw-option-store.php";' > "${RUNTIME_DIR}/raw-option-store.json"
 python3 -B "${PROJECT_DIR}/bin/validate_matrix.py" --verify-raw-option-store "${RUNTIME_DIR}/raw-option-store.json"
+wp_cli eval 'putenv( "CYBERMAPS_AUDIT_FIXTURE_DISPOSABLE=1" ); require "/validation/wporg-audit-batching.php";' > "${RUNTIME_DIR}/audit-batching.json"
+python3 -B "${PROJECT_DIR}/bin/validate_matrix.py" --verify-audit-batching "${RUNTIME_DIR}/audit-batching.json"
 wp_cli eval 'putenv( "CYBERMAPS_BUFFER_FIXTURE=1" ); require "/validation/output-buffer-ownership.php";' > "${RUNTIME_DIR}/output-buffer-ownership.json"
 python3 -B "${PROJECT_DIR}/bin/validate_matrix.py" --verify-output-buffer "${RUNTIME_DIR}/output-buffer-ownership.json"
 wp_cli eval 'require "/validation/wporg-lifecycle.php";'  >> "${RUNTIME_DIR}/smoke.txt"
@@ -263,6 +265,7 @@ report = {
     "configuration_persistence_passed": True,
     "cloudflare_persistence_passed": True,
     "audit_run_lock_passed": True,
+    "audit_batching_passed": True,
     "static_ownership_passed": True,
     "state_cutover_passed": True,
     "mcp_read_only_passed": True,

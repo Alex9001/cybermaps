@@ -29,7 +29,7 @@
 }
 
 .cm-setup-wizard-header .button-link {
-    color: #64748b;
+    color: #475569;
     text-decoration: none;
 }
 
@@ -44,7 +44,7 @@
     align-items: center;
     gap: 14px;
     margin: 0 4px 16px;
-    color: #64748b;
+    color: #475569;
     font-size: 12px;
     letter-spacing: .02em;
 }
@@ -95,7 +95,7 @@
 .cm-quick-setup__card > header p {
     max-width: 590px;
     margin: 0;
-    color: #64748b;
+    color: #475569;
     font-size: 15px;
     line-height: 1.6;
 }
@@ -128,7 +128,7 @@
 .cm-quick-setup__question-copy,
 .cm-quick-setup__note {
     margin: 0 0 18px;
-    color: #64748b;
+    color: #475569;
     line-height: 1.55;
 }
 
@@ -230,7 +230,7 @@
 }
 
 .cm-quick-choice__copy span {
-    color: #64748b;
+    color: #475569;
     font-size: 12px;
     line-height: 1.45;
 }
@@ -309,7 +309,7 @@
 }
 
 .cm-quick-setup__image span {
-    color: #64748b;
+    color: #475569;
     font-size: 12px;
 }
 
@@ -350,7 +350,7 @@
 .cm-quick-setup__loading {
     display: grid;
     min-height: 350px;
-    color: #64748b;
+    color: #475569;
     place-items: center;
     align-content: center;
 }
@@ -385,7 +385,7 @@
 .cm-quick-setup__complete-copy {
     max-width: 560px;
     margin: 0 auto 30px;
-    color: #64748b;
+    color: #475569;
     font-size: 15px;
     line-height: 1.6;
 }
@@ -426,7 +426,7 @@
 
 .cm-quick-setup__summary small {
     margin-bottom: 3px;
-    color: #64748b;
+    color: #475569;
 }
 
 .cm-quick-setup__summary strong {
@@ -457,7 +457,7 @@
     gap: 20px;
     padding: 10px 0;
     border-top: 1px solid #edf1f6;
-    color: #64748b;
+    color: #475569;
 }
 
 .cm-quick-setup__receipt-row strong {

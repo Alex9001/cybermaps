@@ -186,6 +186,91 @@ final class AuditRunRepositoryTest extends TestCase {
 		$this->assertSame( 2, $run['resources'][0]['measurement']['sample_words'] );
 	}
 
+	public function test_batch_preserves_resource_ids_and_all_finding_fields(): void {
+		$repository = new AuditRunRepository();
+		( new \ReflectionProperty( AuditRunRepository::class, 'running_runs' ) )->setValue( $repository, array( 8 => true ) );
+		$resource = array(
+			'resource_key' => 'post:1:8', 'object_type' => 'post', 'object_id' => 8,
+			'post_type' => 'page', 'title' => 'Fixture', 'url' => 'https://example.com/',
+			'modified_gmt' => '', 'word_count' => 12, 'age_days' => null, 'has_media' => false,
+			'indexable' => true, 'indexability' => array(), 'measurement' => array(), 'content_hash' => '',
+		);
+		$finding = static fn( int $i ): array => array(
+			'key' => 'key_' . $i, 'severity' => 'review', 'summary' => 'Summary ' . $i,
+			'evidence' => array( 'value' => $i ), 'recommendation' => 'Action ' . $i,
+		);
+		$second_resource = $resource;
+		$second_resource['resource_key'] = 'post:1:9';
+		$second_resource['object_id'] = 9;
+		$repository->add_resources( 8, array(
+			array( 'resource' => $resource, 'findings' => array( $finding( 1 ), $finding( 2 ), $finding( 3 ) ) ),
+			array( 'resource' => $second_resource, 'findings' => array( $finding( 4 ), $finding( 5 ), $finding( 6 ) ) ),
+		) );
+		$sql = implode( "\n", $GLOBALS['wpdb']->queries );
+		$this->assertStringContainsString( "(8,81,'key_1','review','Summary 1','{\"value\":1}','Action 1')", $sql );
+		$this->assertStringContainsString( "(8,82,'key_5','review','Summary 5','{\"value\":5}','Action 5')", $sql );
+		$this->assertSame( 82, $GLOBALS['wpdb']->saved_findings[0]['resource_id'] );
+		$this->assertSame( 'key_6', $GLOBALS['wpdb']->saved_findings[0]['finding_key'] );
+	}
+
+	public function test_batch_rejects_invalid_wordpress_column_data(): void {
+		$repository = new AuditRunRepository();
+		$GLOBALS['wpdb']->invalid_column = 'summary';
+		$batch = array_fill( 0, 5, array( 80, array(
+			'key' => 'test', 'severity' => 'review', 'summary' => 'invalid',
+			'evidence' => array(), 'recommendation' => 'Action',
+		) ) );
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'could not store an audit finding' );
+		( new \ReflectionMethod( AuditRunRepository::class, 'insert_finding_batch' ) )->invoke( $repository, 8, $batch );
+	}
+
+	public function test_batch_write_failure_is_reported(): void {
+		$repository = new AuditRunRepository();
+		$GLOBALS['wpdb']->fail_batch = true;
+		$batch = array_fill( 0, 5, array( 80, array(
+			'key' => 'test', 'severity' => 'review', 'summary' => 'Summary',
+			'evidence' => array(), 'recommendation' => 'Action',
+		) ) );
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( 'could not store an audit finding' );
+		( new \ReflectionMethod( AuditRunRepository::class, 'insert_finding_batch' ) )->invoke( $repository, 8, $batch );
+	}
+
+	public function test_large_finding_batch_uses_standard_individual_inserts(): void {
+		$batch = array_fill( 0, 5, array( 80, array(
+			'key' => 'test', 'severity' => 'review', 'summary' => str_repeat( 'x', 53000 ),
+			'evidence' => array(), 'recommendation' => 'Action',
+		) ) );
+		( new \ReflectionMethod( AuditRunRepository::class, 'insert_finding_batch' ) )->invoke( new AuditRunRepository(), 8, $batch );
+		$this->assertCount( 5, $GLOBALS['wpdb']->saved_findings );
+		$this->assertSame( str_repeat( 'x', 53000 ), $GLOBALS['wpdb']->saved_findings[0]['summary'] );
+		$this->assertSame( array(), $GLOBALS['wpdb']->queries );
+	}
+
+	public function test_non_utf_charset_uses_wordpress_individual_inserts(): void {
+		$GLOBALS['wpdb']->column_charset = 'sjis';
+		$batch = array_fill( 0, 5, array( 80, array(
+			'key' => 'test', 'severity' => 'review', 'summary' => 'Café',
+			'evidence' => array(), 'recommendation' => 'Action',
+		) ) );
+		( new \ReflectionMethod( AuditRunRepository::class, 'insert_finding_batch' ) )->invoke( new AuditRunRepository(), 8, $batch );
+		$this->assertCount( 5, $GLOBALS['wpdb']->saved_findings );
+		$this->assertSame( 'Café', $GLOBALS['wpdb']->saved_findings[0]['summary'] );
+		$this->assertSame( array(), $GLOBALS['wpdb']->queries );
+	}
+
+	public function test_missing_mbstring_uses_wordpress_individual_inserts(): void {
+		$process = proc_open( array( PHP_BINARY, '-d', 'disable_functions=mb_strlen', __DIR__ . '/fixtures/audit-no-mbstring.php' ), array( 1 => array( 'pipe', 'w' ), 2 => array( 'pipe', 'w' ) ), $pipes );
+		$this->assertIsResource( $process );
+		$output = stream_get_contents( $pipes[1] );
+		$error = stream_get_contents( $pipes[2] );
+		fclose( $pipes[1] );
+		fclose( $pipes[2] );
+		$this->assertSame( 0, proc_close( $process ), $error );
+		$this->assertSame( array( 'mb_available' => false, 'findings' => 5, 'summary' => 'Café', 'queries' => array() ), json_decode( $output, true, 512, JSON_THROW_ON_ERROR ) );
+	}
+
 	public function test_expired_run_lock_is_replaced_without_allowing_the_old_owner_to_delete_it(): void {
 		$old_owner = 'old-owner';
 		add_option(
@@ -427,16 +512,37 @@ final class AuditRunRepositoryWpdbStub {
 	public bool $fail_insert = false;
 	public string $resource_measurement = '{"words":100}';
 	public ?array $saved_resource = null;
+	public array $saved_findings = array();
+	public string $invalid_column = '';
+	public bool $fail_batch = false;
+	public string $column_charset = 'utf8mb4';
 	public int $insert_id = 80;
 	/** @var array<int,string> */
 	public array $queries = array();
 
 	public function insert( string $table, array $data ): int {
+		if ( 'wp_cybermaps_audit_findings' === $table ) {
+			$this->saved_findings[] = $data;
+			return 1;
+		}
 		if ( 'wp_cybermaps_audit_resources' !== $table ) {
 			throw new \RuntimeException( 'Unexpected fixture insert.' );
 		}
 		$this->saved_resource = $data;
+		++$this->insert_id;
 		return 1;
+	}
+
+	public function get_col_charset( string $table, string $column ): string {
+		return $this->column_charset;
+	}
+
+	public function get_col_length( string $table, string $column ): array|false {
+		return false;
+	}
+
+	public function strip_invalid_text_for_column( string $table, string $column, string $value ): string {
+		return $this->invalid_column === $column ? '' : $value;
 	}
 
 	public function get_charset_collate(): string {
@@ -604,6 +710,9 @@ final class AuditRunRepositoryWpdbStub {
 		) {
 			$this->last_error = 'Cleanup delete failed';
 			return false;
+		}
+		if ( str_starts_with( $query, 'INSERT INTO wp_cybermaps_audit_findings' ) ) {
+			return $this->fail_batch ? false : 5;
 		}
 		return 3;
 	}

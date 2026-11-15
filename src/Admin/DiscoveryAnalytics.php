@@ -306,7 +306,7 @@ final class DiscoveryAnalytics {
 	private function render_endpoint_table( array $endpoints ): void {
 		?>
 		<div class="cm-card cm-analytics-table-card">
-			<div class="cm-analytics-table-scroll">
+			<div class="cm-analytics-table-scroll" tabindex="0" role="region" aria-label="<?php esc_attr_e( 'Endpoint activity table', 'cybermaps' ); ?>">
 				<table class="wp-list-table widefat fixed striped">
 					<thead>
 						<tr>
@@ -364,7 +364,7 @@ final class DiscoveryAnalytics {
 	private function render_unknown_client_patterns( array $patterns ): void {
 		?>
 		<div class="cm-card cm-analytics-table-card">
-			<div class="cm-analytics-table-scroll">
+			<div class="cm-analytics-table-scroll" tabindex="0" role="region" aria-label="<?php esc_attr_e( 'Unidentified request patterns table', 'cybermaps' ); ?>">
 				<table class="wp-list-table widefat striped">
 					<thead>
 						<tr>
@@ -529,7 +529,7 @@ else :
 		?>
 		<div class="cm-card cm-analytics-table-card">
 			<h3><?php esc_html_e( 'Top content paths', 'cybermaps' ); ?></h3>
-			<div class="cm-analytics-table-scroll"><table class="wp-list-table widefat striped">
+			<div class="cm-analytics-table-scroll" tabindex="0" role="region" aria-label="<?php esc_attr_e( 'Top content paths table', 'cybermaps' ); ?>"><table class="wp-list-table widefat striped">
 				<thead><tr><th><?php esc_html_e( 'Path', 'cybermaps' ); ?></th><th><?php esc_html_e( 'Visits', 'cybermaps' ); ?></th><th><?php esc_html_e( 'Claimed crawlers', 'cybermaps' ); ?></th></tr></thead>
 				<tbody>
 				<?php if ( empty( $content ) ) : ?>
@@ -551,7 +551,7 @@ else :
 		?>
 		<div class="cm-card cm-analytics-table-card">
 			<h3><?php esc_html_e( 'Claimed crawler signatures', 'cybermaps' ); ?></h3>
-			<div class="cm-analytics-table-scroll"><table class="wp-list-table widefat striped">
+			<div class="cm-analytics-table-scroll" tabindex="0" role="region" aria-label="<?php esc_attr_e( 'Claimed crawler signatures table', 'cybermaps' ); ?>"><table class="wp-list-table widefat striped">
 				<thead><tr><th><?php esc_html_e( 'Claimed crawler', 'cybermaps' ); ?></th><th><?php esc_html_e( 'Endpoints', 'cybermaps' ); ?></th><th><?php esc_html_e( 'Content', 'cybermaps' ); ?></th></tr></thead>
 				<tbody>
 				<?php if ( empty( $crawlers ) ) : ?>
@@ -599,7 +599,7 @@ else :
 			<?php if ( ! $has_activity ) : ?>
 				<p><?php esc_html_e( 'No PHP-observed activity in the reporting window.', 'cybermaps' ); ?></p>
 			<?php else : ?>
-				<div class="cm-analytics-table-scroll cm-analytics-trend-scroll">
+				<div class="cm-analytics-table-scroll cm-analytics-trend-scroll" tabindex="0" role="region" aria-label="<?php esc_attr_e( 'Daily activity table', 'cybermaps' ); ?>">
 					<table class="wp-list-table widefat striped">
 						<thead>
 							<tr>
@@ -661,7 +661,7 @@ else :
 			</div>
 		</div>
 
-		<div class="cm-card cm-request-log-card">
+		<div class="cm-card cm-request-log-card" tabindex="0" role="region" aria-label="<?php esc_attr_e( 'Recent request log', 'cybermaps' ); ?>">
 			<?php if ( empty( $activity ) ) : ?>
 				<p class="cm-analytics-empty"><?php esc_html_e( 'No PHP-observed endpoint or retained crawler requests are stored yet.', 'cybermaps' ); ?></p>
 				<?php else : ?>

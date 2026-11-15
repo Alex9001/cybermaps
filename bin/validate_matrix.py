@@ -29,6 +29,37 @@ def verify_sql_fixture(path, name):
             f'Native {name} fixture incomplete')
 
 
+def verify_audit_batching_fixture(path):
+    result = json.loads(Path(path).read_text())
+    require(isinstance(result, dict) and result.get('schema_version') == 1
+            and result.get('audit_batching_passed') is True and result.get('cleanup_passed') is True
+            and isinstance(result.get('database'), str) and result['database'], 'Native audit_batching fixture incomplete')
+    for key, count in (('resources', 3), ('findings', 6)):
+        rows = result.get(key)
+        require(isinstance(rows, dict) and set(rows) == {'legacy', 'batch'}
+                and isinstance(rows['legacy'], list) and len(rows['legacy']) == count
+                and rows['legacy'] == rows['batch'] and all(isinstance(row, dict) for row in rows['legacy']),
+                'Native audit_batching row parity incomplete')
+    resources = result['resources']['legacy']
+    require(all(row.get('modified_gmt') is None and row.get('age_days') is None for row in resources)
+            and all("L'été café '" in row.get('title', '') for row in resources),
+            'Native audit_batching nullable or Unicode resource values missing')
+    keys = {row.get('resource_key') for row in resources}
+    require(len(keys) == 3 and all(isinstance(key, str) and key for key in keys), 'Native audit_batching resource identities missing')
+    for row in result['findings']['legacy']:
+        evidence = json.loads(row.get('evidence_json', '{}'))
+        require(row.get('resource_key') in keys and "Quoted 'café' \\ path" in row.get('summary', '')
+                and evidence.get('unicode') == '東京' and evidence.get('quote') == "'\\",
+                'Native audit_batching finding identity or escaping evidence missing')
+    rejections = result.get('rejections')
+    require(isinstance(rejections, dict) and set(rejections) == {'length', 'invalid_utf8'}, 'Native audit_batching negative cases missing')
+    for methods in rejections.values():
+        require(isinstance(methods, dict) and set(methods) == {'legacy', 'batch'}
+                and all(isinstance(value, dict) and value.get('rejected') is True
+                        and value.get('exception') == 'RuntimeException' for value in methods.values()),
+                'Native audit_batching invalid input was not rejected by both methods')
+
+
 def verify_output_buffer_fixture(path):
     result = json.loads(Path(path).read_text())
     require(isinstance(result, dict) and result.get('schema_version') == 1
@@ -80,12 +111,15 @@ def validate_result(result, wp, php, multisite, archive_hash, commit):
     require(result.get('sitemap_regressions_passed') is True, 'Sitemap runtime regressions incomplete')
     require(result.get('rest_representation_passed') is True, 'Native REST representation regressions incomplete')
     require(result.get('publication_priming_passed') is True, 'Native publication priming regressions incomplete')
-    for key in ('configuration_persistence', 'cloudflare_persistence', 'audit_run_lock', 'static_ownership', 'state_cutover', 'stored_template_source', 'raw_option_store', 'output_buffer_ownership', 'sitemap_ownership'):
+    for key in ('configuration_persistence', 'cloudflare_persistence', 'audit_run_lock', 'audit_batching', 'static_ownership', 'state_cutover', 'stored_template_source', 'raw_option_store', 'output_buffer_ownership', 'sitemap_ownership'):
         require(result.get(key + '_passed') is True, f'Native {key} regressions incomplete')
     require(result.get('stable_findings') == [] and result.get('experimental_findings') == [], 'Runtime findings remain')
 
 
 def main():
+    if sys.argv[1] == '--verify-audit-batching':
+        verify_audit_batching_fixture(sys.argv[2])
+        return
     if sys.argv[1] == '--verify-sitemap-ownership':
         verify_sitemap_ownership_fixture(sys.argv[2])
         return

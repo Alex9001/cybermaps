@@ -37,6 +37,9 @@ final class AuditBudgetFixtureDatabase {
 	public function get_col( string $sql ): array { return $this->source->get_col( $sql ); }
 	public function get_results( string $sql, string $format ): array { return $this->audit->get_results( $sql, $format ); }
 	public function query( string $sql ): int|false { return $this->audit->query( $sql ); }
+	public function get_col_charset( string $table, string $column ): string { return $this->audit->get_col_charset( $table, $column ); }
+	public function get_col_length( string $table, string $column ): array|false { return $this->audit->get_col_length( $table, $column ); }
+	public function strip_invalid_text_for_column( string $table, string $column, string $value ): string { return $this->audit->strip_invalid_text_for_column( $table, $column, $value ); }
 	public function insert( string $table, array $data ): int {
 		if ( 'wp_cybermaps_audit_runs' === $table ) { $this->statuses[] = $data['status']; }
 		if ( 'wp_cybermaps_audit_resources' === $table ) { ++$this->resources; }

@@ -61,6 +61,8 @@
             "@test:release-github",
             "@test:release-workflow",
             "@test:release-gates",
+            "@test:release-wordpress",
+            "@test:native-upgrade",
             "python3 -B tests/tooling/test_plugin_check_result.py"
         ],
         "release:build": [
@@ -91,6 +93,8 @@
             "python3 -B bin/release-workflow.py resume"
         ],
         "test:release-workflow": "python3 -B tests/tooling/test_release_workflow.py",
+        "test:release-wordpress": "python3 -B tests/tooling/test_wordpress_release.py",
+        "test:native-upgrade": "python3 -B tests/tooling/test_native_upgrade.py",
         "release:ready": [
             "Composer\\Config::disableProcessTimeout",
             "python3 -B bin/release_gate.py ready"

@@ -17,7 +17,7 @@ import urllib.request
 import uuid
 
 sys.dont_write_bytecode = True
-from workspace import ROOT, configure, git, package_files, release_dir, require, safe_path, save_json, version, load_config
+from workspace import ROOT, configure, git, package_files, release_dir, require, safe_path, save_json, version, load_config, lock
 from website_evidence import prepared
 
 POLICY = ROOT / 'docs/dev/release-policy.json'
@@ -43,7 +43,10 @@ def now():
 
 def policy():
     value = json.loads(POLICY.read_text())
-    require(value['schema_version'] == 1 and len(value['conditions']) == 19 and {'website_prepared', 'website_live', 'remote_capabilities', 'output_buffer_ownership', 'sitemap_ownership'} <= value['conditions'].keys(), 'Invalid release policy')
+    require(value['schema_version'] == 1 and len(value['conditions']) == 24 and {
+        'website_prepared', 'website_live', 'remote_capabilities', 'output_buffer_ownership',
+        'sitemap_ownership', 'stable_presentation', 'native_updates', 'everyday_workloads',
+        'wordpress_distribution', 'release_channels'} <= value['conditions'].keys(), 'Invalid release policy')
     return value
 
 
@@ -119,7 +122,7 @@ def validate_record(record):
 
 
 def validate_runtime_evidence(record):
-    from validate_matrix import validate_result
+    from validate_matrix import validate_result, verify_audit_batching_fixture
     latest = record["upstream"]["wordpress_version"]
     cases = {(policy()["minimum_wordpress"], "8.2", False), (latest, "8.2", True)}
     cases.update((latest, php, False) for php in policy()["php_versions"])
@@ -131,6 +134,9 @@ def validate_runtime_evidence(record):
     for name, (wp, php, multi) in expected.items():
         result = json.loads(reports[name].read_text())
         validate_result(result, wp, php, multi, record["zip_sha256"], record["identity"]["commit"])
+        fixture = reports[name].with_suffix('.evidence') / 'audit-batching.json'
+        require(str(fixture.relative_to(ROOT)) in record['evidence'], 'Native audit batching evidence missing')
+        verify_audit_batching_fixture(fixture)
         require(result["plugin_check_version"] == policy()["plugin_check_version"], "Checker version mismatch")
 
 
@@ -171,7 +177,9 @@ def execute(record, name, command, directory, env=None):
 
 
 def retained_candidate(record):
-    require(record.get('identity') == identity(), 'Retained candidate source/policy changed')
+    current = identity()
+    require(isinstance(record.get('identity'), dict) and all(record['identity'].get(key) == current.get(key)
+            for key in ('commit', 'source_sha256', 'policy_sha256')), 'Retained candidate source/policy changed')
     _, archive_hash = package_files(candidate())
     require(record.get('zip_sha256') == archive_hash, 'Retained candidate ZIP changed')
     final = release_dir() / candidate().name
@@ -189,6 +197,12 @@ def retained_candidate(record):
 def build():
     directory = release_dir()
     directory.mkdir(parents=True, exist_ok=True)
+    publication = directory / 'wordpress-publication.json'
+    if publication.exists():
+        state = json.loads(publication.read_text())
+        require(not state.get('svn_revision') and state.get('state') in ('inputs-frozen', 'svn-not-committed'),
+                'WordPress publication may already be committed; resume its downstream '
+                'publication without rebuilding: composer release:resume -- --tag v' + version())
     # Never overwrite an already published version's package or historical evidence.
     previous = directory / 'validation.json'
     if previous.exists():
@@ -247,6 +261,11 @@ def build():
 
 
 def ready():
+    publication = release_dir() / 'wordpress-publication.json'
+    if publication.exists():
+        saved = json.loads(publication.read_text())
+        require(not saved.get('svn_revision') and saved.get('state') in ('inputs-frozen', 'svn-not-committed'),
+                'Publication evidence is frozen after SVN commit; use release:resume for downstream checks')
     record = validate_record(load_record())
     validate_review(record)
     require(not git(ROOT, 'status', '--porcelain', '--untracked-files=all'), 'Commit and push source before readiness')
@@ -256,7 +275,12 @@ def ready():
     website, _ = load_config()
     website_release = json.loads((website / 'product/release.json').read_text())
     website_proof = prepared(website, record['identity']['commit'], website_release['channel'], version(),
-                             policy()['evidence_max_age_hours'])
+                             policy()['evidence_max_age_hours'],
+                             zip_sha256=record['zip_sha256'] if website_release['channel'] == 'stable' else None)
+    stable_checks = {}
+    if website_release['channel'] == 'stable':
+        from stable_release_checks import validate
+        stable_checks = validate(version(), record, policy()['evidence_max_age_hours'])
     fresh = upstream()
     require(fresh['wordpress_version'] == record['upstream']['wordpress_version'], 'New WordPress release requires validation')
     final = release_dir() / candidate().name
@@ -272,7 +296,7 @@ def ready():
     save_json(release_dir() / 'release-readiness.json', dict(schema_version=1, state='release-ready',
               identity=record['identity'], zip_sha256=record['zip_sha256'], ready_at=now(), website=website_proof,
               validation_sha256=digest(release_dir() / 'validation.json'),
-              review_sha256=digest(release_dir() / 'agent-review.json')))
+              review_sha256=digest(release_dir() / 'agent-review.json'), stable_checks=stable_checks))
     print('Release ready: ' + str(final))
 
 
@@ -282,6 +306,10 @@ def status():
     workflow = json.loads(workflow_path.read_text()) if workflow_path.exists() else {}
     live_path = release_dir() / 'website-live.json'
     if workflow.get('release_id'):
+        if workflow.get('phase') == 'beta-published' and workflow.get('channel') == 'beta':
+            print(json.dumps(dict(state='beta-published', tag=workflow.get('tag'), blockers=[],
+                                  note='Explicit prerelease; WordPress.org and production website remain unchanged'), indent=2))
+            return False
         live = json.loads(live_path.read_text()) if live_path.exists() else {}
         complete = (workflow.get('phase') == 'complete' and live.get('state') == 'website-verified'
                     and workflow.get('website_live_sha256') == (digest(live_path) if live_path.exists() else None)
@@ -290,6 +318,20 @@ def status():
               tag=workflow.get('tag'), website_verified_at=live.get('checked_at') if complete else None,
               blockers=[] if complete else ['Finish website deployment/verification with composer release:resume -- --tag ' + workflow['tag']]), indent=2))
         return not complete
+    publication = release_dir() / 'wordpress-publication.json'
+    if publication.exists():
+        saved = json.loads(publication.read_text())
+        if saved.get('svn_revision') or saved.get('state') not in ('inputs-frozen', 'svn-not-committed'):
+            distribution = release_dir() / 'wordpress-distribution.json'
+            failure = release_dir() / 'wordpress-failure.json'
+            if failure.exists():
+                distribution = failure
+            downstream = json.loads(distribution.read_text()) if distribution.exists() else {}
+            print(json.dumps(dict(state=downstream.get('state', saved['state']),
+                  tag=saved.get('tag'), svn_revision=saved.get('svn_revision'),
+                  next_check_at=downstream.get('next_check_at', saved.get('next_check_at')), blockers=[downstream.get('reason',
+                  'Resume immutable publication with composer release:resume -- --tag ' + saved['tag'])]), indent=2))
+            return True
     state = 'candidate-pending'
     try:
         record = validate_record(load_record())
@@ -298,7 +340,12 @@ def status():
         website, _ = load_config()
         website_release = json.loads((website / 'product/release.json').read_text())
         proof = prepared(website, record['identity']['commit'], website_release['channel'], version(),
-                         policy()['evidence_max_age_hours'])
+                         policy()['evidence_max_age_hours'],
+                         zip_sha256=record['zip_sha256'] if website_release['channel'] == 'stable' else None)
+        stable_checks = {}
+        if website_release['channel'] == 'stable':
+            from stable_release_checks import validate
+            stable_checks = validate(version(), record, policy()['evidence_max_age_hours'])
         if git(ROOT, 'status', '--porcelain', '--untracked-files=all'):
             blockers.append('Source must be committed and pushed before promotion')
         receipt = release_dir() / 'release-readiness.json'
@@ -311,7 +358,8 @@ def status():
             require(value['identity'] == record['identity'] and value['zip_sha256'] == record['zip_sha256']
                     and value['validation_sha256'] == digest(release_dir() / 'validation.json')
                     and value['review_sha256'] == digest(release_dir() / 'agent-review.json')
-                    and value.get('website') == proof, 'Readiness record is stale')
+                    and value.get('website') == proof and value.get('stable_checks', {}) == stable_checks,
+                    'Readiness record is stale')
     except (RuntimeError, ValueError, KeyError, OSError) as error:
         blockers.append(str(error))
     print(json.dumps(dict(state=state if blockers else 'release-ready', blockers=blockers,
@@ -327,7 +375,7 @@ def main():
     configure()
     if args.action == 'status':
         return status()
-    with gate_lock():
+    with lock(allow_parent=True), gate_lock():
         if args.action in ('build', 'validate'):
             build()
         else:

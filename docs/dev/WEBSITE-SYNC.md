@@ -10,7 +10,7 @@ Use the only plugin source checkout, `/home/user/Documents/CODE/cybermaps/`.
 The canonical website remains `/home/user/Documents/CODE/cybermaps-astro/`.
 Never create a release-specific clone or worktree. Configure both website and
 Local Sites installation destinations in `.cybermaps-workspace.json` using the
-tracked example, then run `composer release` (or `composer release -- --stable`).
+tracked example, then run `composer release` (stable by default; `--stable` is a compatibility alias).
 See [RELEASE-WORKFLOW.md](RELEASE-WORKFLOW.md) for gates and recovery.
 
 The preflight rejects staged, unstaged and untracked website changes before
@@ -18,7 +18,7 @@ running any website command. It never stashes, resets or commits existing work.
 After checking committed, pushed plugin source, it runs:
 
 ```sh
-npm run docs:sync -- /home/user/Documents/CODE/cybermaps --commit FULL_COMMIT_SHA --channel beta
+npm run docs:sync -- /home/user/Documents/CODE/cybermaps --commit FULL_COMMIT_SHA --channel stable
 ```
 
 The importer reads an immutable Git archive under the plugin's
@@ -40,12 +40,19 @@ When no prose review is needed, the workflow commits only the importer's known
 generated files. It then validates source, reviews, website output and the plugin
 package before publication.
 
-After publication, the workflow imports the exact `--tag vX.Y.Z` with the same
-channel, commits generated frozen-snapshot changes and runs `npm run deploy`.
-That existing command verifies the newest published release (including betas),
-channel and tag commit before building and again before uploading. After upload,
+After WordPress.org distribution and the native update path are verified, the
+workflow publishes the matching GitHub draft, then imports the exact `--tag vX.Y.Z`
+with the stable channel. The importer consumes the versioned
+`wordpress-distribution.json` receipt and verifies its source identity, exact local
+ZIP hash and normalized file manifest before adding the WordPress provider.
+Candidate previews remain honest about pending Directory availability.
+It commits generated frozen-snapshot changes and runs `npm run deploy`.
+That command verifies the newest published stable release, channel and tag commit,
+plus current WordPress API/listing/download parity before building and again before
+uploading. Betas are excluded from production. After upload,
 the workflow verifies the actual cybermaps.dev domain against the built contracts,
-versioned schemas, release download links and changelog. A successful deployment
+versioned schemas, release download links, changelog, current gallery, launch
+content, feeds and social artwork. A successful deployment
 command without matching live content cannot complete a release.
 
 If the handoff or deployment is interrupted, run from the plugin source:
@@ -54,12 +61,24 @@ If the handoff or deployment is interrupted, run from the plugin source:
 composer release:resume -- --tag vX.Y.Z
 ```
 
-This downloads and checks the published ZIP/checksum, compares package files to
-the tagged source, and resumes only the website handoff. It never publishes or
-replaces assets. A frozen matching snapshot skips reimport on a deployment retry.
+This resumes the matching frozen publication. Before SVN commit, tag/draft retries
+still require fresh validation and review. After SVN commit, retries verify the
+immutable intent/revision and WordPress distribution; only then may they publish
+the existing GitHub draft. After GitHub publication, it downloads and checks the
+ZIP/checksum, compares package files to the tagged source and completes the
+website handoff. It never rebuilds or replaces released assets. A frozen matching snapshot skips reimport on a deployment retry.
 Normal website builds remain offline; the deployment publication guards are
-online. The lower-level `composer release:github` remains available for a
-prepared clean website, using the same local configuration.
+online. `composer release:github` is a compatibility alias for the full workflow.
+`composer release -- --beta` publishes only an explicitly selected GitHub
+prerelease and leaves the stable production website unchanged.
+
+The launch gallery must use actual captures of the candidate ZIP. The website's
+`check:screenshots` gate requires current capture provenance, image hashes and a
+specific review of the pictured state and captions. It does not approve a gallery
+by changing its version or capture date. Historical beta posts remain historical,
+with a dated notice and a current installation link. If a distribution delay
+crosses the intended announcement date, update the actual publication date and
+rerun the affected site checks before deployment.
 
 ## Contract and compatibility
 

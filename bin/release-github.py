@@ -88,15 +88,42 @@ def asset_records(state):
             for asset in state['assets']]
 
 
+def verify_source_archive(contents, commit, tag):
+    source = subprocess.check_output(['git', 'archive', '--format=tar', commit], cwd=ROOT)
+    expected = {}
+    with tarfile.open(fileobj=io.BytesIO(source)) as tree:
+        for entry in tree.getmembers():
+            path = Path(entry.name)
+            if not entry.isfile() or any(part.startswith('.') for part in path.parts):
+                continue
+            if (entry.name in {'cybermaps.php', 'uninstall.php', 'readme.txt', 'changelog.txt', 'LICENSE'}
+                    or (path.parts[0] in {'src', 'assets', 'languages'} and path.suffix != '.map')):
+                expected[entry.name] = tree.extractfile(entry).read()
+    require(contents == expected, 'Frozen ZIP does not match the tagged source.')
+    match = re.search(rb'Version:[ \t]*(\d+\.\d+\.\d+)', contents['cybermaps.php'])
+    require(match and match[1].decode() == tag[1:], 'Frozen package version differs from tag.')
+
+
 def verify_retry_candidate(archive):
     """Verify retained draft bytes without writing tags, releases or assets."""
     commit = source_commit()
     version = archive.name.removeprefix('cybermaps_').removesuffix('.zip')
     tag = 'v' + version
     local, remote = verify_tag(tag, commit)
-    require(local and remote, 'Retained draft requires matching local and remote tags.')
+    require(local, 'Retained candidate requires a matching local tag.')
     state = release_state(tag)
-    require(state is not None, 'Tagged candidate has no retained draft; inspect before retrying.')
+    if state is None:
+        # A process can stop between tag push and draft creation. Only our saved
+        # frozen intent authorizes continuing that exact tag without a rebuild.
+        intent = release_dir(version) / 'github-publication.json'
+        require(intent.is_file(), 'Tagged candidate has no retained publication intent; inspect before retrying.')
+        saved = json.loads(intent.read_text())
+        _, digest = package_files(archive)
+        require(saved.get('tag') == tag and saved.get('commit') == commit
+                and saved.get('zip_sha256') == digest and saved.get('phase') in ('validated', 'git-tagged'),
+                'Tagged candidate differs from the retained publication intent.')
+        return dict(id=None, tag=tag, commit=commit)
+    require(remote, 'Retained draft requires its matching remote tag.')
     beta = state['prerelease']
     require(isinstance(beta, bool), 'Invalid draft channel.')
     title = 'Cybermaps ' + version + (' — Open beta' if beta else '')
@@ -123,35 +150,39 @@ def verify_retry_candidate(archive):
 
 
 def release_notes(version, beta, commit):
-    history = Path("changelog.txt").read_text()
+    history = run('git', 'show', commit + ':changelog.txt')
     match = re.search(r"^" + re.escape(version) + r"\n-+\n(.*?)(?=^\d+\.\d+\.\d+\n-+\n|\Z)",
                       history, re.M | re.S)
     require(match and match[1].strip(), "Missing matching changelog section.")
-    readme = Path("readme.txt").read_text()
+    readme = run('git', 'show', commit + ':readme.txt')
     requirements = []
     for field, label in [("Requires at least", "WordPress"), ("Requires PHP", "PHP")]:
         value = re.search(r"^" + field + r":\s*([^\n]+)", readme, re.M)
         require(value is not None, "Missing requirement: " + field)
         requirements.append(label + " " + value[1].strip() + "+")
     return (f"{'Open beta prerelease' if beta else 'Stable release'} — Cybermaps {version}\n\n"
-            + ("This open beta is ready for use on live WordPress sites. Feedback and bug reports are welcome.\n\n" if beta else "")
+            + ("This prerelease is for testing. Use the stable WordPress.org release for production sites.\n\n" if beta else "")
             + match[1].strip() + "\n\nRequirements: " + "; ".join(requirements)
-            + f".\n\nDownload `cybermaps_{version}.zip` below (not GitHub's source archives). "
+            + (".\n\nInstall from https://wordpress.org/plugins/cybermaps/ for native WordPress updates. " if not beta else ".\n\n")
+            + f"Download `cybermaps_{version}.zip` below for a manual installation (not GitHub's source archives). "
             "In WordPress, open Plugins → Add New Plugin → Upload Plugin, select the ZIP, "
             "install, and activate Cybermaps. The accompanying `.sha256` file verifies the ZIP.\n\n"
             "Report issues: https://github.com/Alex9001/cybermaps/issues/new?template=bug_report.yml\n"
             "Include versions, reproduction steps, and the diagnostic support bundle from "
             "Cybermaps → Debugging → Copy GitHub support bundle (or Download support bundle). "
             "Review the JSON before pasting it into the issue.\n\n"
-            f"Source commit: `{commit}`")
+            f"Source: https://github.com/{REPO}/tree/v{version}\nSource commit: `{commit}`")
 
 
-def publish(website, stable=False, on_validated=None, on_website_validated=None):
+def publish(website, stable=True, on_validated=None, on_website_validated=None,
+            before_publish=None, on_phase=None, before_github=None):
     """Validate exactly once, optionally install, then publish a matching draft."""
     os.chdir(ROOT)
     configure()
     website = website_destination(website)
     clean_website(website)
+    require(not stable or (before_publish is not None and before_github is not None),
+            'Stable publication requires the canonical WordPress.org workflow.')
     os.environ["GH_HOST"] = "github.com"
     os.environ["GH_PROMPT_DISABLED"] = "1"
     run("gh", "auth", "status", "--hostname", "github.com", capture=False)
@@ -167,12 +198,14 @@ def publish(website, stable=False, on_validated=None, on_website_validated=None)
     state = release_state(tag)
     if state:
         matching_draft(state, tag, commit, beta, notes, title)
+    run('composer', 'run', 'release:build', capture=False)
+    candidate = release_dir(version) / 'candidate' / ('cybermaps_' + version + '.zip')
+    website_args = ('--zip', str(candidate)) if stable else ()
     run("python3", "bin/check-website.py", str(website), "--commit", commit,
-        "--channel", "beta" if beta else "stable", capture=False)
+        "--channel", "beta" if beta else "stable", *website_args, capture=False)
     if on_website_validated:
         on_website_validated()
-    for command in [("composer", "run", "release:build"), ("composer", "run", "release:ready")]:
-        run(*command, capture=False)
+    run('composer', 'run', 'release:ready', capture=False)
     # release:build already validates directory/ZIP parity and runs Plugin Check.
     archive = release_dir(version) / ("cybermaps_" + version + ".zip")
     checksum = Path(str(archive) + ".sha256")
@@ -185,16 +218,56 @@ def publish(website, stable=False, on_validated=None, on_website_validated=None)
             'Readiness evidence does not match the frozen publication bytes.')
     require(source_commit() == commit, "Source changed during validation.")
     run("python3", "bin/check-website.py", str(website), "--commit", commit,
-        "--channel", "beta" if beta else "stable", "--source-only", capture=False)
+        "--channel", "beta" if beta else "stable", "--source-only", *website_args, capture=False)
     clean_website(website)
     if on_validated:
         on_validated(archive, hashlib.sha256(artifacts[archive.name]).hexdigest())
     require(source_commit() == commit, "Source changed during installation.")
+    # Recheck the actual evidence after installation and directly before tag push.
+    run('composer', 'run', 'release:ready', capture=False)
+    intent = dict(tag=tag, commit=commit, zip_sha256=receipt['zip_sha256'],
+                  channel='beta' if beta else 'stable', phase='validated')
+    save_json(release_dir(version) / 'github-publication.json', intent)
     local, remote = verify_tag(tag, commit)
     if not local:
         run("git", "tag", tag, commit)
     if not remote:
         run("git", "push", REMOTE, "refs/tags/" + tag, capture=False)
+    intent['phase'] = 'git-tagged'
+    save_json(release_dir(version) / 'github-publication.json', intent)
+    if on_phase:
+        on_phase('git-tagged')
+    def guard(frozen, digest):
+        require(source_commit() == commit, 'Source changed before publication.')
+        run('python3', 'bin/check-website.py', str(website), '--commit', commit,
+            '--channel', 'beta' if beta else 'stable', '--source-only', *website_args, capture=False)
+        clean_website(website)
+        if before_publish:
+            before_publish(frozen, digest)
+    return publish_frozen(archive, commit, beta, guard, on_phase, before_github)
+
+
+def publish_frozen(archive, commit, beta, before_publish=None, on_phase=None, before_github=None):
+    """Resume immutable tag/draft bytes, including after a committed SVN release.
+
+    This path intentionally does not rebuild or expire past publication evidence.
+    The stable callback verifies the immutable SVN receipt and live distribution.
+    """
+    version = archive.name.removeprefix('cybermaps_').removesuffix('.zip')
+    tag = 'v' + version
+    require(beta or (before_publish is not None and before_github is not None),
+            'Stable release requires verified WordPress distribution and final website/date checks')
+    contents, digest = package_files(archive)
+    require(verify_tag(tag, commit)[1], 'Frozen publication requires its existing remote tag')
+    verify_source_archive(contents, commit, tag)
+    title = 'Cybermaps ' + version + (' — Open beta' if beta else '')
+    notes = release_notes(version, beta, commit)
+    state = release_state(tag)
+    if state:
+        matching_draft(state, tag, commit, beta, notes, title)
+    checksum = Path(str(archive) + '.sha256')
+    artifacts = {p.name: p.read_bytes() for p in (archive, checksum)}
+    intent = dict(tag=tag, commit=commit, zip_sha256=digest, channel='beta' if beta else 'stable')
     with tempfile.TemporaryDirectory(prefix="cybermaps-release-") as temporary:
         temporary = Path(temporary)
         notes_file = temporary / "notes.md"
@@ -234,13 +307,27 @@ def publish(website, stable=False, on_validated=None, on_website_validated=None)
                 "Draft assets changed during verification.")
         # Existing asset IDs must survive verification, including on resumed drafts.
         require(all(a in asset_records(final) for a in asset_records(state)), "Draft assets were replaced.")
-        require(source_commit() == commit, "Source changed before publication.")
         require(verify_tag(tag, commit)[1], "Remote tag disappeared before publication.")
-        run("python3", "bin/check-website.py", str(website), "--commit", commit,
-            "--channel", "beta" if beta else "stable", "--source-only", capture=False)
-        clean_website(website)
+        save_json(release_dir(version) / 'github-publication.json', dict(intent, phase='github-draft',
+                                                                       release_id=final['id']))
+        if on_phase:
+            on_phase('github-draft', draft_id=final['id'])
+        if before_publish:
+            before_publish(archive, digest)
+        # A multi-hour directory delay may separate these checks. Re-read both
+        # immutable remote identities immediately before exposing the draft.
+        current = release_state(tag)
+        matching_draft(current, tag, commit, beta, notes, title)
+        require(current['id'] == final['id'] and asset_records(current) == asset_records(final)
+                and verify_tag(tag, commit)[1], 'Draft or tag changed before publication')
+        if before_github:
+            before_github(archive, digest)
         run("gh", "release", "edit", tag, "--repo", REPO, "--draft=false",
             "--prerelease=" + str(beta).lower(), "--latest=" + str(not beta).lower(), capture=False)
+    save_json(release_dir(version) / 'github-publication.json', dict(intent, phase='github-published',
+                                                                   release_id=final['id']))
+    if on_phase:
+        on_phase('github-published', release_id=final['id'])
     print("Published https://github.com/" + REPO + "/releases/tag/" + tag)
     return tag
 
@@ -266,20 +353,8 @@ def verify_published(tag):
             run('gh', 'release', 'download', tag, '--repo', REPO, '--pattern', asset,
                 '--dir', temporary)
         contents, digest = package_files(Path(temporary) / name)
-        # Compare the downloaded package to its immutable Git source, not today's HEAD.
-        source = subprocess.check_output(['git', 'archive', '--format=tar', commit], cwd=ROOT)
-        expected = {}
-        with tarfile.open(fileobj=io.BytesIO(source)) as tree:
-            for entry in tree.getmembers():
-                path = Path(entry.name)
-                if not entry.isfile() or any(part.startswith('.') for part in path.parts):
-                    continue
-                if (entry.name in {'cybermaps.php', 'uninstall.php', 'readme.txt', 'changelog.txt', 'LICENSE'}
-                        or (path.parts[0] in {'src', 'assets', 'languages'} and path.suffix != '.map')):
-                    expected[entry.name] = tree.extractfile(entry).read()
-        require(contents == expected, 'Published ZIP does not match the tagged source.')
-        match = re.search(rb'Version:[ \t]*(\d+\.\d+\.\d+)', contents['cybermaps.php'])
-        require(match and match[1].decode() == tag[1:], 'Published package version differs from tag.')
+        # Compare to immutable Git source, not today's HEAD.
+        verify_source_archive(contents, commit, tag)
     final = release_state(tag)
     require(final and not final['draft'] and final['id'] == state['id']
             and asset_records(final) == asset_records(state) and final['prerelease'] == state['prerelease'],
@@ -290,15 +365,9 @@ def verify_published(tag):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--stable', action='store_true')
-    parser.add_argument('--website', default=os.environ.get('CYBERMAPS_WEBSITE_DIR'),
-                        help='Must match the configured canonical website')
-    args = parser.parse_args()
-    website, _ = load_config()
-    require(not args.website or Path(args.website) == website, '--website must match .cybermaps-workspace.json.')
-    with lock():
-        publish(website, args.stable)
+    # Keep the historical entry point without allowing it to bypass installation,
+    # WordPress distribution, website publication or their shared release state.
+    os.execv(sys.executable, [sys.executable, '-B', str(ROOT / 'bin/release-workflow.py'), 'release', *sys.argv[1:]])
 
 
 if __name__ == "__main__":

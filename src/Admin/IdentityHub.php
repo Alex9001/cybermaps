@@ -323,7 +323,7 @@ class IdentityHub {
 									<?php if ( $image_id ) : ?>
 										<?php echo wp_get_attachment_image( $image_id, 'thumbnail', false, array( 'style' => 'width: 100%; height: auto;' ) ); ?>
 									<?php else : ?>
-										<span style="font-size: 11px; color: #64748b;"><?php esc_html_e( 'No Image', 'cybermaps' ); ?></span>
+										<span class="cm-text-xs cm-text-muted"><?php esc_html_e( 'No Image', 'cybermaps' ); ?></span>
 									<?php endif; ?>
 								</div>
 								<div>
@@ -811,7 +811,7 @@ class IdentityHub {
             .append(
                 makeElement(
                     "span",
-                    { style: "font-size: 10px; color: #64748b;" },
+                    { "class": "cm-text-xs cm-text-muted" },
                     cybermapsIH.noImage
                 )
             );

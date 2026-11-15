@@ -26,6 +26,10 @@ def mock():
     failure = os.environ.get('MOCK_FAIL', '')
     with Path(str(state_path) + '.commands').open('a') as log:
         log.write(json.dumps([sys.argv[1], *args]) + '\n')
+    if os.environ.get('MOCK_STDIN_PROBE') == '1':
+        received = sys.stdin.buffer.read()
+        with Path(str(state_path) + '.stdin').open('a') as output:
+            output.write(str(len(received)) + '\n')
     def save():
         state_path.write_text(json.dumps(state))
     def option(name):
@@ -152,6 +156,18 @@ class PublisherTest(unittest.TestCase):
         for name in ['release-github.sh', 'release-github.py', 'check-website.py', 'workspace.py',
                      'workspace.sh', 'release-workflow.py', 'website_evidence.py']:
             shutil.copy(ROOT / 'bin' / name, self.repo / 'bin' / name)
+        for source, destination in [('wordpress_workflow_stub.py', 'wordpress_release.py'),
+                                    ('stable_checks_stub.py', 'stable_release_checks.py')]:
+            shutil.copy(ROOT / 'tests/tooling/fixtures' / source, self.repo / 'bin' / destination)
+        (self.repo / 'bin/fixture-publish.py').write_text('''import importlib.util,sys
+from workspace import load_config
+spec=importlib.util.spec_from_file_location('publisher','bin/release-github.py')
+publisher=importlib.util.module_from_spec(spec)
+spec.loader.exec_module(publisher)
+publisher.publish(load_config()[0], '--stable' in sys.argv,
+                  before_publish=(lambda archive,digest: None) if '--stable' in sys.argv else None,
+                  before_github=(lambda archive,digest: None) if '--stable' in sys.argv else None)
+''')
         (self.repo / 'bin/check-website-live.py').write_text('''import json,os,sys,hashlib
 from pathlib import Path
 from workspace import git,save_json,release_dir
@@ -167,6 +183,8 @@ save_json(release_dir(option('--tag')[1:])/'website-live.json',value)
         (self.repo / 'readme.txt').write_text('Requires at least: 7.0\nRequires PHP: 8.2\n')
         (self.repo / 'changelog.txt').write_text('7.4.0\n-----\n\n* Release test.\n\n7.3.0\n-----\n* Older.\n')
         (self.repo / '.gitignore').write_text('docs/generated/\n.cybermaps-workspace.json\n')
+        (self.repo / 'docs/dev').mkdir(parents=True)
+        (self.repo / 'docs/dev/release-policy.json').write_text(json.dumps(dict(presentation=dict(website_screenshots=14))))
         self.git('add', '.')
         self.git('commit', '-m', 'fixture')
         self.git('push', str(self.remote), 'main')
@@ -213,7 +231,7 @@ save_json(release_dir(option('--tag')[1:])/'website-live.json',value)
         }))
         self.website_git('add', '.')
         self.website_git('commit', '--allow-empty', '-m', 'import candidate')
-        result = subprocess.run(['bash', 'bin/release-github.sh'] + (['--stable'] if stable else []),
+        result = subprocess.run([sys.executable, '-B', 'bin/fixture-publish.py'] + (['--stable'] if stable else []),
                                 cwd=self.repo, env=dict(self.env, MOCK_FAIL=failure),
                                 text=True, capture_output=True)
         self.assertEqual(result.returncode == 0, success, result.stdout + result.stderr)

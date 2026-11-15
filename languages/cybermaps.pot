@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: CYBERMAPS: XML Sitemaps & llms.txt 8.0.4\n"
+"Project-Id-Version: CYBERMAPS: XML Sitemaps & llms.txt 8.1.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/cybermaps\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-26T21:06:29+00:00\n"
+"POT-Creation-Date: 2026-11-15T12:51:47+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: cybermaps\n"
@@ -1289,6 +1289,10 @@ msgstr ""
 msgid "Automated clients, browsers, missing User-Agents, unknown clients, and unclassified legacy endpoint observations."
 msgstr ""
 
+#: src/Admin/DiscoveryAnalytics.php:309
+msgid "Endpoint activity table"
+msgstr ""
+
 #: src/Admin/DiscoveryAnalytics.php:313
 msgid "Endpoint"
 msgstr ""
@@ -1320,6 +1324,10 @@ msgstr ""
 
 #: src/Admin/DiscoveryAnalytics.php:351
 msgid "Unclassified endpoint"
+msgstr ""
+
+#: src/Admin/DiscoveryAnalytics.php:367
+msgid "Unidentified request patterns table"
 msgstr ""
 
 #: src/Admin/DiscoveryAnalytics.php:371
@@ -1379,6 +1387,10 @@ msgstr ""
 msgid "Top content paths"
 msgstr ""
 
+#: src/Admin/DiscoveryAnalytics.php:532
+msgid "Top content paths table"
+msgstr ""
+
 #: src/Admin/DiscoveryAnalytics.php:533
 msgid "Path"
 msgstr ""
@@ -1393,6 +1405,10 @@ msgstr ""
 
 #: src/Admin/DiscoveryAnalytics.php:553
 msgid "Claimed crawler signatures"
+msgstr ""
+
+#: src/Admin/DiscoveryAnalytics.php:554
+msgid "Claimed crawler signatures table"
 msgstr ""
 
 #: src/Admin/DiscoveryAnalytics.php:555
@@ -1426,6 +1442,10 @@ msgstr ""
 msgid "No PHP-observed activity in the reporting window."
 msgstr ""
 
+#: src/Admin/DiscoveryAnalytics.php:602
+msgid "Daily activity table"
+msgstr ""
+
 #: src/Admin/DiscoveryAnalytics.php:606
 msgid "Day"
 msgstr ""
@@ -1447,6 +1467,7 @@ msgid "Retained evidence"
 msgstr ""
 
 #: src/Admin/DiscoveryAnalytics.php:638
+#: src/Admin/DiscoveryAnalytics.php:664
 msgid "Recent request log"
 msgstr ""
 
@@ -4044,7 +4065,7 @@ msgid "Need attention"
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Advanced/AdvancedFields.php:23
-#: src/Admin/SettingsPage.php:584
+#: src/Admin/SettingsPage.php:594
 msgid "Open Debugging"
 msgstr ""
 
@@ -4585,7 +4606,7 @@ msgstr ""
 
 #: src/Admin/Settings/Tabs/ContentReview.php:434
 #: src/Admin/Settings/Tabs/ContentReview.php:525
-#: src/Admin/Settings/Tabs/ContentReview.php:610
+#: src/Admin/Settings/Tabs/ContentReview.php:613
 msgid "CSV"
 msgstr ""
 
@@ -4682,89 +4703,97 @@ msgstr ""
 msgid "The printable report includes recommendations and the measurement summary for every finding."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:550
+#: src/Admin/Settings/Tabs/ContentReview.php:549
+msgid "Current report findings"
+msgstr ""
+
+#: src/Admin/Settings/Tabs/ContentReview.php:551
 #: src/Audit/AuditExporter.php:105
 msgid "Resource"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:550
+#: src/Admin/Settings/Tabs/ContentReview.php:551
 #: src/Audit/AuditExporter.php:49
 #: src/Audit/AuditExporter.php:106
 msgid "Finding"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:550
+#: src/Admin/Settings/Tabs/ContentReview.php:551
 #: src/Audit/AuditExporter.php:106
 msgid "Measurement"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:560
+#: src/Admin/Settings/Tabs/ContentReview.php:561
 msgid "This run recorded no policy findings."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:565
+#: src/Admin/Settings/Tabs/ContentReview.php:567
 msgid "Showing the first 25 findings. Export the report for the complete inventory."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:589
+#: src/Admin/Settings/Tabs/ContentReview.php:591
 msgid "Report history"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:590
+#: src/Admin/Settings/Tabs/ContentReview.php:592
 msgid "Other saved reports"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:592
+#: src/Admin/Settings/Tabs/ContentReview.php:594
 msgid "Open or export another saved report."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:595
+#: src/Admin/Settings/Tabs/ContentReview.php:596
+msgid "Saved report history"
+msgstr ""
+
+#: src/Admin/Settings/Tabs/ContentReview.php:598
 msgid "Run"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:595
+#: src/Admin/Settings/Tabs/ContentReview.php:598
 #: src/Audit/AuditExporter.php:96
 msgid "Completed"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:595
+#: src/Admin/Settings/Tabs/ContentReview.php:598
 #: src/Admin/SettingsPage.php:541
 msgid "Resources"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:595
+#: src/Admin/Settings/Tabs/ContentReview.php:598
 msgid "Findings"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:595
+#: src/Admin/Settings/Tabs/ContentReview.php:598
 msgid "Exports"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:608
+#: src/Admin/Settings/Tabs/ContentReview.php:611
 msgid "HTML"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:625
+#: src/Admin/Settings/Tabs/ContentReview.php:629
 msgid "No content report exists yet"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:626
+#: src/Admin/Settings/Tabs/ContentReview.php:630
 msgid "Run the first report to establish a baseline. Later reports show exactly which findings were added, resolved, or persisted."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:636
+#: src/Admin/Settings/Tabs/ContentReview.php:640
 msgid "Content measurement policy"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:637
+#: src/Admin/Settings/Tabs/ContentReview.php:641
 msgid "These explicit rules are saved with every report."
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:643
+#: src/Admin/Settings/Tabs/ContentReview.php:647
 msgid "Client presentation"
 msgstr ""
 
-#: src/Admin/Settings/Tabs/ContentReview.php:644
+#: src/Admin/Settings/Tabs/ContentReview.php:648
 msgid "Brand and theme printable deliverables generated from the saved measurements."
 msgstr ""
 
@@ -4789,7 +4818,7 @@ msgid "Discovery Architecture"
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Dashboard.php:54
-msgid "Key endpoints your site exposes to search engines and AI agents. Enabled endpoints are shown in full color; disabled ones are dimmed. Click any endpoint to visit it."
+msgid "Key endpoints your site exposes to search engines and AI agents. Enabled endpoints have a filled status dot; disabled ones have an outlined dot. Click any endpoint to visit it."
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Dashboard.php:57
@@ -4819,7 +4848,7 @@ msgid "Enable AI Publication Hub"
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Discovery.php:50
-msgid "Master switch for the public AI discovery surface. WordPress 7.1 native routing publishes fixed and well-known protocols without requiring Cloudflare or host-specific installation steps. Cybermaps publishes its own read-only search ability. Optional MCP connections require WordPress MCP Adapter. <span class=\"cm-desc-example\">These emerging integrations put enabled sites ahead of common discovery tooling; client adoption still varies.</span>"
+msgid "Enable AI-readable publications and public search. Check AI Discovery Status to confirm public delivery; server and cache settings can affect routing. MCP connections additionally require WordPress MCP Adapter. <span class=\"cm-desc-example\">Choose the formats your clients support. Emerging formats may not be supported by every client.</span>"
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Discovery.php:57
@@ -5139,7 +5168,7 @@ msgid "Published Action Links"
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Discovery.php:511
-msgid "Configure literal LLMS output, vendor publications, usage assertions, and delivery."
+msgid "Choose the AI-readable publications, content preferences, and delivery options for your site."
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Discovery.php:515
@@ -6738,52 +6767,60 @@ msgid "Documentation"
 msgstr ""
 
 #: src/Admin/SettingsPage.php:563
-msgid "Open beta feedback"
+msgid "Help and feedback"
 msgstr ""
 
 #: src/Admin/SettingsPage.php:565
-msgid "Help improve Cybermaps. Report a problem or suggest an improvement on GitHub."
+msgid "Get help on WordPress.org, or report a problem and suggest improvements on GitHub."
 msgstr ""
 
 #: src/Admin/SettingsPage.php:568
-msgid "Report an issue"
+msgid "WordPress.org support"
 msgstr ""
 
 #: src/Admin/SettingsPage.php:573
-msgid "Suggest an improvement"
+msgid "Report an issue"
 msgstr ""
 
 #: src/Admin/SettingsPage.php:578
+msgid "Suggest an improvement"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:583
 msgid "Browse existing issues"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:581
+#: src/Admin/SettingsPage.php:586
 msgid "Before reporting, open Cybermaps → Debugging and choose Copy GitHub support bundle. Include it in your report after reviewing it for private information."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:605
+#: src/Admin/SettingsPage.php:589
+msgid "Report a security issue privately"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:615
 msgid "Static Recovery Required"
 msgstr ""
 
 #. translators: 1: static operation type, 2: relative publication path.
-#: src/Admin/SettingsPage.php:614
+#: src/Admin/SettingsPage.php:624
 #, php-format
 msgid "Pending %1$s operation for %2$s."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:621
+#: src/Admin/SettingsPage.php:631
 msgid "Stop or quiesce every Cybermaps cron, web, and CLI worker first. This confirmation is manual because WordPress has no portable atomic transaction spanning the database and filesystem."
 msgstr ""
 
-#: src/Admin/SettingsPage.php:628
+#: src/Admin/SettingsPage.php:638
 msgid "Type this exact confirmation:"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:631
+#: src/Admin/SettingsPage.php:641
 msgid "Resolve Pending Static Operation"
 msgstr ""
 
-#: src/Admin/SettingsPage.php:634
+#: src/Admin/SettingsPage.php:644
 msgid "The stored recovery journal is malformed. Cybermaps will not delete it or mutate generated files automatically. Preserve a database backup and inspect the cybermaps_static_write_intent option before taking manual action."
 msgstr ""
 
@@ -7542,7 +7579,7 @@ msgid "The dynamic sitemap index did not return the expected Cybermaps marker."
 msgstr ""
 
 #: src/Admin/SitemapStatus.php:372
-msgid "Run a nonce-protected dynamic-only check when static delivery may bypass PHP."
+msgid "Check the WordPress-generated sitemap when static files may be serving requests instead."
 msgstr ""
 
 #: src/Admin/SitemapStatus.php:378
@@ -8425,28 +8462,31 @@ msgstr ""
 msgid "Cybermaps could not store an audit resource."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:641
+#: src/Audit/AuditRunRepository.php:661
+#: src/Audit/AuditRunRepository.php:693
+#: src/Audit/AuditRunRepository.php:697
+#: src/Audit/AuditRunRepository.php:750
 msgid "Cybermaps could not store an audit finding."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:673
+#: src/Audit/AuditRunRepository.php:803
 msgid "Cybermaps could not finalize the content report."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:1033
+#: src/Audit/AuditRunRepository.php:1163
 msgid "Only a running Cybermaps content report can be modified."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:1045
-#: src/Audit/AuditRunRepository.php:1062
+#: src/Audit/AuditRunRepository.php:1175
+#: src/Audit/AuditRunRepository.php:1192
 msgid "Cybermaps could not read the saved content report data."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:1052
+#: src/Audit/AuditRunRepository.php:1182
 msgid "Cybermaps could not update the content report lock."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:1076
+#: src/Audit/AuditRunRepository.php:1206
 msgid "Cybermaps could not encode the content report lock."
 msgstr ""
 
@@ -8508,11 +8548,11 @@ msgstr ""
 msgid "Add useful visual media only if it improves comprehension or delivery; decorative media is not required."
 msgstr ""
 
-#: src/Audit/ContentAuditService.php:286
+#: src/Audit/ContentAuditService.php:288
 msgid "Cybermaps could not encode the content report snapshot."
 msgstr ""
 
-#: src/Audit/ContentAuditService.php:338
+#: src/Audit/ContentAuditService.php:340
 msgid "The Content Intelligence Report lock expired or changed ownership, so this run stopped safely."
 msgstr ""
 

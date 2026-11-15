@@ -278,13 +278,13 @@
         "suppressions": [
           "// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only result flags from nonce-protected admin actions."
         ],
-        "file_code_sha256": "18853f734b967a7dc7c5627970dd34b5d4c527c1513a37d68c944606cfc89adb",
+        "file_code_sha256": "2ae13ac7ed3375bdf276a4673e3f4c407042df24a6ce101806f85461c1af0d2b",
         "code_sha256": "b96831913dde7594c78fed0a978ab90fe55df90d394c9f6690a317786145babf",
         "findings": {
           "WordPress.Security.NonceVerification.Recommended:WARNING": 2
         }
       },
-      "rationale": "render_admin_notices: Notice flags are read-only scalar sanitized URL-controlled presentation selectors, not proof of originating nonce-protected action. They select escaped constant messages without mutation. Actual RequestInputBoundaryTest covers another notice class, so it does not prove this renderer; unavailable metrics/display behavior is covered by AnalyticsAvailabilityDisplayTest.",
+      "rationale": "render_admin_notices: reached through render_page after manage_options. The two GET keys are presence-only, read-only selectors for escaped constant notices; their values are never consumed and they are not proof that an action occurred. The database error uses esc_html. The 8.1.0 file changes only add tabindex, region roles and esc_attr_e labels to five table wrappers and the populated request-log card; this function and its caller authorization are unchanged. AnalyticsAvailabilityDisplayTest covers related unavailable/empty projections, not this renderer; RequestInputBoundaryTest covers another notice class.",
       "tests": [
         "tests/Admin/AnalyticsAvailabilityDisplayTest.php",
         "tests/Admin/RequestInputBoundaryTest.php"
@@ -500,13 +500,13 @@
         "suppressions": [
           "// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only admin workspace selection."
         ],
-        "file_code_sha256": "6d727807df0629777dd21dd88acf4c85747cb32c53758388fcccd6cfaf707fbe",
+        "file_code_sha256": "e5bf999564172eb8d1999e7c4880f86b10ac804f3903ef82409d3cbf4e83ee52",
         "code_sha256": "215b4592085c95efc2eb6808060e5c4a44701720555b135129eda967d378ab9f",
         "findings": {
           "WordPress.Security.NonceVerification.Recommended:WARNING": 3
         }
       },
-      "rationale": "enqueue_scripts: Settings screen capability owns editor; enqueue_scripts only reads bounded scalar sanitized page/tab selection and enqueues registered assets. No write or authorization grant. Current read normalization handles malformed saved scalar via defaults without changing saved bytes. IdentityHubTest tests editor/normalization, not enqueue negative authorization.",
+      "rationale": "enqueue_scripts: the manage_options Settings screen owns the editor. This callback checks its exact screen hook, then scalar-guards, unslashes and sanitize_key-normalizes the read-only tab selector before enqueuing media and the registered page selector. It grants no authorization and writes no settings. The 8.1.0 diff replaces two fixed faint placeholder styles with existing CSS classes; static No Image copy remains esc_html_e and dynamic copy remains makeElement text content. This function body is unchanged. IdentityHubTest covers editor output, normalization and safe dynamic construction; it does not exercise enqueue negative authorization.",
       "tests": [
         "tests/Admin/IdentityHubTest.php",
         "tests/Admin/StructuredSettingsSubmissionTest.php"
@@ -564,7 +564,7 @@
         "code_sha256": "085da1d032363a87a41088cd07e284f6c20cc9abb69c3ce1839c2483bfeeb8e9",
         "findings": {}
       },
-      "rationale": "Private helper is reached only after ajax_search exact method and manage_options checks and itself invokes check_ajax_referer before any POST access. Raw query is string and at most200 slashed bytes before wp_unslash/sanitize_text_field. Raw cursor string is at most18bytes; sanitized projection must strictly equal the original before parse_cursor accepts only1\u201318digits. No punctuation/backslash normalization can turn rejected raw input into a valid cursor. IdentityPageSelectorTest actual-handler subprocess uses faithful stripslashes and checks raw201bytes reducing after unslash, cursor punctuation/escape/arrays/bounds and successful edges. Authentication is simulated; this is no native request/SQL proof. No new input suppression.",
+      "rationale": "Private helper is reached only after ajax_search exact method and manage_options checks and itself invokes check_ajax_referer before any POST access. Raw query is string and at most200 slashed bytes before wp_unslash/sanitize_text_field. Raw cursor string is at most18bytes; sanitized projection must strictly equal the original before parse_cursor accepts only1–18digits. No punctuation/backslash normalization can turn rejected raw input into a valid cursor. IdentityPageSelectorTest actual-handler subprocess uses faithful stripslashes and checks raw201bytes reducing after unslash, cursor punctuation/escape/arrays/bounds and successful edges. Authentication is simulated; this is no native request/SQL proof. No new input suppression.",
       "tests": [
         "tests/Admin/RequestInputBoundaryTest.php",
         "tests/Admin/IdentityPageSelectorTest.php",
@@ -1407,11 +1407,11 @@
           "$_SERVER"
         ],
         "suppressions": [],
-        "file_code_sha256": "8c0527f3e5a164aa6b365749036e99e2576d108253e3e821e6ba26a7fb5606b3",
+        "file_code_sha256": "0f28c555a08dc482fcb5631727e0febfcd557502f23bc0ee16a92ccb04b8fbcb",
         "code_sha256": "eb4f1f9966e8a2b5a7ee15652f15c8ca719bf156444f67b327541cae10678a8b",
         "findings": {}
       },
-      "rationale": "Request adapter or authenticated caller owns this boundary; scalar guards and contextual sanitization are frozen with the body. Review caller authorization again whenever this scope changes.",
+      "rationale": "review_state checks manage_options, GET and the exact cybermaps_content_review_state nonce before reading scalar run/notice fields; absint and sanitize_text_field normalize only those fields. load_report_state uses the selected integer ID through AuditRunRepository and bounds history to ten; report output escapes titles, URLs and summaries. The 8.1.0 file diff only wraps the existing findings/history tables in labeled keyboard-scroll regions, with esc_attr_e labels. The boundary body and settings-page authorization are unchanged. RequestInputBoundaryTest executes array-vs-scalar notice selectors with a valid nonce; it does not prove every negative authorization branch.",
       "tests": [
         "tests/Admin/RequestInputBoundaryTest.php"
       ]
@@ -1427,13 +1427,13 @@
           "// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only admin workspace selection.",
           "// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only admin workspace selection."
         ],
-        "file_code_sha256": "76e63eeb009cc28b9975523771ffb6a5b4bd54b16fd80f13f0ffb4e2a6cb0fb7",
+        "file_code_sha256": "c1864c7b332e496734861dd23214fe277e81779e181c3799528aa38a21513131",
         "code_sha256": "77a00474b0d3a6fc674f1e6f7c6a36c36b5bcd8172cc9e25acfb69f5be77115b",
         "findings": {
           "WordPress.Security.NonceVerification.Recommended:WARNING": 6
         }
       },
-      "rationale": "Read-only view/tab selection controls fixed whitelist; WordPress menu registration manage_options gates callback; output notices RequestInput-bounded and escaped; no mutation via selector. Test limits: RequestInputBoundaryTest unrelated to SettingsPage::render; menu authorization traced source, not real WordPress admin dispatch. 8.0.4 review: XML ownership now hides unowned index/News/RSS sidebar links; the fixed disabled message is HTML-escaped. Registered admin access, sanitized read-only tab selection, Settings API nonce/completeness marker and separate destructive-action forms retain their bodies.",
+      "rationale": "Read-only view/tab selection controls fixed whitelist; WordPress menu registration manage_options gates callback; output notices RequestInput-bounded and escaped; no mutation via selector. Test limits: RequestInputBoundaryTest unrelated to SettingsPage::render; menu authorization traced source, not real WordPress admin dispatch. 8.0.4 review: XML ownership now hides unowned index/News/RSS sidebar links; the fixed disabled message is HTML-escaped. Registered admin access, sanitized read-only tab selection, Settings API nonce/completeness marker and separate destructive-action forms retain their bodies. 8.1.0 review: inspected the complete SettingsPage, its manage_options menu registration in SettingsAssets, unchanged read-only view/tab selectors, bounded notice adapters, Settings API form and separate destructive forms. The file change renames the private feedback renderer and adds fixed WordPress.org support and private GitHub security links. Each new URL uses esc_url, translated text uses esc_html_e, and external targets retain noopener noreferrer. No request boundary, capability, nonce, write action or render body changed; only the containing-file fingerprint changed. Existing accessibility and notice tests remain applicable; fresh native presentation checks separately cover the new links.",
       "tests": [
         "tests/Admin/SettingsControlsAccessibilityTest.php",
         "tests/Admin/RegenerationNoticeTest.php"
@@ -1613,11 +1613,11 @@
           "$_POST"
         ],
         "suppressions": [],
-        "file_code_sha256": "87e8da1693fa77fd49da7cdbbd8ec2d0a2fdf54d04cdf06ff540a19a4c601f0d",
+        "file_code_sha256": "240274c1674de0b8173ea2fb6cc8b2b9bf4f70472413fe3a3d5ff787793c0c62",
         "code_sha256": "2d231cb729a51fa370732140a8072bbb50d26a4397eeaddbc0f37641e796ded1",
         "findings": {}
       },
-      "rationale": "Authenticated wp_ajax handler verifies debugging nonce and shared POST/manage_options before total/passed; absint normalizes aggregate counts, passed clamps to total and failures nevernegative. Only bounded allowlisted aggregate logger context is stored; no paths/URLs or complete request reaches hook/JSON. Return recorded reflects current logger opt-in. DiagnosticLoggerTest test_enable_records_only_redacted_allowlisted_context and test_redaction_input_is_bounded_before_processing_and_retained_shape_is_revalidated cover downstream logger schema, while DiagnosticClearTest test_clear_verifies_retained_data_and_preserves_authorization_boundaries is adjacent shared-guard evidence. No direct aggregate handler malformed/over-total test found; recommend direct cases instead of blanket runtime assertion.",
+      "rationale": "Authenticated wp_ajax handler verifies debugging nonce and shared POST/manage_options before total/passed; absint normalizes aggregate counts, passed clamps to total and failures nevernegative. Only bounded allowlisted aggregate logger context is stored; no paths/URLs or complete request reaches hook/JSON. Return recorded reflects current logger opt-in. DiagnosticLoggerTest test_enable_records_only_redacted_allowlisted_context and test_redaction_input_is_bounded_before_processing_and_retained_shape_is_revalidated cover downstream logger schema, while DiagnosticClearTest test_clear_verifies_retained_data_and_preserves_authorization_boundaries is adjacent shared-guard evidence. No direct aggregate handler malformed/over-total test found; recommend direct cases instead of blanket runtime assertion. 8.1.0 review: all four AJAX registrations, nonce calls, shared authorization and JSON sinks were reread. The sole file change adds keyboard focus and a region label escaped with esc_attr to the status table wrapper in the manage_options-protected page; this boundary body is unchanged.",
       "tests": [
         "tests/Core/DiagnosticLoggerTest.php",
         "tests/Core/DiagnosticClearTest.php"
@@ -1631,11 +1631,11 @@
           "$_POST"
         ],
         "suppressions": [],
-        "file_code_sha256": "87e8da1693fa77fd49da7cdbbd8ec2d0a2fdf54d04cdf06ff540a19a4c601f0d",
+        "file_code_sha256": "240274c1674de0b8173ea2fb6cc8b2b9bf4f70472413fe3a3d5ff787793c0c62",
         "code_sha256": "fd3e170f5095ebe5cbe636b83150e8e8d975294c92b2bea9a4e66623cca5dbba",
         "findings": {}
       },
-      "rationale": "Authenticated wp_ajax only. Exact debugging nonce then shared POST/manage_options guard precedes reading enabled/duration; enabled accepts sanitized literal1 and duration goes through absint then Logger fixed1/4/24hour normalization. Structured state is returned through wp_send_json_success. DiagnosticLoggerTest test_enable_records_only_redacted_allowlisted_context and test_expired_session_stops_collection_and_clear_removes_events exercise adjacent logger behavior; DiagnosticClearTest test_clear_verifies_retained_data_and_preserves_authorization_boundaries exercises the shared guard through clear, not this toggle handler. No direct toggle malformed payload/failed option write AJAX regression found; recommend one, do not claim these citations cover it.",
+      "rationale": "Authenticated wp_ajax only. Exact debugging nonce then shared POST/manage_options guard precedes reading enabled/duration; enabled accepts sanitized literal1 and duration goes through absint then Logger fixed1/4/24hour normalization. Structured state is returned through wp_send_json_success. DiagnosticLoggerTest test_enable_records_only_redacted_allowlisted_context and test_expired_session_stops_collection_and_clear_removes_events exercise adjacent logger behavior; DiagnosticClearTest test_clear_verifies_retained_data_and_preserves_authorization_boundaries exercises the shared guard through clear, not this toggle handler. No direct toggle malformed payload/failed option write AJAX regression found; recommend one, do not claim these citations cover it. 8.1.0 review: all four AJAX registrations, nonce calls, shared authorization and JSON sinks were reread. The sole file change adds keyboard focus and a region label escaped with esc_attr to the status table wrapper in the manage_options-protected page; this boundary body is unchanged.",
       "tests": [
         "tests/Core/DiagnosticLoggerTest.php",
         "tests/Core/DiagnosticClearTest.php"
@@ -1649,11 +1649,11 @@
           "$_SERVER"
         ],
         "suppressions": [],
-        "file_code_sha256": "87e8da1693fa77fd49da7cdbbd8ec2d0a2fdf54d04cdf06ff540a19a4c601f0d",
+        "file_code_sha256": "240274c1674de0b8173ea2fb6cc8b2b9bf4f70472413fe3a3d5ff787793c0c62",
         "code_sha256": "a999ef642fac58e7422cd530dd7673b099ecbfac4574c0ea7397540458b26f6a",
         "findings": {}
       },
-      "rationale": "All four wp_ajax handlers verify exact debugging nonce before this shared guard; method is sanitized then must bePOST, and manage_options required before mutation/export values are read. It reads only REQUEST_METHOD, never forwards request context. DiagnosticClearTest test_clear_verifies_retained_data_and_preserves_authorization_boundaries executes actual ajax_clear against bad nonce, absent capability and GET; each makes0deletecalls with403/403/405. Adapter wp_send_json functions throw terminators and do not prove native AJAX transport or every calling action; no GET mutation exemption.",
+      "rationale": "All four wp_ajax handlers verify exact debugging nonce before this shared guard; method is sanitized then must bePOST, and manage_options required before mutation/export values are read. It reads only REQUEST_METHOD, never forwards request context. DiagnosticClearTest test_clear_verifies_retained_data_and_preserves_authorization_boundaries executes actual ajax_clear against bad nonce, absent capability and GET; each makes0deletecalls with403/403/405. Adapter wp_send_json functions throw terminators and do not prove native AJAX transport or every calling action; no GET mutation exemption. 8.1.0 review: all four AJAX registrations, nonce calls, shared authorization and JSON sinks were reread. The sole file change adds keyboard focus and a region label escaped with esc_attr to the status table wrapper in the manage_options-protected page; this boundary body is unchanged.",
       "tests": [
         "tests/Core/DiagnosticClearTest.php"
       ]
@@ -1684,11 +1684,11 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching -- Exact-value CAS is required for ownership-safe expiry takeover."
         ],
-        "file_code_sha256": "09adfe079900949bf0bfdd46c59befcba83a0e2fb21c2877cbda312dbc3c0027",
+        "file_code_sha256": "2cce2859153527b6175934374db045e3d6881cef2760a1e34ccab27fc91ac923",
         "code_sha256": "2a2077371063eda391a32f11df26396e863ede089ed99d3e3c99a6d240a1bae6",
         "findings": {}
       },
-      "rationale": "Site-local service and maintenance callers use a generated UUID and clamped60\u20133600-second TTL. Initial RawOptionStore INSERT IGNORE cannot replace a concurrent first owner; authoritative empty-aware read followed by observed-value wpdb update handles expired/malformed leases. Trusted options-table identifier and typed values; busy and read/write error paths remain distinct. Deterministic interleave, empty-value, expired-owner and insert-failure regressions execute the method; native two-DB fixture is read, not run by this reviewer.",
+      "rationale": "Site-local service and maintenance callers use a generated UUID and clamped60–3600-second TTL. Initial RawOptionStore INSERT IGNORE cannot replace a concurrent first owner; authoritative empty-aware read followed by observed-value wpdb update handles expired/malformed leases. Trusted options-table identifier and typed values; busy and read/write error paths remain distinct. Deterministic interleave, empty-value, expired-owner and insert-failure regressions execute the method; native two-DB fixture is read, not run by this reviewer. 8.1.0 containing-file review: this boundary body is unchanged. The new finding-storage path and its service caller were reviewed for prepared SQL, WordPress field validation, actual resource IDs, bounded batches and failure handling; see the add_resource and run records.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php"
       ]
@@ -1699,17 +1699,17 @@
         "scope": "add_resource",
         "requests": [],
         "suppressions": [
-          "// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching",
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching"
         ],
-        "file_code_sha256": "09adfe079900949bf0bfdd46c59befcba83a0e2fb21c2877cbda312dbc3c0027",
-        "code_sha256": "16deb1d6258a07d316347e2dd8fb2f830903431de28777726c6ca409c021df7c",
+        "file_code_sha256": "2cce2859153527b6175934374db045e3d6881cef2760a1e34ccab27fc91ac923",
+        "code_sha256": "c788776918d47387a7d0079f6979d51b42fdcfe5fd5e92fa1bad702d3818c870",
         "findings": {}
       },
-      "rationale": "Called by service with evaluator snapshots while run is running; cached running ID or typed prepared status check precedes writes. wpdb insert stores resource fields and findings; errors throw. Incomplete measurement persists marker, placeholder zero restores null on reads. Actual storage\u2192read\u2192JSON regression verifies incomplete fields; runtime service fixture exercises resource writes. No raw request reaches repository.",
+      "rationale": "Service evaluator snapshots reach this repository only after the run-state check; no request bag reaches storage. Resource insertion, nullable fields and actual insert IDs retain the WordPress insert path. The extracted single-finding helper uses the same casts, JSON encoding and insert API, with its unnecessary suppression removed. add_resources stores each source batch and groups at most five findings. The fixed SQL gives the owned table a %i placeholder and each datum its own typed placeholder; it requires exactly five inserted rows. Native column length/charset checks reject changed or erroneous data, and unsupported local text validation or a raw payload over 256 KiB falls back to individual inserts. The service marks any storage exception failed and never completes a partial run. Parent and independent model reviewed these helpers against native wpdb. AuditRunRepositoryTest covers assigned IDs, fields, invalid data, failed writes and fallback; the disposable native fixture compares actual persisted rows and invalid-input rejection. Native fixture execution remains a separate required release gate.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php",
-        "tests/Audit/AuditRuntimeBudgetTest.php"
+        "tests/Audit/AuditRuntimeBudgetTest.php",
+        "tests/integration/wporg-audit-batching.php"
       ]
     },
     "src/Audit/AuditRunRepository.php::assert_running": {
@@ -1720,11 +1720,11 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching -- Mutation validation must observe the exact persisted run state."
         ],
-        "file_code_sha256": "09adfe079900949bf0bfdd46c59befcba83a0e2fb21c2877cbda312dbc3c0027",
+        "file_code_sha256": "2cce2859153527b6175934374db045e3d6881cef2760a1e34ccab27fc91ac923",
         "code_sha256": "f49a049a3701bcc0f6a3393ea0e763b7376806d3b0b9dd665dcdc3da1a8fb74b",
         "findings": {}
       },
-      "rationale": "Private fallback in add_resource uses trusted prefixed table %i and run ID %d, checks DB error, rejects status other than running. It prevents arbitrary mutation of complete snapshots. Existing storage tests bypass running cache with Reflection and do not directly prove every bad-status/error branch; this method is source-traced, not represented as a full negative runtime test. Test limits: Generic inherited tests do not invokeevery named method/storagefailure branch; sourcedataflowchecked, no native transaction/DB failure fixture claimed.",
+      "rationale": "Private fallback in add_resource uses trusted prefixed table %i and run ID %d, checks DB error, rejects status other than running. It prevents arbitrary mutation of complete snapshots. Existing storage tests bypass running cache with Reflection and do not directly prove every bad-status/error branch; this method is source-traced, not represented as a full negative runtime test. Test limits: Generic inherited tests do not invokeevery named method/storagefailure branch; sourcedataflowchecked, no native transaction/DB failure fixture claimed. 8.1.0 containing-file review: this boundary body is unchanged. The new finding-storage path and its service caller were reviewed for prepared SQL, WordPress field validation, actual resource IDs, bounded batches and failure handling; see the add_resource and run records.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php"
       ]
@@ -1737,11 +1737,11 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching"
         ],
-        "file_code_sha256": "09adfe079900949bf0bfdd46c59befcba83a0e2fb21c2877cbda312dbc3c0027",
+        "file_code_sha256": "2cce2859153527b6175934374db045e3d6881cef2760a1e34ccab27fc91ac923",
         "code_sha256": "6eeea96af59035e8eb28056c07ae4438bb2de450d7f09084ff24a0b814240efb",
         "findings": {}
       },
-      "rationale": "Service obtains lease and completed baseline before begin. UUID, policy JSON/hash and optional baseline ID are stored with wpdb insert; failed insert throws, successful ID is marked running. Actual runtime-budget fixture executes begin and records running status; insert failure branch is source-traced, not a native SQL error test. Test limits: Generic inherited tests do not invokeevery named method/storagefailure branch; sourcedataflowchecked, no native transaction/DB failure fixture claimed.",
+      "rationale": "Service obtains lease and completed baseline before begin. UUID, policy JSON/hash and optional baseline ID are stored with wpdb insert; failed insert throws, successful ID is marked running. Actual runtime-budget fixture executes begin and records running status; insert failure branch is source-traced, not a native SQL error test. Test limits: Generic inherited tests do not invokeevery named method/storagefailure branch; sourcedataflowchecked, no native transaction/DB failure fixture claimed. 8.1.0 containing-file review: this boundary body is unchanged. The new finding-storage path and its service caller were reviewed for prepared SQL, WordPress field validation, actual resource IDs, bounded batches and failure handling; see the add_resource and run records.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php",
         "tests/Audit/AuditRuntimeBudgetTest.php"
@@ -1758,14 +1758,14 @@
           "// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- The variadic list supplies three identifiers, one integer placeholder per bounded run ID, and the cutoff.",
           "// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- The complete bounded statement is prepared immediately above."
         ],
-        "file_code_sha256": "09adfe079900949bf0bfdd46c59befcba83a0e2fb21c2877cbda312dbc3c0027",
+        "file_code_sha256": "2cce2859153527b6175934374db045e3d6881cef2760a1e34ccab27fc91ac923",
         "code_sha256": "4764332895655b9c23e7e69a4c018dddece6dd9976e0c42ead4ecf7f1aea1f9c",
         "findings": {
           "WordPress.DB.PreparedSQL.InterpolatedNotPrepared:ERROR": 1,
           "WordPress.DB.PreparedSQL.NotPrepared:ERROR": 1
         }
       },
-      "rationale": "Private caller holds or renews exact mutation lease. Trusted %i table identifiers; bounded1\u2013100 IDs each have %d placeholder; cutoff %s. Atomic multi-table delete repeats failed/stale-running predicate after selection and preserves complete runs. DB read/delete errors throw. Actual mock query/error/lease regressions inspect prepared predicates and ownership; no native multi-table execution claimed.",
+      "rationale": "Private caller holds or renews exact mutation lease. Trusted %i table identifiers; bounded1–100 IDs each have %d placeholder; cutoff %s. Atomic multi-table delete repeats failed/stale-running predicate after selection and preserves complete runs. DB read/delete errors throw. Actual mock query/error/lease regressions inspect prepared predicates and ownership; no native multi-table execution claimed. 8.1.0 containing-file review: this boundary body is unchanged. The new finding-storage path and its service caller were reviewed for prepared SQL, WordPress field validation, actual resource IDs, bounded batches and failure handling; see the add_resource and run records.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php"
       ]
@@ -1778,11 +1778,11 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching"
         ],
-        "file_code_sha256": "09adfe079900949bf0bfdd46c59befcba83a0e2fb21c2877cbda312dbc3c0027",
+        "file_code_sha256": "2cce2859153527b6175934374db045e3d6881cef2760a1e34ccab27fc91ac923",
         "code_sha256": "2d953f5f49c3da4dfc2f51c4d09fcff7842f4efd4369c8bbb876333bfc93d85f",
         "findings": {}
       },
-      "rationale": "Service calls only after both passes, final fallback checkpoint and lease renewal. wpdb update requires id and running status; exactly one updated row required before removing running marker. Runtime fixture proves complete on supported cleanup and no complete after unsupported failure. Native concurrent DB update semantics and zero-row completion branch are source-traced only. Test limits: Generic inherited tests do not invokeevery named method/storagefailure branch; sourcedataflowchecked, no native transaction/DB failure fixture claimed.",
+      "rationale": "Service calls only after both passes, final fallback checkpoint and lease renewal. wpdb update requires id and running status; exactly one updated row required before removing running marker. Runtime fixture proves complete on supported cleanup and no complete after unsupported failure. Native concurrent DB update semantics and zero-row completion branch are source-traced only. Test limits: Generic inherited tests do not invokeevery named method/storagefailure branch; sourcedataflowchecked, no native transaction/DB failure fixture claimed. 8.1.0 containing-file review: this boundary body is unchanged. The new finding-storage path and its service caller were reviewed for prepared SQL, WordPress field validation, actual resource IDs, bounded batches and failure handling; see the add_resource and run records.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php",
         "tests/Audit/AuditRuntimeBudgetTest.php"
@@ -1796,11 +1796,11 @@
         "suppressions": [
           "// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching -- The reports page needs exact bounded metadata for completed runs."
         ],
-        "file_code_sha256": "09adfe079900949bf0bfdd46c59befcba83a0e2fb21c2877cbda312dbc3c0027",
+        "file_code_sha256": "2cce2859153527b6175934374db045e3d6881cef2760a1e34ccab27fc91ac923",
         "code_sha256": "29f1a4200404c688858544d8566a45f70acb9e959cbe1e9ae4283517b59a526a",
         "findings": {}
       },
-      "rationale": "Authorized Reports view calls metadata-only completed-run list; limit clamped1\u201350 and supplied as %d, trusted tables %i, fixed complete predicate and dependent-baseline EXISTS. DB read errors throw. Existing repository display projection tests exercise neighboring bounded projection, not this exact history method; source review provides the bound proof. Test limits: Generic inherited tests do not invokeevery named method/storagefailure branch; sourcedataflowchecked, no native transaction/DB failure fixture claimed.",
+      "rationale": "Authorized Reports view calls metadata-only completed-run list; limit clamped1–50 and supplied as %d, trusted tables %i, fixed complete predicate and dependent-baseline EXISTS. DB read errors throw. Existing repository display projection tests exercise neighboring bounded projection, not this exact history method; source review provides the bound proof. Test limits: Generic inherited tests do not invokeevery named method/storagefailure branch; sourcedataflowchecked, no native transaction/DB failure fixture claimed. 8.1.0 containing-file review: this boundary body is unchanged. The new finding-storage path and its service caller were reviewed for prepared SQL, WordPress field validation, actual resource IDs, bounded batches and failure handling; see the add_resource and run records.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php"
       ]
@@ -1814,13 +1814,13 @@
           "// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching -- The atomic multi-table delete enforces baseline ownership at mutation time.",
           "// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- The complete bounded statement is prepared immediately above."
         ],
-        "file_code_sha256": "09adfe079900949bf0bfdd46c59befcba83a0e2fb21c2877cbda312dbc3c0027",
+        "file_code_sha256": "2cce2859153527b6175934374db045e3d6881cef2760a1e34ccab27fc91ac923",
         "code_sha256": "52476d745df508fc34ce1a6e3ecb64f2d92b92cca70124de7b88aa3a63527319",
         "findings": {
           "WordPress.DB.PreparedSQL.NotPrepared:ERROR": 1
         }
       },
-      "rationale": "Authorized POST delete action validates method, manage_options and nonce before run ID. Repository acquires mutation lease, prepares atomic fixed multi-table DELETE using %i tables/%d ID, repeats complete predicate and refuses running/complete baseline dependents. Finally releases lease. Mock regressions inspect atomic baseline predicate and reject active lease; no native delete transaction run claimed.",
+      "rationale": "Authorized POST delete action validates method, manage_options and nonce before run ID. Repository acquires mutation lease, prepares atomic fixed multi-table DELETE using %i tables/%d ID, repeats complete predicate and refuses running/complete baseline dependents. Finally releases lease. Mock regressions inspect atomic baseline predicate and reject active lease; no native delete transaction run claimed. 8.1.0 containing-file review: this boundary body is unchanged. The new finding-storage path and its service caller were reviewed for prepared SQL, WordPress field validation, actual resource IDs, bounded batches and failure handling; see the add_resource and run records.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php"
       ]
@@ -1833,11 +1833,11 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching"
         ],
-        "file_code_sha256": "09adfe079900949bf0bfdd46c59befcba83a0e2fb21c2877cbda312dbc3c0027",
+        "file_code_sha256": "2cce2859153527b6175934374db045e3d6881cef2760a1e34ccab27fc91ac923",
         "code_sha256": "c7f7f57b6ee1b462fece5fdfedb7e94ac447cce6608a2796720afa8765d9508d",
         "findings": {}
       },
-      "rationale": "Catch around post-begin generation marks only running ID failed via wpdb update and drops local running marker. This is best effort, with original exception rethrown and lease released in finally. Actual runtime fixture proves running\u2192failed/no complete; forced storage failure during fail is not runtime-tested. Test limits: Generic inherited tests do not invokeevery named method/storagefailure branch; sourcedataflowchecked, no native transaction/DB failure fixture claimed.",
+      "rationale": "Catch around post-begin generation marks only running ID failed via wpdb update and drops local running marker. This is best effort, with original exception rethrown and lease released in finally. Actual runtime fixture proves running→failed/no complete; forced storage failure during fail is not runtime-tested. Test limits: Generic inherited tests do not invokeevery named method/storagefailure branch; sourcedataflowchecked, no native transaction/DB failure fixture claimed. 8.1.0 containing-file review: this boundary body is unchanged. The new finding-storage path and its service caller were reviewed for prepared SQL, WordPress field validation, actual resource IDs, bounded batches and failure handling; see the add_resource and run records.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php",
         "tests/Audit/AuditRuntimeBudgetTest.php"
@@ -1851,11 +1851,11 @@
         "suppressions": [
           "// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching -- Comparison counts must reflect the exact immutable report snapshots."
         ],
-        "file_code_sha256": "09adfe079900949bf0bfdd46c59befcba83a0e2fb21c2877cbda312dbc3c0027",
+        "file_code_sha256": "2cce2859153527b6175934374db045e3d6881cef2760a1e34ccab27fc91ac923",
         "code_sha256": "61ec5e8957c2a93c78ccec574e1d35e30709f68c5d801f628c461f83f4bf67e5",
         "findings": {}
       },
-      "rationale": "Protected bounded Reports view supplies typed run/baseline IDs and boolean comparison eligibility. Fixed trusted table joins prepared with %i/%d/%s, including one boolean/fixed finding key per filter; no request SQL fragments. Baseline complete existence and each DB read error checked. Tests assert prepared SQL thin/internal-link exclusions and stub counts, not real DB join/count semantics. Test limits: Mock tests assert preparedSQL predicate text andstub counts; actual DB comparison query semantics notexecutedbythisreviewer.",
+      "rationale": "Protected bounded Reports view supplies typed run/baseline IDs and boolean comparison eligibility. Fixed trusted table joins prepared with %i/%d/%s, including one boolean/fixed finding key per filter; no request SQL fragments. Baseline complete existence and each DB read error checked. Tests assert prepared SQL thin/internal-link exclusions and stub counts, not real DB join/count semantics. Test limits: Mock tests assert preparedSQL predicate text andstub counts; actual DB comparison query semantics notexecutedbythisreviewer. 8.1.0 containing-file review: this boundary body is unchanged. The new finding-storage path and its service caller were reviewed for prepared SQL, WordPress field validation, actual resource IDs, bounded batches and failure handling; see the add_resource and run records.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php"
       ]
@@ -1868,11 +1868,11 @@
         "suppressions": [
           "// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching -- A report export must hydrate its exact immutable persisted snapshot."
         ],
-        "file_code_sha256": "09adfe079900949bf0bfdd46c59befcba83a0e2fb21c2877cbda312dbc3c0027",
+        "file_code_sha256": "2cce2859153527b6175934374db045e3d6881cef2760a1e34ccab27fc91ac923",
         "code_sha256": "c7ef29ca4f02ff22d3c2a7b7237993d2056db44e894a70805f6779185e03d580",
         "findings": {}
       },
-      "rationale": "Protected AuditReadAPI/export caller checks row profile before public JSON/HTML hydration; internal service may also read a full immutable snapshot. Three queries use trusted tables %i and run ID %d and require complete status. Read errors throw; JSON arrays hydrate via decoding and null incomplete measurement restored. Actual mock complete/finding-only/storage\u2192JSON regressions execute this path. Row ceilings are not aggregate byte limits.",
+      "rationale": "Protected AuditReadAPI/export caller checks row profile before public JSON/HTML hydration; internal service may also read a full immutable snapshot. Three queries use trusted tables %i and run ID %d and require complete status. Read errors throw; JSON arrays hydrate via decoding and null incomplete measurement restored. Actual mock complete/finding-only/storage→JSON regressions execute this path. Row ceilings are not aggregate byte limits. 8.1.0 containing-file review: this boundary body is unchanged. The new finding-storage path and its service caller were reviewed for prepared SQL, WordPress field validation, actual resource IDs, bounded batches and failure handling; see the add_resource and run records.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php"
       ]
@@ -1885,11 +1885,11 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching -- Comparison qualification must read the exact immutable report metadata."
         ],
-        "file_code_sha256": "09adfe079900949bf0bfdd46c59befcba83a0e2fb21c2877cbda312dbc3c0027",
+        "file_code_sha256": "2cce2859153527b6175934374db045e3d6881cef2760a1e34ccab27fc91ac923",
         "code_sha256": "941d30dec262b7a4280705bcfcb3f6905192dee48fcc2265c1aecb9fcdb8edbf",
         "findings": {}
       },
-      "rationale": "Reports comparison fetches only complete run analysis_json via trusted table %i/run ID %d; checks DB error then absence. Decoding produces array or empty metadata. Comparison tests execute qualification through service; malformed/read-error branches are principally source-traced.",
+      "rationale": "Reports comparison fetches only complete run analysis_json via trusted table %i/run ID %d; checks DB error then absence. Decoding produces array or empty metadata. Comparison tests execute qualification through service; malformed/read-error branches are principally source-traced. 8.1.0 containing-file review: this boundary body is unchanged. The new finding-storage path and its service caller were reviewed for prepared SQL, WordPress field validation, actual resource IDs, bounded batches and failure handling; see the add_resource and run records.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php"
       ]
@@ -1902,11 +1902,11 @@
         "suppressions": [
           "// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching -- Export sizing must read the exact persisted report metadata."
         ],
-        "file_code_sha256": "09adfe079900949bf0bfdd46c59befcba83a0e2fb21c2877cbda312dbc3c0027",
+        "file_code_sha256": "2cce2859153527b6175934374db045e3d6881cef2760a1e34ccab27fc91ac923",
         "code_sha256": "de4a70d5b7a11ac3d4b5c58f25393b053ddffd133346fb2dd470b84243ae0917",
         "findings": {}
       },
-      "rationale": "Protected export/AuditReadAPI obtains complete run counts and complete baseline finding count using fixed join, %i trusted tables/%d run ID. Checks read error, clamps counts nonnegative; caller applies format-specific row ceilings before loading rows. Actual profile regression proves no resource hydration; aggregate text byte budget is not provided.",
+      "rationale": "Protected export/AuditReadAPI obtains complete run counts and complete baseline finding count using fixed join, %i trusted tables/%d run ID. Checks read error, clamps counts nonnegative; caller applies format-specific row ceilings before loading rows. Actual profile regression proves no resource hydration; aggregate text byte budget is not provided. 8.1.0 containing-file review: this boundary body is unchanged. The new finding-storage path and its service caller were reviewed for prepared SQL, WordPress field validation, actual resource IDs, bounded batches and failure handling; see the add_resource and run records.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php"
       ]
@@ -1919,11 +1919,11 @@
         "suppressions": [
           "// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching -- The reports screen needs an exact bounded projection of persisted report evidence."
         ],
-        "file_code_sha256": "09adfe079900949bf0bfdd46c59befcba83a0e2fb21c2877cbda312dbc3c0027",
+        "file_code_sha256": "2cce2859153527b6175934374db045e3d6881cef2760a1e34ccab27fc91ac923",
         "code_sha256": "5c5ffc19c29a7c8d311e4c109465b568753df83cc71cbc29c8577bc567c8e179",
         "findings": {}
       },
-      "rationale": "Protected Reports screen calls bounded metadata/finding preview without resource hydration. Preview clamp1\u2013100 passed %d; fixed complete predicate, grouped finding counts and dependent-baseline EXISTS use %i trusted identifiers/%d ID. Checks each DB read. Actual projection test asserts LIMIT and no full resource query; native grouped SQL semantics not separately run.",
+      "rationale": "Protected Reports screen calls bounded metadata/finding preview without resource hydration. Preview clamp1–100 passed %d; fixed complete predicate, grouped finding counts and dependent-baseline EXISTS use %i trusted identifiers/%d ID. Checks each DB read. Actual projection test asserts LIMIT and no full resource query; native grouped SQL semantics not separately run. 8.1.0 containing-file review: this boundary body is unchanged. The new finding-storage path and its service caller were reviewed for prepared SQL, WordPress field validation, actual resource IDs, bounded batches and failure handling; see the add_resource and run records.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php"
       ]
@@ -1936,11 +1936,11 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching -- Reports must reflect the latest persisted completed run."
         ],
-        "file_code_sha256": "09adfe079900949bf0bfdd46c59befcba83a0e2fb21c2877cbda312dbc3c0027",
+        "file_code_sha256": "2cce2859153527b6175934374db045e3d6881cef2760a1e34ccab27fc91ac923",
         "code_sha256": "47c0c6813d9bbc86dd807a5ab9e280aaaadec593636383166f189877d957d8fc",
         "findings": {}
       },
-      "rationale": "Service obtains baseline using fixed complete predicate, ID DESC LIMIT1 and trusted table %i, checking DB error. Actual runtime fixture executes baseline lookup; forced read error for this specific query not separately injected. Test limits: Generic inherited tests do not invokeevery named method/storagefailure branch; sourcedataflowchecked, no native transaction/DB failure fixture claimed.",
+      "rationale": "Service obtains baseline using fixed complete predicate, ID DESC LIMIT1 and trusted table %i, checking DB error. Actual runtime fixture executes baseline lookup; forced read error for this specific query not separately injected. Test limits: Generic inherited tests do not invokeevery named method/storagefailure branch; sourcedataflowchecked, no native transaction/DB failure fixture claimed. 8.1.0 containing-file review: this boundary body is unchanged. The new finding-storage path and its service caller were reviewed for prepared SQL, WordPress field validation, actual resource IDs, bounded batches and failure handling; see the add_resource and run records.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php",
         "tests/Audit/AuditRuntimeBudgetTest.php"
@@ -1954,11 +1954,11 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching -- Exact-value CAS prevents an expired former owner from refreshing a successor's lease."
         ],
-        "file_code_sha256": "09adfe079900949bf0bfdd46c59befcba83a0e2fb21c2877cbda312dbc3c0027",
+        "file_code_sha256": "2cce2859153527b6175934374db045e3d6881cef2760a1e34ccab27fc91ac923",
         "code_sha256": "4fb07e1f3b1035d6972ff82f53cc0fe1454c5f0e3bfab09673a96d141fa58a0e",
         "findings": {}
       },
-      "rationale": "Service heartbeat/final completion and maintenance reuse authoritative empty-aware raw read. hash_equals token comparison precedes clamped nonshortening expiry and observed-value typed wpdb update; zero rows fails ownership, DB failure throws. Tests execute expired/former-owner rejection, nonshortening and refresh interleaves; actual runtime fixture renews lease. No native two-DB run by this reviewer.",
+      "rationale": "Service heartbeat/final completion and maintenance reuse authoritative empty-aware raw read. hash_equals token comparison precedes clamped nonshortening expiry and observed-value typed wpdb update; zero rows fails ownership, DB failure throws. Tests execute expired/former-owner rejection, nonshortening and refresh interleaves; actual runtime fixture renews lease. No native two-DB run by this reviewer. 8.1.0 containing-file review: this boundary body is unchanged. The new finding-storage path and its service caller were reviewed for prepared SQL, WordPress field validation, actual resource IDs, bounded batches and failure handling; see the add_resource and run records.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php",
         "tests/Audit/AuditRuntimeBudgetTest.php"
@@ -1972,11 +1972,11 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching -- Exact token-bearing value makes release ownership-safe."
         ],
-        "file_code_sha256": "09adfe079900949bf0bfdd46c59befcba83a0e2fb21c2877cbda312dbc3c0027",
+        "file_code_sha256": "2cce2859153527b6175934374db045e3d6881cef2760a1e34ccab27fc91ac923",
         "code_sha256": "14925bd2989d4939f12c6387285d567eef7ecbf8f409fe8ac7df7091d595ee13",
         "findings": {}
       },
-      "rationale": "Finally paths use authoritative raw read and hash_equals token, then typed wpdb delete with observed complete value; only own successful deletion invalidates option cache. Failures intentionally swallowed so self-expiring lease is recovery. Existing initial/expired/foreign-owner tests and runtime failure fixture execute cleanup; native persistent backend invalidation is coordinator-owned.",
+      "rationale": "Finally paths use authoritative raw read and hash_equals token, then typed wpdb delete with observed complete value; only own successful deletion invalidates option cache. Failures intentionally swallowed so self-expiring lease is recovery. Existing initial/expired/foreign-owner tests and runtime failure fixture execute cleanup; native persistent backend invalidation is coordinator-owned. 8.1.0 containing-file review: this boundary body is unchanged. The new finding-storage path and its service caller were reviewed for prepared SQL, WordPress field validation, actual resource IDs, bounded batches and failure handling; see the add_resource and run records.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php",
         "tests/Audit/AuditRuntimeBudgetTest.php"
@@ -1990,11 +1990,11 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching"
         ],
-        "file_code_sha256": "09adfe079900949bf0bfdd46c59befcba83a0e2fb21c2877cbda312dbc3c0027",
+        "file_code_sha256": "2cce2859153527b6175934374db045e3d6881cef2760a1e34ccab27fc91ac923",
         "code_sha256": "db4acff3aa3db2788d52451635a2f6aad5a14045e45adfa901ac63b8b64fc4be",
         "findings": {}
       },
-      "rationale": "Maintenance cleanup probes trusted internal table names via escaped LIKE pattern prepared%s; compares exact returned name and checks database errors. Missing-table mock regression proves cleanup no-op rather than noisy mutation. Tables originate solely from wpdb prefix, not a request.",
+      "rationale": "Maintenance cleanup probes trusted internal table names via escaped LIKE pattern prepared%s; compares exact returned name and checks database errors. Missing-table mock regression proves cleanup no-op rather than noisy mutation. Tables originate solely from wpdb prefix, not a request. 8.1.0 containing-file review: this boundary body is unchanged. The new finding-storage path and its service caller were reviewed for prepared SQL, WordPress field validation, actual resource IDs, bounded batches and failure handling; see the add_resource and run records.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php"
       ]
@@ -2007,13 +2007,13 @@
         "suppressions": [
           "// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Fixed integer exception code, never rendered as message text."
         ],
-        "file_code_sha256": "483440617b4568a2955d63cc8f8486c430e070a9e7cb911780ba8197386cbb6d",
+        "file_code_sha256": "d2ff3191c1808db8c2ed2875a7d42096984c41ab0bad6bd6957e646e9b52d612",
         "code_sha256": "15dae5dceeb1b65d4be39c781dcf46988efbd28df221dbede7fe4b2799b924ba",
         "findings": {
           "WordPress.Security.EscapeOutput.ExceptionNotEscaped:ERROR": 1
         }
       },
-      "rationale": "Authorized admin-post report action checks POST, manage_options and nonce before policy/generation. Site-local lease encloses cleanup/baseline/begin; callbacks renew it between batches. Unsupported runtime cleanup shares one candidate/time/headroom guard before hydration across both passes and completion; supported path performs only runtime flush. Post-begin exceptions mark failed and final cleanup releases exact owner. Fixed40901 exception code is structured error data, escaped translated message reaches protected admin/API JSON sinks. Actual runtime-budget service fixture proves failure/no-complete/lease release and supported completion; it does not exercise unauthorized HTTP dispatch or forced lease-steal renewal failure. Test limits: Admin action contract tests are source assertions, not real WordPress dispatch. CoreBoundaryTest does not execute this service. Runtime fixture uses deterministic SQL/cache adapters, not native DB/drop-in.",
+      "rationale": "Authorized admin-post report action checks POST, manage_options and nonce before policy/generation. Site-local lease encloses cleanup/baseline/begin; callbacks renew it between batches. Unsupported runtime cleanup shares one candidate/time/headroom guard before hydration across both passes and completion; supported path performs only runtime flush. Post-begin exceptions mark failed and final cleanup releases exact owner. Fixed40901 exception code is structured error data, escaped translated message reaches protected admin/API JSON sinks. Actual runtime-budget service fixture proves failure/no-complete/lease release and supported completion; it does not exercise unauthorized HTTP dispatch or forced lease-steal renewal failure. Test limits: Admin action contract tests are source assertions, not real WordPress dispatch. CoreBoundaryTest does not execute this service. Runtime fixture uses deterministic SQL/cache adapters, not native DB/drop-in. 8.1.0 containing-file review: this boundary body is unchanged. The new finding-storage path and its service caller were reviewed for prepared SQL, WordPress field validation, actual resource IDs, bounded batches and failure handling; see the add_resource and run records.",
       "tests": [
         "tests/Audit/AuditRuntimeBudgetTest.php",
         "tests/Audit/AuditRunRepositoryTest.php",
@@ -2028,17 +2028,18 @@
         "suppressions": [
           "// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Fixed integer exception code, never rendered as message text."
         ],
-        "file_code_sha256": "483440617b4568a2955d63cc8f8486c430e070a9e7cb911780ba8197386cbb6d",
-        "code_sha256": "498b5d2e6e3d4049986871cf15292950c434ab89a530f47d563cbb63378575ce",
+        "file_code_sha256": "d2ff3191c1808db8c2ed2875a7d42096984c41ab0bad6bd6957e646e9b52d612",
+        "code_sha256": "b0dab8a4893eb959a56590aafcc6e8028e5ecbfa690543c9499e0f1070334dfe",
         "findings": {
           "WordPress.Security.EscapeOutput.ExceptionNotEscaped:ERROR": 1
         }
       },
-      "rationale": "Authorized admin-post report action checks POST, manage_options and nonce before policy/generation. Site-local lease encloses cleanup/baseline/begin; callbacks renew it between batches. Unsupported runtime cleanup shares one candidate/time/headroom guard before hydration across both passes and completion; supported path performs only runtime flush. Post-begin exceptions mark failed and final cleanup releases exact owner. Fixed40901 exception code is structured error data, escaped translated message reaches protected admin/API JSON sinks. Actual runtime-budget service fixture proves failure/no-complete/lease release and supported completion; it does not exercise unauthorized HTTP dispatch or forced lease-steal renewal failure. Test limits: Admin action contract tests are source assertions, not real WordPress dispatch. CoreBoundaryTest does not execute this service. Runtime fixture uses deterministic SQL/cache adapters, not native DB/drop-in.",
+      "rationale": "Authorized admin-post report action checks POST, manage_options and nonce before policy/generation. Site-local lease encloses cleanup/baseline/begin; callbacks renew it between batches. Unsupported runtime cleanup shares one candidate/time/headroom guard before hydration across both passes and completion; supported path performs only runtime flush. Post-begin exceptions mark failed and final cleanup releases exact owner. Fixed40901 exception code is structured error data, escaped translated message reaches protected admin/API JSON sinks. Actual runtime-budget service fixture proves failure/no-complete/lease release and supported completion; it does not exercise unauthorized HTTP dispatch or forced lease-steal renewal failure. Test limits: Admin action contract tests are source assertions, not real WordPress dispatch. CoreBoundaryTest does not execute this service. Runtime fixture uses deterministic SQL/cache adapters, not native DB/drop-in. 8.1.0 review: ContentAuditManager.handle_run still checks POST, manage_options and the exact nonce before calling this service, and escapes errors at wp_die. The service collects only the current 100-post batch before calling add_resources; snapshot order and counters remain unchanged, cache cleanup stays in finally, and lease renewal/runtime checkpoints retain their existing batch cadence. A batch exception reaches fail(run_id), and release_run_lock remains in the outer finally. Independent review found no changed authorization or completion semantics; the new native row-equivalence fixture and exact-package workload checks are required separately.",
       "tests": [
         "tests/Audit/AuditRuntimeBudgetTest.php",
         "tests/Audit/AuditRunRepositoryTest.php",
-        "tests/Admin/ContentAuditActionContractTest.php"
+        "tests/Admin/ContentAuditActionContractTest.php",
+        "tests/integration/wporg-audit-batching.php"
       ]
     },
     "src/Audit/PublishedPostSource.php::attached_image_parent_ids": {
@@ -2519,7 +2520,7 @@
         "code_sha256": "48d81de806bc64ab6d8108925cdae7a638046896217687fed355e1cbe0e30e88",
         "findings": {}
       },
-      "rationale": "The requested key retains exact1\u201364character allowlist. Literal REQUEST_URI stays visible, scalar and raw16384-byte bounded before unslash; callback validates decoded ASCII1\u20138192bytes without canonicalizing URI/percent markup. Private query_value retains query4096, scalar selected value, decoded control rejection and caller byte cap before text sanitization. OpenAPI requests version16, SettingsPage notice keys64; neither path makes the adapter a mutation authority. RequestInputBoundaryTest covers encoded/nested/control inputs, exact URI/query caps and the real-stripslashes fixture. WordPress parse/sanitizer extension filters remain a documented trust boundary.",
+      "rationale": "The requested key retains exact1–64character allowlist. Literal REQUEST_URI stays visible, scalar and raw16384-byte bounded before unslash; callback validates decoded ASCII1–8192bytes without canonicalizing URI/percent markup. Private query_value retains query4096, scalar selected value, decoded control rejection and caller byte cap before text sanitization. OpenAPI requests version16, SettingsPage notice keys64; neither path makes the adapter a mutation authority. RequestInputBoundaryTest covers encoded/nested/control inputs, exact URI/query caps and the real-stripslashes fixture. WordPress parse/sanitizer extension filters remain a documented trust boundary.",
       "tests": [
         "tests/Admin/RequestInputBoundaryTest.php",
         "tests/Admin/fixtures/request-input-slashed.php"
@@ -4009,7 +4010,7 @@
           "WordPress.Security.NonceVerification.Recommended:WARNING": 3
         }
       },
-      "rationale": "Reached only from the public read-only GET/HEAD sitemap handler after bounded route/provider/page validation. String challenges are unslashed/sanitized and must match exactly as 32\u201364 ASCII alphanumeric characters before entering the diagnostic header and no-store policy. No administrative nonce is required because this grants no administrator authority or destructive action; static repair remains bounded generated-path scheduling under StaticBridge mode/ownership rules. The 8.0.3 change removes all output-buffer mutation from the begin/serve helpers; complete XML remains generation-fenced and passes ProtocolOutput, and existing caller buffers remain owned by their callers. OrchestratorRequestContractTest covers request/challenge helpers. OutputBufferOwnershipTest and the disposable native fixture cover cached/uncached GET/HEAD, 304, early/late 404 and generation failure with single/nested/non-removable buffers. Real HTTP response coverage is separate: preserving foreign buffer contents does not imply empty wire bodies. 8.0.4 review: the new Core filter is conditional and preserves incoming false decisions. Disabled requests fall through before response mutation; owned redirects retain GET/HEAD enforcement. A fresh publication snapshot is checked before serving XML; generation fences and ProtocolOutput remain. Rewrite refresh removes only Cybermaps query targets. Regeneration/comment/diagnostic boundaries retain their exact bodies.",
+      "rationale": "Reached only from the public read-only GET/HEAD sitemap handler after bounded route/provider/page validation. String challenges are unslashed/sanitized and must match exactly as 32–64 ASCII alphanumeric characters before entering the diagnostic header and no-store policy. No administrative nonce is required because this grants no administrator authority or destructive action; static repair remains bounded generated-path scheduling under StaticBridge mode/ownership rules. The 8.0.3 change removes all output-buffer mutation from the begin/serve helpers; complete XML remains generation-fenced and passes ProtocolOutput, and existing caller buffers remain owned by their callers. OrchestratorRequestContractTest covers request/challenge helpers. OutputBufferOwnershipTest and the disposable native fixture cover cached/uncached GET/HEAD, 304, early/late 404 and generation failure with single/nested/non-removable buffers. Real HTTP response coverage is separate: preserving foreign buffer contents does not imply empty wire bodies. 8.0.4 review: the new Core filter is conditional and preserves incoming false decisions. Disabled requests fall through before response mutation; owned redirects retain GET/HEAD enforcement. A fresh publication snapshot is checked before serving XML; generation fences and ProtocolOutput remain. Rewrite refresh removes only Cybermaps query targets. Regeneration/comment/diagnostic boundaries retain their exact bodies.",
       "tests": [
         "tests/Sitemap/OrchestratorRequestContractTest.php",
         "tests/Admin/SitemapStatusTest.php",

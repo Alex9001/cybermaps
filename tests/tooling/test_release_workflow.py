@@ -28,8 +28,10 @@ class WorkflowTest(unittest.TestCase):
     publish = fixtures.PublisherTest.publish
 
     def workflow(self, action='release', failure='', success=True, *args):
-        result = subprocess.run([sys.executable, '-B', 'bin/release-workflow.py', action, *args],
-                                cwd=self.repo, env=dict(self.env, MOCK_FAIL=failure), capture_output=True, text=True)
+        credentials = ['--svn-password-stdin'] if action in ('release', 'resume') and '--beta' not in args else []
+        result = subprocess.run([sys.executable, '-B', 'bin/release-workflow.py', action, *args, *credentials],
+                                cwd=self.repo, env=dict(self.env, MOCK_FAIL=failure), capture_output=True, text=True,
+                                input='fixture-svn-password\n' if credentials else None)
         self.assertEqual(result.returncode == 0, success, result.stdout + result.stderr)
         return result
 
@@ -86,7 +88,7 @@ class WorkflowTest(unittest.TestCase):
         self.assertEqual(before, snapshot(self.install))
 
     def test_generated_output_symlink_is_refused(self):
-        (self.repo / 'docs').mkdir()
+        (self.repo / 'docs').mkdir(exist_ok=True)
         (self.repo / 'docs/generated').symlink_to(self.website, target_is_directory=True)
         before = snapshot(self.website)
         self.assertIn('Symlink', self.workflow('dev-install', success=False).stderr)
@@ -130,7 +132,11 @@ class WorkflowTest(unittest.TestCase):
         self.workflow()
         commands = self.commands()
         self.assertEqual(commands.count(['composer', 'run', 'release:build']), 1)
-        self.assertEqual(commands.count(['composer', 'run', 'release:ready']), 1)
+        self.assertEqual(commands.count(['composer', 'run', 'release:ready']), 3)
+        svn = commands.index(['svnmucc', 'commit'])
+        dates = [i for i, command in enumerate(commands) if command[:2] == ['node', 'scripts/check-launch-date.mjs']]
+        self.assertGreater(len([i for i in dates if i < svn]), 1)
+        self.assertEqual(commands[svn - 1][:2], ['node', 'scripts/check-launch-date.mjs'])
         self.assertNotIn(['composer', 'run', 'release:validate'], commands)
         self.assertFalse(self.state()['draft'])
         record = json.loads((self.repo / 'docs/generated/releases/7.4.0/workflow.json').read_text())
@@ -169,18 +175,19 @@ class WorkflowTest(unittest.TestCase):
         self.assertFalse(any(c[:2] == ['gh', 'release'] and c[2] in ('create', 'upload', 'edit') for c in after))
 
     def test_resume_after_publication_without_saved_workflow_state(self):
-        self.publish()
+        self.workflow()
+        (self.repo / 'docs/generated/releases/7.4.0/workflow.json').unlink()
         published = self.state()
         count = len(self.commands())
         self.workflow('resume', '', True, '--tag', 'v7.4.0')
         after = self.commands()[count:]
         self.assertEqual(published, self.state())
-        self.assertTrue(any(c[:3] == ['npm', 'run', 'docs:sync'] and '--tag' in c for c in after))
+        self.assertIn(['npm', 'run', 'deploy'], after)
         self.assertFalse(any(c[0] == 'composer' for c in after))
         self.assertFalse(any(c[:2] == ['gh', 'release'] and c[2] in ('create', 'upload', 'edit') for c in after))
 
     def test_resume_allows_download_counts_to_increase(self):
-        self.publish()
+        self.workflow()
         ids = [a['id'] for a in self.state()['assets']]
         self.workflow('resume', 'download-count', True, '--tag', 'v7.4.0')
         self.assertEqual(ids, [a['id'] for a in self.state()['assets']])
@@ -194,17 +201,57 @@ class WorkflowTest(unittest.TestCase):
                 workspace.install(archive, self.install, expected_sha256='0' * 64)
         self.assertEqual(before, snapshot(self.install))
 
-    def test_downstream_resume_rejects_draft_and_corrupt_download(self):
+    def test_resume_completes_draft_but_rejects_corrupt_published_download(self):
         self.workflow(failure='interrupt', success=False)
-        before = snapshot(self.website)
-        self.workflow('resume', '', False, '--tag', 'v7.4.0')
-        self.assertEqual(before, snapshot(self.website))
-        self.workflow(failure='deploy', success=False)
+        self.workflow('resume', '', True, '--tag', 'v7.4.0')
         published = self.state()
         before = snapshot(self.website)
         self.workflow('resume', 'download', False, '--tag', 'v7.4.0')
         self.assertEqual(before, snapshot(self.website))
         self.assertEqual(published, self.state())
+
+    def test_stable_is_default_and_waits_for_wordpress_before_github(self):
+        self.workflow(failure='wordpress-pending', success=False)
+        self.assertTrue(self.state()['draft'])
+        self.assertFalse(self.state()['prerelease'])
+        commands = self.commands()
+        self.assertEqual(commands.count(['svnmucc', 'commit']), 1)
+        self.assertNotIn(['npm', 'run', 'deploy'], commands)
+        before = len(commands)
+        self.workflow('resume', '', True, '--tag', 'v7.4.0')
+        resumed = self.commands()[before:]
+        self.assertFalse(any(c[0] == 'composer' for c in resumed))
+        self.assertNotIn(['svnmucc', 'commit'], resumed)
+        verified = resumed.index(['wordpress', 'distribution-verified'])
+        published = next(i for i, c in enumerate(resumed) if c[:3] == ['gh', 'release', 'edit'])
+        self.assertLess(verified, published)
+
+    def test_beta_is_explicit_and_never_replaces_production_or_svn(self):
+        self.workflow('release', '', True, '--beta')
+        self.assertTrue(self.state()['prerelease'])
+        self.assertNotIn(['svnmucc', 'commit'], self.commands())
+        self.assertNotIn(['npm', 'run', 'deploy'], self.commands())
+        record = json.loads((self.repo / 'docs/generated/releases/7.4.0/workflow.json').read_text())
+        self.assertEqual(record['phase'], 'beta-published')
+
+    def test_svn_auth_failure_keeps_github_draft_and_can_retry(self):
+        self.workflow(failure='svn-auth', success=False)
+        self.assertTrue(self.state()['draft'])
+        self.assertNotIn(['svnmucc', 'commit'], self.commands())
+        self.workflow('resume', '', True, '--tag', 'v7.4.0')
+        self.assertFalse(self.state()['draft'])
+
+    def test_password_pipe_is_consumed_before_any_child_command(self):
+        sentinel = 'sentinel-password-not-for-child-processes'
+        result = subprocess.run([sys.executable, '-B', 'bin/release-workflow.py', 'release', '--beta',
+                                 '--svn-password-stdin'], cwd=self.repo,
+                                env=dict(self.env, MOCK_STDIN_PROBE='1'),
+                                input=sentinel + '\n', text=True, capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        observed = Path(self.env['MOCK_STATE'] + '.stdin').read_text().splitlines()
+        self.assertTrue(observed)
+        self.assertEqual(set(observed), {'0'})
+        self.assertNotIn(sentinel, result.stdout + result.stderr + str(self.commands()))
 
     def test_failed_install_restores_previous_files(self):
         self.workflow('dev-install')
