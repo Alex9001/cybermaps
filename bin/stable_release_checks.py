@@ -33,6 +33,38 @@ def module(relative, name):
     return result
 
 
+def presentation_browser(value, name, captures):
+    message = 'Presentation browser checks failed: ' + name
+    require(value.get('passed') is True and all(value.get(key) == []
+            for key in ('page_errors', 'failures')), message)
+    errors = value.get('console_errors')
+    if errors == []:
+        return
+    # The configured browser deliberately sends one log-clear POST without a
+    # nonce. Keep its raw observation, but accept it only with the actual denied
+    # response and the completed authority/confirmation interaction behind it.
+    origin = captures.get('origin')
+    require(name == 'browser.json' and value.get('phase') == 'configured'
+            and isinstance(origin, str) and re.fullmatch(r'http://127\.0\.0\.1:[1-9][0-9]{0,4}', origin)
+            and int(origin.rsplit(':', 1)[1]) <= 65535
+            and all(value.get(key) == captures.get(key) for key in ('origin', 'version', 'zip_sha256')),
+            message)
+    expected = dict(url=origin + '/wp-admin/admin.php?page=cybermaps-system-status',
+                    text='Failed to load resource: the server responded with a status of 403 (Forbidden)',
+                    expected=True)
+    require(errors == [expected] and errors[0].get('expected') is True, message)
+    interactions = value.get('interactions')
+    require(isinstance(interactions, list) and all(isinstance(item, dict) for item in interactions), message)
+    matches = [item for item in interactions if item.get('name') == 'destructive-log-clear-authority-and-confirmation']
+    require(len(matches) == 1 and matches[0].get('passed') is True, message)
+    detail = matches[0].get('detail')
+    require(isinstance(detail, dict) and detail.get('missing_nonce') == {'status': 403, 'body': '-1'}
+            and type(detail['missing_nonce']['status']) is int
+            and detail.get('confirmation_dismissed') is True
+            and type(detail.get('confirmed_status')) is int and detail['confirmed_status'] == 200
+            and detail.get('confirmed_result') == 'Diagnostic events cleared.', message)
+
+
 def presentation(number, zip_sha256, commit, max_age_hours):
     path = release_dir(number) / 'presentation/review.json'
     record = json.loads(path.read_text())
@@ -66,8 +98,7 @@ def presentation(number, zip_sha256, commit, max_age_hours):
             require(value.get('version') == number and value.get('zip_sha256') == zip_sha256
                     and value.get('passed') is True, 'Presentation fixture did not pass for this candidate')
         else:
-            require(value.get('passed') is True and all(value.get(k) == []
-                    for k in ('page_errors', 'console_errors', 'failures')), 'Presentation browser checks failed: ' + name)
+            presentation_browser(value, name, capture_manifest)
     reviewed_hashes = set(record['evidence'].values())
     require(all(capture.get('sha256') in reviewed_hashes for capture in captures),
             'Each actual gallery capture must be included in the visual review evidence')
