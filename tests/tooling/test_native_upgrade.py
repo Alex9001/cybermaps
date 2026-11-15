@@ -20,6 +20,31 @@ upgrade = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(upgrade)
 
 
+class NativeUpgradeDispatchTest(unittest.TestCase):
+    def test_every_state_action_includes_strict_php_without_eval_file(self):
+        with tempfile.TemporaryDirectory(dir=ROOT / 'docs/generated/tmp') as directory:
+            fixture = Path(directory) / 'strict-state.php'
+            fixture.write_text("<?php\ndeclare(strict_types=1);\necho json_encode(array('action' => $args[0]));\n")
+            runtime = upgrade.Runtime.__new__(upgrade.Runtime)
+
+            def execute(command, code):
+                self.assertEqual(command, 'eval')
+                code = code.replace('/validation/native-upgrade-state.php', str(fixture))
+                return subprocess.check_output(['php', '-r', 'eval($argv[1]);', code], text=True)
+
+            with mock.patch.object(runtime, 'cli', side_effect=execute):
+                for action in ('seed', 'snapshot', 'offer'):
+                    with self.subTest(action=action):
+                        self.assertEqual(json.loads(runtime.state_fixture(action)), {'action': action})
+
+    def test_unknown_state_action_never_reaches_php(self):
+        runtime = upgrade.Runtime.__new__(upgrade.Runtime)
+        with mock.patch.object(runtime, 'cli') as command:
+            with self.assertRaisesRegex(RuntimeError, 'Unknown native upgrade fixture action'):
+                runtime.state_fixture("seed'); echo 'unexpected")
+        command.assert_not_called()
+
+
 class NativeUpgradeReceiptTest(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory(dir=ROOT / 'docs/generated/tmp')

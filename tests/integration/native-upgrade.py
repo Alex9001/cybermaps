@@ -412,6 +412,11 @@ class Runtime:
                               'php', '-d', 'memory_limit=512M', '/cli-tools/vendor/wp-cli/wp-cli/php/boot-fs.php',
                               *args, '--allow-root', timeout=timeout).stdout.strip()
 
+    def state_fixture(self, action):
+        # eval-file prepends PHP output before eval, invalidating strict_types.
+        require(action in ('seed', 'snapshot', 'offer'), 'Unknown native upgrade fixture action.')
+        return self.cli('eval', "$args = array('" + action + "'); require '/validation/native-upgrade-state.php';")
+
     def start(self):
         self.container('network', 'create', self.network)
         self.started.append(('network', self.network))
@@ -468,12 +473,12 @@ class Runtime:
             self.cli('site', 'create', '--slug=second', '--title=Second update fixture', '--email=admin@example.com', '--quiet')
         activate = '--activate-network' if multisite else '--activate'
         self.cli('plugin', 'install', '/baseline/cybermaps.zip', activate, '--force', '--quiet')
-        self.cli('eval-file', '/validation/native-upgrade-state.php', 'seed')
+        self.state_fixture('seed')
         paths = {}
         for action in ('before', 'offer'):
             path = self.output / (action + '.json')
             fixture_action = 'snapshot' if action == 'before' else action
-            data = json.loads(self.cli('eval-file', '/validation/native-upgrade-state.php', fixture_action))
+            data = json.loads(self.state_fixture(fixture_action))
             write_json(path, data)
             paths[action] = str(path.relative_to(ROOT))
         offer = json.loads((self.output / 'offer.json').read_text())
@@ -492,7 +497,7 @@ class Runtime:
             write_json(path, rows)
             paths['wp_cli'] = str(path.relative_to(ROOT))
         after = self.output / 'after.json'
-        write_json(after, json.loads(self.cli('eval-file', '/validation/native-upgrade-state.php', 'snapshot')))
+        write_json(after, json.loads(self.state_fixture('snapshot')))
         paths['after'] = str(after.relative_to(ROOT))
         validate_state(json.loads((self.output / 'before.json').read_text()), json.loads(after.read_text()),
                        multisite, self.version, self.phase, self.baseline['version'])
