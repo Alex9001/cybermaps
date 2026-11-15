@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-15T12:51:47+00:00\n"
+"POT-Creation-Date: 2026-11-15T19:44:46+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: cybermaps\n"
@@ -8462,31 +8462,31 @@ msgstr ""
 msgid "Cybermaps could not store an audit resource."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:661
-#: src/Audit/AuditRunRepository.php:693
-#: src/Audit/AuditRunRepository.php:697
-#: src/Audit/AuditRunRepository.php:750
+#: src/Audit/AuditRunRepository.php:662
+#: src/Audit/AuditRunRepository.php:694
+#: src/Audit/AuditRunRepository.php:698
+#: src/Audit/AuditRunRepository.php:753
 msgid "Cybermaps could not store an audit finding."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:803
+#: src/Audit/AuditRunRepository.php:806
 msgid "Cybermaps could not finalize the content report."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:1163
+#: src/Audit/AuditRunRepository.php:1166
 msgid "Only a running Cybermaps content report can be modified."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:1175
-#: src/Audit/AuditRunRepository.php:1192
+#: src/Audit/AuditRunRepository.php:1178
+#: src/Audit/AuditRunRepository.php:1195
 msgid "Cybermaps could not read the saved content report data."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:1182
+#: src/Audit/AuditRunRepository.php:1185
 msgid "Cybermaps could not update the content report lock."
 msgstr ""
 
-#: src/Audit/AuditRunRepository.php:1206
+#: src/Audit/AuditRunRepository.php:1209
 msgid "Cybermaps could not encode the content report lock."
 msgstr ""
 

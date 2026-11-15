@@ -110,6 +110,10 @@ owner sign-off is required. A changed package requires renewed agent review.
     plugin's decision. Native and fresh-request handover checks are mandatory.
 20. Stable copy describes current behavior and optional dependencies accurately;
     retain GitHub issues and WordPress.org support without beta recruitment.
+    Every stable readiness check must confirm that the advertised private
+    security-report route is enabled through GitHub's official
+    [private vulnerability reporting API](https://docs.github.com/en/rest/repos/repos#check-if-private-vulnerability-reporting-is-enabled-for-a-repository).
+    A disabled route, API failure, or malformed response blocks publication.
     Directory artwork has exact provenance, licenses, dimensions and captions.
     All pictured interfaces come from the candidate ZIP. Responsive, keyboard,
     200% reflow, default/empty/error, save and destructive journeys require

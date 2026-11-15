@@ -83,6 +83,32 @@ class StableChecksTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             checks.current_copy(self.contents)
 
+    def test_private_reporting_requires_actual_enabled_boolean(self):
+        with patch.object(checks, 'run', return_value='{"enabled":true}') as run:
+            checks.private_reporting()
+        run.assert_called_once_with(
+            'gh', 'api', '--hostname', 'github.com', '--method', 'GET',
+            '-H', 'Accept: application/vnd.github+json',
+            '-H', 'X-GitHub-Api-Version: 2026-03-10',
+            'repos/Alex9001/cybermaps/private-vulnerability-reporting')
+        for response in ('{"enabled":false}', '{}', 'null', '[]', 'true',
+                         '{"enabled":1}', '{"enabled":"true"}', '{"enabled":null}',
+                         'not JSON'):
+            with self.subTest(response=response), patch.object(checks, 'run', return_value=response):
+                with self.assertRaisesRegex(RuntimeError, 'GitHub private vulnerability reporting'):
+                    checks.private_reporting()
+
+    def test_private_reporting_api_failure_stops_readiness(self):
+        with patch.object(checks, 'run', side_effect=RuntimeError('GitHub API unavailable')):
+            with self.assertRaisesRegex(RuntimeError, 'GitHub API unavailable'):
+                checks.private_reporting()
+        with patch.object(checks, 'current_copy'), patch.object(checks, 'baseline') as baseline, \
+                patch.object(checks, 'run', return_value='{"enabled":false}') as run:
+            with self.assertRaisesRegex(RuntimeError, 'must be enabled before stable publication'):
+                checks.validate('8.1.0', {'zip_sha256': 'b' * 64})
+            self.assertEqual(run.call_count, 1)
+            baseline.assert_not_called()
+
     def test_visual_review_requires_current_zip_every_journey_and_actual_files(self):
         path = self.directory / 'presentation/review.json'
         path.write_text(json.dumps(self.review))

@@ -134,6 +134,7 @@ def validate(number, record, max_age_hours=24):
     contents, digest = package_files(release_dir(number) / 'candidate' / ('cybermaps_' + number + '.zip'))
     require(digest == record['zip_sha256'], 'Stable checks must use the exact validated candidate')
     current_copy(contents)
+    private_reporting()
     baseline(number)
     validate_presentation(number, contents)
     commit = record['identity']['commit']
@@ -159,6 +160,20 @@ def current_copy(contents):
         value = (ROOT / name).read_bytes()
         require(not retired.search(value) and b'include_prereleases' not in value,
                 'Stable project metadata still promotes the beta: ' + name)
+
+
+def private_reporting():
+    """The advertised private security-report route must actually be enabled."""
+    response = run('gh', 'api', '--hostname', 'github.com', '--method', 'GET',
+                   '-H', 'Accept: application/vnd.github+json',
+                   '-H', 'X-GitHub-Api-Version: 2026-03-10',
+                   'repos/Alex9001/cybermaps/private-vulnerability-reporting')
+    try:
+        value = json.loads(response)
+    except ValueError as error:
+        raise RuntimeError('GitHub private vulnerability reporting returned invalid JSON') from error
+    require(isinstance(value, dict) and value.get('enabled') is True,
+            'GitHub private vulnerability reporting must be enabled before stable publication')
 
 
 def baseline(number):

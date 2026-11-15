@@ -1705,7 +1705,7 @@
         "code_sha256": "c788776918d47387a7d0079f6979d51b42fdcfe5fd5e92fa1bad702d3818c870",
         "findings": {}
       },
-      "rationale": "Service evaluator snapshots reach this repository only after the run-state check; no request bag reaches storage. Resource insertion, nullable fields and actual insert IDs retain the WordPress insert path. The extracted single-finding helper uses the same casts, JSON encoding and insert API, with its unnecessary suppression removed. add_resources stores each source batch and groups at most five findings. The fixed SQL gives the owned table a %i placeholder and each datum its own typed placeholder; it requires exactly five inserted rows. Native column length/charset checks reject changed or erroneous data, and unsupported local text validation or a raw payload over 256 KiB falls back to individual inserts. The service marks any storage exception failed and never completes a partial run. Parent and independent model reviewed these helpers against native wpdb. AuditRunRepositoryTest covers assigned IDs, fields, invalid data, failed writes and fallback; the disposable native fixture compares actual persisted rows and invalid-input rejection. Native fixture execution remains a separate required release gate.",
+      "rationale": "Service evaluator snapshots reach this repository only after the run-state check; no request bag reaches storage. Resource insertion, nullable fields and actual insert IDs retain the WordPress insert path. The extracted single-finding helper uses the same casts, JSON encoding and insert API under the user-approved direct-write exception. add_resources stores each source batch and groups at most five findings. The fixed SQL gives the owned table a %i placeholder and each datum its own typed placeholder; it requires exactly five inserted rows. Native column length/charset checks reject changed or erroneous data, and unsupported local text validation or a raw payload over 256 KiB falls back to individual inserts. The service marks any storage exception failed and never completes a partial run. Parent and independent model reviewed these helpers against native wpdb. AuditRunRepositoryTest covers assigned IDs, fields, invalid data, failed writes and fallback; the disposable native fixture compares actual persisted rows and invalid-input rejection. Native fixture execution remains a separate required release gate.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php",
         "tests/Audit/AuditRuntimeBudgetTest.php",
@@ -1926,6 +1926,44 @@
       "rationale": "Protected Reports screen calls bounded metadata/finding preview without resource hydration. Preview clamp1–100 passed %d; fixed complete predicate, grouped finding counts and dependent-baseline EXISTS use %i trusted identifiers/%d ID. Checks each DB read. Actual projection test asserts LIMIT and no full resource query; native grouped SQL semantics not separately run. 8.1.0 containing-file review: this boundary body is unchanged. The new finding-storage path and its service caller were reviewed for prepared SQL, WordPress field validation, actual resource IDs, bounded batches and failure handling; see the add_resource and run records.",
       "tests": [
         "tests/Audit/AuditRunRepositoryTest.php"
+      ]
+    },
+    "src/Audit/AuditRunRepository.php::insert_finding_batch": {
+      "inventory": {
+        "path": "src/Audit/AuditRunRepository.php",
+        "scope": "insert_finding_batch",
+        "requests": [],
+        "suppressions": [
+          "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Fixed prepared insert, at most five rows and 256 KiB of text."
+        ],
+        "file_code_sha256": "2cce2859153527b6175934374db045e3d6881cef2760a1e34ccab27fc91ac923",
+        "code_sha256": "7ffa6f99692ee8a26b7aa84e3c17ea81091eb636ea6f3a5fd436d64d0f601eaa",
+        "findings": {}
+      },
+      "rationale": "User-approved exception covers DirectQuery and NoCaching only for a fixed prepared INSERT into the owned immutable findings snapshot: one %i table identifier, five rows, and a typed placeholder for every datum. This is a write, not a cacheable read; WordPress has no supported multi-row insert API. The caller batches no more than five findings and retains actual resource IDs; string fields are validated by WordPress charset/length APIs, with unsupported validation and over-256-KiB raw text using individual inserts. A non-five-row result or validation error throws, so the enclosing service fails the run rather than completing partial data; no transaction or schema change is introduced. Snapshot order, lease renewal and cleanup remain in ContentAuditService. The native PHP 8.3/MariaDB 10.11 diagnostic compared rows and invalid input rejection but does not replace the full matrix or exact-package performance gate. See docs/dev/AUDIT-STORAGE-REVIEW.md.",
+      "tests": [
+        "tests/Audit/AuditRunRepositoryTest.php",
+        "tests/Audit/AuditRuntimeBudgetTest.php",
+        "tests/integration/wporg-audit-batching.php"
+      ]
+    },
+    "src/Audit/AuditRunRepository.php::insert_finding": {
+      "inventory": {
+        "path": "src/Audit/AuditRunRepository.php",
+        "scope": "insert_finding",
+        "requests": [],
+        "suppressions": [
+          "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Preserve the reviewed individual write to the owned report snapshot."
+        ],
+        "file_code_sha256": "2cce2859153527b6175934374db045e3d6881cef2760a1e34ccab27fc91ac923",
+        "code_sha256": "4cb4050ea0aee0cc11177e83cbf76fda7a71993751e4c935a36f958ceb84a727",
+        "findings": {}
+      },
+      "rationale": "User-approved narrow DirectQuery exception preserves the existing individual wpdb insert for the owned findings table after helper extraction. The fixed column map casts run and resource IDs and finding fields, and encodes evidence as JSON; wpdb validates and prepares the row. Failure throws and the service marks the run failed. Callers are the authorized report service via add_resources or the existing add_resource contract, and individual fallback handles unsupported local validation, oversized batches, and residual findings. The admin action verifies POST, manage_options and its nonce before the service. Native PHP 8.3/MariaDB 10.11 diagnostic compared actual legacy and batched rows and invalid input rejection; full native matrix and exact-package workload remain required. See docs/dev/AUDIT-STORAGE-REVIEW.md.",
+      "tests": [
+        "tests/Audit/AuditRunRepositoryTest.php",
+        "tests/Audit/AuditRuntimeBudgetTest.php",
+        "tests/integration/wporg-audit-batching.php"
       ]
     },
     "src/Audit/AuditRunRepository.php::latest_completed_run_id": {

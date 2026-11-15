@@ -255,6 +255,11 @@ throttling, static-parity, and status coverage.
   not weaken or regenerate an allowlist merely to make a validation command
   pass. An unavoidable protocol boundary requires a documented design review
   and an exact entry in `docs/dev/wporg-source-allowlist.json`.
+  The user-approved audit-storage exception is limited to the two direct-write
+  annotations on `AuditRunRepository::insert_finding` and
+  `AuditRunRepository::insert_finding_batch`, reviewed in
+  `docs/dev/AUDIT-STORAGE-REVIEW.md` and the function-scoped security ledger.
+  It does not permit additional SQL suppressions or relax any other check.
 - Shipped PHP must not mutate output buffers (`ob_start`, cleanup, flush, or
   capture calls). Build protocol bodies as strings and preserve caller-owned
   buffers. Standalone report styles use isolated `WP_Styles` accumulation.

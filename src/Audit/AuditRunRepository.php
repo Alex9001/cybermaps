@@ -656,6 +656,7 @@ KEY severity (severity)
 	/** Store one finding using WordPress's standard field validation. */
 	private function insert_finding( int $run_id, int $resource_id, array $finding ): void {
 		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Preserve the reviewed individual write to the owned report snapshot.
 		$inserted = $wpdb->insert( $wpdb->prefix . 'cybermaps_audit_findings', $this->finding_data( $run_id, $resource_id, $finding ) );
 		if ( false === $inserted ) {
 			throw new \RuntimeException( esc_html__( 'Cybermaps could not store an audit finding.', 'cybermaps' ) );
@@ -705,6 +706,8 @@ KEY severity (severity)
 			$this->insert_findings_individually( $run_id, $pending );
 			return;
 		}
+		// Core has no multi-row insert API; these immutable snapshot rows are not cached reads.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Fixed prepared insert, at most five rows and 256 KiB of text.
 		$inserted = $wpdb->query(
 			$wpdb->prepare(
 				'INSERT INTO %i (run_id, resource_id, finding_key, severity, summary, evidence_json, recommendation) VALUES (%d,%d,%s,%s,%s,%s,%s),(%d,%d,%s,%s,%s,%s,%s),(%d,%d,%s,%s,%s,%s,%s),(%d,%d,%s,%s,%s,%s,%s),(%d,%d,%s,%s,%s,%s,%s)',
