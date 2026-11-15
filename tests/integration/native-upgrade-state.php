@@ -36,6 +36,8 @@ function cybermaps_native_upgrade_seed(): void {
 	$settings = array_merge( $settings, array(
 		'enable_xml_sitemaps' => '1', 'redirect_wp_sitemap' => '0', 'show_sitemap_attribution' => '0',
 		'enable_discovery_hub' => '1', 'enable_mcp_adapter' => '0', 'enable_analytics' => '0',
+		// An existing choice must survive the baseline's first multisite admin visit.
+		'enable_translation_integrations' => '0',
 		'static_engine_mode' => 'well_known', 'report_theme' => 'midnight', 'delete_data_on_uninstall' => '0',
 	) );
 	update_option( 'cybermaps_settings', $settings );

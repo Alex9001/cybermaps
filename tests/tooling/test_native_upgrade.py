@@ -163,6 +163,18 @@ class NativeUpgradeReceiptTest(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, 'changed options'):
             self.validate()
 
+    def test_dashboard_network_update_must_preserve_an_explicit_translation_opt_out(self):
+        index = next(index for index, case in enumerate(self.receipt['cases'])
+                     if case['method'] == 'dashboard' and case['multisite'])
+        for phase in ('before', 'after'):
+            self.change_evidence(index, phase, lambda data: data['sites']['1']['options']['cybermaps_settings'].update(
+                enable_translation_integrations='0'))
+        self.assertTrue(self.validate()['passed'])
+        self.change_evidence(index, 'after', lambda data: data['sites']['1']['options']['cybermaps_settings'].update(
+            enable_translation_integrations='1'))
+        with self.assertRaisesRegex(RuntimeError, 'changed options'):
+            self.validate()
+
     def test_production_phase_cannot_use_controlled_offer(self):
         self.freeze_controlled()
         self.path = self.release / 'native-upgrade-wordpress.json'
