@@ -21,23 +21,31 @@ class Integrity {
 	/**
 	 * Send Cybermaps publication integrity headers and handle conditional discovery.
 	 *
-	 * @param string   $content The content to hash and send.
-	 * @param int      $ttl Cache-Control max-age in seconds.
-	 * @param int|null $last_modified_ts Optional timestamp only when it represents
-	 *                                   every input to this exact body.
-	 * @param int|null $discovery_generation Optional generation captured before publication authorization.
+	 * @param string                   $content The content to hash and send.
+	 * @param int                      $ttl Cache-Control max-age in seconds when inferring the policy.
+	 * @param int|null                 $last_modified_ts Timestamp only when it represents every input to this body.
+	 * @param int|null                 $discovery_generation Optional generation captured before publication authorization.
+	 * @param array<string,mixed>|null $policy Explicit policy for a publication that owns its route.
 	 * @return void
 	 */
-	public static function send_headers( string $content, int $ttl = 3600, ?int $last_modified_ts = null, ?int $discovery_generation = null ): void {
+	public static function send_headers(
+		string $content,
+		int $ttl = 3600,
+		?int $last_modified_ts = null,
+		?int $discovery_generation = null,
+		?array $policy = null
+	): void {
 		self::require_discovery_generation( $discovery_generation );
 		// WordPress marks virtual discovery URLs as 404 before handlers run; force success.
 		status_header( 200 );
-		$policy = PublicationCachePolicy::for_request_path(
-			(string) \Cybermaps\Core\URLManager::get_request_path()
-		);
-		// Retain the historical per-handler TTL argument as an internal override.
-		$policy['browser_ttl'] = max( 0, $ttl );
-		$policy['shared_ttl']  = max( 0, $ttl );
+		if ( null === $policy ) {
+			$policy = PublicationCachePolicy::for_request_path(
+				(string) \Cybermaps\Core\URLManager::get_request_path()
+			);
+			// Retain the historical per-handler TTL argument as an internal override.
+			$policy['browser_ttl'] = max( 0, $ttl );
+			$policy['shared_ttl']  = max( 0, $ttl );
+		}
 		self::require_discovery_generation( $discovery_generation );
 		$not_modified = self::send_representation_headers( $content, $policy, $last_modified_ts );
 
@@ -84,7 +92,7 @@ class Integrity {
 		} else {
 			$last_modified_ts = null;
 		}
-		header( 'Cache-Control: ' . PublicationCachePolicy::cache_control( $policy ) );
+		self::send_cache_headers( $policy );
 		header( 'Repr-Digest: ' . PublicationCachePolicy::repr_digest( $content ) );
 
 		// PHP cannot know whether a later server/CDN gzip or Brotli filter will
@@ -105,6 +113,31 @@ class Integrity {
 		}
 
 		return empty( $policy['no_store'] ) && self::is_not_modified( $etag, $last_modified_ts );
+	}
+
+	/**
+	 * Send cache instructions for a response whose body or redirect depends on the site.
+	 *
+	 * @param array<string,mixed> $policy Normalized publication cache policy.
+	 */
+	public static function send_cache_headers( array $policy ): void {
+		self::add_vary( 'Host' );
+		$control = PublicationCachePolicy::cache_control( $policy );
+		header( 'Cache-Control: ' . $control );
+		if ( str_contains( $control, 'no-store' ) ) {
+			header( 'X-Accel-Expires: 0' );
+		}
+	}
+
+	/** Add a request header to Vary while preserving existing dimensions and wildcards. */
+	public static function add_vary( string $field ): void {
+		$values = array();
+		foreach ( headers_list() as $header_line ) {
+			if ( 0 === stripos( $header_line, 'Vary:' ) ) {
+				$values[] = trim( substr( $header_line, 5 ) );
+			}
+		}
+		header( 'Vary: ' . PublicationCachePolicy::merge_vary( implode( ',', $values ), array( $field ) ) );
 	}
 
 	/**

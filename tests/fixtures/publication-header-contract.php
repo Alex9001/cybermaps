@@ -6,6 +6,13 @@ namespace Cybermaps\Sitemap {
 }
 namespace Cybermaps\Discovery {
 	function header( string $value, bool $replace = true ): void { \cybermaps_fixture_header( $value, $replace ); }
+	function headers_list(): array {
+		$lines = array();
+		foreach ( $GLOBALS['fixture_headers'] as $name => $value ) {
+			$lines[] = $name . ': ' . $value;
+		}
+		return $lines;
+	}
 }
 namespace {
 	if ( 'cli' !== PHP_SAPI ) { exit; }
@@ -17,6 +24,15 @@ namespace {
 	$_SERVER['REQUEST_METHOD'] = $argv[2];
 	$_SERVER['REQUEST_URI'] = '/sitemap_index.xml';
 	$GLOBALS['fixture_headers'] = array();
+	if ( 'shared-cache' === $argv[1] ) {
+		$GLOBALS['fixture_headers']['vary'] = 'Accept-Encoding, Accept';
+		$GLOBALS['cybermaps_mock_filter_callbacks']['cybermaps_publication_cache_policy'] = array(
+			static function ( array $policy ): array {
+				$policy['shared_cache'] = true;
+				return $policy;
+			},
+		);
+	}
 	$GLOBALS['cybermaps_mock_status_headers'] = array( 200 );
 	update_option( 'cybermaps_settings', array( 'static_engine_mode' => 'off' ) );
 	register_shutdown_function( static function (): void {

@@ -25,12 +25,39 @@ final class PublicationCachePolicyTest extends TestCase {
 		$this->assertSame( 'no-store, no-cache, must-revalidate, max-age=0', PublicationCachePolicy::cache_control( $policy ) );
 	}
 
-	public function test_default_policy_is_public_but_requires_revalidation(): void {
+	public function test_sitemap_policy_prevents_shared_storage_and_discovery_remains_cacheable(): void {
 		update_option( 'cybermaps_static_generation', 12 );
-		$policy = PublicationCachePolicy::for_publication( 'sitemap', 'post_type:post' );
+		foreach ( array( array( 'sitemap', 'index' ), array( 'sitemap', 'post_type:post' ), array( 'sitemap', 'rss' ), array( 'discovery', 'ai_sitemap' ) ) as [ $family, $endpoint ] ) {
+			$policy = PublicationCachePolicy::for_publication( $family, $endpoint );
+			$this->assertSame( 'private, no-store, no-cache, must-revalidate, max-age=0', PublicationCachePolicy::cache_control( $policy ) );
+			$this->assertSame( 12, $policy['generation'] );
+		}
+		$this->assertSame( 'public, max-age=3600, must-revalidate', PublicationCachePolicy::cache_control( PublicationCachePolicy::for_publication( 'discovery', 'feed' ) ) );
+	}
 
-		$this->assertSame( 'public, max-age=3600, must-revalidate', PublicationCachePolicy::cache_control( $policy ) );
-		$this->assertSame( 12, $policy['generation'] );
+	public function test_an_explicit_shared_cache_policy_can_set_sitemap_ttls(): void {
+		$GLOBALS['cybermaps_mock_filter_callbacks']['cybermaps_publication_cache_policy'] = array(
+			static function ( array $policy ): array {
+				$policy['shared_cache'] = true;
+				$policy['shared_ttl']   = 60;
+				return $policy;
+			},
+		);
+		$policy = PublicationCachePolicy::for_publication( 'sitemap', 'index' );
+		$this->assertSame( 'public, max-age=3600, s-maxage=60, must-revalidate', PublicationCachePolicy::cache_control( $policy ) );
+	}
+
+	public function test_a_partial_filter_keeps_the_sitemap_private_and_uses_the_current_generation(): void {
+		update_option( 'cybermaps_static_generation', 12 );
+		$GLOBALS['cybermaps_mock_filter_callbacks']['cybermaps_publication_cache_policy'] = array(
+			static function (): array {
+				update_option( 'cybermaps_static_generation', 13 );
+				return array( 'shared_ttl' => 600 );
+			},
+		);
+		$policy = PublicationCachePolicy::for_publication( 'sitemap', 'index' );
+		$this->assertFalse( $policy['shared_cache'] );
+		$this->assertSame( 13, $policy['generation'] );
 	}
 
 	public function test_tags_are_bounded_ascii_and_do_not_include_the_site_url(): void {

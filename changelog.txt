@@ -1,6 +1,10 @@
 Cybermaps release history
 =========================
 
+8.1.1
+-----
+* Prevent shared proxies from serving another site's dynamic sitemap or sitemap redirect while preserving WordPress sitemap caching.
+
 8.1.0
 -----
 * Launch the stable WordPress.org release with clearer setup, support and directory presentation.
@@ -590,11 +594,14 @@ regenerate static files, validate public endpoints, and create a new Reports
 baseline after upgrading.
 
 
-Archived WordPress.org release entries (through 8.0.0)
+Archived WordPress.org release entries (through 8.0.1)
 ===================================================
 
 Changelog entries
 -----------------
+
+= 8.0.1 =
+* Delete obsolete MCP settings and upgrade code; use one adapter switch.
 
 = 8.0.0 =
 * Optional WordPress MCP Adapter replaces custom MCP/OAuth. Only public resources and search remain; remote operations and arbitrary abilities are removed.
@@ -702,6 +709,9 @@ Changelog entries
 
 Upgrade notices
 ---------------
+
+= 8.0.1 =
+Removes legacy MCP settings; preserves 8.0 adapter consent.
 
 = 8.0.0 =
 MCP users: install MCP Adapter 0.7.0+, enable read-only MCP in AI Publishing and reconnect. Old endpoints, credentials and tasks are retired.

@@ -60,14 +60,7 @@ final class MarkdownResponder {
 	 * Merge Accept into any response Vary dimensions already registered.
 	 */
 	public static function add_vary_accept(): void {
-		$values = array();
-		foreach ( headers_list() as $header_line ) {
-			if ( 0 === stripos( $header_line, 'Vary:' ) ) {
-				$values[] = trim( substr( $header_line, 5 ) );
-			}
-		}
-		header_remove( 'Vary' );
-		header( 'Vary: ' . PublicationCachePolicy::merge_vary( implode( ',', $values ), array( 'Accept' ) ) );
+		Integrity::add_vary( 'Accept' );
 	}
 
 	/**

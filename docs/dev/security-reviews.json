@@ -4042,19 +4042,20 @@
           "// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public read-only cache-busting challenge; no state mutation.",
           "// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Same read-only challenge value validated against the request header."
         ],
-        "file_code_sha256": "b03a84a0e2963294631aebb2712c30a17c70a4b50d80673b0cc8096c41b1b98b",
+        "file_code_sha256": "9036a0420a6809005178faa9a171aa4b5af8bd9e6cc4e7edb8c6e35630d7de83",
         "code_sha256": "74895481afdd7c8289551a04d6d62c4afa4080411d403dc5c24f6235c83cbceb",
         "findings": {
           "WordPress.Security.NonceVerification.Recommended:WARNING": 3
         }
       },
-      "rationale": "Reached only from the public read-only GET/HEAD sitemap handler after bounded route/provider/page validation. String challenges are unslashed/sanitized and must match exactly as 32–64 ASCII alphanumeric characters before entering the diagnostic header and no-store policy. No administrative nonce is required because this grants no administrator authority or destructive action; static repair remains bounded generated-path scheduling under StaticBridge mode/ownership rules. The 8.0.3 change removes all output-buffer mutation from the begin/serve helpers; complete XML remains generation-fenced and passes ProtocolOutput, and existing caller buffers remain owned by their callers. OrchestratorRequestContractTest covers request/challenge helpers. OutputBufferOwnershipTest and the disposable native fixture cover cached/uncached GET/HEAD, 304, early/late 404 and generation failure with single/nested/non-removable buffers. Real HTTP response coverage is separate: preserving foreign buffer contents does not imply empty wire bodies. 8.0.4 review: the new Core filter is conditional and preserves incoming false decisions. Disabled requests fall through before response mutation; owned redirects retain GET/HEAD enforcement. A fresh publication snapshot is checked before serving XML; generation fences and ProtocolOutput remain. Rewrite refresh removes only Cybermaps query targets. Regeneration/comment/diagnostic boundaries retain their exact bodies.",
+      "rationale": "Reached only from the public read-only GET/HEAD sitemap handler after bounded route/provider/page validation. String challenges are unslashed/sanitized and must match exactly as 32–64 ASCII alphanumeric characters before entering the diagnostic header and no-store policy. No administrative nonce is required because this grants no administrator authority or destructive action; static repair remains bounded generated-path scheduling under StaticBridge mode/ownership rules. The 8.0.3 change removes all output-buffer mutation from the begin/serve helpers; complete XML remains generation-fenced and passes ProtocolOutput, and existing caller buffers remain owned by their callers. OrchestratorRequestContractTest covers request/challenge helpers. OutputBufferOwnershipTest and the disposable native fixture cover cached/uncached GET/HEAD, 304, early/late 404 and generation failure with single/nested/non-removable buffers. Real HTTP response coverage is separate: preserving foreign buffer contents does not imply empty wire bodies. 8.0.4 review: the new Core filter is conditional and preserves incoming false decisions. Disabled requests fall through before response mutation; owned redirects retain GET/HEAD enforcement. A fresh publication snapshot is checked before serving XML; generation fences and ProtocolOutput remain. Rewrite refresh removes only Cybermaps query targets. Regeneration/comment/diagnostic boundaries retain their exact bodies. The shared-cache fix adds response headers to the already method-checked public sitemap redirect. Host is a literal Vary field name. The redirect target still comes from the configured public URL via wp_safe_redirect. Challenge matching, the admin regeneration authorization checks, and the comment hook database write retain their reviewed function bodies.",
       "tests": [
         "tests/Sitemap/OrchestratorRequestContractTest.php",
         "tests/Admin/SitemapStatusTest.php",
         "tests/Sitemap/OutputBufferOwnershipTest.php",
         "tests/integration/output-buffer-ownership.php",
-        "tests/integration/wporg-http.py"
+        "tests/integration/wporg-http.py",
+        "tests/integration/sitemap-ownership-http.py"
       ]
     },
     "src/Sitemap/Orchestrator.php::handle_regeneration": {
@@ -4068,7 +4069,7 @@
         "suppressions": [
           "// phpcs:ignore WordPress.Security.NonceVerification.Missing -- The action nonce was verified immediately above."
         ],
-        "file_code_sha256": "b03a84a0e2963294631aebb2712c30a17c70a4b50d80673b0cc8096c41b1b98b",
+        "file_code_sha256": "9036a0420a6809005178faa9a171aa4b5af8bd9e6cc4e7edb8c6e35630d7de83",
         "code_sha256": "5a66dd3fc8a5064ae3f09ab50b9378745ab5e6154235112daf752430692494dc",
         "findings": {}
       },
@@ -4086,7 +4087,7 @@
         "suppressions": [
           "// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching -- Comment-driven freshness must update the exact persisted post timestamps."
         ],
-        "file_code_sha256": "b03a84a0e2963294631aebb2712c30a17c70a4b50d80673b0cc8096c41b1b98b",
+        "file_code_sha256": "9036a0420a6809005178faa9a171aa4b5af8bd9e6cc4e7edb8c6e35630d7de83",
         "code_sha256": "e6a36483edd0ee712747c95f097ecea57c3e4fd3400779a8b8e0b19ff69bb8e2",
         "findings": {}
       },

@@ -1,6 +1,6 @@
 # Cybermaps — Technical Documentation
 
-> Version 8.1.0 · PHP 8.2 · WordPress 7.1
+> Version 8.1.1 · PHP 8.2 · WordPress 7.1
 
 Public sitemap credit is optional. In **Sitemaps**, enable **Show the CYBER MAPS
 credit on public sitemaps** to opt in. `show_sitemap_attribution` defaults to `0`
@@ -430,6 +430,13 @@ Dynamic sitemap responses support:
 - optional post or page modified-time updates when a comment is approved;
 - optional redirects from WordPress core and legacy sitemap locations; and
 - configurable sitemap, News, and RSS base slugs.
+
+Dynamic XML and RSS sitemaps and Cybermaps sitemap redirects send the
+`private` and `no-store` cache directives. A proxy shared by several sites
+can otherwise serve one site's sitemap or redirect on another domain. WordPress
+can still reuse its cached sitemap XML. Sites that explicitly enable
+`shared_cache` through the `cybermaps_publication_cache_policy` filter also
+send `Vary: Host` so the proxy can distinguish domains.
 
 The index footer identifies Cybermaps as the generator and states that the
 sitemap helps search-engine indexing.

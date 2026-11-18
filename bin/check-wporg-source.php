@@ -238,7 +238,8 @@ try {
 	$config = null === $fixture_dir ? cybermaps_wporg_source_json( $config_path ) : array();
 	if ( null === $fixture_dir ) {
 		$readme = (string) file_get_contents( $project_dir . '/readme.txt' );
-		if ( ! str_contains( $readme, '== Source Code ==' ) || ! str_contains( $readme, 'https://github.com/Alex9001/cybermaps' ) || ! str_contains( $readme, 'bash bin/package-candidate.sh' ) ) {
+		// The Directory folds custom top-level sections into Description; a FAQ heading keeps these instructions below Screenshots.
+		if ( ! preg_match( '/^(={1,2}) Source Code \1$/m', $readme ) || ! str_contains( $readme, 'https://github.com/Alex9001/cybermaps' ) || ! str_contains( $readme, 'bash bin/package-candidate.sh' ) ) {
 			cybermaps_wporg_source_error( 'asset-source', 'The shipped readme must identify editable sources and build instructions.' );
 		}
 	}

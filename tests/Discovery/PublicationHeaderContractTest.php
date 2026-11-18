@@ -31,13 +31,25 @@ final class PublicationHeaderContractTest extends TestCase {
 	public function test_nonmatching_diagnostic_retains_normal_policy_and_conditional_status(): void {
 		$response = $this->response( 'diagnostic-mismatch', 'GET' );
 		self::assertSame( 200, $response['status'] );
-		self::assertSame( 'public, max-age=3600, must-revalidate', $response['headers']['cache-control'] );
+		self::assertSame( 'private, no-store, no-cache, must-revalidate, max-age=0', $response['headers']['cache-control'] );
+		self::assertSame( '0', $response['headers']['x-accel-expires'] );
+		self::assertSame( 'Host', $response['headers']['vary'] );
 		self::assertArrayNotHasKey( 'x-cybermaps-diagnostic-response', $response['headers'] );
 		foreach ( array( 'GET', 'HEAD' ) as $method ) {
 			$response = $this->response( 'conditional', $method );
 			self::assertSame( 304, $response['status'] );
+			self::assertStringContainsString( 'no-store', $response['headers']['cache-control'] );
+			self::assertSame( 'Host', $response['headers']['vary'] );
 			self::assertSame( '', $response['body'] );
 		}
+	}
+
+	public function test_explicitly_shared_sitemaps_vary_by_host_and_keep_existing_dimensions(): void {
+		$response = $this->response( 'shared-cache', 'GET' );
+		self::assertSame( 200, $response['status'] );
+		self::assertSame( 'public, max-age=3600, must-revalidate', $response['headers']['cache-control'] );
+		self::assertSame( 'Accept-Encoding, Accept, Host', $response['headers']['vary'] );
+		self::assertArrayNotHasKey( 'x-accel-expires', $response['headers'] );
 	}
 
 	public function test_head_error_paths_emit_no_php_body(): void {

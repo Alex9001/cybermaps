@@ -43,6 +43,8 @@ def xml(path, kind):
 if state in ('enabled', 'restored'):
     status, headers, _ = request('/wp-sitemap.xml')
     assert status == 301 and headers['Location'] == origin + '/sitemap.xml', (state, status, dict(headers))
+    assert 'no-store' in headers['Cache-Control'], dict(headers)
+    assert 'host' in {part.strip().lower() for part in headers['Vary'].split(',')}, dict(headers)
     xml('/sitemap.xml', 'sitemapindex')
     checks.append('core-redirect')
 else:

@@ -53,7 +53,8 @@ class RSSProvider {
 			return;
 		}
 
-		\Cybermaps\Discovery\Integrity::send_headers( $output, 3600 );
+		$policy = \Cybermaps\Discovery\PublicationCachePolicy::for_publication( 'sitemap', 'rss' );
+		\Cybermaps\Discovery\Integrity::send_headers( $output, policy: $policy );
 		header( 'Content-Type: application/rss+xml; charset=utf-8' );
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
 			\Cybermaps\Core\ProtocolOutput::emit( $output, 'xml' );

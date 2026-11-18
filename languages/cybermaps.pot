@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: CYBERMAPS: XML Sitemaps & llms.txt 8.1.0\n"
+"Project-Id-Version: CYBERMAPS: XML Sitemaps & llms.txt 8.1.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/cybermaps\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-15T19:44:46+00:00\n"
+"POT-Creation-Date: 2026-11-18T04:40:46+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: cybermaps\n"
@@ -9448,7 +9448,7 @@ msgstr ""
 msgid "The public IndexNow key URL responded correctly."
 msgstr ""
 
-#: src/Discovery/Integrity.php:66
+#: src/Discovery/Integrity.php:74
 msgid "Cybermaps content changed during publication. Please retry shortly."
 msgstr ""
 
@@ -9583,7 +9583,7 @@ msgstr ""
 msgid "Content collection"
 msgstr ""
 
-#: src/Discovery/MarkdownResponder.php:92
+#: src/Discovery/MarkdownResponder.php:85
 msgid "Markdown representation exceeds the safe output limit."
 msgstr ""
 
@@ -10284,11 +10284,11 @@ msgstr ""
 msgid "Vimeo Video"
 msgstr ""
 
-#: src/Sitemap/Orchestrator.php:596
+#: src/Sitemap/Orchestrator.php:598
 msgid "Sitemap not found."
 msgstr ""
 
-#: src/Sitemap/Orchestrator.php:1310
+#: src/Sitemap/Orchestrator.php:1312
 msgid "Cybermaps stopped sitemap publication because its content changed during selection. Please retry shortly."
 msgstr ""
 
@@ -10344,16 +10344,16 @@ msgstr ""
 msgid "Network sitemap selection exceeded its request time budget. No partial network index was produced."
 msgstr ""
 
-#: src/Sitemap/RSSProvider.php:104
+#: src/Sitemap/RSSProvider.php:105
 msgid "Cybermaps stopped RSS publication because its content changed during selection. Please retry shortly."
 msgstr ""
 
-#: src/Sitemap/RSSProvider.php:210
+#: src/Sitemap/RSSProvider.php:211
 msgid "Cybermaps could not finish RSS eligibility selection within its request budget. No partial feed was produced."
 msgstr ""
 
 #. translators: %s: site name
-#: src/Sitemap/RSSProvider.php:235
+#: src/Sitemap/RSSProvider.php:236
 #, php-format
 msgid "Latest content from %s"
 msgstr ""

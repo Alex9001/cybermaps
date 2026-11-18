@@ -581,6 +581,8 @@ class Orchestrator {
 	/** Redirect only a route the administrator has explicitly assigned to us. */
 	private function redirect_sitemap( string $target ): never {
 		\Cybermaps\Core\ReadOnlyRequest::enforce();
+		$policy = \Cybermaps\Discovery\PublicationCachePolicy::for_publication( 'sitemap', 'redirect' );
+		\Cybermaps\Discovery\Integrity::send_cache_headers( $policy );
 		wp_safe_redirect( $target, 301 );
 		exit;
 	}

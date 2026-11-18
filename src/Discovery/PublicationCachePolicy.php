@@ -36,11 +36,13 @@ final class PublicationCachePolicy {
 	 * @return array<string,mixed>
 	 */
 	public static function for_publication( string $family = 'discovery', string $endpoint = '', ?array $settings = null ): array {
-		$settings = \is_array( $settings ) ? $settings : \Cybermaps\Core\ConfigurationStore::settings();
-		$family   = self::slug( $family, 'discovery' );
-		$endpoint = self::slug( $endpoint, 'root' );
+		$settings ??= \Cybermaps\Core\ConfigurationStore::settings();
+		$family     = self::slug( $family, 'discovery' );
+		$endpoint   = self::slug( $endpoint, 'root' );
 
-		$policy = array(
+		// Sitemap URLs belong to one site even when several sites share a proxy upstream.
+		$defaults = array(
+			'shared_cache'           => 'sitemap' !== $family && ! ( 'discovery' === $family && 'ai_sitemap' === $endpoint ),
 			'browser_ttl'            => self::DEFAULT_BROWSER_TTL,
 			'shared_ttl'             => self::DEFAULT_SHARED_TTL,
 			'must_revalidate'        => true,
@@ -57,6 +59,8 @@ final class PublicationCachePolicy {
 		 *
 		 * Stale directives require must_revalidate to be disabled because HTTP
 		 * shared caches must otherwise revalidate before reusing stale content.
+		 * A deployment that isolates responses by host may explicitly enable
+		 * shared_cache for its sitemaps.
 		 * This hook is intentionally the only policy override; it does not imply
 		 * that an edge-purge transport is configured.
 		 *
@@ -65,14 +69,16 @@ final class PublicationCachePolicy {
 		 * @param string              $endpoint Endpoint/provider identifier.
 		 * @param array<string,mixed> $settings Current Cybermaps settings.
 		 */
-		$policy = \apply_filters( 'cybermaps_publication_cache_policy', $policy, $family, $endpoint, $settings );
-		$policy = \is_array( $policy ) ? $policy : array();
+		$filtered = \apply_filters( 'cybermaps_publication_cache_policy', $defaults, $family, $endpoint, $settings );
+		// A filter may advance the generation and return a partial policy.
+		$defaults['generation'] = max( 0, (int) \get_option( 'cybermaps_static_generation', 0 ) );
+		$policy                 = \is_array( $filtered ) ? $filtered + $defaults : $defaults;
 
-		$browser_ttl = self::bounded_int( $policy['browser_ttl'] ?? self::DEFAULT_BROWSER_TTL, self::DEFAULT_BROWSER_TTL, 0, 31536000 );
-		$shared_ttl  = self::bounded_int( $policy['shared_ttl'] ?? self::DEFAULT_SHARED_TTL, self::DEFAULT_SHARED_TTL, 0, 31536000 );
-		$must        = ! array_key_exists( 'must_revalidate', $policy ) || (bool) $policy['must_revalidate'];
-		$stale_swr   = self::bounded_int( $policy['stale_while_revalidate'] ?? 0, 0, 0, 604800 );
-		$stale_error = self::bounded_int( $policy['stale_if_error'] ?? 0, 0, 0, 604800 );
+		$browser_ttl = self::bounded_int( $policy['browser_ttl'], self::DEFAULT_BROWSER_TTL, 0, 31536000 );
+		$shared_ttl  = self::bounded_int( $policy['shared_ttl'], self::DEFAULT_SHARED_TTL, 0, 31536000 );
+		$must        = (bool) $policy['must_revalidate'];
+		$stale_swr   = self::bounded_int( $policy['stale_while_revalidate'], 0, 0, 604800 );
+		$stale_error = self::bounded_int( $policy['stale_if_error'], 0, 0, 604800 );
 
 		if ( $must ) {
 			$stale_swr   = 0;
@@ -80,15 +86,16 @@ final class PublicationCachePolicy {
 		}
 
 		return array(
+			'shared_cache'           => true === $policy['shared_cache'],
 			'browser_ttl'            => $browser_ttl,
 			'shared_ttl'             => $shared_ttl,
 			'must_revalidate'        => $must,
 			'stale_while_revalidate' => $stale_swr,
 			'stale_if_error'         => $stale_error,
-			'preflight_ttl'          => self::bounded_int( $policy['preflight_ttl'] ?? self::PREFLIGHT_TTL, self::PREFLIGHT_TTL, 0, 86400 ),
+			'preflight_ttl'          => self::bounded_int( $policy['preflight_ttl'], self::PREFLIGHT_TTL, 0, 86400 ),
 			'family'                 => $family,
 			'endpoint'               => $endpoint,
-			'generation'             => self::bounded_int( $policy['generation'] ?? max( 0, (int) \get_option( 'cybermaps_static_generation', 0 ) ), max( 0, (int) \get_option( 'cybermaps_static_generation', 0 ) ), 0, PHP_INT_MAX ),
+			'generation'             => self::bounded_int( $policy['generation'], $defaults['generation'], 0, PHP_INT_MAX ),
 		);
 	}
 
@@ -113,6 +120,9 @@ final class PublicationCachePolicy {
 	public static function cache_control( array $policy ): string {
 		if ( ! empty( $policy['no_store'] ) ) {
 			return 'no-store, no-cache, must-revalidate, max-age=0';
+		}
+		if ( false === ( $policy['shared_cache'] ?? true ) ) {
+			return 'private, no-store, no-cache, must-revalidate, max-age=0';
 		}
 		return self::public_cache_control( $policy );
 	}

@@ -18,6 +18,15 @@ require(set(inventory['network_callers']) == callers, 'Network caller inventory 
 for entry in inventory['network_callers'].values():
     require(entry['service'] and entry['purpose_and_trigger'] and (ROOT / entry['disclosure']).is_file(), 'Service disclosure incomplete')
 readme = (ROOT / 'readme.txt').read_text()
-require('== Source Code ==' in readme and '== External Services ==' in readme, 'Readme source or services disclosure incomplete')
+headings = {title for _, title in re.findall(r'^(={1,2}) ([^=\r\n]+) \1$', readme, re.M)}
+required_headings = {
+    'Source Code',
+    'External Services: Cloudflare and Cybermaps OAuth relay',
+    'External Services: IndexNow',
+    'External Services: WebSub',
+    'Public delivery checks',
+}
+missing = required_headings - headings
+require(not missing, 'Readme source or services disclosure missing: ' + ', '.join(sorted(missing)))
 require('setup-wizard.js' in readme and 'No compilation' in readme, 'Readme source or services disclosure incomplete')
 print(f'Distribution inventory: {len(assets)} editable assets; {len(callers)} network callers for policy review.')

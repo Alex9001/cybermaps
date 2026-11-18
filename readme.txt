@@ -3,7 +3,7 @@ Contributors: oreshkin
 Tags: sitemap, llms-txt, technical-seo, content-audit, indexnow
 Requires at least: 7.1
 Tested up to: 7.1
-Stable tag: 8.1.0
+Stable tag: 8.1.1
 Requires PHP: 8.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -45,6 +45,17 @@ Cybermaps can work alongside supported SEO and translation integrations. Choose 
 
 [Getting started](https://cybermaps.dev/docs/getting-started/) | [Feature guide](https://cybermaps.dev/features/) | [Documentation](https://cybermaps.dev/docs/)
 
+== Screenshots ==
+
+1. Overview and Quick Setup: choose what your site publishes.
+2. XML Sitemaps: select content and choose who manages sitemap generation.
+3. AI Publishing: configure optional discovery publications and read-only MCP guidance.
+4. Site Identity: describe your organization and public content.
+5. Sitemap Status: inspect public sitemap delivery.
+6. AI Discovery Status: see configured publications and their delivery checks.
+7. Content Reports: review saved findings and export results.
+8. Analytics: inspect local crawler observations after opting in.
+
 == Installation ==
 
 1. Install and activate CYBERMAPS from Plugins → Add New Plugin, or upload the installable release ZIP.
@@ -77,26 +88,13 @@ Publications have documented byte, query and scan limits. Large full-text export
 
 Use the [WordPress.org support forum](https://wordpress.org/support/plugin/cybermaps/) for help, or [GitHub issues](https://github.com/Alex9001/cybermaps/issues) for reproducible bugs and feature requests. Cybermaps → Debugging can create a support bundle. Report security issues [privately](https://github.com/Alex9001/cybermaps/security/advisories/new).
 
-== Screenshots ==
+= Source Code =
 
-1. Overview and Quick Setup: choose what your site publishes.
-2. XML Sitemaps: select content and choose who manages sitemap generation.
-3. AI Publishing: configure optional discovery publications and read-only MCP guidance.
-4. Site Identity: describe your organization and public content.
-5. Sitemap Status: inspect public sitemap delivery.
-6. AI Discovery Status: see configured publications and their delivery checks.
-7. Content Reports: review saved findings and export results.
-8. Analytics: inspect local crawler observations after opting in.
-
-== Source Code ==
-
-https://github.com/Alex9001/cybermaps/tree/v8.1.0
+https://github.com/Alex9001/cybermaps/tree/v8.1.1
 JS/CSS: assets/; setup-wizard.js uses wp.element. No compilation.
 Build: composer install; bash bin/package-candidate.sh.
 
-== External Services ==
-
-= Cloudflare and Cybermaps OAuth relay =
+= External Services: Cloudflare and Cybermaps OAuth relay =
 
 Opt-in Cloudflare OAuth sends PKCE challenge, state and code to
 https://connect.cybermaps.dev for five minutes. No verifier, token, WP identity, site URL or rules. Hosting processes
@@ -107,13 +105,13 @@ https://cybermaps.dev/privacy/#cloudflare-oauth-relay
 https://www.cloudflare.com/website-terms/
 https://www.cloudflare.com/privacypolicy/
 
-= IndexNow =
+= External Services: IndexNow =
 
 Opt-in changes send URLs, host, key and key location to
 https://api.indexnow.org/indexnow. Headless sites must serve `/{key}.txt`.
 Terms/privacy: https://www.indexnow.org/terms
 
-= WebSub =
+= External Services: WebSub =
 
 Opt-in WebSub notifies HTTPS hubs of public /feed.json. Hubs/policies:
 https://pubsubhubbub.appspot.com/
@@ -128,7 +126,7 @@ Custom hubs: own policies.
 
 GET/HEAD probes use the site/Frontend Base URL; `X-Cybermaps-Diagnostic: 1` excludes analytics. Configured Varnish receives purges.
 
-== Privacy ==
+= Privacy =
 
 Opt-in analytics is local: /24 IPv4, /64 IPv6 by default; 1–365-day retention,
 export and clear. Public rate limits: 60 seconds.
@@ -137,6 +135,9 @@ but omit IPs, requester keys and User-Agent. Diagnostic probes are excluded.
 Uninstall retains data unless cleanup is enabled.
 
 == Changelog ==
+
+= 8.1.1 =
+* Prevent shared proxies from serving another site's sitemap or sitemap redirect.
 
 = 8.1.0 =
 * Stable WordPress.org launch with clearer setup, directory presentation and support links.
@@ -154,12 +155,12 @@ Uninstall retains data unless cleanup is enabled.
 = 8.0.2 =
 * Fix privacy, configuration, ownership, publication limits, reports and admin UI; expand release checks.
 
-= 8.0.1 =
-* Delete obsolete MCP settings and upgrade code; use one adapter switch.
-
 Full release history and archived upgrade notices: `changelog.txt`.
 
 == Upgrade Notice ==
+
+= 8.1.1 =
+Fixes cross-site sitemap responses on shared hosting. Existing cached responses may appear until they expire.
 
 = 8.1.0 =
 Stable release. Existing settings are retained; GitHub issue reporting remains available. Back up before updating. MCP still requires the optional adapter and explicit opt-in.
@@ -173,6 +174,3 @@ Preserves caller output buffers.
 
 = 8.0.2 =
 Ownership migrates in batches. Review file conflicts and incomplete reports. Restart pending Cloudflare authorization.
-
-= 8.0.1 =
-Removes legacy MCP settings; preserves 8.0 adapter consent.

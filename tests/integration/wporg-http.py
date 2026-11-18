@@ -44,6 +44,7 @@ for path in ('/feed.json', '/ai-sitemap.xml'):
         assert json.loads(body)['version'] == 'https://jsonfeed.org/version/1.1'
     else:
         assert ET.fromstring(body).tag.endswith('urlset')
+        assert 'no-store' in headers['Cache-Control'], (path, dict(headers))
     digest = 'sha-256=:' + base64.b64encode(hashlib.sha256(body).digest()).decode() + ':'
     assert headers['Repr-Digest'] == digest, (path, dict(headers), digest)
     head_status, head_headers, head_body = request(path, method='HEAD')
@@ -60,11 +61,13 @@ assert index.tag.endswith('sitemapindex')
 children = [node.text for node in index.findall('{*}sitemap/{*}loc')
             if node.text and node.text.startswith(origin + '/')]
 assert children, 'Sitemap index advertised no local child.'
-for path in ('/sitemap.xml', urllib.parse.urlsplit(children[0]).path):
+for path in ('/sitemap.xml', '/?cybermaps_sitemap=index', urllib.parse.urlsplit(children[0]).path):
     status, headers, body = request(path)
     assert status == 200 and ET.fromstring(body) is not None, (path, status, body[:500])
     digest = 'sha-256=:' + base64.b64encode(hashlib.sha256(body).digest()).decode() + ':'
     assert headers['Repr-Digest'] == digest and headers['Content-Type'].startswith('application/xml')
+    assert {'private', 'no-store'} <= {part.strip() for part in headers['Cache-Control'].split(',')}, (path, dict(headers))
+    assert 'host' in {part.strip().lower() for part in headers['Vary'].split(',')}, (path, dict(headers))
     warm_status, warm_headers, warm_body = request(path)
     assert warm_status == 200 and warm_body == body and warm_headers['ETag'] == headers['ETag']
     head_status, head_headers, head_body = request(path, method='HEAD')
@@ -72,7 +75,8 @@ for path in ('/sitemap.xml', urllib.parse.urlsplit(children[0]).path):
     conditional, _, conditional_body = request(path, headers={'If-None-Match': headers['ETag']})
     assert conditional == 304 and conditional_body == b''
     challenge = 'AbCdEf0123456789AbCdEf0123456789'
-    diagnostic, diagnostic_headers, diagnostic_body = request(path + '?cybermaps_php_path_probe=' + challenge,
+    separator = '&' if '?' in path else '?'
+    diagnostic, diagnostic_headers, diagnostic_body = request(path + separator + 'cybermaps_php_path_probe=' + challenge,
         headers={'X-Cybermaps-Diagnostic-Challenge': challenge, 'If-None-Match': headers['ETag']})
     assert diagnostic == 200 and diagnostic_body == body and 'no-store' in diagnostic_headers['Cache-Control']
     assert diagnostic_headers['X-Cybermaps-Diagnostic-Response'] == challenge
