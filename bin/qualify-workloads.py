@@ -14,7 +14,7 @@ from workspace import ROOT, configure, lock, release_dir, require
 def measure(directory, archive, label, wordpress, *, preflight=False, baseline=False, images=None):
     command = [
         sys.executable, '-B', str(ROOT / 'tests/performance/run.py'),
-        '--zip', str(archive), '--label', label, '--release-version', directory.name,
+        '--zip', str(archive), '--label', label.replace('.', '-'), '--release-version', directory.name,
         '--wordpress-version', wordpress, '--timeout', '90', '--long-timeout', '120',
         '--static-timeout', '600', '--static-slices', '50',
     ]
