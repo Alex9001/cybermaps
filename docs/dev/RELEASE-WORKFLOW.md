@@ -127,9 +127,11 @@ rechecks the evidence window. A matching GitHub draft is created and its uploade
 ZIP/checksum are downloaded and compared. It remains private while WordPress.org
 publication proceeds. Source links use the public tag tree, not the draft page.
 
-`svnmucc` submits one bounded atomic transaction: reconcile owned trunk files,
-put the same frozen files explicitly into a new version tag, and reconcile the
-separate Directory images with their MIME properties. No SVN checkout, automatic
+`svnmucc` submits one atomic transaction. It uploads changed and new trunk
+files and Directory images, removes obsolete paths, and sets each image MIME
+type. It creates the new tag from every frozen plugin file. The planner compares
+file hashes against the verified base revision, and the existing directory
+ownership properties fence concurrent changes, including to skipped files. No SVN checkout, automatic
 clone, worktree, old-tag edit or copy of uncommitted trunk is used. Existing trunk
 must match its prior released tag. Owned remote changes stop publication; the
 global revision counter advancing for another plugin does not. Readiness is
@@ -218,9 +220,13 @@ inputs can be replaced by a newly validated candidate; the old inputs are backed
 After an uncertain SVN response, query the tag and transaction marker before any
 retry. A matching committed tag resumes downstream; it is never submitted again.
 An absent tag does not prove that a timed-out server request stopped. An uncertain
-attempt retains its evidence and waits at least 20 minutes from its start (the
-five-minute client timeout plus a 15-minute server margin) before a subsequent
-resume may record `svn-not-committed`. The exception path never clears uncertainty
+attempt records its upload time limit. The 8.1.1 server transaction took five
+minutes and 49 seconds and completed after the old five-minute client timeout.
+New uploads allow 15 minutes. A follow-up may recognize the matching tag and
+transaction as soon as they appear. Before treating an absent tag as an
+uncommitted attempt, allow the recorded client timeout plus 15 minutes for the
+server. This gives new attempts a 30-minute settling window and preserves the
+original 20-minute window for historical attempts. The exception path never clears uncertainty
 immediately. This settling interval is a retry delay, not proof that a late commit
 is impossible: each retry has a new identifier, every earlier attempt remains
 searchable, and a late matching commit uses only that attempt's original evidence

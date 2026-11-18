@@ -30,8 +30,8 @@ SVN_ROOT = 'https://plugins.svn.wordpress.org/cybermaps'
 LISTING = 'https://wordpress.org/plugins/cybermaps/'
 MAX_FILES = 10000
 MAX_BYTES = 128 * 1024 * 1024
-SVN_COMMIT_TIMEOUT = 300
-SVN_SETTLING_SECONDS = SVN_COMMIT_TIMEOUT + 15 * 60
+SVN_COMMIT_TIMEOUT = 15 * 60
+SVN_SERVER_MARGIN = 15 * 60
 
 
 class Pending(RuntimeError):
@@ -399,7 +399,8 @@ class Publication:
         transaction = uuid.uuid4().hex
         started = now()
         attempt = dict(schema_version=1, **self.identity, transaction=transaction,
-                       base_revision=revision, commit_started_at=started, publication_evidence=evidence)
+                       base_revision=revision, commit_started_at=started, commit_timeout_seconds=SVN_COMMIT_TIMEOUT,
+                       publication_evidence=evidence)
         path = safe_path(self.directory / 'wordpress-attempts' / (transaction + '.json'))
         path.parent.mkdir(parents=True, exist_ok=True)
         with path.open('x') as output:
@@ -424,7 +425,10 @@ class Publication:
         if record.get('state') in ('svn-committing', 'svn-outcome-unknown'):
             attempt = attempts.get(record.get('transaction'))
             require(attempt is not None, 'Uncertain SVN outcome has no retained attempt; inspect before retrying')
-            until = datetime.fromisoformat(attempt['commit_started_at']) + timedelta(seconds=SVN_SETTLING_SECONDS)
+            # Older release clients did not record their five-minute commit timeout.
+            timeout = attempt.get('commit_timeout_seconds', 300)
+            require(type(timeout) is int and timeout > 0, 'Invalid recorded SVN commit timeout')
+            until = datetime.fromisoformat(attempt['commit_started_at']) + timedelta(seconds=timeout + SVN_SERVER_MARGIN)
             if not allow_absence or datetime.fromisoformat(now()) < until:
                 self.save(record, record['state'], next_check_at=until.isoformat())
                 raise Pending('SVN outcome is still settling; evidence remains frozen. Resume after '
@@ -486,28 +490,30 @@ class Publication:
         # edits to known files. The value also records which artifact owns the roots.
         actions += ['propset', 'cybermaps:release-sha256', self.zip_sha256, 'trunk',
                     'propset', 'cybermaps:release-sha256', sha256(json.dumps(record['assets'], sort_keys=True).encode()), 'assets']
-        for target, values, source in (('trunk', self.contents, 'plugin'),
-                                       (self.tag, self.contents, 'plugin'),
-                                       ('assets', images, 'assets')):
+        targets = (
+            ('trunk', self.contents, 'plugin', record['previous_files']),
+            (self.tag, self.contents, 'plugin', {}),
+            ('assets', images, 'assets', record['previous_assets']),
+        )
+        for target, values, source, previous in targets:
             parents = set()
             for name in values:
                 parents.update(str(p) for p in Path(name).parents if str(p) != '.')
-            previous = set(record['previous_files'] if target == 'trunk'
-                           else record['previous_assets'] if target == 'assets' else ())
             old_directories = set(record['previous_directories'].get(target, ()))
             obsolete = old_directories - parents
             # Removing a directory already removes its obsolete descendants.
             removed = {p for p in obsolete if not any(str(parent) in obsolete for parent in Path(p).parents)}
             for name in sorted(removed):
                 actions += ['rm', target + '/' + name]
-            for name in sorted(previous - values.keys()):
+            for name in sorted(previous.keys() - values.keys()):
                 if not any(str(parent) in removed for parent in Path(name).parents):
                     actions += ['rm', target + '/' + name]
             for parent in sorted(parents - old_directories, key=lambda p: (p.count('/'), p)):
                 actions += ['mkdir', target + '/' + parent]
             for name in sorted(values):
                 destination = target + '/' + name
-                actions += ['put', str(inputs / source / name), destination]
+                if previous.get(name) != sha256(values[name]):
+                    actions += ['put', str(inputs / source / name), destination]
                 if target == 'assets':
                     actions += ['propset', 'svn:mime-type', 'image/png', destination]
         return actions

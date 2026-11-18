@@ -154,13 +154,41 @@ class WordPressPublicationTest(unittest.TestCase):
         first = self.publish()
         self.number, self.commit = '8.1.1', 'b' * 40
         self.prepare({'src/New.php': b'new'})
-        second = self.publish()
+        plan = self.publication.actions
+        puts = set()
+
+        def record_uploads(*args):
+            actions = plan(*args)
+            puts.update(actions[i + 2] for i, action in enumerate(actions) if action == 'put')
+            return actions
+
+        with patch.object(self.publication, 'actions', side_effect=record_uploads):
+            second = self.publish()
+        self.assertEqual(puts, {'tags/8.1.1/' + name for name in self.files} | {
+            'trunk/cybermaps.php', 'trunk/readme.txt', 'trunk/changelog.txt', 'trunk/src/New.php'})
+        self.assertEqual(self.svn.files('tags/8.1.1', second['svn_revision']), self.files)
         self.assertEqual(second['svn_revision'], first['svn_revision'] + 1)
         self.assertEqual(self.svn.files('trunk', second['svn_revision']), self.files)
         self.assertNotIn('src/retired/Old.php', self.files)
         changes = self.command('svn', 'log', '--verbose', '-r', second['svn_revision'], self.svn.root)
         self.assertNotRegex(changes, r'\s[RAD] /cybermaps/(trunk|assets)\n')
         self.assertIn('D /cybermaps/src', changes.replace('/trunk/', '/'))
+
+    def test_concurrent_edit_to_an_unchanged_nested_file_blocks_the_patch(self):
+        self.publish()
+        self.number, self.commit = '8.1.1', 'b' * 40
+        self.prepare()
+        commit = self.svn.commit
+
+        def change_file(*args, **kwargs):
+            changed = self.base / 'changed.php'
+            changed.write_text('a different nested file')
+            self.command('svnmucc', '-m', 'concurrent edit', 'put', changed, self.svn.root + '/trunk/src/Example.php')
+            commit(*args, **kwargs)
+
+        with patch.object(self.svn, 'commit', side_effect=change_file), self.assertRaises(RuntimeError):
+            self.publish()
+        self.assertFalse(self.svn.exists('tags/8.1.1', self.svn.revision()))
 
     def test_unrelated_global_commit_does_not_block_release(self):
         def check():
@@ -296,11 +324,15 @@ class WordPressPublicationTest(unittest.TestCase):
         record = self.publication.load()
         first = self.publication.attempts(record)[record['transaction']]
         original = json.loads(json.dumps(record))
+        self.assertEqual(first['commit_timeout_seconds'], 15 * 60)
+        twenty_minutes_later = (datetime.fromisoformat(first['commit_started_at']) + timedelta(minutes=20, seconds=1)).isoformat()
+        with patch.object(release, 'now', return_value=twenty_minutes_later), self.assertRaises(release.Pending):
+            self.publication.reconcile(record)
         with self.assertRaisesRegex(release.Pending, 'still settling'):
             self.publication.publish(lambda: self.fail('Uncertain publication must not refresh evidence'))
         self.assertEqual(record['publication_evidence'], original['publication_evidence'])
         later = (datetime.fromisoformat(first['commit_started_at'])
-                 + timedelta(seconds=release.SVN_SETTLING_SECONDS + 1)).isoformat()
+                 + timedelta(seconds=release.SVN_COMMIT_TIMEOUT + release.SVN_SERVER_MARGIN + 1)).isoformat()
         with patch.object(release, 'now', return_value=later):
             self.assertEqual(self.publication.reconcile(record)['state'], 'svn-not-committed')
             self.evidence.write_text('{"fixture":"second attempt"}')
@@ -309,6 +341,21 @@ class WordPressPublicationTest(unittest.TestCase):
         self.assertNotEqual(completed['transaction'], first['transaction'])
         self.assertEqual(len(completed['attempts']), 2)
         self.assertEqual(self.publication.attempts(completed)[first['transaction']], first)
+
+    def test_legacy_attempt_keeps_its_original_twenty_minute_settling_window(self):
+        with patch.object(self.svn, 'commit', side_effect=subprocess.TimeoutExpired('svnmucc', 300)):
+            with self.assertRaises(release.Pending):
+                self.publish()
+        record = self.publication.load()
+        attempt = self.publication.attempts(record)[record['transaction']]
+        del attempt['commit_timeout_seconds']
+        started = datetime.fromisoformat(attempt['commit_started_at'])
+        with patch.object(self.publication, 'attempts', return_value={record['transaction']: attempt}):
+            with patch.object(release, 'now', return_value=(started + timedelta(minutes=19)).isoformat()):
+                with self.assertRaises(release.Pending):
+                    self.publication.reconcile(record)
+            with patch.object(release, 'now', return_value=(started + timedelta(minutes=20, seconds=1)).isoformat()):
+                self.assertEqual(self.publication.reconcile(record)['state'], 'svn-not-committed')
 
     def test_late_first_commit_uses_its_original_snapshot_after_second_attempt_starts(self):
         actual, delayed = self.svn.commit, {}
@@ -322,7 +369,7 @@ class WordPressPublicationTest(unittest.TestCase):
         first = delayed['record']
         self.evidence.write_text('{"fixture":"later evidence must never replace original proof"}')
         later = (datetime.fromisoformat(first['commit_started_at'])
-                 + timedelta(seconds=release.SVN_SETTLING_SECONDS + 1)).isoformat()
+                 + timedelta(seconds=release.SVN_COMMIT_TIMEOUT + release.SVN_SERVER_MARGIN + 1)).isoformat()
         def lands_during_retry(*args, **kwargs):
             actual(lambda private: self.publication.actions(first, private, delayed['uploads']['assets']),
                    delayed['revision'], delayed['message'], delayed['username'], delayed['password'],
@@ -455,6 +502,7 @@ class WordPressPublicationTest(unittest.TestCase):
             self.svn.commit(['mkdir', 'tags/8.1.0'], 1, 'fixture', 'oreshkin', password)
         command = execute.call_args.args[0]
         self.assertNotIn(password.decode(), str(command))
+        self.assertEqual(execute.call_args.kwargs['timeout'], 15 * 60)
         self.assertIn('--password-from-stdin', command)
         self.assertIn('--config-dir', command)
         self.assertIn('config:auth:password-stores=', command)
