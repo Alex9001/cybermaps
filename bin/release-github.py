@@ -123,7 +123,13 @@ def verify_retry_candidate(archive):
                 and saved.get('zip_sha256') == digest and saved.get('phase') in ('validated', 'git-tagged'),
                 'Tagged candidate differs from the retained publication intent.')
         return dict(id=None, tag=tag, commit=commit)
-    require(remote, 'Retained draft requires its matching remote tag.')
+    require(remote, 'Retained artifact requires its matching remote tag.')
+    if not state['draft']:
+        published = verify_published(tag)
+        _, digest = package_files(archive)
+        require(published['commit'] == commit and published['zip_sha256'] == digest,
+                'Retained candidate differs from the published GitHub release.')
+        return dict(id=state['id'], tag=tag, commit=commit)
     beta = state['prerelease']
     require(isinstance(beta, bool), 'Invalid draft channel.')
     title = 'Cybermaps ' + version + (' — Open beta' if beta else '')
@@ -181,8 +187,8 @@ def publish(website, stable=True, on_validated=None, on_website_validated=None,
     configure()
     website = website_destination(website)
     clean_website(website)
-    require(not stable or (before_publish is not None and before_github is not None),
-            'Stable publication requires the canonical WordPress.org workflow.')
+    require(not stable or before_github is not None,
+            'Stable publication requires the canonical website readiness check.')
     os.environ["GH_HOST"] = "github.com"
     os.environ["GH_PROMPT_DISABLED"] = "1"
     run("gh", "auth", "status", "--hostname", "github.com", capture=False)
@@ -253,11 +259,11 @@ def publish_frozen(archive, commit, beta, before_publish=None, on_phase=None, be
     """Resume immutable tag/draft bytes, including after a committed SVN release.
 
     This path intentionally does not rebuild or expire past publication evidence.
-    The stable callback verifies the immutable SVN receipt and live distribution.
+    Stable publication still requires a final website readiness check.
     """
     version = archive.name.removeprefix('cybermaps_').removesuffix('.zip')
     tag = 'v' + version
-    require(beta or (before_publish is not None and before_github is not None),
+    require(beta or before_github is not None,
             'Stable release requires verified WordPress distribution and final website/date checks')
     contents, digest = package_files(archive)
     require(verify_tag(tag, commit)[1], 'Frozen publication requires its existing remote tag')

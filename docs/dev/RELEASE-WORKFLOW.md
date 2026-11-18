@@ -61,7 +61,7 @@ missing conditions; a release is complete only after production website verifica
 
 | Command | Result |
 | --- | --- |
-| `python3 -B bin/release-workflow.py release --svn-password-stdin` | Read the publishing password from the broker's pipe, validate and install the stable plugin, publish to WordPress.org and GitHub, then deploy and verify the website |
+| `python3 -B bin/release-workflow.py release --svn-password-stdin` | Read the publishing password from the broker's pipe, validate and install the stable plugin, publish to GitHub and WordPress.org, then deploy and verify the website |
 | `composer release -- --stable` | Explicit compatibility alias for the default stable channel |
 | `composer release -- --beta` | Explicit GitHub prerelease; never publish to WordPress.org or deploy over the stable production website |
 | `composer dev:install` | Build, validate and install local working source; no website commands or publication |
@@ -124,8 +124,8 @@ advance screenshot or prose approvals.
 Publication retains matching-draft, no-overwrite, immutable-tag, checksum and
 download-verification rules. Immediately before pushing the Git tag, readiness
 rechecks the evidence window. A matching GitHub draft is created and its uploaded
-ZIP/checksum are downloaded and compared. It remains private while WordPress.org
-publication proceeds. Source links use the public tag tree, not the draft page.
+ZIP/checksum are downloaded and compared. The matching stable release becomes
+public on GitHub before the WordPress.org upload begins.
 
 `svnmucc` submits one atomic transaction. It uploads changed and new trunk
 files and Directory images, removes obsolete paths, and sets each image MIME
@@ -135,8 +135,7 @@ ownership properties fence concurrent changes, including to skipped files. No SV
 clone, worktree, old-tag edit or copy of uncommitted trunk is used. Existing trunk
 must match its prior released tag. Owned remote changes stop publication; the
 global revision counter advancing for another plugin does not. Readiness is
-checked again immediately before the SVN write, including the committed launch
-post's date. Every write attempt gets a unique transaction marker and a retained,
+checked again immediately before the SVN write. Every write attempt gets a unique transaction marker and a retained,
 hash-bound record of its start time, base revision and publication evidence.
 After readiness children finish, shared staging is checked again. The package and
 artwork bytes are copied into a private transaction directory; svnmucc reads only
@@ -159,8 +158,7 @@ After the commit, verify its revision and immutable tag, current trunk/artwork,
 Directory API/listing, CDN images and the downloaded WordPress ZIP's individual
 file bytes. ZIP container hashes may differ between hosts; file manifests must
 match exactly. Run real dashboard and WP-CLI updates from the reviewed baseline,
-on single sites and networks, using WordPress.org's actual update offer. Only then
-publish the existing GitHub draft as stable/latest. Import the published tag and
+on single sites and networks, using WordPress.org's actual update offer. Import the published tag and
 its verified WordPress receipt, commit the generated snapshot, and run the existing
 guarded `npm run deploy`. Production follows the newest stable release and never
 promotes a beta. Verify live cybermaps.dev contracts, downloads, changelog, current
@@ -206,10 +204,10 @@ where it was; normal source cleanliness rules still apply before a future
 release. Temporary environment variables are passed to subprocesses, including
 website imports and test fixtures, so staging stays inside the plugin source.
 
-For an interrupted tag or draft, use `release:resume` with the same tag. Before
-SVN publication, expired validation reruns checks against the retained ZIP and
-artifact tree without rebuilding those bytes. Source and policy
-identity, clean pushed main, draft metadata, downloaded assets and current agent
+Use `release:resume` with the same tag for interrupted publication. If the
+validation expires before SVN accepts the release, run `composer release:build`
+to revalidate the retained ZIP and artifact tree. The source and policy identity,
+clean pushed main, GitHub release or draft, downloaded assets and current agent
 review must still match. A tag created before draft creation can resume only with
 its saved frozen publication intent. Conflicting tags or bytes stop without replacement.
 Refreshing only installed validation tools is permitted: all checks rerun against
@@ -232,8 +230,8 @@ is impossible: each retry has a new identifier, every earlier attempt remains
 searchable, and a late matching commit uses only that attempt's original evidence
 snapshot. No release-state file needs a manual edit. A saved unknown outcome with
 missing or altered attempt evidence fails closed for inspection.
-Authentication failure leaves the GitHub draft unpublished. Fix the credential
-source and resume, satisfying the freshness window if SVN has not committed.
+If SVN authentication fails, the GitHub release stays public. Resume with the
+SVN password and fresh evidence before the initial SVN commit.
 After an accepted SVN commit, evidence is immutable and ordinary freshness expiry
 does not authorize rebuilding or rewriting the version. Fresh remote checks and
 retained evidence hashes govern downstream retries.
@@ -244,13 +242,13 @@ needed. There is no speculative time-of-day cutoff for otherwise-ready SVN work.
 WordPress.org may require release confirmation or hold updates for its security
 review/cooldown. An unavailable version, artwork or real update offer records a
 pending state and next-check time, then exits; there is no hours-long polling loop.
-The public GitHub release, announcement and website stay pending. Check WordPress's
+The plugin stays available on GitHub during this wait. Check WordPress's
 confirmation/review notifications if the delay persists. A security block is not
 a successful release. Correct a published defect in a new version; never edit the
 released tag to bypass a review or replace bytes. If publication moves to another
 day, update the announcement date and rerun the affected website checks before deployment.
-The committed launch-post date is checked before preparation, immediately before
-SVN publication, and immediately before GitHub publication. Only a healthy official update API response without a
+The committed launch-post date is checked before preparation and immediately
+before GitHub publication. Only a healthy official update API response without a
 matching offer is an update cooldown. Missing tools, changed harnesses, invalid
 receipts and failed updates are hard failures. Post-publication native checks use
 only harness bytes verified against the frozen source commit. Their controlled

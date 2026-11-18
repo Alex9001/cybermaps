@@ -123,7 +123,6 @@ class Workflow:
             require(publisher.source_commit() == self.state['commit'], 'Source changed before SVN publication')
             run('composer', 'run', 'release:ready', capture=False)
             clean_website(self.website)
-            run('node', 'scripts/check-launch-date.mjs', '--version', self.number, cwd=self.website)
             return publication_evidence(self.number)
 
         receipt = publication.publish(fresh_evidence, username=username, password=password)
@@ -206,12 +205,11 @@ class Workflow:
         self.phase('svn-committed', commit=saved['commit'], tag='v' + self.number,
                    channel='stable', zip_sha256=saved['zip_sha256'])
         publisher.publish_frozen(archive, saved['commit'], False,
-            before_publish=lambda frozen, digest: self.wordpress(frozen, digest, password, username),
             on_phase=self.phase, before_github=self.before_github)
-        self.downstream('v' + self.number)
+        self.downstream('v' + self.number, password, username)
         return True
 
-    def downstream(self, tag):
+    def downstream(self, tag, password=None, username='oreshkin'):
         clean_website(self.website)
         self.phase('verifying-published-release')
         published = publisher.verify_published(tag)
@@ -226,13 +224,14 @@ class Workflow:
             self.phase('beta-published', **published)
             return
         archive = self.directory / ('cybermaps_' + self.number + '.zip')
-        self.wordpress(archive, published['zip_sha256'])
+        distribution = self.wordpress(archive, published['zip_sha256'], password, username)
         release_path = self.website / 'product/release.json'
         source_path = self.website / 'product' / self.number / 'source.json'
         frozen = json.loads(source_path.read_text()) if source_path.exists() else {}
         current = json.loads(release_path.read_text()) if release_path.exists() else {}
         if (frozen.get('state') != 'tagged' or frozen.get('commit') != published['commit']
-                or any(current.get(k) != published[k] for k in ('tag', 'commit', 'channel'))):
+                or any(current.get(k) != published[k] for k in ('tag', 'commit', 'channel'))
+                or current.get('wordpress') != distribution['wordpress'] or current.get('githubReleasePending')):
             self.sync('tag', tag, published['channel'])
         clean_website(self.website)
         self.phase('deploying')
@@ -304,7 +303,7 @@ def main():
         if args.action == 'resume':
             state = publisher.release_state(args.tag)
             if state and not state['draft']:
-                workflow.downstream(args.tag)
+                workflow.downstream(args.tag, password, args.svn_username)
                 return
             if workflow.resume_committed(password, args.svn_username):
                 return
@@ -327,8 +326,6 @@ def main():
                 (workflow.directory / 'github-publication.json').read_text())['channel']
         require(channel in ('stable', 'beta'), 'Invalid retained publication channel')
         stable = channel == 'stable'
-        require(not stable or password is not None,
-                'New stable SVN publication requires --svn-password-stdin; existing committed releases can resume without it')
         if stable:
             run('node', 'scripts/check-launch-date.mjs', '--version', number, cwd=website)
         if state:
@@ -350,15 +347,13 @@ def main():
         try:
             publisher.publish(website, stable, on_validated=validated,
                               on_website_validated=lambda: commit_generated(website, number, build=True),
-                              before_publish=(lambda archive, digest: workflow.wordpress(
-                                  archive, digest, password, args.svn_username)) if stable else None,
                               on_phase=workflow.phase, before_github=workflow.before_github if stable else None)
         except Pending:
             raise
         except (RuntimeError, OSError, ValueError, subprocess.CalledProcessError) as error:
             workflow.phase('publication-incomplete', publication_error=str(error))
             raise
-        workflow.downstream(tag)
+        workflow.downstream(tag, password, args.svn_username)
 
 
 if __name__ == '__main__':

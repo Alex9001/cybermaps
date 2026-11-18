@@ -134,7 +134,8 @@ owner sign-off is required. A changed package requires renewed agent review.
 23. Publish one atomic SVN transaction from the frozen package and separate
     reviewed Directory assets. Preserve immutable version tags, verify actual
     Directory downloads by file bytes, and prove the public native update offer
-    before publishing the GitHub stable release or website announcement.
+    before marking WordPress distribution verified. Publish the tested GitHub
+    release first, then continue WordPress distribution and website deployment.
     Pending confirmation, security review, CDN propagation and update cooldown
     remain pending. Record and inspect ambiguous SVN outcomes before retrying.
 24. Stable is the default release channel. Betas require `--beta`, cannot reach

@@ -137,7 +137,8 @@ class WorkflowTest(unittest.TestCase):
         svn = commands.index(['svnmucc', 'commit'])
         dates = [i for i, command in enumerate(commands) if command[:2] == ['node', 'scripts/check-launch-date.mjs']]
         self.assertGreater(len([i for i in dates if i < svn]), 1)
-        self.assertEqual(commands[svn - 1][:2], ['node', 'scripts/check-launch-date.mjs'])
+        github = next(i for i, c in enumerate(commands) if c[:3] == ['gh', 'release', 'edit'])
+        self.assertLess(github, svn)
         self.assertNotIn(['composer', 'run', 'release:validate'], commands)
         self.assertFalse(self.state()['draft'])
         record = json.loads((self.repo / 'docs/generated/releases/7.4.0/workflow.json').read_text())
@@ -211,21 +212,21 @@ class WorkflowTest(unittest.TestCase):
         self.assertEqual(before, snapshot(self.website))
         self.assertEqual(published, self.state())
 
-    def test_stable_is_default_and_waits_for_wordpress_before_github(self):
+    def test_stable_is_default_and_publishes_github_before_wordpress(self):
         self.workflow(failure='wordpress-pending', success=False)
-        self.assertTrue(self.state()['draft'])
+        self.assertFalse(self.state()['draft'])
         self.assertFalse(self.state()['prerelease'])
         commands = self.commands()
         self.assertEqual(commands.count(['svnmucc', 'commit']), 1)
+        published = next(i for i, c in enumerate(commands) if c[:3] == ['gh', 'release', 'edit'])
+        self.assertLess(published, commands.index(['svnmucc', 'commit']))
         self.assertNotIn(['npm', 'run', 'deploy'], commands)
-        before = len(commands)
         self.workflow('resume', '', True, '--tag', 'v7.4.0')
-        resumed = self.commands()[before:]
+        resumed = self.commands()[len(commands):]
         self.assertFalse(any(c[0] == 'composer' for c in resumed))
         self.assertNotIn(['svnmucc', 'commit'], resumed)
-        verified = resumed.index(['wordpress', 'distribution-verified'])
-        published = next(i for i, c in enumerate(resumed) if c[:3] == ['gh', 'release', 'edit'])
-        self.assertLess(verified, published)
+        self.assertFalse(any(c[:3] == ['gh', 'release', 'edit'] for c in resumed))
+        self.assertIn(['wordpress', 'distribution-verified'], resumed)
 
     def test_beta_is_explicit_and_never_replaces_production_or_svn(self):
         self.workflow('release', '', True, '--beta')
@@ -236,9 +237,9 @@ class WorkflowTest(unittest.TestCase):
         record = json.loads((self.repo / 'docs/generated/releases/7.4.0/workflow.json').read_text())
         self.assertEqual(record['phase'], 'beta-published')
 
-    def test_svn_auth_failure_keeps_github_draft_and_can_retry(self):
+    def test_svn_auth_failure_leaves_github_public_and_can_retry(self):
         self.workflow(failure='svn-auth', success=False)
-        self.assertTrue(self.state()['draft'])
+        self.assertFalse(self.state()['draft'])
         self.assertNotIn(['svnmucc', 'commit'], self.commands())
         self.workflow('resume', '', True, '--tag', 'v7.4.0')
         self.assertFalse(self.state()['draft'])

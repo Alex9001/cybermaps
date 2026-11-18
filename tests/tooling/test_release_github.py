@@ -39,7 +39,13 @@ def mock():
             source = Path(args[3])
             commit = option('--commit') if '--commit' in args else subprocess.check_output(
                 ['git', '-C', str(source), 'rev-parse', option('--tag') + '^{commit}'], text=True).strip()
-            Path('product/release.json').write_text(json.dumps(dict(version='7.4.0', commit=commit, channel=option('--channel'), tag='v7.4.0')))
+            release = dict(version='7.4.0', commit=commit, channel=option('--channel'), tag='v7.4.0')
+            distribution = source / 'docs/generated/releases/7.4.0/wordpress-distribution.json'
+            if '--tag' in args and distribution.is_file():
+                receipt = json.loads(distribution.read_text())
+                if receipt.get('state') == 'distribution-verified':
+                    release['wordpress'] = receipt['wordpress']
+            Path('product/release.json').write_text(json.dumps(release))
             Path('product/7.4.0').mkdir(exist_ok=True)
             Path('product/7.4.0/source.json').write_text(json.dumps(dict(commit=commit, state='tagged' if '--tag' in args else 'candidate')))
             if failure == 'unrelated-write':

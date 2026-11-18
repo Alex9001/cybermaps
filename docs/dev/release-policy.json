@@ -54,7 +54,7 @@
     "stable_presentation": "Current benefit-led stable wording, accurately disclosed optional features, Directory images with provenance and matching captions, exact-candidate screenshots and evidence-backed responsive/keyboard/zoom/empty/error/save/destructive visual review",
     "native_updates": "Exact candidate passes real dashboard and WP-CLI updates from the reviewed latest-stable baseline on single sites and networks (the first stable launch uses the explicit beta baseline); stable basename/native updates and settings, tables, cron, rewrites, files and activation are preserved; public WordPress.org update verification follows SVN publication",
     "everyday_workloads": "Complete 1000-item and 10000-item sitemap, report and full static-publication workloads in all four cache configurations within existing resource limits; controlled reviewed-baseline comparison, raw evidence and truthful larger-corpus limitations",
-    "wordpress_distribution": "One atomic SVN release from frozen bytes and reviewed separate Directory assets; immutable new tag, exact downloaded file parity, verified listing/artwork and native update before public GitHub/website launch; ambiguous writes inspected before retry",
+    "wordpress_distribution": "One atomic SVN release from frozen bytes and reviewed separate Directory assets; immutable new tag, exact downloaded file parity, verified listing/artwork and native update for WordPress distribution after GitHub publication; ambiguous writes inspected before retry",
     "release_channels": "Stable is the default; beta is explicit and cannot reach WordPress.org or replace stable production docs; exact source, metadata, assets and receipts stay consistent across resumable channels"
   },
   "references": [
