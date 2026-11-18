@@ -1093,7 +1093,9 @@ Content Intelligence Reports inspect all published public post types except
 attachments. The reader captures a maximum post ID and processes stable
 100-item ID batches so publishing or deleting content during a run cannot shift
 pagination. Attached-image presence is resolved once per batch, and completed
-batch objects are released from the runtime cache. Posts and pages use the
+batch objects are released from the runtime cache. Both passes keep temporary
+text analysis in request memory. The report writes its measurements and
+findings to the audit tables. Posts and pages use the
 configurable rules; another public post type uses a 150-word fallback with no
 age or required-media finding. Report generation is synchronous. It is not a
 background job that resumes after a request timeout.

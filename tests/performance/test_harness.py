@@ -76,7 +76,7 @@ class EvidenceTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix='perf-failfast-', dir=run.TEMP) as directory:
             runtime = object.__new__(run.Runtime)
             runtime.output = Path(directory)
-            runtime.args = SimpleNamespace(operations='llms', cold=1, warm=4)
+            runtime.args = SimpleNamespace(operations='llms', cold=1, warm=4, fail_fast=False)
             runtime.operation = Mock()
             runtime.storage_check = Mock()
             runtime.persistent_cache = Mock()
@@ -93,6 +93,13 @@ class EvidenceTests(unittest.TestCase):
                 self.assertEqual(3, sum(s.get('skipped', False) for s in samples))
                 self.assertTrue(all(s['valid'] is False for s in samples))
             self.assertTrue(all(row['p95_seconds'] is None and row['complete'] is False for row in json.loads((runtime.output/'summary.json').read_text())))
+            runtime.args.fail_fast = True
+            runtime.http_sample.reset_mock()
+            with self.assertRaisesRegex(RuntimeError, '100-redis-off-plugin-on-llms failed'):
+                runtime.measure(100, fixture)
+            self.assertEqual(3, runtime.http_sample.call_count)
+            retained = json.loads((runtime.output / '100-redis-off-plugin-on-llms.json').read_text())
+            self.assertTrue(all(sample['valid'] is False for sample in retained))
 
     def test_status_and_body_validated(self):
         self.assertIsNone(run.validate_http('sitemap_index', 200, b'<sitemapindex><sitemap/></sitemapindex>'))

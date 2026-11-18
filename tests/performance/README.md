@@ -125,7 +125,18 @@ release must use the previous published stable version and its actual ZIP
 checksum. The first 8.1.0 stable launch is the documented exception: its baseline
 is the published 8.0.4 beta ZIP, SHA-256
 `b63cb6f54f800d758cfe49e2056bb82bfc4e122121c46c98c19ed7f6bab9e7f9`.
-Run the two packages **serially**, with no native matrix or competing load test:
+After a timeout, package the revised candidate with `bash bin/package-candidate.sh`
+and run `composer release:workloads -- --preflight-only` before repeating the
+runtime matrix. For a full comparison, run `composer release:workloads` after
+`composer release:build`.
+It checks for a fresh passing receipt, then runs the candidate's 10,000-entry
+audit with Redis and the plugin cache enabled and disabled. If any audit misses
+the 120-second deadline, the launcher retains the failing sample and stops
+before starting the full baseline or candidate. The full candidate also stops
+after its first failed measurement group. Inspect that group before retrying.
+
+The launcher runs both full packages **serially**, with no native matrix or
+competing load test. The underlying commands for the original stable launch were:
 
 ```sh
 python3 -B tests/performance/run.py --zip docs/generated/releases/8.0.4/cybermaps_8.0.4.zip --label baseline-8-0-4 --release-version 8.1.0 --wordpress-version 7.1.4 --sizes 1000 10000 --timeout 90 --long-timeout 120 --static-timeout 600 --static-slices 50

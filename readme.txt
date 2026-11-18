@@ -138,6 +138,7 @@ Uninstall retains data unless cleanup is enabled.
 
 = 8.1.1 =
 * Prevent shared proxies from serving another site's sitemap or sitemap redirect.
+* Avoid writing a temporary content-analysis cache entry for every post in a full content report.
 
 = 8.1.0 =
 * Stable WordPress.org launch with clearer setup, directory presentation and support links.

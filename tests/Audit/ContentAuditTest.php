@@ -80,6 +80,27 @@ final class ContentAuditTest extends TestCase {
 		$this->assertNull( json_decode( $exporter->json( $run ), true )['resources'][0]['word_count'] );
 	}
 
+	public function test_report_does_not_persist_each_posts_content_analysis(): void {
+		$post = $this->post( 8674, 'post', 'A unique passage for the report cache check.', '2026-07-01 00:00:00' );
+		$previous_cache = $GLOBALS['cybermaps_mock_using_ext_object_cache'] ?? false;
+		$previous_observer = $GLOBALS['cybermaps_mock_set_transient_observer'] ?? null;
+		$writes = array();
+		$GLOBALS['cybermaps_mock_using_ext_object_cache'] = false;
+		$GLOBALS['cybermaps_mock_set_transient_observer'] = static function ( $key, $value ) use ( &$writes ) {
+			if ( isset( $value['value']['markdown'], $value['value']['headings'] ) ) {
+				$writes[] = $key;
+			}
+		};
+		try {
+			$result = ( new ContentAuditEvaluator() )->evaluate( $post, AuditPolicy::from_settings( array() ) );
+			$this->assertGreaterThan( 0, $result['resource']['word_count'] );
+			$this->assertSame( array(), $writes );
+		} finally {
+			$GLOBALS['cybermaps_mock_set_transient_observer'] = $previous_observer;
+			$GLOBALS['cybermaps_mock_using_ext_object_cache'] = $previous_cache;
+		}
+	}
+
 	public function test_page_has_no_default_age_or_media_finding(): void {
 		$post   = $this->post( 2, 'page', implode( ' ', array_fill( 0, 100, 'word' ) ), '2020-01-01 00:00:00' );
 		$result = ( new ContentAuditEvaluator() )->evaluate(

@@ -850,6 +850,9 @@ class Runtime:
                 for sample in samples:
                     sample['valid'] = valid_sample(sample)
                 write_json(self.output / (stem + '.json'), samples)
+                if self.args.fail_fast and any(not sample['valid'] for sample in samples):
+                    self.summarize()
+                    raise RuntimeError(f'{stem} failed. Raw samples are retained in {self.output}')
                 self.analyze_queries(samples, self.output / (stem + '-plans.json'))
         self.summarize()
 
@@ -903,6 +906,8 @@ def main():
     parser.add_argument('--release-version', help='Release evidence owner; defaults to the measured package version.')
     parser.add_argument('--wordpress-version', default='7.1')
     parser.add_argument('--image-manifest', type=lambda value: Path(value).resolve())
+    parser.add_argument('--fail-fast', action='store_true',
+                        help='Stop after the first failed measurement group and retain its evidence')
     parser.add_argument('--label', required=True)
     parser.add_argument('--sizes', type=int, nargs='+', default=[1000, 10000, 100000, 1000000])
     parser.add_argument('--warm', type=int, default=20)

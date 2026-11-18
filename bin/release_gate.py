@@ -194,15 +194,19 @@ def retained_candidate(record):
     return archive_hash, proof
 
 
-def build():
-    directory = release_dir()
-    directory.mkdir(parents=True, exist_ok=True)
+def require_mutable_evidence(directory):
     publication = directory / 'wordpress-publication.json'
     if publication.exists():
         state = json.loads(publication.read_text())
         require(not state.get('svn_revision') and state.get('state') in ('inputs-frozen', 'svn-not-committed'),
                 'WordPress publication may already be committed; resume its downstream '
                 'publication without rebuilding: composer release:resume -- --tag v' + version())
+
+
+def build():
+    directory = release_dir()
+    directory.mkdir(parents=True, exist_ok=True)
+    require_mutable_evidence(directory)
     # Never overwrite an already published version's package or historical evidence.
     previous = directory / 'validation.json'
     if previous.exists():

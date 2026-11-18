@@ -199,6 +199,8 @@ def publish(website, stable=True, on_validated=None, on_website_validated=None,
     if state:
         matching_draft(state, tag, commit, beta, notes, title)
     run('composer', 'run', 'release:build', capture=False)
+    if stable:
+        run('composer', 'run', 'release:workloads', capture=False)
     candidate = release_dir(version) / 'candidate' / ('cybermaps_' + version + '.zip')
     website_args = ('--zip', str(candidate)) if stable else ()
     run("python3", "bin/check-website.py", str(website), "--commit", commit,

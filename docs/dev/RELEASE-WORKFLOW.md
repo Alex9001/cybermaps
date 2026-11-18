@@ -30,6 +30,10 @@ before any child starts; children receive EOF on stdin. Only `svnmucc` receives
 the secret explicitly, using an empty config directory with password stores
 disabled. Committed releases resume without this flag. Credentials never belong in arguments, environment variables,
 logs, the repository, an action manifest, or an evidence record.
+On the KDE release workstation, the private website README documents the saved
+KDESVN login. Pipe it directly to `python3 -B bin/release-workflow.py release
+--svn-password-stdin`. This invokes the canonical release workflow and avoids
+Composer dropping the pipe before starting its child.
 Developer release locking uses Linux process identities: gate subprocesses may
 inherit their actual parent workflow's lock, while separate commands cannot
 rewrite evidence concurrently.
@@ -57,7 +61,7 @@ missing conditions; a release is complete only after production website verifica
 
 | Command | Result |
 | --- | --- |
-| `composer release -- --svn-password-stdin` | Prepare and validate a stable release, install locally, publish through WordPress.org and GitHub, then deploy and verify the website; provide the secret through a secure stdin broker |
+| `python3 -B bin/release-workflow.py release --svn-password-stdin` | Read the publishing password from the broker's pipe, validate and install the stable plugin, publish to WordPress.org and GitHub, then deploy and verify the website |
 | `composer release -- --stable` | Explicit compatibility alias for the default stable channel |
 | `composer release -- --beta` | Explicit GitHub prerelease; never publish to WordPress.org or deploy over the stable production website |
 | `composer dev:install` | Build, validate and install local working source; no website commands or publication |
@@ -262,6 +266,15 @@ static ownership migration and state cutover fixtures. Every required runtime
 flag must be present and true; a partial fixture cannot satisfy the gate.
 Optimized Python (`-O`, `-OO` or `PYTHONOPTIMIZE`) is rejected so mandatory runtime
 assertions cannot disappear.
+
+After a report timeout, package the fix and run
+`composer release:workloads -- --preflight-only` before repeating the runtime
+matrix. The stable publisher calls `composer release:workloads` after validating
+the candidate. You can also run it directly. It runs the
+10,000-entry audit in all four cache configurations first. A failed audit
+stops the comparison and retains its samples. A passing preflight proceeds to
+the complete baseline and candidate workloads with the same container images.
+An existing passing receipt for the same commit and ZIP can be reused while fresh.
 
 Controlled performance measurements use the separate disposable harness in
 `tests/performance/`. Its self-tests are a routine release gate; executing the

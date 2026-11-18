@@ -100,6 +100,10 @@
             "python3 -B bin/release_gate.py ready"
         ],
         "release:status": "python3 -B bin/release_gate.py status",
+        "release:workloads": [
+            "Composer\\Config::disableProcessTimeout",
+            "python3 -B bin/qualify-workloads.py"
+        ],
         "test:release-gates": "python3 -B -m unittest discover -s tests/tooling -p test_gate_*.py",
         "validation:setup": "python3 -B bin/setup-validation.py",
         "mcp:check": [

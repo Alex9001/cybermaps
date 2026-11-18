@@ -132,6 +132,7 @@ class WorkflowTest(unittest.TestCase):
         self.workflow()
         commands = self.commands()
         self.assertEqual(commands.count(['composer', 'run', 'release:build']), 1)
+        self.assertEqual(commands.count(['composer', 'run', 'release:workloads']), 1)
         self.assertEqual(commands.count(['composer', 'run', 'release:ready']), 3)
         svn = commands.index(['svnmucc', 'commit'])
         dates = [i for i, command in enumerate(commands) if command[:2] == ['node', 'scripts/check-launch-date.mjs']]
@@ -230,6 +231,7 @@ class WorkflowTest(unittest.TestCase):
         self.workflow('release', '', True, '--beta')
         self.assertTrue(self.state()['prerelease'])
         self.assertNotIn(['svnmucc', 'commit'], self.commands())
+        self.assertNotIn(['composer', 'run', 'release:workloads'], self.commands())
         self.assertNotIn(['npm', 'run', 'deploy'], self.commands())
         record = json.loads((self.repo / 'docs/generated/releases/7.4.0/workflow.json').read_text())
         self.assertEqual(record['phase'], 'beta-published')

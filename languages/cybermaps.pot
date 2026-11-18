@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-18T04:40:46+00:00\n"
+"POT-Creation-Date: 2026-11-18T06:57:14+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: cybermaps\n"
@@ -8494,17 +8494,17 @@ msgstr ""
 msgid "Cybermaps stopped this content report at its safety budget because the object cache cannot release runtime data. No partial report was completed. Use an object-cache implementation with runtime cleanup before retrying a larger report."
 msgstr ""
 
-#: src/Audit/ContentAuditEvaluator.php:110
+#: src/Audit/ContentAuditEvaluator.php:112
 msgid "Stored content exceeded the bounded text analysis. Full word count, content hash, and thin-content findings are unavailable."
 msgstr ""
 
-#: src/Audit/ContentAuditEvaluator.php:115
+#: src/Audit/ContentAuditEvaluator.php:117
 msgid "Review this resource directly; the saved text sample does not describe the complete content."
 msgstr ""
 
 #. translators: %d: visible word count.
-#: src/Audit/ContentAuditEvaluator.php:127
-#: src/Audit/ContentAuditEvaluator.php:132
+#: src/Audit/ContentAuditEvaluator.php:129
+#: src/Audit/ContentAuditEvaluator.php:134
 #, php-format
 msgid "%d word"
 msgid_plural "%d words"
@@ -8512,18 +8512,18 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: 1: localized measured word count, 2: localized minimum word count.
-#: src/Audit/ContentAuditEvaluator.php:140
+#: src/Audit/ContentAuditEvaluator.php:142
 #, php-format
 msgid "Visible text has %1$s; policy minimum is %2$s."
 msgstr ""
 
-#: src/Audit/ContentAuditEvaluator.php:149
+#: src/Audit/ContentAuditEvaluator.php:151
 msgid "Review whether this resource needs more useful visible information, consolidation, or intentional exclusion."
 msgstr ""
 
 #. translators: %d: day count.
-#: src/Audit/ContentAuditEvaluator.php:161
-#: src/Audit/ContentAuditEvaluator.php:166
+#: src/Audit/ContentAuditEvaluator.php:163
+#: src/Audit/ContentAuditEvaluator.php:168
 #, php-format
 msgid "%d day"
 msgid_plural "%d days"
@@ -8531,20 +8531,20 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: 1: localized content age, 2: localized review interval.
-#: src/Audit/ContentAuditEvaluator.php:174
+#: src/Audit/ContentAuditEvaluator.php:176
 #, php-format
 msgid "Last modified %1$s ago; review interval is %2$s."
 msgstr ""
 
-#: src/Audit/ContentAuditEvaluator.php:183
+#: src/Audit/ContentAuditEvaluator.php:185
 msgid "Confirm the information remains accurate; update the resource only when a substantive change is warranted."
 msgstr ""
 
-#: src/Audit/ContentAuditEvaluator.php:196
+#: src/Audit/ContentAuditEvaluator.php:198
 msgid "No featured image, attached image, or stored visual-media block or markup was detected."
 msgstr ""
 
-#: src/Audit/ContentAuditEvaluator.php:202
+#: src/Audit/ContentAuditEvaluator.php:204
 msgid "Add useful visual media only if it improves comprehension or delivery; decorative media is not required."
 msgstr ""
 

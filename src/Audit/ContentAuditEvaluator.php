@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Cybermaps\Audit;
 
+use Cybermaps\Content\ContentAnalyzer;
 use Cybermaps\Content\VisibleTextExtractor;
 use Cybermaps\Core\URLManager;
 use Cybermaps\SEO\PublicationEligibility;
@@ -22,7 +23,8 @@ final class ContentAuditEvaluator {
 		?VisibleTextExtractor $extractor = null,
 		?PublicationEligibility $eligibility = null
 	) {
-		$this->extractor   = $extractor ?? new VisibleTextExtractor();
+		// The report stores its measurements. Keep intermediate text analysis in the request cache.
+		$this->extractor   = $extractor ?? new VisibleTextExtractor( new ContentAnalyzer( false ) );
 		$this->eligibility = $eligibility ?? new PublicationEligibility();
 	}
 

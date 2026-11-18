@@ -4,6 +4,7 @@ Cybermaps release history
 8.1.1
 -----
 * Prevent shared proxies from serving another site's dynamic sitemap or sitemap redirect while preserving WordPress sitemap caching.
+* Keep intermediate content analysis in memory during a full content report to avoid per-post database cache writes.
 
 8.1.0
 -----
