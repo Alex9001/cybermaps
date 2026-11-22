@@ -346,6 +346,17 @@ def ready():
     print('Release ready: ' + str(final))
 
 
+def wordpress_status(release):
+    """Report the most recent applicable provider outcome for this frozen release."""
+    for name in ('wordpress-failure.json', 'wordpress-pending.json', 'wordpress-distribution.json'):
+        path = release_dir() / name
+        if path.is_file():
+            record = json.loads(path.read_text())
+            if all(release.get(k) and record.get(k) == release[k] for k in ('tag', 'commit', 'zip_sha256')):
+                return record
+    return {}
+
+
 def status():
     blockers = []
     workflow_path = release_dir() / 'workflow.json'
@@ -357,9 +368,18 @@ def status():
                                   note='Explicit prerelease; WordPress.org and production website remain unchanged'), indent=2))
             return False
         live = json.loads(live_path.read_text()) if live_path.exists() else {}
-        complete = (workflow.get('phase') == 'complete' and live.get('state') == 'website-verified'
+        verified = (live.get('state') == 'website-verified'
+                    and all(workflow.get(k) and live.get(k) == workflow[k] for k in ('tag', 'commit', 'channel', 'zip_sha256')))
+        complete = (workflow.get('phase') == 'complete' and verified
                     and workflow.get('website_live_sha256') == (digest(live_path) if live_path.exists() else None)
-                    and all(live.get(k) == workflow.get(k) for k in ('tag', 'commit', 'channel', 'zip_sha256', 'website_commit')))
+                    and bool(workflow.get('website_commit')) and live.get('website_commit') == workflow['website_commit'])
+        downstream = {} if complete else wordpress_status(workflow)
+        if downstream.get('reason'):
+            print(json.dumps(dict(state=downstream['state'], tag=workflow['tag'],
+                  svn_revision=downstream.get('svn_revision', workflow.get('svn_revision')),
+                  next_check_at=downstream.get('next_check_at'), website_verified_at=live.get('checked_at') if verified else None,
+                  blockers=[downstream['reason']]), indent=2))
+            return True
         print(json.dumps(dict(state='release-complete' if complete else 'published-website-pending',
               tag=workflow.get('tag'), website_verified_at=live.get('checked_at') if complete else None,
               blockers=[] if complete else ['Finish website deployment/verification with composer release:resume -- --tag ' + workflow['tag']]), indent=2))
@@ -368,11 +388,7 @@ def status():
     if publication.exists():
         saved = json.loads(publication.read_text())
         if saved.get('svn_revision') or saved.get('state') not in ('inputs-frozen', 'svn-not-committed'):
-            distribution = release_dir() / 'wordpress-distribution.json'
-            failure = release_dir() / 'wordpress-failure.json'
-            if failure.exists():
-                distribution = failure
-            downstream = json.loads(distribution.read_text()) if distribution.exists() else {}
+            downstream = wordpress_status(saved)
             print(json.dumps(dict(state=downstream.get('state', saved['state']),
                   tag=saved.get('tag'), svn_revision=saved.get('svn_revision'),
                   next_check_at=downstream.get('next_check_at', saved.get('next_check_at')), blockers=[downstream.get('reason',

@@ -53,6 +53,37 @@ class ReadinessTest(unittest.TestCase):
 
 
 class PublishedCheckoutTest(unittest.TestCase):
+    def test_published_status_reports_the_provider_still_pending_after_the_site_is_verified(self):
+        frozen = dict(tag='v8.1.2', commit='a' * 40, zip_sha256='b' * 64)
+        workflow = dict(frozen, phase='wordpress-update-pending', release_id=92,
+                        svn_revision=123, channel='stable')
+        live = dict(frozen, state='website-verified', channel='stable', checked_at='2026-11-22T04:28:00Z',
+                    website_commit='c' * 40)
+        pending = dict(frozen, state='wordpress-update-pending', next_check_at='2026-11-22T10:22:43Z',
+                       reason='The official update API has not advertised this version yet')
+        with tempfile.TemporaryDirectory(dir=gate.configure()) as scratch, \
+                patch.object(gate, 'release_dir', return_value=Path(scratch)), patch('builtins.print') as output:
+            directory = Path(scratch)
+            (directory / 'workflow.json').write_text(json.dumps(workflow))
+            (directory / 'wordpress-pending.json').write_text(json.dumps(pending))
+            (directory / 'wordpress-distribution.json').write_text(json.dumps(dict(frozen, state='distribution-verified')))
+            live_path = directory / 'website-live.json'
+            live_path.write_text(json.dumps(live))
+            self.assertTrue(gate.status())
+            self.assertEqual(json.loads(output.call_args.args[0]), dict(
+                state=pending['state'], tag=frozen['tag'], svn_revision=123, next_check_at=pending['next_check_at'],
+                website_verified_at=live['checked_at'], blockers=[pending['reason']]))
+            live_path.write_text(json.dumps(dict(live, commit='d' * 40)))
+            self.assertTrue(gate.status())
+            self.assertIsNone(json.loads(output.call_args.args[0])['website_verified_at'])
+            failure = dict(frozen, state='wordpress-verification-failed', reason='Native update failed')
+            (directory / 'wordpress-failure.json').write_text(json.dumps(failure))
+            self.assertTrue(gate.status())
+            self.assertEqual(json.loads(output.call_args.args[0])['blockers'], [failure['reason']])
+            (directory / 'wordpress-failure.json').write_text(json.dumps(dict(failure, tag='v8.1.1')))
+            self.assertTrue(gate.status())
+            self.assertEqual(json.loads(output.call_args.args[0])['state'], pending['state'])
+
     def test_public_receipt_and_svn_inputs_must_match_the_verified_github_release(self):
         published = dict(tag='v8.1.2', commit='a' * 40, channel='stable', zip_sha256='b' * 64, release_id=92)
         saved = {key: published[key] for key in ('tag', 'commit', 'zip_sha256')}
