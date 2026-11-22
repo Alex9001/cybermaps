@@ -71,7 +71,7 @@ final class SitemapStatusTest extends TestCase {
 			ob_start();
 			( new \ReflectionMethod( SitemapStatus::class, 'render_full_mode_notice' ) )->invoke( null, $context['sync_status_label'], 'today', 'yesterday' );
 			$html = (string) ob_get_clean();
-			$this->assertStringContainsString( 'Latest reconciliation: Continuation queued', $html );
+			$this->assertStringContainsString( 'Latest reconciliation Continuation queued.', $html );
 			$this->assertStringNotContainsString( 'Unknown', $html );
 		} finally { $GLOBALS['cybermaps_mock_options'] = $prior; }
 	}
