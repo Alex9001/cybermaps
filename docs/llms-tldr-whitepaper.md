@@ -116,15 +116,13 @@ enforceability.
 
 ## Caching and delivery
 
-Dynamic responses use a one-hour, generation-fenced WordPress cache with
-separate language keys. Content and
-relevant settings changes invalidate the discovery cache. With full static
-publication enabled, the same generated body can be materialized at
-`/llms-tldr.txt`; localized variants can also be materialized when translation
-output is configured.
-
-Physical delivery bypasses PHP. It therefore cannot appear in PHP-observed
-crawler analytics and uses server-controlled response headers.
+WordPress caches briefings for up to one hour with separate language keys.
+Full publication cache can also keep each generated briefing in private storage.
+When a page becomes private or gains a password, WordPress retires the previous
+generation during the save. Requests to `/llms-tldr.txt` and its localized
+URLs then receive a current briefing or a temporary error while it rebuilds.
+WordPress handles these requests at the origin. A page cache or CDN can answer
+before WordPress and needs its own purge policy.
 
 Generation examines at most 250 candidates across pinned and ordinary passes,
 counting each candidate before SEO checks. `Candidate-Scan` reports examined
@@ -143,7 +141,7 @@ retryable failure and never replaces a successful publication.
 - Stable modified-date ordering favors recent edits, not quality.
 - No semantic duplicate detection occurs.
 - No automatic consumer or downstream behavior is guaranteed.
-- A static file remains stale until the next complete reconciliation.
+- A client that has downloaded a briefing retains its copy after a page is withdrawn.
 
 ## Appropriate use
 
