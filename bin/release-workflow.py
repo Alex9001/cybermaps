@@ -120,7 +120,8 @@ class Workflow:
         require(publication.zip_sha256 == digest, 'WordPress publication package changed')
 
         def fresh_evidence():
-            require(publisher.source_commit() == self.state['commit'], 'Source changed before SVN publication')
+            # Readiness rechecks the public GitHub bytes and tag before SVN
+            # snapshots this proof against its own frozen commit and archive.
             run('composer', 'run', 'release:ready', capture=False)
             clean_website(self.website)
             return publication_evidence(self.number)

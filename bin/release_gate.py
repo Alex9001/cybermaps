@@ -50,14 +50,35 @@ def policy():
     return value
 
 
-def identity():
-    names = subprocess.check_output(['git', 'ls-files', '-z', '--cached', '--others', '--exclude-standard'], cwd=ROOT).split(b'\0')
+def identity(published_commit=None):
+    head = git(ROOT, 'rev-parse', 'HEAD')
+    changed = set()
+    listing = ['ls-files', '-z', '--cached', '--others', '--exclude-standard']
+    if published_commit and published_commit != head:
+        # A downstream retry may need repaired publishing tools. All other source,
+        # tests, policy, artwork and runtime inputs must match the actual published tag.
+        require(re.fullmatch(r'[a-f0-9]{40}', published_commit)
+                and git(ROOT, 'merge-base', published_commit, head) == published_commit,
+                'Published source is not an ancestor of the release checkout')
+        differences = subprocess.check_output(['git', 'diff', '--name-only', '--no-renames', '-z',
+                                               published_commit, head], cwd=ROOT)
+        changed = {item.decode() for item in differences.split(b'\0') if item}
+        orchestration = {'bin/release_gate.py', 'bin/release-workflow.py', 'bin/stable_release_checks.py',
+                         'tests/tooling/test_gate_readiness.py', 'tests/tooling/test_gate_stable.py',
+                         'tests/tooling/test_release_workflow.py', 'docs/dev/RELEASE-WORKFLOW.md'}
+        require(changed <= orchestration, 'Source outside the publication tools changed after the tag')
+        listing = ['ls-tree', '-r', '-z', '--name-only', published_commit]
+    names = subprocess.check_output(['git', *listing], cwd=ROOT).split(b'\0')
     hashes = []
     for name in sorted(set(n.decode() for n in names if n)):
+        if name in changed:
+            original = subprocess.check_output(['git', 'show', published_commit + ':' + name], cwd=ROOT)
+            hashes.append((name, hashlib.sha256(original).hexdigest()))
+            continue
         path = safe_path(ROOT / name)
         hashes.append((name, digest(path) if path.is_file() else 'DELETED'))
     dependencies = {name: digest(ROOT / name) for name in ('vendor/composer/installed.json', 'docs/generated/tmp/browser-tools/package-lock.json', 'docs/generated/tmp/wp-cli-modern/vendor/composer/installed.json')}
-    return dict(commit=git(ROOT, 'rev-parse', 'HEAD'), dependencies=dependencies,
+    return dict(commit=published_commit or head, dependencies=dependencies,
                 source_sha256=hashlib.sha256(json.dumps(hashes).encode()).hexdigest(),
                 policy_sha256=digest(POLICY))
 
@@ -101,9 +122,10 @@ def load_record():
     return json.loads(path.read_text())
 
 
-def validate_record(record):
+def validate_record(record, published_commit=None):
     require(record.get('state') == 'validation-passed', 'Candidate validation has not passed')
-    require(record.get('identity') == identity(), 'Source/policy changed after validation')
+    expected = identity(published_commit) if published_commit else identity()
+    require(record.get('identity') == expected, 'Source/policy changed after validation')
     age = (datetime.now(timezone.utc) - datetime.fromisoformat(record['completed_at'])).total_seconds()
     require(0 <= age <= policy()['evidence_max_age_hours'] * 3600, 'Validation evidence expired')
     _, archive_hash = package_files(candidate())
@@ -264,18 +286,37 @@ def build():
     print('Candidate validated; publication and website deployment are pending. Complete the agent review and website preparation before composer release:ready.')
 
 
+def published_submission(saved):
+    path = release_dir() / 'github-publication.json'
+    intent = json.loads(path.read_text()) if path.exists() else {}
+    if intent.get('phase') != 'github-published':
+        return None
+    from stable_release_checks import module
+    publisher = module('bin/release-github.py', 'cybermaps_published_submission')
+    published = publisher.verify_published('v' + version())
+    require(all(intent.get(key) == value for key, value in published.items()),
+            'Retained GitHub receipt differs from the public release')
+    require(published.get('channel') == 'stable' and all(saved.get(key) == published[key]
+            for key in ('tag', 'commit', 'zip_sha256')), 'Frozen SVN inputs differ from the public GitHub release')
+    return published
+
+
 def ready():
     publication = release_dir() / 'wordpress-publication.json'
+    published = None
     if publication.exists():
         saved = json.loads(publication.read_text())
         require(not saved.get('svn_revision') and saved.get('state') in ('inputs-frozen', 'svn-not-committed'),
                 'Publication evidence is frozen after SVN commit; use release:resume for downstream checks')
-    record = validate_record(load_record())
+        published = published_submission(saved)
+    record = validate_record(load_record(), published['commit']) if published else validate_record(load_record())
+    require(not published or record['zip_sha256'] == published['zip_sha256'],
+            'Validated ZIP differs from the published release')
     validate_review(record)
     require(not git(ROOT, 'status', '--porcelain', '--untracked-files=all'), 'Commit and push source before readiness')
     require(git(ROOT, 'branch', '--show-current') == 'main', 'Readiness requires main')
     remote = git(ROOT, 'ls-remote', 'https://github.com/Alex9001/cybermaps.git', 'refs/heads/main').split()
-    require(remote and remote[0] == record['identity']['commit'], 'Source must match pushed main')
+    require(remote and remote[0] == git(ROOT, 'rev-parse', 'HEAD'), 'Source must match pushed main')
     website, _ = load_config()
     website_release = json.loads((website / 'product/release.json').read_text())
     website_proof = prepared(website, record['identity']['commit'], website_release['channel'], version(),
@@ -289,6 +330,7 @@ def ready():
     require(fresh['wordpress_version'] == record['upstream']['wordpress_version'], 'New WordPress release requires validation')
     final = release_dir() / candidate().name
     for source, destination in ((candidate(), final), (Path(str(candidate()) + '.sha256'), Path(str(final) + '.sha256'))):
+        require(not published or destination.is_file(), 'Frozen GitHub release artifact is missing locally')
         if destination.exists():
             require(destination.read_bytes() == source.read_bytes(), 'Refusing to overwrite a different final artifact')
         else:

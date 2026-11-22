@@ -204,6 +204,22 @@ class StableChecksTest(unittest.TestCase):
                 checks.baseline('8.1.1')
             self.assertEqual(run.call_count, 1)
 
+    def test_public_candidate_uses_its_predecessor_and_a_newer_stable_still_blocks(self):
+        path = self.root / 'docs/dev/release-policy.json'
+        path.parent.mkdir(parents=True, exist_ok=True)
+        expected_hash = 'd' * 64
+        path.write_text(json.dumps(dict(first_stable_version='8.1.0',
+                            upgrade_baseline=dict(version='8.1.1', zip_sha256=expected_hash))))
+        releases = [dict(tag_name='v' + number, draft=False, prerelease=False) for number in ('8.1.2', '8.1.1')]
+        with patch.object(checks, 'run', side_effect=[json.dumps([releases]), '', '']) as run, \
+                patch.object(checks, 'package_files', return_value=({}, expected_hash)):
+            checks.baseline('8.1.2')
+            self.assertEqual([call.args[3] for call in run.call_args_list[1:]], ['v8.1.1', 'v8.1.1'])
+        releases.append(dict(tag_name='v8.1.3', draft=False, prerelease=False))
+        with patch.object(checks, 'run', return_value=json.dumps([releases])), \
+                self.assertRaisesRegex(RuntimeError, 'latest published stable'):
+            checks.baseline('8.1.2')
+
     def test_upgrade_uses_frozen_policy_even_after_working_policy_changes(self):
         path = self.directory / 'native-upgrade-wordpress.json'
         path.write_text('{"fixture":"reviewed native proof"}')

@@ -183,7 +183,10 @@ def baseline(number):
     repo = 'Alex9001/cybermaps'
     pages = json.loads(run('gh', 'api', '--hostname', 'github.com', '--paginate', '--slurp',
                            'repos/' + repo + '/releases?per_page=100'))
-    published = [r for page in pages for r in page if not r['draft'] and not r['prerelease']]
+    # During the SVN handoff the candidate itself is already public on GitHub.
+    # A newer stable release must still block a stale or out-of-order handoff.
+    published = [r for page in pages for r in page
+                 if not r['draft'] and not r['prerelease'] and r['tag_name'] != 'v' + number]
     if not published:
         require(number == policy['first_stable_version'] and expected['version'] == '8.0.4',
                 'Only the first stable launch can use the reviewed beta transition baseline')

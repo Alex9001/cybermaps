@@ -135,7 +135,14 @@ ownership properties fence concurrent changes, including to skipped files. No SV
 clone, worktree, old-tag edit or copy of uncommitted trunk is used. Existing trunk
 must match its prior released tag. Owned remote changes stop publication; the
 global revision counter advancing for another plugin does not. Readiness is
-checked again immediately before the SVN write. Every write attempt gets a unique transaction marker and a retained,
+checked again immediately before the SVN write. At that point the candidate is
+already on GitHub. The baseline is the preceding stable release. A later
+stable release blocks an out-of-order handoff. If the publisher itself needs
+a repair, resume verifies the public tag and both downloads, reconstructs the
+validated source identity at that tag and checks the current release evidence.
+Only publishing-tool changes and their tests or release guide can differ in a
+clean, pushed descendant checkout. The plugin, policy, runtime harness, artwork
+and existing release ZIP must still match. Every write attempt gets a unique transaction marker and a retained,
 hash-bound record of its start time, base revision and publication evidence.
 After readiness children finish, shared staging is checked again. The package and
 artwork bytes are copied into a private transaction directory; svnmucc reads only

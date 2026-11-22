@@ -1,8 +1,11 @@
 import copy
 from datetime import datetime, timedelta, timezone
 import importlib.util
+import json
 from pathlib import Path
+import subprocess
 import sys
+import tempfile
 import unittest
 from unittest.mock import patch
 
@@ -47,6 +50,55 @@ class ReadinessTest(unittest.TestCase):
     def test_missing_agent_review_blocks_promotion(self):
         with patch.object(Path, 'is_file', return_value=False), self.assertRaises(RuntimeError):
             gate.validate_review(self.record)
+
+
+class PublishedCheckoutTest(unittest.TestCase):
+    def test_public_receipt_and_svn_inputs_must_match_the_verified_github_release(self):
+        published = dict(tag='v8.1.2', commit='a' * 40, channel='stable', zip_sha256='b' * 64, release_id=92)
+        saved = {key: published[key] for key in ('tag', 'commit', 'zip_sha256')}
+        with tempfile.TemporaryDirectory(dir=gate.configure()) as scratch, \
+                patch.object(gate, 'release_dir', return_value=Path(scratch)), \
+                patch.object(gate, 'version', return_value='8.1.2'), \
+                patch('stable_release_checks.module') as loader:
+            loader.return_value.verify_published.return_value = published
+            self.assertIsNone(gate.published_submission(saved))
+            receipt = Path(scratch) / 'github-publication.json'
+            receipt.write_text(json.dumps(dict(published, phase='github-published')))
+            self.assertEqual(gate.published_submission(saved), published)
+            with self.assertRaisesRegex(RuntimeError, 'SVN inputs'):
+                gate.published_submission(dict(saved, zip_sha256='c' * 64))
+            receipt.write_text(json.dumps(dict(published, phase='github-published', release_id=93)))
+            with self.assertRaisesRegex(RuntimeError, 'GitHub receipt'):
+                gate.published_submission(saved)
+
+    def test_only_publication_tool_changes_can_replay_the_original_source_identity(self):
+        with tempfile.TemporaryDirectory(dir=gate.configure()) as scratch:
+            root = Path(scratch)
+            def git(*args):
+                return subprocess.check_output(['git', '-C', scratch, *args], text=True).strip()
+            git('init', '-q', '-b', 'main')
+            git('config', 'user.name', 'Release fixture')
+            git('config', 'user.email', 'fixture@example.invalid')
+            policy = root / 'docs/dev/release-policy.json'
+            for name in ('docs/dev/release-policy.json', 'vendor/composer/installed.json',
+                         'docs/generated/tmp/browser-tools/package-lock.json',
+                         'docs/generated/tmp/wp-cli-modern/vendor/composer/installed.json',
+                         'bin/release_gate.py', 'src/plugin.php'):
+                path = root / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text('original')
+            git('add', '.')
+            git('commit', '-qm', 'validated candidate')
+            with patch.object(gate, 'ROOT', root), patch.object(gate, 'POLICY', policy):
+                original = gate.identity()
+                (root / 'bin/release_gate.py').write_text('publisher repair')
+                git('commit', '-qam', 'repair publishing tools')
+                self.assertNotEqual(gate.identity(), original)
+                self.assertEqual(gate.identity(original['commit']), original)
+                (root / 'src/plugin.php').write_text('different runtime')
+                git('commit', '-qam', 'change runtime')
+                with self.assertRaisesRegex(RuntimeError, 'outside the publication tools'):
+                    gate.identity(original['commit'])
 
 
 if __name__ == '__main__':
