@@ -137,7 +137,7 @@ Uninstall retains data unless cleanup is enabled.
 == Changelog ==
 
 = 8.1.2 =
-* Withdraw content from origin publications when a public page becomes private or password-protected.
+* Withdraw content from origin publications when a public page becomes private or password-protected. Thanks to PeepSo for flagging that a cached export could still serve the withdrawn text.
 
 = 8.1.1 =
 * Prevent shared proxies from serving another site's sitemap or sitemap redirect.

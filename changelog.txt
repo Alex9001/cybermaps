@@ -3,7 +3,7 @@ Cybermaps release history
 
 8.1.2
 -----
-* Withdraw previously published origin representations after a public page becomes private or password-protected.
+* Withdraw previously published origin representations after a public page becomes private or password-protected. Thanks to PeepSo for flagging that a cached export could still serve the withdrawn text.
 
 8.1.1
 -----
