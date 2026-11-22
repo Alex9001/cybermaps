@@ -1,4 +1,4 @@
-# Cybermaps 8.1.1 — vs. Rank Math, Yoast, AIOSEO, and sitemap plugins
+# Cybermaps 8.1.2 — vs. Rank Math, Yoast, AIOSEO, and sitemap plugins
 
 **Publish. Verify. Improve. One complete WordPress discovery engine.**
 
@@ -12,7 +12,7 @@ clients, and practical reports that turn ongoing site work into a client deliver
 
 ## Compare at a glance
 
-**CYBERMAPS 8.1.1 · Official competitor sources reviewed September 8, 2026.**
+**CYBERMAPS 8.1.2 · Official competitor sources reviewed September 8, 2026.**
 AIOSEO is All in One SEO, formerly All in One SEO Pack. “Generic sitemap plugin”
 means a basic XML sitemap solution; additional features vary by the chosen plugin.
 
@@ -67,8 +67,8 @@ Yoast also offers schema aggregation, and AIOSEO documents full-text and Markdow
 publication: AI publishing is a shared category, with meaningful differences in scope.
 
 CYBERMAPS' public checks distinguish a reachable URL from a valid body and correct
-headers. Optional static publication can serve eligible files directly; multisite
-uses dynamic delivery. Server and CDN configuration still determines public routing
+headers. The five compatibility files support direct delivery. Full publication cache
+serves content through WordPress after checking freshness. Multisite uses dynamic delivery. Server and CDN configuration still determines public routing
 and headers. See the [delivery documentation](./documentation.md).
 
 ### Site improvement and client work
@@ -129,7 +129,7 @@ per sitemap or discovery URL when combining plugins. The
 
 ## Implementation and source notes
 
-CYBERMAPS 8.1.1 requires PHP 8.2+ and WordPress 7.1+. Its
+CYBERMAPS 8.1.2 requires PHP 8.2+ and WordPress 7.1+. Its
 [feature reference](./features.md) and [generated inventory](./dev/manifest.json)
 provide the detailed Core coverage behind these comparisons.
 

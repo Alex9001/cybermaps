@@ -51,13 +51,14 @@ class StaticBridgePurgeTest extends \WP_UnitTestCase {
 		$this->assertTrue( $bridge->write_file( 'sitemap.xml', '<credited-sitemap/>' ) );
 		$this->assertTrue( $bridge->write_file( 'sitemap-post-1.xml', '<credited-child/>' ) );
 		$this->assertTrue( $bridge->write_file( 'llms.txt', '# Site' ) );
+		$paths = array_map( array( $bridge, 'get_file_path' ), array( 'sitemap.xml', 'sitemap-post-1.xml', 'llms.txt' ) );
 		$old = array( 'static_engine_mode' => 'all', 'show_sitemap_attribution' => '1' );
 		$new = array( 'static_engine_mode' => 'all', 'show_sitemap_attribution' => '0' );
 		$GLOBALS['cybermaps_mock_options']['cybermaps_settings'] = $new;
 		( new \Cybermaps\Admin\Settings() )->on_settings_updated( $old, $new );
-		$this->assertFileDoesNotExist( ABSPATH . 'sitemap.xml' );
-		$this->assertFileDoesNotExist( ABSPATH . 'sitemap-post-1.xml' );
-		$this->assertFileExists( ABSPATH . 'llms.txt' );
+		$this->assertFileDoesNotExist( $paths[ 0 ] );
+		$this->assertFileDoesNotExist( $paths[ 1 ] );
+		$this->assertFileExists( $paths[ 2 ] );
 	}
 
 	public function test_purge_all_deletes_root_ai_json(): void {
@@ -201,6 +202,8 @@ class StaticBridgePurgeTest extends \WP_UnitTestCase {
 		$this->assertTrue( $bridge->write_file( 'sitemap.xml', '<sitemapindex/>' ) );
 		$this->assertTrue( $bridge->write_file( 'llms.txt', '# Site' ) );
 
+		$sitemap_path = $bridge->get_file_path( 'sitemap.xml' );
+		$llms_path = $bridge->get_file_path( 'llms.txt' );
 		( new \Cybermaps\Admin\Settings() )->on_settings_updated(
 				array(
 					'static_engine_mode'   => 'all',
@@ -212,10 +215,11 @@ class StaticBridgePurgeTest extends \WP_UnitTestCase {
 				)
 		);
 
-		$this->assertFileExists( ABSPATH . 'sitemap.xml' );
-		$this->assertFileDoesNotExist( ABSPATH . 'llms.txt' );
-		$this->assertArrayHasKey( 'sitemap.xml', get_option( 'cybermaps_static_hashes', array() ) );
-		$this->assertArrayNotHasKey( 'llms.txt', get_option( 'cybermaps_static_hashes', array() ) );
+		$this->assertFileExists( $sitemap_path );
+		$this->assertFileDoesNotExist( $llms_path );
+		$owned = array_map( array( \Cybermaps\Discovery\GuardedPublicationCache::class, 'filename' ), array_keys( get_option( 'cybermaps_static_hashes', array() ) ) );
+		$this->assertContains( 'sitemap.xml', $owned );
+		$this->assertNotContains( 'llms.txt', $owned );
 
 		$this->delete_test_file( 'sitemap.xml' );
 	}

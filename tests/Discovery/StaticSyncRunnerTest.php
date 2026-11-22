@@ -88,7 +88,7 @@ final class StaticSyncRunnerTest extends \WP_UnitTestCase {
 			} while ( ! $done );
 			$actual = array();
 			foreach ( $report['written'] as $filename ) {
-				$body = json_decode( (string) file_get_contents( ABSPATH . $filename ), true, 512, JSON_THROW_ON_ERROR );
+				$body = json_decode( (string) file_get_contents( StaticBridge::get_instance()->get_file_path( $filename ) ), true, 512, JSON_THROW_ON_ERROR );
 				$actual[] = $body['post_id'];
 			}
 			sort( $actual );
@@ -96,7 +96,7 @@ final class StaticSyncRunnerTest extends \WP_UnitTestCase {
 			$this->assertSame( array(), $report['failed'] );
 		} finally {
 			foreach ( $report['written'] as $filename ) {
-				unlink( ABSPATH . $filename );
+				unlink( $bridge->get_file_path( $filename ) );
 			}
 		}
 	}

@@ -415,7 +415,7 @@ class SitemapStatus {
 				echo esc_html(
 					sprintf(
 						/* translators: 1: latest reconciliation status, 2: latest attempt, 3: latest complete success. */
-						__( 'Latest reconciliation: %1$s · attempted: %2$s · last complete success: %3$s. A published file is only an intended static copy; the public web server decides whether it is actually served.', 'cybermaps' ),
+						__( 'Latest reconciliation %1$s. Last attempt %2$s. Last complete success %3$s. Route sitemap URLs to WordPress so it can check freshness before serving a cached copy.', 'cybermaps' ),
 						$status,
 						$attempt,
 						$success

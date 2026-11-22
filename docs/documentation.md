@@ -1,6 +1,6 @@
 # Cybermaps — Technical Documentation
 
-> Version 8.1.1 · PHP 8.2 · WordPress 7.1
+> Version 8.1.2 · PHP 8.2 · WordPress 7.1
 
 Public sitemap credit is optional. In **Sitemaps**, enable **Show the CYBER MAPS
 credit on public sitemaps** to opt in. `show_sitemap_attribution` defaults to `0`
@@ -743,7 +743,7 @@ deployment.
 |---|---|
 | `off` | No generated files; supported requests use WordPress when the server routes them to PHP |
 | `well_known` | Five small registered root and canonical Agent Skills targets while the Discovery Hub is enabled; this is the default |
-| `all` | The sitemap index and internal children, enabled RSS output, protocol-safe discovery files, localized LLMS output, and eligible RAG chunks |
+| `all` | The five compatibility files plus privately cached sitemap XML, RSS, content-bearing discovery files, localized LLMS output, and eligible RAG chunks |
 
 The default target inventory is:
 
@@ -773,6 +773,24 @@ On a subdirectory WordPress installation, Cybermaps derives the origin document
 root conservatively. A differently rooted or remote headless frontend must
 provide the `cybermaps_static_publication_root` filter. Multisite is
 dynamic-only so individual sites never compete for shared root filenames.
+
+### Withdrawing previously exported content
+
+In Full publication cache mode, route the LLMS, localized LLMS, chunk, news, RSS,
+and sitemap URLs to WordPress. Cybermaps stores their generated bodies outside
+the public directory and checks the current publication generation on each origin
+request. Saving a formerly public page as private or adding a password invalidates
+the old generation during the save. With cron paused or a rebuild failure, the
+origin serves current eligible content or a temporary error. Per-page Markdown
+also checks eligibility on each request.
+
+On upgrade from an earlier version, WordPress requests remove older public
+copies whose bytes match the plugin's ownership records. Check the Static File
+Engine notices for retained files. Resolve changed or unwritable copies at the
+origin, or route those URLs directly to WordPress. A remote frontend must
+forward the content URLs to WordPress. Page caches and CDNs that can answer
+without contacting WordPress require their own purge policy. A previously
+downloaded copy stays with its recipient.
 
 ### Write safety and reconciliation
 

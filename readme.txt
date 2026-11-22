@@ -3,7 +3,7 @@ Contributors: oreshkin
 Tags: sitemap, llms-txt, technical-seo, content-audit, indexnow
 Requires at least: 7.1
 Tested up to: 7.1
-Stable tag: 8.1.1
+Stable tag: 8.1.2
 Requires PHP: 8.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -90,7 +90,7 @@ Use the [WordPress.org support forum](https://wordpress.org/support/plugin/cyber
 
 = Source Code =
 
-https://github.com/Alex9001/cybermaps/tree/v8.1.1
+https://github.com/Alex9001/cybermaps/tree/v8.1.2
 JS/CSS: assets/; setup-wizard.js uses wp.element. No compilation.
 Build: composer install; bash bin/package-candidate.sh.
 
@@ -136,6 +136,9 @@ Uninstall retains data unless cleanup is enabled.
 
 == Changelog ==
 
+= 8.1.2 =
+* Withdraw content from origin publications when a public page becomes private or password-protected.
+
 = 8.1.1 =
 * Prevent shared proxies from serving another site's sitemap or sitemap redirect.
 * Avoid writing a temporary content-analysis cache entry for every post in a full content report.
@@ -153,12 +156,12 @@ Uninstall retains data unless cleanup is enabled.
 = 8.0.3 =
 * Fix sitemap/report buffers.
 
-= 8.0.2 =
-* Fix privacy, configuration, ownership, publication limits, reports and admin UI; expand release checks.
-
 Full release history and archived upgrade notices: `changelog.txt`.
 
 == Upgrade Notice ==
+
+= 8.1.2 =
+Improves withdrawal of previously published content in Full publication cache mode. Purge separate page and CDN caches.
 
 = 8.1.1 =
 Fixes cross-site sitemap responses on shared hosting. Existing cached responses may appear until they expire.
@@ -172,6 +175,3 @@ XML management switch added; defaults stay enabled.
 
 = 8.0.3 =
 Preserves caller output buffers.
-
-= 8.0.2 =
-Ownership migrates in batches. Review file conflicts and incomplete reports. Restart pending Cloudflare authorization.

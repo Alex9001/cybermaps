@@ -82,7 +82,8 @@ class StaticBridge {
 	/**
 	 * Configuration generation captured when this request acquired the lock.
 	 */
-	private ?int $operation_generation = null;
+	private ?int $operation_generation            = null;
+	private ?string $operation_privacy_generation = null;
 
 	private bool $ownership_dirty            = false;
 	private bool $ownership_ready            = true;
@@ -349,8 +350,50 @@ class StaticBridge {
 	 * @return string Absolute path.
 	 */
 	public function get_file_path( $filename ) {
-		$resolution = $this->resolve_file_path( (string) $filename );
+		$resolution = $this->resolve_file_path( $this->publication_key( (string) $filename ) );
 		return (string) ( $resolution['path'] ?? '' );
+	}
+
+	/** Resolve the file identity before reading or generating a publication. */
+	private function publication_key( string $filename ): string {
+		if ( ! GuardedPublicationCache::covers( $filename ) ) {
+			return $filename;
+		}
+		return GuardedPublicationCache::key( $filename, $this->operation_generation ?? $this->get_generation(), $this->operation_privacy_generation ?? GuardedPublicationCache::privacy_generation() );
+	}
+
+	/** Read a verified current file through its normal WordPress response handler. */
+	public function read_current_publication( string $filename ): ?string {
+		if ( 'all' !== self::get_mode() || ! $this->is_safe_generated_path( $filename ) || ! GuardedPublicationCache::covers( $filename ) ) {
+			return null;
+		}
+		$generation = $this->get_generation();
+		if ( $generation < 0 || ! $this->load_filesystem_api() || ! \WP_Filesystem() ) {
+			return null;
+		}
+		$privacy    = GuardedPublicationCache::privacy_generation();
+		$key        = GuardedPublicationCache::key( $filename, $generation, $privacy );
+		$resolution = $this->resolve_file_path( $key );
+		$body       = $this->read_verified_cached_file( $key, (string) $resolution['path'] );
+		return $generation === $this->get_generation() && GuardedPublicationCache::privacy_generation() === $privacy ? $body : null;
+	}
+
+	/** An absent, changed or oversized backing file is a cache miss. */
+	private function read_verified_cached_file( string $key, string $path ): ?string {
+		global $wp_filesystem;
+		if ( '' === $path || is_link( $path ) || ! $wp_filesystem->is_readable( $path ) ) {
+			return null;
+		}
+		$size = $wp_filesystem->size( $path );
+		if ( ! is_int( $size ) || ! GuardedPublicationCache::can_read_body( $size ) ) {
+			return null;
+		}
+		$hash = $this->ownership_store->get_hash( $key );
+		if ( null === $hash ) {
+			return null;
+		}
+		$body = $wp_filesystem->get_contents( $path );
+		return is_string( $body ) && hash_equals( $hash, md5( $body ) ) ? $body : null;
 	}
 
 	/**
@@ -396,7 +439,7 @@ class StaticBridge {
 			return false;
 		}
 
-		$resolution = $this->resolve_file_path( $filename );
+		$resolution = $this->resolve_file_path( $this->publication_key( $filename ) );
 		$path       = (string) ( $resolution['path'] ?? '' );
 		if ( '' === $path || ! $this->load_filesystem_api() || ! \WP_Filesystem() ) {
 			return false;
@@ -449,12 +492,26 @@ class StaticBridge {
 		}
 
 		try {
-			return $this->write_file_unlocked( $filename, $content );
+			return $this->write_file_unlocked( is_string( $filename ) ? $this->publication_key( $filename ) : $filename, $content );
 		} finally {
 			if ( $acquired_here ) {
 				$this->release_operation_lock();
 			}
 		}
+	}
+
+	/** A public file at the old location can take precedence over the WordPress route. */
+	private function retire_previous_public_target( string $filename ): bool {
+		$resolution = $this->resolve_file_path( $filename );
+		$path       = (string) $resolution['path'];
+		if ( '' === $path || ! file_exists( $path ) ) {
+			return true;
+		}
+		$result = $this->purge_owned_paths_unlocked( array( $filename ), true );
+		if ( 'complete' === $result['status'] ) {
+			return true;
+		}
+		return $this->complete_write_attempt( false, $filename, 'conflict', 'public_file_retained', __( 'A previous public file still takes precedence at this URL. Resolve its ownership or route the URL to WordPress.', 'cybermaps' ), $path, array(), true );
 	}
 
 	/**
@@ -582,7 +639,11 @@ class StaticBridge {
 			);
 		}
 
-		$resolution = $this->resolve_file_path( $filename );
+		$logical = GuardedPublicationCache::filename( $filename );
+		if ( $logical !== $filename && ! $this->retire_previous_public_target( $logical ) ) {
+			return false;
+		}
+		$resolution = $this->resolve_file_path( $filename, true );
 		if ( empty( $resolution['path'] ) ) {
 			$reason = (string) ( $resolution['reason'] ?? 'publication_root_unavailable' );
 			return $this->complete_write_attempt(
@@ -1987,7 +2048,7 @@ class StaticBridge {
 	private function collect_time_sensitive_news_state( array &$state, int $checkpoint, int $now ): void {
 		$news          = new \Cybermaps\Sitemap\NewsProvider();
 		$news_filename = \Cybermaps\Sitemap\Orchestrator::get_news_sitemap_base() . '.xml';
-		$owns_news     = null !== $this->ownership_store->get_hash( $news_filename );
+		$owns_news     = null !== $this->ownership_store->get_hash( $this->publication_key( $news_filename ) );
 		try {
 			$state['news_due'] = $checkpoint < 1
 				? ( $news->get_count() > 0 || $owns_news )
@@ -2525,7 +2586,7 @@ class StaticBridge {
 			$report['retained'][ $file ] = (string) $deletion['code'];
 			return true; }
 		if ( ! empty( $deletion['deleted'] ) ) {
-			$report['deleted'][] = $file; }
+			$report['deleted'][] = GuardedPublicationCache::filename( $file ); }
 		unset( $records[ $file ], $errors[ $file ] );
 		return true;
 	}
@@ -2774,7 +2835,7 @@ class StaticBridge {
 		// makes this publication impossible.
 		if (
 			null !== $this->get_write_block_reason( $filename )
-			|| '' === (string) ( $this->resolve_file_path( $filename )['path'] ?? '' )
+			|| '' === $this->get_file_path( $filename )
 		) {
 			$this->record_sync_write_result(
 				$report,
@@ -2853,7 +2914,7 @@ class StaticBridge {
 			);
 			$this->merge_purge_result(
 				$report,
-				$this->purge_owned_paths_unlocked( array( $filename ), true )
+				$this->purge_owned_paths_unlocked( array_unique( array( $filename, $this->publication_key( $filename ) ) ), true )
 			);
 			return array(
 				'handled' => true,
@@ -2932,11 +2993,12 @@ class StaticBridge {
 		if ( ! isset( $this->sync_completed[ $filename ] ) ) {
 			return false;
 		}
-		if ( ! $this->publication_matches_ownership( $filename ) ) {
+		$key = $this->publication_key( $filename );
+		if ( ! $this->publication_matches_ownership( $key ) ) {
 			unset( $this->sync_completed[ $filename ] );
 			return false;
 		}
-		if ( ! $this->mark_ownership_seen( $filename ) ) {
+		if ( ! $this->mark_ownership_seen( $key ) ) {
 			unset( $this->sync_completed[ $filename ] );
 			return false;
 		}
@@ -3009,6 +3071,17 @@ class StaticBridge {
 			+ \count( (array) $report['skipped'] );
 	}
 
+	/** Keep the public reporting contract in terms of published URLs. */
+	private function public_purge_result( array $result ): array {
+		$result['deleted'] = array_map( array( GuardedPublicationCache::class, 'filename' ), $result['deleted'] ?? array() );
+		$retained          = array();
+		foreach ( $result['retained'] ?? array() as $key => $reason ) {
+			$retained[ GuardedPublicationCache::filename( (string) $key ) ] = $reason;
+		}
+		$result['retained'] = $retained;
+		return $result;
+	}
+
 	/**
 	 * Merge an ownership-safe purge into a synchronization report.
 	 *
@@ -3016,6 +3089,7 @@ class StaticBridge {
 	 * @param array<string, mixed> $purge Purge result.
 	 */
 	private function merge_purge_result( array &$report, array $purge ): void {
+		$purge            = $this->public_purge_result( $purge );
 		$sample_limit     = 100;
 		$aggregate_counts = \is_array( $report['_aggregate_counts'] ?? null )
 			? $report['_aggregate_counts']
@@ -3448,7 +3522,7 @@ class StaticBridge {
 			}
 		}
 
-		return $result;
+		return $this->public_purge_result( $result );
 	}
 
 	/**
@@ -3499,7 +3573,7 @@ class StaticBridge {
 	}
 
 	private function resume_purge_checkpoint( string $scope, array $state ): void {
-		if ( $state['generation'] !== $this->operation_generation || $scope !== $state['args']['scope'] ) {
+		if ( $scope !== $state['args']['scope'] || ( 'legacy_content' !== $scope && $state['generation'] !== $this->operation_generation ) ) {
 			$this->ownership_store->write_purge_checkpoint( $scope, null );
 		} else {
 			$args = $state['args'];
@@ -3584,7 +3658,7 @@ class StaticBridge {
 
 	private function purge_initial_state( array $args ): array|false {
 		$scope    = $args['scope'];
-		$identity = hash( 'sha256', (string) wp_json_encode( array( $args, $this->operation_generation ) ) );
+		$identity = hash( 'sha256', (string) wp_json_encode( array( $args, 'legacy_content' === $scope ? 0 : $this->operation_generation ) ) );
 		$state    = $this->ownership_store->read_purge_checkpoint( $scope );
 		if ( false === $state ) {
 			return false;
@@ -3766,14 +3840,16 @@ class StaticBridge {
 
 	/** Determine whether a purge scope includes an owned path. */
 	private function purge_scope_includes_file( string $file, string $scope, array $sitemap_targets, array $desired_lookup, ?int $desired_generation ): bool {
+		$logical  = GuardedPublicationCache::filename( $file );
 		$included = array(
 			'web_root'            => ! $this->is_well_known_mode_static_path( $file ),
-			'discovery'           => $this->is_discovery_generated_path( $file ),
+			'discovery'           => $this->is_discovery_generated_path( $logical ),
 			'xml'                 => str_ends_with( $file, '.xml' ),
-			'sitemaps'            => \in_array( $file, $sitemap_targets, true ),
-			'sitemap_family'      => $this->is_sitemap_family_target( $file, $sitemap_targets, $desired_lookup ),
+			'sitemaps'            => \in_array( $logical, $sitemap_targets, true ),
+			'sitemap_family'      => $this->is_sitemap_family_target( $logical, $sitemap_targets, $desired_lookup ),
+			'legacy_content'      => GuardedPublicationCache::covers( $file ),
 			'legacy_publications' => \in_array( $file, self::LEGACY_GENERATED_FILES, true ),
-			'stale'               => ! isset( $desired_lookup[ $file ] ),
+			'stale'               => ! isset( $desired_lookup[ $logical ] ),
 			'stale_generation'    => null === $desired_generation || $this->ownership_store->get_generation( $file ) !== $desired_generation,
 			'failed_publication'  => isset( $desired_lookup[ $file ] ),
 		);
@@ -3932,14 +4008,16 @@ class StaticBridge {
 
 	/** Determine whether one diagnostic remains in the active purge scope. */
 	private function should_retain_purge_error( string $file, string $scope, array $retained, array $desired_lookup, array $sitemap_targets, ?int $desired_generation ): bool {
-		$retain = array(
-			'stale'               => isset( $desired_lookup[ $file ] ),
+		$logical = GuardedPublicationCache::filename( $file );
+		$retain  = array(
+			'stale'               => isset( $desired_lookup[ $logical ] ),
 			'stale_generation'    => null !== $desired_generation && $this->ownership_store->get_generation( $file ) === $desired_generation,
 			'failed_publication'  => ! isset( $desired_lookup[ $file ] ) || isset( $retained[ $file ] ),
 			'web_root'            => $this->is_well_known_mode_static_path( $file ),
-			'discovery'           => ! $this->is_discovery_generated_path( $file ),
-			'sitemaps'            => ! \in_array( $file, $sitemap_targets, true ),
-			'sitemap_family'      => ! $this->is_sitemap_family_target( $file, $sitemap_targets, $desired_lookup ),
+			'discovery'           => ! $this->is_discovery_generated_path( $logical ),
+			'sitemaps'            => ! \in_array( $logical, $sitemap_targets, true ),
+			'sitemap_family'      => ! $this->is_sitemap_family_target( $logical, $sitemap_targets, $desired_lookup ),
+			'legacy_content'      => ! GuardedPublicationCache::covers( $file ),
 			'legacy_publications' => ! \in_array( $file, self::LEGACY_GENERATED_FILES, true ),
 		);
 		return $retain[ $scope ] ?? false;
@@ -4132,6 +4210,7 @@ class StaticBridge {
 				$this->ownership_store->clear_local_cache();
 				return false;
 			}
+			$this->operation_privacy_generation = GuardedPublicationCache::privacy_generation();
 			return true;
 		}
 		return false;
@@ -4188,9 +4267,10 @@ class StaticBridge {
 		}
 
 		$this->operation_lock->release();
-		$this->operation_lock_token = null;
-		$this->operation_generation = null;
-		$this->operation_lock_lost  = false;
+		$this->operation_lock_token         = null;
+		$this->operation_generation         = null;
+		$this->operation_privacy_generation = null;
+		$this->operation_lock_lost          = false;
 		$this->ownership_store->clear_local_cache();
 		$this->ownership_dirty            = false;
 		$this->ownership_repair_needed    = false;
@@ -5427,7 +5507,7 @@ class StaticBridge {
 			return 'configuration_changed';
 		}
 
-		return $this->get_configuration_write_block_reason( $filename );
+		return $this->get_configuration_write_block_reason( GuardedPublicationCache::filename( $filename ) );
 	}
 
 	/** Apply the current publication switches independently of operation fences. */
@@ -5590,7 +5670,7 @@ class StaticBridge {
 	 *
 	 * @return array{path:string,reason:string,message:string}
 	 */
-	private function resolve_file_path( string $filename ): array {
+	private function resolve_file_path( string $filename, bool $create_private_root = false ): array {
 		if ( ! $this->is_safe_generated_path( $filename ) ) {
 			return array(
 				'path'    => '',
@@ -5619,11 +5699,11 @@ class StaticBridge {
 		$custom_root = \apply_filters(
 			'cybermaps_static_publication_root',
 			'',
-			$filename,
+			GuardedPublicationCache::filename( $filename ),
 			$settings
 		);
 		if ( \is_string( $custom_root ) && '' !== \trim( $custom_root ) ) {
-			return $this->resolve_publication_path( $custom_root, $filename, true );
+			return $this->resolve_storage_path( $custom_root, $filename, true, $create_private_root );
 		}
 
 		$frontend_base = $this->get_static_frontend_base( $settings );
@@ -5641,7 +5721,30 @@ class StaticBridge {
 			return $publication_root;
 		}
 
-		return $this->resolve_publication_path( $publication_root, $filename, false );
+		return $this->resolve_storage_path( $publication_root, $filename, false, $create_private_root );
+	}
+
+	/** Resolve public and guarded storage only after the origin mapping is known. */
+	private function resolve_storage_path( string $root, string $filename, bool $require_writable, bool $create ): array {
+		if ( str_starts_with( $filename, GuardedPublicationCache::PREFIX ) ) {
+			return $this->resolve_guarded_path( $filename, $root, $create );
+		}
+		return $this->resolve_publication_path( $root, $filename, $require_writable );
+	}
+
+	/** A guarded key may resolve only in this installation's private cache. */
+	private function resolve_guarded_path( string $key, string $public_root, bool $create ): array {
+		if ( GuardedPublicationCache::filename( $key ) !== $key && $this->load_filesystem_api() ) {
+			$root = GuardedPublicationCache::private_root( $public_root, $create );
+			if ( '' !== $root ) {
+				return $this->resolve_publication_path( dirname( $root ), basename( $root ) . '/' . hash( 'sha256', $key ) . '.cache', false );
+			}
+		}
+		return array(
+			'path'    => '',
+			'reason'  => 'private_cache_unavailable',
+			'message' => __( 'Private publication storage is unavailable. Route this publication to WordPress for dynamic delivery.', 'cybermaps' ),
+		);
 	}
 
 	/**
@@ -6067,7 +6170,7 @@ class StaticBridge {
 		}
 
 		$size = max( 0, (int) $size );
-		if ( $size <= self::OWNERSHIP_VERIFICATION_MAX_BYTES ) {
+		if ( $size <= self::OWNERSHIP_VERIFICATION_MAX_BYTES || GuardedPublicationCache::can_read_body( $size ) ) {
 			return null;
 		}
 

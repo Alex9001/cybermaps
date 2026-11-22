@@ -34,7 +34,7 @@ final class StaticHeaderManifest {
 
 		foreach ( $targets as $target ) {
 			$path = (string) ( $target['path'] ?? '' );
-			if ( '' === $path || isset( $policies[ $path ] ) ) {
+			if ( '' === $path || 'all' === $target['bucket'] || isset( $policies[ $path ] ) ) {
 				continue;
 			}
 			$policies[ $path ] = $this->policy_for_target( $target );
@@ -371,6 +371,12 @@ final class StaticHeaderManifest {
 			}
 			$paths[] = (string) $definition['path'];
 			$paths   = array_merge( $paths, array_filter( (array) ( $definition['aliases'] ?? array() ), 'is_string' ) );
+		}
+
+		foreach ( $registry->get_static_targets( 'all', null, true ) as $target ) {
+			if ( 'all' === $target['bucket'] ) {
+				$paths[] = $target['path'];
+			}
 		}
 
 		return array_values( array_unique( $paths ) );

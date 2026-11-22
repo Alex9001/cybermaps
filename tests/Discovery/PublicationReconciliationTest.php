@@ -54,11 +54,11 @@ final class PublicationReconciliationTest extends \WP_UnitTestCase {
 
 		$this->assertHookContract( 'save_post', 2, array( $this->manager, 'on_post_saved' ) );
 		$this->assertHookContract( 'transition_post_status', 3, array( $this->manager, 'on_post_status_transition' ) );
-		$this->assertHookContract( 'delete_post', 2, array( $this->manager, 'on_post_deleted' ) );
+		$this->assertHookContract( 'after_delete_post', 2, array( $this->manager, 'on_post_deleted' ) );
 		$this->assertHookContract( 'set_object_terms', 6, array( $this->manager, 'on_object_terms_set' ) );
 		$this->assertHookContract( 'save_post', 2, array( $this->orchestrator, 'handle_published_post_save' ) );
 		$this->assertHookContract( 'transition_post_status', 3, array( $this->orchestrator, 'handle_post_status_transition' ) );
-		$this->assertHookContract( 'delete_post', 2, array( $this->orchestrator, 'handle_published_post_delete' ) );
+		$this->assertHookContract( 'after_delete_post', 2, array( $this->orchestrator, 'handle_published_post_delete' ) );
 		$this->assertHookContract( 'set_object_terms', 6, array( $this->orchestrator, 'handle_published_post_terms' ) );
 	}
 

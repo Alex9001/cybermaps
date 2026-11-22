@@ -1,6 +1,10 @@
 Cybermaps release history
 =========================
 
+8.1.2
+-----
+* Withdraw previously published origin representations after a public page becomes private or password-protected.
+
 8.1.1
 -----
 * Prevent shared proxies from serving another site's dynamic sitemap or sitemap redirect while preserving WordPress sitemap caching.
@@ -40,6 +44,9 @@ Cybermaps release history
 * Report incomplete sitemap and audit scans explicitly; preserve queued edge invalidations and surface backpressure or scheduling failures.
 * Bound browser delivery checks, fence stale page-search responses and preserve disabled controls during overlapping operations.
 * Extend local release checks and retain exact candidate, runtime, website and review evidence.
+
+= 8.0.2 =
+* Fix privacy, configuration, ownership, publication limits, reports and admin UI; expand release checks.
 
 8.0.1
 -----
@@ -710,6 +717,9 @@ Changelog entries
 
 Upgrade notices
 ---------------
+
+= 8.0.2 =
+Ownership migrates in batches. Review file conflicts and incomplete reports. Restart pending Cloudflare authorization.
 
 = 8.0.1 =
 Removes legacy MCP settings; preserves 8.0 adapter consent.

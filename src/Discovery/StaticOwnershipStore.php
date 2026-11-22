@@ -18,7 +18,7 @@ final class StaticOwnershipStore {
 	public const SCHEMA_OPTION        = 'cybermaps_static_hashes_schema';
 	public const SCHEMA_VERSION       = 3;
 	public const SHARD_SCHEMA_VERSION = 2;
-	public const PURGE_SCOPES         = array( 'all', 'web_root', 'discovery', 'sitemaps', 'stale', 'stale_generation', 'legacy_publications', 'failed_publication', 'xml', 'sitemap_family' );
+	public const PURGE_SCOPES         = array( 'all', 'web_root', 'discovery', 'sitemaps', 'stale', 'stale_generation', 'legacy_publications', 'legacy_content', 'failed_publication', 'xml', 'sitemap_family' );
 	public const MIGRATION_OPTION     = 'cybermaps_static_ownership_migration';
 	private array $row_changes        = array();
 	private array $row_observations   = array();

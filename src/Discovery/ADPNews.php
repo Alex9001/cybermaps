@@ -43,24 +43,26 @@ final class ADPNews {
 	private ?array $articles = null;
 
 	public function handle(): void {
-		$match       = \Cybermaps\Core\EndpointRegistry::get_instance()->match_path( (string) \Cybermaps\Core\URLManager::get_request_path() );
+		$path        = (string) \Cybermaps\Core\URLManager::get_request_path();
+		$match       = \Cybermaps\Core\EndpointRegistry::get_instance()->match_path( $path );
 		$endpoint_id = is_array( $match ) ? (string) ( $match['id'] ?? '' ) : '';
 		if ( ! isset( self::ENDPOINTS[ $endpoint_id ] ) ) {
 			return;
 		}
 
+		$generation = \Cybermaps\Core\CacheManager::get_generation( 'discovery', true );
 		try {
-			$output = $this->get_content( $endpoint_id );
+			$output = StaticBridge::get_instance()->read_current_publication( ltrim( $path, '/' ) ) ?? $this->get_content( $endpoint_id );
 		} catch ( PublicationSizeLimitException $error ) {
 			PublicationRequestGuard::serve_size_limit_error( $error );
 		}
 		$config = self::ENDPOINTS[ $endpoint_id ];
-		Integrity::send_headers( $output, $config['ttl'] );
 		header( 'Content-Type: ' . $config['type'] );
 		header( 'X-Update-Frequency: ' . $config['frequency'] );
 		if ( 'adp_news_archive' === $endpoint_id ) {
 			header( 'X-Total-Records: ' . count( $this->get_articles() ) );
 		}
+		Integrity::send_headers( $output, $config['ttl'], null, $generation );
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
 			$protocol = in_array( $endpoint_id, array( 'adp_news_speakable', 'adp_news_changelog' ), true ) ? 'json' : 'text';
 			\Cybermaps\Core\ProtocolOutput::emit( $output, $protocol );

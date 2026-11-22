@@ -133,10 +133,10 @@ final class TimeSensitivePublicationTest extends \WP_UnitTestCase {
 			array( 'discovery/chunks/41.json', 'ai-sitemap.xml' ),
 			$report['desired']
 		);
-		$this->assertFileExists( ABSPATH . 'discovery/chunks/41.json' );
-		$this->assertFileExists( ABSPATH . 'ai-sitemap.xml' );
+		$this->assertFileExists( StaticBridge::get_instance()->get_file_path( 'discovery/chunks/41.json' ) );
+		$this->assertFileExists( StaticBridge::get_instance()->get_file_path( 'ai-sitemap.xml' ) );
 		$chunk = json_decode(
-			(string) file_get_contents( ABSPATH . 'discovery/chunks/41.json' ),
+			(string) file_get_contents( StaticBridge::get_instance()->get_file_path( 'discovery/chunks/41.json' ) ),
 			true,
 			512,
 			JSON_THROW_ON_ERROR
@@ -144,7 +144,7 @@ final class TimeSensitivePublicationTest extends \WP_UnitTestCase {
 		$this->assertSame( 'established', $chunk['metadata']['freshness'] );
 		$this->assertStringContainsString(
 			'<ai:freshness>established</ai:freshness>',
-			(string) file_get_contents( ABSPATH . 'ai-sitemap.xml' )
+			(string) file_get_contents( StaticBridge::get_instance()->get_file_path( 'ai-sitemap.xml' ) )
 		);
 		$this->assertSame(
 			array( 'status' => 'sentinel' ),
@@ -199,7 +199,7 @@ final class TimeSensitivePublicationTest extends \WP_UnitTestCase {
 		$this->assertSame( array(), $report['desired'] );
 		$this->assertSame( array(), $report['written'] );
 		foreach ( $sentinels as $filename => $content ) {
-			$this->assertSame( $content, \file_get_contents( ABSPATH . $filename ) );
+			$this->assertSame( $content, \file_get_contents( $bridge->get_file_path( $filename ) ) );
 		}
 		$this->assertSame( $ownership_before, ( new StaticOwnershipStore() )->read_flat_hashes() );
 	}
@@ -243,8 +243,8 @@ final class TimeSensitivePublicationTest extends \WP_UnitTestCase {
 			$this->assertSame( 'full_static_mode_inactive', $report['skipped']['operation']['code'] );
 			$this->assertSame( array(), $report['desired'] );
 			$this->assertSame( array(), $report['written'] );
-			$this->assertFileDoesNotExist( ABSPATH . 'discovery/chunks/41.json' );
-			$this->assertFileDoesNotExist( ABSPATH . 'ai-sitemap.xml' );
+			$this->assertFileDoesNotExist( StaticBridge::get_instance()->get_file_path( 'discovery/chunks/41.json' ) );
+			$this->assertFileDoesNotExist( StaticBridge::get_instance()->get_file_path( 'ai-sitemap.xml' ) );
 			$this->assertArrayNotHasKey( StaticBridge::OPERATION_LOCK_OPTION, $GLOBALS['cybermaps_mock_options'] );
 			$this->assertArrayNotHasKey(
 				StaticBridge::TIME_SENSITIVE_REFRESH_HOOK,
@@ -277,8 +277,8 @@ final class TimeSensitivePublicationTest extends \WP_UnitTestCase {
 		$this->assertSame( array( 41 ), \array_map( static fn ( object $item ): int => (int) $item->ID, $state['ai_changed_posts'] ) );
 		$this->assertSame( $before_meta, $GLOBALS['cybermaps_mock_post_meta'] );
 		$this->assertSame( $before_options, $GLOBALS['cybermaps_mock_options'] );
-		$this->assertFileDoesNotExist( ABSPATH . 'discovery/chunks/41.json' );
-		$this->assertFileDoesNotExist( ABSPATH . 'ai-sitemap.xml' );
+		$this->assertFileDoesNotExist( StaticBridge::get_instance()->get_file_path( 'discovery/chunks/41.json' ) );
+		$this->assertFileDoesNotExist( StaticBridge::get_instance()->get_file_path( 'ai-sitemap.xml' ) );
 	}
 
 	public function test_failed_publication_preserves_due_state_and_retry_republishes(): void {
@@ -371,7 +371,7 @@ final class TimeSensitivePublicationTest extends \WP_UnitTestCase {
 		$this->assertSame( $checkpoint, (int) \get_option( 'cybermaps_last_time_sensitive_static_refresh', 0 ) );
 		$this->assertSame( $due, $GLOBALS['cybermaps_mock_post_meta'][41][ AIMetadata::TRANSITION_META_KEY ] );
 		$this->assertNotFalse( \wp_next_scheduled( StaticBridge::TIME_SENSITIVE_REFRESH_HOOK ) );
-		$this->assertFileDoesNotExist( ABSPATH . 'discovery/chunks/41.json' );
+		$this->assertFileDoesNotExist( StaticBridge::get_instance()->get_file_path( 'discovery/chunks/41.json' ) );
 	}
 
 	public function test_successful_batch_advances_transition_index_and_checkpoint_monotonically(): void {

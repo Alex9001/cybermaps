@@ -10,8 +10,8 @@
   ],
   "evidence_max_age_hours": 24,
   "upgrade_baseline": {
-    "version": "8.1.0",
-    "zip_sha256": "13ab5294469d76fdba8d2aca629d976d759c1629da8e272fd1dd4c0507ad91b7"
+    "version": "8.1.1",
+    "zip_sha256": "692170fd6ab305f898896d8246f5923704d73a2865dbd4692997ea705c725a40"
   },
   "first_stable_version": "8.1.0",
   "presentation": {

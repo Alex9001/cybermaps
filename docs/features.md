@@ -1,6 +1,6 @@
-# Cybermaps 8.1.1 Feature Reference
+# Cybermaps 8.1.2 Feature Reference
 
-This reference describes Cybermaps 8.1.1 using the
+This reference describes Cybermaps 8.1.2 using the
 [generated source inventory](./dev/manifest.json). Cloudflare automation,
 Debugging, compatibility publication, and independent LiteSpeed/APCu controls
 are included; availability and public delivery depend on the configuration.
@@ -251,7 +251,8 @@ Static publishing provides:
 - dynamic `/skill.md` compatibility delivery plus a materializable canonical
   nested `SKILL.md` and discovery index;
 - `WP_Filesystem` writes through temporary files and verified moves;
-- complete LLMS static output constrained to the same 32 MiB complete-or-fail
+- private generation-checked disk caches for Full publication content, including localized and per-post outputs;
+- complete LLMS output constrained to the same 32 MiB complete-or-fail
   response ceiling;
 - renewable owner-token coordination with exact-value checks before long-running
   static write and purge boundaries;
@@ -412,7 +413,7 @@ translation relationships.
 
 The separate AI Configuration Brief is a credential-excluding, site-aware
 Markdown handoff with current non-secret context, 122 editable fields in the
-8.1.1 generated contract, field guidance,
+8.1.2 generated contract, field guidance,
 dependencies, examples, risk levels, and an initially null JSON changes
 envelope. Imports are merge-only and require a server-generated preview that
 shows canonical sanitized values. Unknown or malformed input is rejected;

@@ -268,7 +268,7 @@ class SitemapsSections {
 		\Cybermaps\Admin\Settings\Fields\FieldRenderer::render_static_engine_mode(
 			array(
 				'label_for'   => 'static_engine_mode',
-				'description' => __( '<strong>Core discovery files (default)</strong> writes small root and canonical <code>/.well-known/</code> resources so nginx and similar origins that bypass WordPress can still serve their bodies. Dynamic routing remains preferred because only PHP can guarantee protocol-specific headers; the status page reports body availability separately from header conformance. <strong>Full publication cache</strong> also writes eligible sitemap and discovery caches. Static-file requests bypass PHP and cannot appear in crawler analytics.', 'cybermaps' ),
+				'description' => __( '<strong>Core discovery files (default)</strong> writes small root and canonical <code>/.well-known/</code> resources so nginx and similar origins that bypass WordPress can still serve their bodies. Dynamic routing remains preferred because only PHP can guarantee protocol-specific headers; the status page reports body availability separately from header conformance. <strong>Full publication cache</strong> keeps content-bearing exports outside the public directory. Route those URLs to WordPress so it can check visibility before serving a cached file. A delayed or failed rebuild uses current WordPress output when available.', 'cybermaps' ),
 			)
 		);
 		echo '</div>';

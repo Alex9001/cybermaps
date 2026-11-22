@@ -79,9 +79,11 @@ class Manager {
 			\Cybermaps\Discovery\StaticBridge::TIME_SENSITIVE_REFRESH_HOOK,
 			array( \Cybermaps\Discovery\StaticBridge::get_instance(), 'refresh_time_sensitive_publications' )
 		);
+		add_action( 'wp_loaded', array( GuardedPublicationCache::class, 'retire_public_files' ) );
 		add_action( 'save_post', array( $this, 'on_post_saved' ), 10, 2 );
 		add_action( 'transition_post_status', array( $this, 'on_post_status_transition' ), 10, 3 );
 		add_action( 'delete_post', array( $this, 'on_post_deleted' ), 10, 2 );
+		add_action( 'after_delete_post', array( $this, 'on_post_deleted' ), 10, 2 );
 		add_action( 'set_object_terms', array( $this, 'on_object_terms_set' ), 10, 6 );
 		add_action( 'edited_term', array( $this, 'on_term_changed' ), 10, 3 );
 		add_action( 'create_term', array( $this, 'on_term_changed' ), 10, 3 );
@@ -108,6 +110,9 @@ class Manager {
 		}
 
 		$this->invalidate_content_publications();
+		if ( '' !== (string) ( $post->post_password ?? '' ) ) {
+			GuardedPublicationCache::retire_post_files( (int) $post_id );
+		}
 	}
 
 	/**
@@ -129,6 +134,7 @@ class Manager {
 		}
 
 		$this->invalidate_content_publications();
+		GuardedPublicationCache::retire_post_files( (int) ( $post->ID ?? 0 ) );
 	}
 
 	/**
@@ -144,6 +150,7 @@ class Manager {
 		}
 
 		$this->invalidate_content_publications();
+		GuardedPublicationCache::retire_post_files( (int) $post_id );
 	}
 
 	/**

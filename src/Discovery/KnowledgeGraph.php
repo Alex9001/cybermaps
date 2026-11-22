@@ -28,9 +28,10 @@ class KnowledgeGraph {
 			return;
 		}
 
-		$output = $this->get_json_content();
+		$generation = \Cybermaps\Core\CacheManager::get_generation( 'discovery', true );
+		$output     = StaticBridge::get_instance()->read_current_publication( 'knowledge-graph.json' ) ?? $this->get_json_content();
 
-		Integrity::send_headers( $output );
+		Integrity::send_headers( $output, HOUR_IN_SECONDS, null, $generation );
 		header( 'Content-Type: application/ld+json' );
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
 			\Cybermaps\Core\ProtocolOutput::emit( $output, 'json' );

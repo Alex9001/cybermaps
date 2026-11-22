@@ -64,6 +64,7 @@ class Orchestrator {
 		add_action( 'save_post', array( $this, 'handle_published_post_save' ), 10, 2 );
 		add_action( 'transition_post_status', array( $this, 'handle_post_status_transition' ), 10, 3 );
 		add_action( 'delete_post', array( $this, 'handle_published_post_delete' ), 10, 2 );
+		add_action( 'after_delete_post', array( $this, 'handle_published_post_delete' ), 10, 2 );
 		add_action( 'set_object_terms', array( $this, 'handle_published_post_terms' ), 10, 6 );
 		add_action( 'created_term', array( $this, 'handle_term_inventory_change_created' ), 10, 3 );
 		add_action( 'edited_term', array( $this, 'handle_term_inventory_change_edited' ), 10, 3 );
@@ -772,7 +773,7 @@ class Orchestrator {
 		$cache_key        = $this->get_response_cache_key( $canonical_type, $page );
 		$cache_enabled    = $this->is_response_cache_enabled( $canonical_type );
 		$is_regular_child = $this->is_regular_child( $sitemap_type, $provider_id );
-		$cached           = $this->cached_sitemap_response( $cache_enabled, $cache_key, $is_regular_child );
+		$cached           = $this->cached_sitemap_response( $cache_enabled, $cache_key, $is_regular_child, $canonical_type, $page );
 		$preloaded_urls   = $this->preloaded_child_urls( $provider, $page, $is_regular_child, $cached );
 		$this->assert_current_generation( $cache_generation );
 
@@ -792,8 +793,11 @@ class Orchestrator {
 			&& ProviderIdentity::NEWS !== $provider_id;
 	}
 
-	private function cached_sitemap_response( bool $cache_enabled, string $cache_key, bool $is_regular_child ): ?string {
-		$cached = $cache_enabled ? $this->get_cached_response( $cache_key ) : null;
+	private function cached_sitemap_response( bool $cache_enabled, string $cache_key, bool $is_regular_child, string $type, int $page ): ?string {
+		$routes   = PublicationRouteSlugs::resolve( $this->settings );
+		$filename = 'index' === $type ? $routes[ PublicationRouteSlugs::SITEMAP_KEY ] . '.xml' : ProviderIdentity::filename( $type, $page, $routes );
+		$cached   = \Cybermaps\Discovery\StaticBridge::get_instance()->read_current_publication( $filename );
+		$cached ??= $cache_enabled ? $this->get_cached_response( $cache_key ) : null;
 		if ( ! $is_regular_child || null === $cached || $this->child_xml_contains_url( $cached ) ) {
 			return $cached;
 		}

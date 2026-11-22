@@ -172,7 +172,7 @@ class StaticBridgeSyncReportTest extends \WP_UnitTestCase {
 			$this->assertTrue( $bridge->write_file( $child_two, '<urlset><url /></urlset>' ) );
 
 			$report = $bridge->sync_all();
-			$index  = file_get_contents( ABSPATH . $index_file );
+			$index  = file_get_contents( $bridge->get_file_path( $index_file ) );
 
 			$this->assertSame( 'complete', $report['status'] );
 			$this->assertNotContains( $child_one, $report['desired'] );
@@ -384,14 +384,14 @@ class StaticBridgeSyncReportTest extends \WP_UnitTestCase {
 		$GLOBALS['cybermaps_mock_options']['cybermaps_settings']['static_engine_mode'] = 'all';
 		$bridge = StaticBridge::get_instance();
 		$this->assertTrue( $bridge->write_file( 'llms-full.txt', "# Previous complete body\n" ) );
-		file_put_contents( ABSPATH . 'llms-full.txt', "# Administrator-modified body\n" );
+		file_put_contents( $bridge->get_file_path( 'llms-full.txt' ), "# Administrator-modified body\n" );
 
 		$report = $this->invoke_oversized_full_publication( $bridge );
 
 		$this->assertSame( 'publication_too_large', $report['failed']['llms-full.txt']['code'] );
 		$this->assertSame( 'content_changed', $report['retained']['llms-full.txt'] );
-		$this->assertFileExists( ABSPATH . 'llms-full.txt' );
-		$this->assertSame( "# Administrator-modified body\n", file_get_contents( ABSPATH . 'llms-full.txt' ) );
+		$this->assertFileExists( $bridge->get_file_path( 'llms-full.txt' ) );
+		$this->assertSame( "# Administrator-modified body\n", file_get_contents( $bridge->get_file_path( 'llms-full.txt' ) ) );
 	}
 
 	public function test_oversized_generation_surfaces_an_untracked_existing_full_file(): void {

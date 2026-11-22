@@ -1,9 +1,9 @@
 {
     "plugin": "CYBERMAPS: XML Sitemaps & llms.txt",
-    "version": "8.1.1",
+    "version": "8.1.2",
     "php_min": "8.2",
     "wp_min": "7.1",
-    "generated_at": "2026-11-18T04:40:46+00:00",
+    "generated_at": "2026-11-22T02:33:06+00:00",
     "discovery_endpoints": [
         {
             "id": "manifest",
@@ -769,7 +769,7 @@
             },
             {
                 "mode": "all",
-                "label": "Publishes the eligible sitemap, protocol-safe discovery, localized, and RAG inventory; protocol/MIME-sensitive routes and robots.txt remain dynamic."
+                "label": "Publishes the compatibility files and privately caches eligible sitemap, discovery, localized, and RAG output. WordPress checks freshness before serving cached content."
             }
         ],
         "target_counts": {
@@ -1247,12 +1247,12 @@
             "api_secret",
             "delete_data_on_uninstall"
         ],
-        "catalog_hash": "cd11dbab07272d56da9087313e80ad6650926f09f7718a51cc702ae0820dc585",
-        "schema_hash": "1a784fb6b6c234eb2807c132bbc71c241bc68417075e02fc9e4f429030413763",
+        "catalog_hash": "68cf5e35e3ca2d649480cf45e2cbc8d618b82e2c62757c92b8ea80cd445f1575",
+        "schema_hash": "14418f63d4c808d48a07a2214f0daaf4f9a3b4bf3ffb9017dcae012575f535b1",
         "guide_path": "docs/ai-configuration.md",
         "guide_url": "https://cybermaps.dev/docs/ai-configuration/",
-        "schema_url": "https://cybermaps.dev/specs/ai-configuration/8.1.1/schema.json",
-        "catalog_url": "https://cybermaps.dev/specs/ai-configuration/8.1.1/catalog.json",
+        "schema_url": "https://cybermaps.dev/specs/ai-configuration/8.1.2/schema.json",
+        "catalog_url": "https://cybermaps.dev/specs/ai-configuration/8.1.2/catalog.json",
         "compatibility": {
             "format_version": "exact",
             "plugin_version": "warning_on_mismatch",
@@ -2289,6 +2289,13 @@
         },
         {
             "namespace": "Cybermaps\\Discovery",
+            "class": "GuardedPublicationCache",
+            "fqcn": "Cybermaps\\Discovery\\GuardedPublicationCache",
+            "file": "src/Discovery/GuardedPublicationCache.php",
+            "summary": "Public URLs never point directly at a generation of these files."
+        },
+        {
+            "namespace": "Cybermaps\\Discovery",
             "class": "HeaderDiscovery",
             "fqcn": "Cybermaps\\Discovery\\HeaderDiscovery",
             "file": "src/Discovery/HeaderDiscovery.php",
@@ -2953,7 +2960,7 @@
             "summary": "Small sitemap XML writer with a native XMLWriter fast path."
         }
     ],
-    "class_count": 241,
+    "class_count": 242,
     "publication_limits": {
         "llms_summary_bytes": 4194303,
         "llms_full_bytes": 33554431,

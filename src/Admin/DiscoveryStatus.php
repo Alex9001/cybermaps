@@ -279,7 +279,7 @@ class DiscoveryStatus {
 		if ( ! $enabled ) {
 			return 'disabled';
 		}
-		return is_array( $active_target ) ? 'static' : 'dynamic';
+		return 'well_known' === $this->static_target_value( $active_target, 'bucket' ) ? 'static' : 'dynamic';
 	}
 
 	private function static_file_exists(

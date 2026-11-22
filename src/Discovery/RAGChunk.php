@@ -52,7 +52,7 @@ class RAGChunk {
 		$output  = null;
 
 		try {
-			$output = $this->get_content( $post_id );
+			$output = $this->response_content( $post_id, $settings, $path );
 			$this->require_current_generation( $generation );
 		} catch ( PublicationSizeLimitException $error ) {
 			PublicationRequestGuard::serve_size_limit_error( $error );
@@ -83,6 +83,17 @@ class RAGChunk {
 			\Cybermaps\Core\ProtocolOutput::emit( $output, 'json' );
 		}
 		exit;
+	}
+
+	/** Check live eligibility even when the file is current (including timed exclusions). */
+	private function response_content( int $post_id, array $settings, string $path ): ?string {
+		$cached = StaticBridge::get_instance()->read_current_publication( ltrim( $path, '/' ) );
+		if ( null === $cached ) {
+			return $this->get_content( $post_id );
+		}
+		\Cybermaps\Core\ConfigurationStore::publication_discovery();
+		$selector = $this->default_selector ? new AIContentSelector( $settings ) : $this->selector;
+		return $selector->contains( $post_id ) ? $cached : null;
 	}
 
 	/**

@@ -42,18 +42,19 @@ class StaticBridgeTest extends \WP_UnitTestCase {
 			}
 			global $wp_filesystem;
 			$wp_filesystem->put_contents( $bridge->get_file_path( 'sitemap-news.xml' ), '<changed-by-someone-else/>' );
+			$paths = array_combine( $names, array_map( array( $bridge, 'get_file_path' ), $names ) );
 			$old = $GLOBALS['cybermaps_mock_options']['cybermaps_settings'];
 			$new = array_replace( $old, array( 'enable_xml_sitemaps' => '0' ) );
 			$GLOBALS['cybermaps_mock_options']['cybermaps_settings'] = $new;
 			( new \Cybermaps\Admin\Settings() )->on_settings_updated( $old, $new );
 			foreach ( array( 'sitemap.xml', 'sitemap-posts-post-1.xml', 'sitemap-rss.xml', 'sitemap-network.xml' ) as $name ) {
-				self::assertFileDoesNotExist( $bridge->get_file_path( $name ), $name );
+				self::assertFileDoesNotExist( $paths[ $name ], $name );
 				self::assertFalse( $bridge->write_file( $name, '<obsolete/>' ) );
 				self::assertSame( 'sitemaps_disabled', $bridge->get_last_write_result()['code'] );
 			}
-			self::assertSame( '<changed-by-someone-else/>', $wp_filesystem->get_contents( $bridge->get_file_path( 'sitemap-news.xml' ) ) );
-			self::assertFileExists( $bridge->get_file_path( 'ai-sitemap.xml' ) );
-			self::assertFileExists( $bridge->get_file_path( 'ai.json' ) );
+			self::assertSame( '<changed-by-someone-else/>', $wp_filesystem->get_contents( $paths['sitemap-news.xml'] ) );
+			self::assertFileExists( $paths['ai-sitemap.xml'] );
+			self::assertFileExists( $paths['ai.json'] );
 			self::assertFalse( wp_next_scheduled( \Cybermaps\Sitemap\PageOccupancyBuilder::HOOK ) );
 			$GLOBALS['cybermaps_mock_options']['cybermaps_settings'] = $old;
 			self::assertTrue( $bridge->write_file( 'sitemap.xml', '<restored/>' ) );
@@ -67,7 +68,8 @@ class StaticBridgeTest extends \WP_UnitTestCase {
 	public function test_get_file_path() {
 		$bridge = \Cybermaps\Discovery\StaticBridge::get_instance();
 		$path = $bridge->get_file_path( 'sitemap.xml' );
-		$this->assertEquals( ABSPATH . 'sitemap.xml', $path );
+		$this->assertStringNotContainsString( ABSPATH, $path );
+		$this->assertSame( ABSPATH . 'ai.json', $bridge->get_file_path( 'ai.json' ) );
 	}
 
 	public function test_write_file() {
@@ -266,9 +268,9 @@ class StaticBridgeTest extends \WP_UnitTestCase {
 		$bridge->write_file( 'ai.json', '{}' );
 		$bridge->write_file( 'discovery/chunks/1.json', '{}' );
 
-		$this->assertFileExists( ABSPATH . $base . '.xml' );
+		$this->assertFileExists( $bridge->get_file_path( $base . '.xml' ) );
 		$this->assertFileExists( ABSPATH . 'ai.json' );
-		$this->assertFileExists( ABSPATH . 'discovery/chunks/1.json' );
+		$this->assertFileExists( $bridge->get_file_path( 'discovery/chunks/1.json' ) );
 
 		$result = $bridge->purge_all();
 
@@ -277,8 +279,8 @@ class StaticBridgeTest extends \WP_UnitTestCase {
 		$this->assertContains( 'ai.json', $result['deleted'] );
 		$this->assertContains( 'discovery/chunks/1.json', $result['deleted'] );
 
-		$this->assertFileDoesNotExist( ABSPATH . $base . '.xml' );
+		$this->assertFileDoesNotExist( $bridge->get_file_path( $base . '.xml' ) );
 		$this->assertFileDoesNotExist( ABSPATH . 'ai.json' );
-		$this->assertFileDoesNotExist( ABSPATH . 'discovery/chunks/1.json' );
+		$this->assertFileDoesNotExist( $bridge->get_file_path( 'discovery/chunks/1.json' ) );
 	}
 }

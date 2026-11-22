@@ -14,6 +14,10 @@ class SettingsAjax {
 			return;
 		}
 
+		if ( 'started' === get_option( \Cybermaps\Discovery\GuardedPublicationCache::MIGRATION_KEY ) ) {
+			echo '<div class="notice notice-warning"><p>' . esc_html__( 'Cybermaps is retiring earlier public export files. Until cleanup finishes, a web server can still deliver an old file directly. Resolve any file conflicts below or route affected URLs to WordPress.', 'cybermaps' ) . '</p></div>';
+		}
+
 		$errors = get_option( 'cybermaps_static_write_errors', array() );
 		if ( ! is_array( $errors ) || empty( $errors ) ) {
 			return;

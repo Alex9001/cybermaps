@@ -29,7 +29,7 @@ final class Updates {
 		$generation = \Cybermaps\Core\CacheManager::get_generation( 'discovery', true );
 		try {
 			self::require_current_generation( $generation );
-			$output = $this->get_json_content();
+			$output = StaticBridge::get_instance()->read_current_publication( 'updates.json' ) ?? $this->get_json_content();
 			Integrity::send_headers( $output, 15 * MINUTE_IN_SECONDS, null, $generation );
 			self::require_current_generation( $generation );
 		} catch ( \Cybermaps\Core\BuildUnavailableException $error ) {

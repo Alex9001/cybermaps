@@ -41,9 +41,10 @@ class AISitemap {
 			return;
 		}
 
-		$output = (string) $this->get_content();
+		$generation = \Cybermaps\Core\CacheManager::get_generation( 'discovery', true );
+		$output     = StaticBridge::get_instance()->read_current_publication( 'ai-sitemap.xml' ) ?? $this->get_content();
 
-		Integrity::send_headers( $output );
+		Integrity::send_headers( $output, HOUR_IN_SECONDS, null, $generation );
 		header( 'Content-Type: application/xml; charset=utf-8' );
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
 			\Cybermaps\Core\ProtocolOutput::emit( $output, 'xml' );

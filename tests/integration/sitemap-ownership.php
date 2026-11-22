@@ -16,6 +16,26 @@ function cybermaps_ownership_assert( bool $condition, string $name ): void {
 	}
 }
 
+/** Exercise real WordPress visibility updates while scheduled rebuilds are still queued. */
+function cybermaps_ownership_check_withdrawal( StaticBridge $bridge, string $root ): void {
+	$marker = 'Willow publication fixture ' . wp_generate_uuid4();
+	$id = wp_insert_post( array( 'post_type' => 'post', 'post_status' => 'publish', 'post_title' => 'Willow origin publication', 'post_content' => $marker ), true );
+	cybermaps_ownership_assert( is_int( $id ) && $id > 0, 'create withdrawal fixture' );
+	$llms = new \Cybermaps\Discovery\LLMS();
+	try {
+		foreach ( array( array( 'post_status' => 'private' ), array( 'post_password' => 'fixture' ) ) as $change ) {
+			$public = $llms->get_llms_content( true, true );
+			cybermaps_ownership_assert( str_contains( $public, $marker ) && $bridge->write_file( 'llms-full.txt', $public ), 'publish eligible fixture' );
+			cybermaps_ownership_assert( $bridge->read_current_publication( 'llms-full.txt' ) === $public && ! file_exists( $root . '/llms-full.txt' ), 'current cache is private' );
+			cybermaps_ownership_assert( $id === wp_update_post( array_merge( array( 'ID' => $id ), $change ), true ), 'save reduced visibility' );
+			cybermaps_ownership_assert( null === $bridge->read_current_publication( 'llms-full.txt' ) && ! str_contains( $llms->get_llms_content( true, true ), $marker ), 'withdraw before running cron' );
+			cybermaps_ownership_assert( $id === wp_update_post( array( 'ID' => $id, 'post_status' => 'publish', 'post_password' => '' ), true ), 'restore eligible fixture' );
+		}
+	} finally {
+		wp_delete_post( $id, true );
+	}
+}
+
 $original = get_option( 'cybermaps_settings', array() );
 $permalinks = get_option( 'permalink_structure' );
 $public = get_option( 'blog_public' );
@@ -81,18 +101,21 @@ try {
 		wp_mkdir_p( $root );
 		WP_Filesystem();
 		global $wp_filesystem;
-		$settings = array_replace( $enabled, array( 'static_engine_mode' => 'all', 'enable_discovery_hub' => '1', 'sitemap_url_base' => 'ownership-map', 'news_sitemap_url_base' => 'ownership-news', 'rss_sitemap_url_base' => 'ownership-rss' ) );
+		$settings = array_replace( $enabled, array( 'static_engine_mode' => 'all', 'enable_discovery_hub' => '1', 'enable_llms_full' => '1', 'ai_sitemap_types' => array( 'post' ), 'sitemap_url_base' => 'ownership-map', 'news_sitemap_url_base' => 'ownership-news', 'rss_sitemap_url_base' => 'ownership-rss' ) );
 		update_option( 'cybermaps_settings', $settings );
 		$bridge = StaticBridge::get_instance();
+		cybermaps_ownership_check_withdrawal( $bridge, $root );
 		foreach ( $files as $file ) {
 			cybermaps_ownership_assert( $bridge->write_file( $file, '<owned/>' ), 'seed ' . $file );
 		}
-		$wp_filesystem->put_contents( $root . '/ownership-news.xml', '<foreign/>' );
+		$paths = array_combine( $files, array_map( array( $bridge, 'get_file_path' ), $files ) );
+		cybermaps_ownership_assert( ! $wp_filesystem->exists( $root . '/ownership-news.xml' ), 'news cache is outside public origin' );
+		$wp_filesystem->put_contents( $paths['ownership-news.xml'], '<foreign/>' );
 		update_option( 'cybermaps_settings', array_replace( $settings, array( 'enable_xml_sitemaps' => '0' ) ) );
 		foreach ( array_slice( $files, 0, 2 ) as $file ) {
-			cybermaps_ownership_assert( ! $wp_filesystem->exists( $root . '/' . $file ) && ! $bridge->write_file( $file, '<obsolete/>' ), 'purge and block ' . $file );
+			cybermaps_ownership_assert( ! $wp_filesystem->exists( $paths[ $file ] ) && ! $bridge->write_file( $file, '<obsolete/>' ), 'purge and block ' . $file );
 		}
-		cybermaps_ownership_assert( ! $wp_filesystem->exists( $root . '/ownership-rss.xml' ) && '<foreign/>' === $wp_filesystem->get_contents( $root . '/ownership-news.xml' ) && '<owned/>' === $wp_filesystem->get_contents( $root . '/ai-sitemap.xml' ), 'preserve foreign and AI files' );
+		cybermaps_ownership_assert( ! $wp_filesystem->exists( $paths['ownership-rss.xml'] ) && '<foreign/>' === $wp_filesystem->get_contents( $paths['ownership-news.xml'] ) && '<owned/>' === $wp_filesystem->get_contents( $paths['ai-sitemap.xml'] ), 'preserve foreign and AI files' );
 		$cases['static_handover'] = true;
 	}
 } finally {

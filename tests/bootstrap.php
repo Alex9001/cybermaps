@@ -77,6 +77,11 @@ if ( ! class_exists( 'WP_UnitTestCase', false ) ) {
 	class WP_UnitTestCase extends \PHPUnit\Framework\TestCase {
 		protected function setUp(): void {
 			parent::setUp();
+			// Each test has its own ownership database. Discard private bodies from the preceding fixture.
+			$cache = sys_get_temp_dir() . '/cybermaps-publications-' . wp_hash( ABSPATH . '|1' );
+			foreach ( glob( $cache . '/*.cache' ) ?: array() as $file ) {
+				unlink( $file );
+			}
 			if ( class_exists( \Cybermaps\Core\ConfigurationStore::class, false ) ) {
 				\Cybermaps\Core\ConfigurationStore::reset_memo();
 			}
@@ -158,6 +163,14 @@ if ( ! function_exists( 'WP_Filesystem' ) ) {
 	$wp_filesystem = new class() {
 		public function is_dir( $path ) {
 			return is_dir( $path );
+		}
+
+		public function mkdir( $path, $mode = 0755 ) {
+			return mkdir( $path, $mode );
+		}
+
+		public function getchmod( $path ) {
+			return is_dir( $path ) ? substr( decoct( fileperms( $path ) ), -3 ) : false;
 		}
 
 		public function is_writable( $path ) {

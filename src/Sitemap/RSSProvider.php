@@ -45,7 +45,9 @@ class RSSProvider {
 			'all'
 		);
 		try {
-			$output = $this->generate();
+			$generation = \Cybermaps\Core\CacheManager::get_generation( 'sitemap', true );
+			$output     = \Cybermaps\Discovery\StaticBridge::get_instance()->read_current_publication( ltrim( $path, '/' ) ) ?? $this->generate();
+			$this->assert_current_generation( $generation );
 		} catch ( \Cybermaps\Core\BuildUnavailableException $error ) {
 			\Cybermaps\Discovery\PublicationRequestGuard::serve_unavailable( $error );
 		}
@@ -54,7 +56,12 @@ class RSSProvider {
 		}
 
 		$policy = \Cybermaps\Discovery\PublicationCachePolicy::for_publication( 'sitemap', 'rss' );
-		\Cybermaps\Discovery\Integrity::send_headers( $output, policy: $policy );
+		try {
+			\Cybermaps\Discovery\Integrity::send_headers( $output, policy: $policy, sitemap_generation: $generation );
+			$this->assert_current_generation( $generation );
+		} catch ( \Cybermaps\Core\BuildUnavailableException $error ) {
+			\Cybermaps\Discovery\PublicationRequestGuard::serve_unavailable( $error );
+		}
 		header( 'Content-Type: application/rss+xml; charset=utf-8' );
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
 			\Cybermaps\Core\ProtocolOutput::emit( $output, 'xml' );

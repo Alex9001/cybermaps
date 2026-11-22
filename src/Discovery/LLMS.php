@@ -55,19 +55,16 @@ class LLMS {
 			return;
 		}
 		PublicationRequestGuard::enforce_active_route();
-		if ( '' !== $lang ) {
-			$lang = (string) \Cybermaps\Core\TranslationHelper::resolve_active_language( $lang );
-		}
-
 		$original_language = '';
 		if ( '' !== $lang ) {
+			$lang              = (string) \Cybermaps\Core\TranslationHelper::resolve_active_language( $lang );
 			$original_language = (string) \Cybermaps\Core\TranslationHelper::get_current_language();
 			\Cybermaps\Core\TranslationHelper::switch_to_language( $lang );
 		}
 
 		try {
 			try {
-				$output = $this->get_llms_content( $is_full, false, $lang );
+				$output = StaticBridge::get_instance()->read_current_publication( ltrim( $path, '/' ) ) ?? $this->get_llms_content( $is_full, false, $lang );
 			} finally {
 				if ( '' !== $lang ) {
 					\Cybermaps\Core\TranslationHelper::switch_to_language( $original_language );

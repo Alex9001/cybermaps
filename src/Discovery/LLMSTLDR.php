@@ -36,19 +36,17 @@ class LLMSTLDR {
 			return;
 		}
 		PublicationRequestGuard::enforce_active_route();
-		if ( '' !== $lang ) {
-			$lang = (string) \Cybermaps\Core\TranslationHelper::resolve_active_language( $lang );
-		}
-
+		$generation        = \Cybermaps\Core\CacheManager::get_generation( 'discovery', true );
 		$original_language = '';
 		if ( '' !== $lang ) {
+			$lang              = (string) \Cybermaps\Core\TranslationHelper::resolve_active_language( $lang );
 			$original_language = (string) \Cybermaps\Core\TranslationHelper::get_current_language();
 			\Cybermaps\Core\TranslationHelper::switch_to_language( $lang );
 		}
 
 		try {
 			try {
-				$output = $this->get_content( false, $lang );
+				$output = StaticBridge::get_instance()->read_current_publication( ltrim( $path, '/' ) ) ?? $this->get_content( false, $lang );
 			} finally {
 				if ( '' !== $lang ) {
 					\Cybermaps\Core\TranslationHelper::switch_to_language( $original_language );
@@ -60,7 +58,11 @@ class LLMSTLDR {
 			PublicationRequestGuard::serve_size_limit_error( $error );
 		}
 
-		Integrity::send_headers( $output );
+		try {
+			Integrity::send_headers( $output, HOUR_IN_SECONDS, null, $generation );
+		} catch ( BuildUnavailableException $error ) {
+			PublicationRequestGuard::serve_unavailable( $error );
+		}
 		header( 'Content-Type: text/plain; charset=utf-8' );
 		if ( ! \Cybermaps\Core\ReadOnlyRequest::is_head() ) {
 			ProtocolOutput::emit( $output, 'text' );

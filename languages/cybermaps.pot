@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: CYBERMAPS: XML Sitemaps & llms.txt 8.1.1\n"
+"Project-Id-Version: CYBERMAPS: XML Sitemaps & llms.txt 8.1.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/cybermaps\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-18T06:57:14+00:00\n"
+"POT-Creation-Date: 2026-11-22T02:37:11+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: cybermaps\n"
@@ -872,7 +872,7 @@ msgstr ""
 #: src/Admin/MediaAuditor.php:165
 #: src/Admin/NetworkSettings.php:79
 #: src/Admin/Settings.php:522
-#: src/Sitemap/Orchestrator.php:450
+#: src/Sitemap/Orchestrator.php:451
 msgid "Unauthorized"
 msgstr ""
 
@@ -923,10 +923,10 @@ msgstr ""
 #: src/Admin/NetworkSettings.php:90
 #: src/Admin/Settings.php:457
 #: src/Admin/Settings.php:515
-#: src/Admin/Settings/SettingsAjax.php:109
-#: src/Admin/Settings/SettingsAjax.php:344
+#: src/Admin/Settings/SettingsAjax.php:113
+#: src/Admin/Settings/SettingsAjax.php:348
 #: src/Admin/SetupWizard/SetupWizardController.php:141
-#: src/Sitemap/Orchestrator.php:461
+#: src/Sitemap/Orchestrator.php:462
 msgid "Invalid request method."
 msgstr ""
 
@@ -1725,8 +1725,8 @@ msgstr ""
 #: src/Admin/DiscoveryAuditor.php:51
 #: src/Admin/EdgeOptimizationController.php:77
 #: src/Admin/EdgeOptimizationController.php:474
-#: src/Admin/Settings/SettingsAjax.php:160
-#: src/Admin/Settings/SettingsAjax.php:196
+#: src/Admin/Settings/SettingsAjax.php:164
+#: src/Admin/Settings/SettingsAjax.php:200
 #: src/Admin/SetupWizard/SetupWizardController.php:104
 msgid "Insufficient permissions."
 msgstr ""
@@ -3730,78 +3730,82 @@ msgstr ""
 msgid "PHP truncated the Cybermaps settings request before it was complete. No Cybermaps settings were changed; reduce unusually large repeater lists or ask your host to raise max_input_vars, then try again."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAjax.php:38
+#: src/Admin/Settings/SettingsAjax.php:18
+msgid "Cybermaps is retiring earlier public export files. Until cleanup finishes, a web server can still deliver an old file directly. Resolve any file conflicts below or route affected URLs to WordPress."
+msgstr ""
+
+#: src/Admin/Settings/SettingsAjax.php:42
 msgid "Cybermaps Static File Engine needs attention"
 msgstr ""
 
 #. translators: %d: number of unresolved generated-file errors.
-#: src/Admin/Settings/SettingsAjax.php:43
+#: src/Admin/Settings/SettingsAjax.php:47
 #, php-format
 msgid "Cybermaps recorded %d unresolved generated-file error. The conflicted or failed file was not changed."
 msgid_plural "Cybermaps recorded %d unresolved generated-file errors. Conflicted or failed files were not changed."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Admin/Settings/SettingsAjax.php:55
+#: src/Admin/Settings/SettingsAjax.php:59
 msgid "Resolve the ownership conflict or filesystem error, then regenerate static files."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAjax.php:65
+#: src/Admin/Settings/SettingsAjax.php:69
 msgid "The file could not be written."
 msgstr ""
 
 #. translators: 1: number of displayed errors, 2: total number of errors.
-#: src/Admin/Settings/SettingsAjax.php:77
+#: src/Admin/Settings/SettingsAjax.php:81
 #, php-format
 msgid "Showing the first %1$d of %2$d errors."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAjax.php:88
+#: src/Admin/Settings/SettingsAjax.php:92
 msgid "Review Static File Engine settings"
 msgstr ""
 
-#: src/Admin/Settings/SettingsAjax.php:113
+#: src/Admin/Settings/SettingsAjax.php:117
 msgid "You are not allowed to export Cybermaps configuration."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAjax.php:114
-#: src/Admin/Settings/SettingsAjax.php:133
+#: src/Admin/Settings/SettingsAjax.php:118
+#: src/Admin/Settings/SettingsAjax.php:137
 msgid "Configuration Export Error"
 msgstr ""
 
-#: src/Admin/Settings/SettingsAjax.php:130
+#: src/Admin/Settings/SettingsAjax.php:134
 msgid "Cybermaps could not generate the configuration download. Review the stored settings and try again."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAjax.php:176
+#: src/Admin/Settings/SettingsAjax.php:180
 msgid "Cybermaps could not preview this configuration file. No settings were changed."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAjax.php:209
+#: src/Admin/Settings/SettingsAjax.php:213
 #: assets/js/admin-command-center.js:501
 msgid "Preview this file before applying it."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAjax.php:233
+#: src/Admin/Settings/SettingsAjax.php:237
 msgid "The configuration import did not complete. Review the current settings before retrying."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAjax.php:261
+#: src/Admin/Settings/SettingsAjax.php:265
 msgid "No configuration data provided."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAjax.php:307
+#: src/Admin/Settings/SettingsAjax.php:311
 #: assets/js/admin-command-center.js:509
 msgid "Acknowledge the high-impact changes before applying this configuration."
 msgstr ""
 
 #. translators: 1: changed configuration groups, 2: unchanged configuration groups.
-#: src/Admin/Settings/SettingsAjax.php:324
+#: src/Admin/Settings/SettingsAjax.php:328
 #, php-format
 msgid "Configuration import complete. Changed groups: %1$d; already current: %2$d."
 msgstr ""
 
-#: src/Admin/Settings/SettingsAjax.php:361
+#: src/Admin/Settings/SettingsAjax.php:365
 msgid "Settings"
 msgstr ""
 
@@ -6138,7 +6142,7 @@ msgid "Static File Engine"
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:271
-msgid "<strong>Core discovery files (default)</strong> writes small root and canonical <code>/.well-known/</code> resources so nginx and similar origins that bypass WordPress can still serve their bodies. Dynamic routing remains preferred because only PHP can guarantee protocol-specific headers; the status page reports body availability separately from header conformance. <strong>Full publication cache</strong> also writes eligible sitemap and discovery caches. Static-file requests bypass PHP and cannot appear in crawler analytics."
+msgid "<strong>Core discovery files (default)</strong> writes small root and canonical <code>/.well-known/</code> resources so nginx and similar origins that bypass WordPress can still serve their bodies. Dynamic routing remains preferred because only PHP can guarantee protocol-specific headers; the status page reports body availability separately from header conformance. <strong>Full publication cache</strong> keeps content-bearing exports outside the public directory. Route those URLs to WordPress so it can check visibility before serving a cached file. A delayed or failed rebuild uses current WordPress output when available."
 msgstr ""
 
 #: src/Admin/Settings/Tabs/Sitemaps/SitemapsSections.php:282
@@ -6701,7 +6705,7 @@ msgstr ""
 
 #: src/Admin/SettingsPage.php:446
 #: src/Admin/SitemapStatus.php:659
-#: src/Discovery/StaticBridge.php:5464
+#: src/Discovery/StaticBridge.php:5544
 msgid "Cybermaps XML sitemap management is disabled."
 msgstr ""
 
@@ -7601,7 +7605,7 @@ msgstr ""
 #. translators: 1: latest reconciliation status, 2: latest attempt, 3: latest complete success.
 #: src/Admin/SitemapStatus.php:418
 #, php-format
-msgid "Latest reconciliation: %1$s · attempted: %2$s · last complete success: %3$s. A published file is only an intended static copy; the public web server decides whether it is actually served."
+msgid "Latest reconciliation %1$s. Last attempt %2$s. Last complete success %3$s. Route sitemap URLs to WordPress so it can check freshness before serving a cached copy."
 msgstr ""
 
 #: src/Admin/SitemapStatus.php:432
@@ -9332,17 +9336,17 @@ msgid "The saved content report could not be loaded from the database."
 msgstr ""
 
 #. translators: 1: deleted files, 2: retained files, 3: remaining inventory lower bound or unknown.
-#: src/Core/Uninstaller.php:445
+#: src/Core/Uninstaller.php:446
 #, php-format
 msgid "; deleted %1$d, retained %2$d, pending at least %3$s"
 msgstr ""
 
-#: src/Core/Uninstaller.php:448
+#: src/Core/Uninstaller.php:449
 msgid "unknown"
 msgstr ""
 
 #. translators: %s: static cleanup status and retained relative paths.
-#: src/Core/Uninstaller.php:454
+#: src/Core/Uninstaller.php:455
 #, php-format
 msgid "Cybermaps removed its opted-in database data, but ownership-safe static cleanup did not finish (%s). Some generated public files may remain."
 msgstr ""
@@ -9367,7 +9371,7 @@ msgstr ""
 msgid "Static ownership migration did not verify its ownership schema and was deferred."
 msgstr ""
 
-#: src/Discovery/ADPNews.php:263
+#: src/Discovery/ADPNews.php:265
 msgid "An ADP news publication could not be encoded as JSON."
 msgstr ""
 
@@ -9448,47 +9452,47 @@ msgstr ""
 msgid "The public IndexNow key URL responded correctly."
 msgstr ""
 
-#: src/Discovery/Integrity.php:74
+#: src/Discovery/Integrity.php:79
 msgid "Cybermaps content changed during publication. Please retry shortly."
 msgstr ""
 
-#: src/Discovery/KnowledgeGraph.php:85
+#: src/Discovery/KnowledgeGraph.php:86
 msgid "Cybermaps content changed during knowledge graph publication. Please retry shortly."
 msgstr ""
 
-#: src/Discovery/KnowledgeGraph.php:121
+#: src/Discovery/KnowledgeGraph.php:122
 msgid "Informational Content Inventory"
 msgstr ""
 
-#: src/Discovery/KnowledgeGraph.php:122
+#: src/Discovery/KnowledgeGraph.php:123
 msgid "Public content types and taxonomies classified as informational by Cybermaps."
 msgstr ""
 
-#: src/Discovery/KnowledgeGraph.php:128
+#: src/Discovery/KnowledgeGraph.php:129
 msgid "Transactional Content Inventory"
 msgstr ""
 
-#: src/Discovery/KnowledgeGraph.php:129
+#: src/Discovery/KnowledgeGraph.php:130
 msgid "Public content types and taxonomies classified as transactional by Cybermaps."
 msgstr ""
 
 #. translators: %s: public post type label.
-#: src/Discovery/KnowledgeGraph.php:179
+#: src/Discovery/KnowledgeGraph.php:180
 #, php-format
 msgid "Public %s content type."
 msgstr ""
 
 #. translators: %s: public taxonomy label.
-#: src/Discovery/KnowledgeGraph.php:270
+#: src/Discovery/KnowledgeGraph.php:271
 #, php-format
 msgid "Public %s taxonomy."
 msgstr ""
 
-#: src/Discovery/LLMS.php:142
+#: src/Discovery/LLMS.php:139
 msgid "Cybermaps content changed during LLMS publication. Please retry shortly."
 msgstr ""
 
-#: src/Discovery/LLMS.php:515
+#: src/Discovery/LLMS.php:512
 msgid "LLMS publication exceeds the safe output limit."
 msgstr ""
 
@@ -9636,11 +9640,11 @@ msgstr ""
 msgid "Cybermaps did not publish %1$s because its complete body exceeded the %2$s-byte safety limit. No partial output was returned or written."
 msgstr ""
 
-#: src/Discovery/RAGChunk.php:126
+#: src/Discovery/RAGChunk.php:137
 msgid "Cybermaps content changed during RAG publication. Please retry shortly."
 msgstr ""
 
-#: src/Discovery/RAGChunk.php:155
+#: src/Discovery/RAGChunk.php:166
 msgid "A RAG chunk publication could not be encoded as JSON."
 msgstr ""
 
@@ -9656,520 +9660,528 @@ msgstr ""
 msgid "Cybermaps content changed during search. Please retry shortly."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:196
+#: src/Discovery/StaticBridge.php:197
 msgid "Automatic recovery is blocked because a paused stale process could resume a filesystem mutation. Stop or quiesce every Cybermaps static worker before confirming recovery."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:227
+#: src/Discovery/StaticBridge.php:228
 msgid "You are not allowed to resolve static publication recovery state."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:230
+#: src/Discovery/StaticBridge.php:231
 msgid "The exact static-worker quiescence confirmation was not supplied."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:237
+#: src/Discovery/StaticBridge.php:238
 msgid "The static recovery authorization is invalid or expired."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:244
+#: src/Discovery/StaticBridge.php:245
 msgid "The pending static intent is malformed and was preserved for administrator review."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:247
+#: src/Discovery/StaticBridge.php:248
 msgid "The pending static intent is malformed and cannot be resolved automatically."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:253
+#: src/Discovery/StaticBridge.php:254
 msgid "The pending static intent changed before recovery could begin."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:259
+#: src/Discovery/StaticBridge.php:260
 msgid "The static operation fence is still active or recovery could not acquire it."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:264
+#: src/Discovery/StaticBridge.php:265
 msgid "The pending static intent was preserved because recovery could not prove a safe terminal state."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:267
+#: src/Discovery/StaticBridge.php:268
 msgid "The pending static intent was reconciled safely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:443
-#: src/Discovery/StaticBridge.php:1429
-#: src/Discovery/StaticBridge.php:1660
-#: src/Discovery/StaticBridge.php:3422
+#: src/Discovery/StaticBridge.php:486
+#: src/Discovery/StaticBridge.php:1490
+#: src/Discovery/StaticBridge.php:1721
+#: src/Discovery/StaticBridge.php:3496
 msgid "Another generated-file operation is already running."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:444
+#: src/Discovery/StaticBridge.php:487
 msgid "The generated-file ownership inventory could not be prepared safely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:530
-#: src/Discovery/StaticBridge.php:5598
+#: src/Discovery/StaticBridge.php:514
+msgid "A previous public file still takes precedence at this URL. Resolve its ownership or route the URL to WordPress."
+msgstr ""
+
+#: src/Discovery/StaticBridge.php:587
+#: src/Discovery/StaticBridge.php:5678
 msgid "The generated-file path is invalid."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:578
+#: src/Discovery/StaticBridge.php:635
 msgid "The WordPress filesystem API is unavailable."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:593
+#: src/Discovery/StaticBridge.php:654
 msgid "The physical publication root could not be resolved safely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:607
+#: src/Discovery/StaticBridge.php:668
 msgid "WordPress could not initialize the filesystem."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:673
+#: src/Discovery/StaticBridge.php:734
 msgid "The existing file could not be read, so it was not overwritten."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:688
+#: src/Discovery/StaticBridge.php:749
 msgid "An existing file is not proven to be owned by Cybermaps and was not overwritten."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:704
+#: src/Discovery/StaticBridge.php:765
 msgid "The file changed after Cybermaps wrote it and was not overwritten."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:743
+#: src/Discovery/StaticBridge.php:804
 msgid "The file is current, but its ownership checkpoint could not be persisted."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:754
+#: src/Discovery/StaticBridge.php:815
 msgid "The generated file is already current."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:781
+#: src/Discovery/StaticBridge.php:842
 msgid "The destination directory could not be created."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:795
+#: src/Discovery/StaticBridge.php:856
 msgid "The destination directory is not writable."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:809
+#: src/Discovery/StaticBridge.php:870
 msgid "A temporary file could not be created."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:823
+#: src/Discovery/StaticBridge.php:884
 msgid "The generated content could not be written to a temporary file."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:873
+#: src/Discovery/StaticBridge.php:934
 msgid "A file appeared at the destination during generation and was not overwritten."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:893
+#: src/Discovery/StaticBridge.php:954
 msgid "The destination became too large to verify safely during generation and was not overwritten."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:917
+#: src/Discovery/StaticBridge.php:978
 msgid "The destination changed during generation and was not overwritten."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:972
+#: src/Discovery/StaticBridge.php:1033
 msgid "The generated write could not establish a durable recovery context."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:997
+#: src/Discovery/StaticBridge.php:1058
 msgid "The generated write was stopped because its durable recovery intent could not be checkpointed."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1009
+#: src/Discovery/StaticBridge.php:1070
 msgid "The generated write was stopped after preparing its recovery intent because the operation lease was lost."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1018
+#: src/Discovery/StaticBridge.php:1079
 msgid "The generated write was stopped because its recovery intent does not belong to the active operation lease."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1027
+#: src/Discovery/StaticBridge.php:1088
 msgid "The generated write was stopped immediately before publication because the operation lease was lost."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1060
+#: src/Discovery/StaticBridge.php:1121
 msgid "The generated file could not be moved into place."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1087
+#: src/Discovery/StaticBridge.php:1148
 msgid "The generated file could not be verified after it was written, so the prior file state was restored."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1088
+#: src/Discovery/StaticBridge.php:1149
 msgid "The generated file could not be verified after it was written, and a safe rollback could not be proven."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1141
+#: src/Discovery/StaticBridge.php:1202
 msgid "The write was cancelled, but the prior file state could not be restored safely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1209
+#: src/Discovery/StaticBridge.php:1270
 msgid "The generated write was rolled back because its ownership checkpoint could not be persisted."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1210
+#: src/Discovery/StaticBridge.php:1271
 msgid "The ownership checkpoint failed, and the prior file state could not be restored completely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1272
+#: src/Discovery/StaticBridge.php:1333
 msgid "The write was cancelled, but its prior file and ownership checkpoint could not both be restored safely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1321
+#: src/Discovery/StaticBridge.php:1382
 msgid "The generated file and ownership checkpoint were written, but the recovery journal could not be cleared safely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1333
+#: src/Discovery/StaticBridge.php:1394
 msgid "The generated file was written successfully."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1417
+#: src/Discovery/StaticBridge.php:1478
 msgid "Static publication is disabled on WordPress multisite."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1430
+#: src/Discovery/StaticBridge.php:1491
 msgid "The generated-file ownership inventory could not be migrated safely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1450
+#: src/Discovery/StaticBridge.php:1511
 msgid "Configuration changed while static synchronization was starting; a fresh run was queued."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1467
+#: src/Discovery/StaticBridge.php:1528
 msgid "The static synchronization state could not be checkpointed safely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1527
-#: src/Discovery/StaticBridge.php:1735
+#: src/Discovery/StaticBridge.php:1588
+#: src/Discovery/StaticBridge.php:1796
 msgid "Settings changed during generation; obsolete owned files were reconciled."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1546
+#: src/Discovery/StaticBridge.php:1607
 msgid "Static synchronization paused because its operation lease was lost."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1652
-#: src/Discovery/StaticBridge.php:1691
+#: src/Discovery/StaticBridge.php:1713
+#: src/Discovery/StaticBridge.php:1752
 msgid "Time-sensitive refresh is needed only in full static mode."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1669
-#: src/Discovery/StaticBridge.php:1742
+#: src/Discovery/StaticBridge.php:1730
+#: src/Discovery/StaticBridge.php:1803
 msgid "The time-sensitive refresh paused because its operation lease was lost."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1669
+#: src/Discovery/StaticBridge.php:1730
 msgid "Configuration changed while the time-sensitive refresh was starting; a fresh run was queued."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1716
+#: src/Discovery/StaticBridge.php:1777
 msgid "No time-sensitive publication changed since the last refresh."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1767
+#: src/Discovery/StaticBridge.php:1828
 msgid "The time-sensitive refresh completed, but its monotonic checkpoint could not be persisted."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1814
+#: src/Discovery/StaticBridge.php:1875
 msgid "The sitemap index was not updated because the time-sensitive News sitemap refresh failed."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1837
+#: src/Discovery/StaticBridge.php:1898
 msgid "The AI content inventory was unavailable for its time-sensitive refresh."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1872
+#: src/Discovery/StaticBridge.php:1933
 #: src/Discovery/StaticSyncRunner.php:1307
 msgid "The selected post no longer has a publishable RAG chunk payload."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1893
+#: src/Discovery/StaticBridge.php:1954
 msgid "The AI sitemap static target is unavailable."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1916
+#: src/Discovery/StaticBridge.php:1977
 msgid "Time-sensitive files were published, but their post transition index could not be verified."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:1929
+#: src/Discovery/StaticBridge.php:1990
 msgid "Unfinished time-sensitive work was preserved for a bounded retry."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:2256
+#: src/Discovery/StaticBridge.php:2317
 msgid "WordPress rejected the time-sensitive static refresh event."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:2436
+#: src/Discovery/StaticBridge.php:2497
 msgid "WordPress could not initialize the filesystem for stale-file reconciliation."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:2449
+#: src/Discovery/StaticBridge.php:2510
 msgid "The ownership cursor could not be read safely; reconciliation was deferred."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:2547
+#: src/Discovery/StaticBridge.php:2608
 msgid "An invalid generated-file ownership record was retained."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:2579
-#: src/Discovery/StaticBridge.php:4051
+#: src/Discovery/StaticBridge.php:2640
+#: src/Discovery/StaticBridge.php:4129
 msgid "The stale file could not be proven unchanged and was retained."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:2599
+#: src/Discovery/StaticBridge.php:2660
 msgid "Stale-file reconciliation could not checkpoint its ownership shard."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:2762
+#: src/Discovery/StaticBridge.php:2823
 msgid "Multiple registry entries resolved to the same static filename."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:2839
+#: src/Discovery/StaticBridge.php:2900
 msgid "The publication generator did not return a string body."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3092
+#: src/Discovery/StaticBridge.php:3166
 msgid "Static reconciliation failed."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3178
+#: src/Discovery/StaticBridge.php:3252
 msgid "The full sync completed, but its monotonic freshness checkpoint could not be persisted."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3188
+#: src/Discovery/StaticBridge.php:3262
 msgid "The freshness checkpoint could not be read safely, so its next timer was deferred."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3705
+#: src/Discovery/StaticBridge.php:3779
 msgid "Static purge could not verify its bounded ownership checkpoint."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3717
+#: src/Discovery/StaticBridge.php:3791
 msgid "Purge is only allowed on the main site."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3726
+#: src/Discovery/StaticBridge.php:3800
 msgid "The generated-file purge scope is invalid."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3735
-#: src/Discovery/StaticBridge.php:3960
+#: src/Discovery/StaticBridge.php:3809
+#: src/Discovery/StaticBridge.php:4038
 msgid "WP_Filesystem initialization failed."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3752
+#: src/Discovery/StaticBridge.php:3826
 msgid "An invalid generated-file inventory path was retained."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3795
+#: src/Discovery/StaticBridge.php:3871
 msgid "The ownership record is invalid, so the file was retained."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3802
+#: src/Discovery/StaticBridge.php:3878
 msgid "The owned file could not be resolved safely for reconciliation."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3846
+#: src/Discovery/StaticBridge.php:3922
 msgid "The file could not be read, so it was retained during purge."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3859
+#: src/Discovery/StaticBridge.php:3935
 msgid "The file changed after Cybermaps wrote it and was retained during purge."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3881
+#: src/Discovery/StaticBridge.php:3957
 msgid "The owned generated file was retained with a durable deletion tombstone for recovery."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3885
+#: src/Discovery/StaticBridge.php:3961
 msgid "Static purge stopped with a pending deletion tombstone."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:3920
-#: src/Discovery/StaticBridge.php:4017
+#: src/Discovery/StaticBridge.php:3996
+#: src/Discovery/StaticBridge.php:4095
 msgid "An existing file is not proven to be owned by Cybermaps and was retained after generation failed."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:4063
+#: src/Discovery/StaticBridge.php:4141
 msgid "Targeted purge stopped with a pending deletion tombstone."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:4087
+#: src/Discovery/StaticBridge.php:4165
 msgid "A malformed static publication intent is blocking stale-lease takeover and requires administrator review."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:4102
+#: src/Discovery/StaticBridge.php:4180
 msgid "A pending static publication intent blocked automatic stale-lease takeover. Quiesce every static worker, then use the confirmed administrator recovery action."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:4182
+#: src/Discovery/StaticBridge.php:4261
 msgid "An ownership checkpoint needs repair, but its durable retry marker could not be verified."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:4357
+#: src/Discovery/StaticBridge.php:4437
 msgid "WordPress rejected the background synchronization event."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:4755
+#: src/Discovery/StaticBridge.php:4835
 msgid "Static synchronization ended before it could publish a final report."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:4910
+#: src/Discovery/StaticBridge.php:4990
 msgid "A pending static write intent is malformed or could not be read safely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:4927
+#: src/Discovery/StaticBridge.php:5007
 msgid "A pending static write could not reconcile its ownership checkpoint safely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:4934
+#: src/Discovery/StaticBridge.php:5014
 msgid "A reconciled static write intent could not be cleared safely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:4954
-#: src/Discovery/StaticBridge.php:4962
+#: src/Discovery/StaticBridge.php:5034
+#: src/Discovery/StaticBridge.php:5042
 msgid "A pending static write intent could not resolve its publication path safely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:4975
+#: src/Discovery/StaticBridge.php:5055
 msgid "A pending static write target is too large or unreadable to reconcile safely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:4983
+#: src/Discovery/StaticBridge.php:5063
 msgid "A pending static write target could not be read safely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5036
+#: src/Discovery/StaticBridge.php:5116
 msgid "A pending static write target changed independently and was preserved for manual review."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5072
+#: src/Discovery/StaticBridge.php:5152
 msgid "The owned publication was retained because its durable deletion tombstone could not be checkpointed."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5082
+#: src/Discovery/StaticBridge.php:5162
 msgid "The deletion tombstone was preserved because the operation lease was lost before filesystem deletion."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5133
+#: src/Discovery/StaticBridge.php:5213
 msgid "The pending deletion tombstone could not initialize the WordPress filesystem API."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5140
+#: src/Discovery/StaticBridge.php:5220
 msgid "The pending deletion tombstone was preserved because its database fence or exact journal row could not be revalidated."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5150
+#: src/Discovery/StaticBridge.php:5230
 msgid "The pending deletion tombstone could not resolve its publication path safely."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5180
+#: src/Discovery/StaticBridge.php:5260
 msgid "The pending deletion target could not be verified safely and was preserved."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5189
+#: src/Discovery/StaticBridge.php:5269
 msgid "The pending deletion target could not be read and was preserved."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5210
+#: src/Discovery/StaticBridge.php:5290
 msgid "The deletion tombstone was preserved because its fence was lost immediately before filesystem deletion."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5248
+#: src/Discovery/StaticBridge.php:5328
 msgid "The owned publication could not be deleted; its tombstone was preserved for recovery."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5275
+#: src/Discovery/StaticBridge.php:5355
 msgid "The publication body is absent, but its ownership checkpoint or deletion tombstone could not be finalized."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5327
+#: src/Discovery/StaticBridge.php:5407
 msgid "A verified successor publication superseded the pending deletion and was preserved."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5335
+#: src/Discovery/StaticBridge.php:5415
 msgid "A third-party body replaced the pending deletion target and was preserved for administrator review."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5460
+#: src/Discovery/StaticBridge.php:5540
 msgid "Static root files are disabled on WordPress multisite; dynamic delivery remains active."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5461
+#: src/Discovery/StaticBridge.php:5541
 msgid "Static generation is suspended while the plugin is inactive or uninstalling."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5462
+#: src/Discovery/StaticBridge.php:5542
 msgid "Settings changed during generation, so the obsolete write was cancelled."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5463
+#: src/Discovery/StaticBridge.php:5543
 msgid "The Static File Engine is disabled."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5465
+#: src/Discovery/StaticBridge.php:5545
 msgid "The AI Publication Hub is disabled."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5466
+#: src/Discovery/StaticBridge.php:5546
 msgid "This file is outside the active Static File Engine mode."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5467
+#: src/Discovery/StaticBridge.php:5547
 msgid "The generated-file operation no longer owns its coordination lock and was stopped before another write."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5470
+#: src/Discovery/StaticBridge.php:5550
 msgid "The generated-file write was cancelled."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5635
+#: src/Discovery/StaticBridge.php:5715
 msgid "A remote or differently rooted frontend requires an explicit physical publication root."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5691
+#: src/Discovery/StaticBridge.php:5746
+msgid "Private publication storage is unavailable. Route this publication to WordPress for dynamic delivery."
+msgstr ""
+
+#: src/Discovery/StaticBridge.php:5794
 msgid "The origin document root could not be derived safely from the WordPress home path."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5710
+#: src/Discovery/StaticBridge.php:5813
 msgid "The physical publication root is not an absolute path."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5719
+#: src/Discovery/StaticBridge.php:5822
 msgid "The physical publication root does not exist or is not a directory."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5733
+#: src/Discovery/StaticBridge.php:5836
 msgid "The generated path escapes the configured publication root."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5742
+#: src/Discovery/StaticBridge.php:5845
 msgid "A destination directory resolves outside the configured publication root."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5806
+#: src/Discovery/StaticBridge.php:5909
 msgid "WordPress could not initialize the filesystem for the configured publication root."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:5814
+#: src/Discovery/StaticBridge.php:5917
 msgid "The configured physical publication root is not writable."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:6055
-#: src/Discovery/StaticBridge.php:6064
+#: src/Discovery/StaticBridge.php:6158
+#: src/Discovery/StaticBridge.php:6167
 msgid "The existing complete LLMS file size could not be checked safely, so the file was retained."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:6076
+#: src/Discovery/StaticBridge.php:6179
 msgid "The existing complete LLMS file exceeds the bounded ownership-verification limit and was retained rather than read or overwritten."
 msgstr ""
 
-#: src/Discovery/StaticBridge.php:6095
+#: src/Discovery/StaticBridge.php:6198
 msgid "Static reconciliation stopped because this request no longer owned its operation lock."
 msgstr ""
 
@@ -10284,11 +10296,11 @@ msgstr ""
 msgid "Vimeo Video"
 msgstr ""
 
-#: src/Sitemap/Orchestrator.php:598
+#: src/Sitemap/Orchestrator.php:599
 msgid "Sitemap not found."
 msgstr ""
 
-#: src/Sitemap/Orchestrator.php:1312
+#: src/Sitemap/Orchestrator.php:1316
 msgid "Cybermaps stopped sitemap publication because its content changed during selection. Please retry shortly."
 msgstr ""
 
@@ -10344,16 +10356,16 @@ msgstr ""
 msgid "Network sitemap selection exceeded its request time budget. No partial network index was produced."
 msgstr ""
 
-#: src/Sitemap/RSSProvider.php:105
+#: src/Sitemap/RSSProvider.php:112
 msgid "Cybermaps stopped RSS publication because its content changed during selection. Please retry shortly."
 msgstr ""
 
-#: src/Sitemap/RSSProvider.php:211
+#: src/Sitemap/RSSProvider.php:218
 msgid "Cybermaps could not finish RSS eligibility selection within its request budget. No partial feed was produced."
 msgstr ""
 
 #. translators: %s: site name
-#: src/Sitemap/RSSProvider.php:236
+#: src/Sitemap/RSSProvider.php:243
 #, php-format
 msgid "Latest content from %s"
 msgstr ""

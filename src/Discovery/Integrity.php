@@ -26,6 +26,7 @@ class Integrity {
 	 * @param int|null                 $last_modified_ts Timestamp only when it represents every input to this body.
 	 * @param int|null                 $discovery_generation Optional generation captured before publication authorization.
 	 * @param array<string,mixed>|null $policy Explicit policy for a publication that owns its route.
+	 * @param int|null                 $sitemap_generation Sitemap generation captured by an RSS handler.
 	 * @return void
 	 */
 	public static function send_headers(
@@ -33,9 +34,11 @@ class Integrity {
 		int $ttl = 3600,
 		?int $last_modified_ts = null,
 		?int $discovery_generation = null,
-		?array $policy = null
+		?array $policy = null,
+		?int $sitemap_generation = null
 	): void {
-		self::require_discovery_generation( $discovery_generation );
+		self::require_generation( 'discovery', $discovery_generation );
+		self::require_generation( 'sitemap', $sitemap_generation );
 		// WordPress marks virtual discovery URLs as 404 before handlers run; force success.
 		status_header( 200 );
 		if ( null === $policy ) {
@@ -46,7 +49,8 @@ class Integrity {
 			$policy['browser_ttl'] = max( 0, $ttl );
 			$policy['shared_ttl']  = max( 0, $ttl );
 		}
-		self::require_discovery_generation( $discovery_generation );
+		self::require_generation( 'discovery', $discovery_generation );
+		self::require_generation( 'sitemap', $sitemap_generation );
 		$not_modified = self::send_representation_headers( $content, $policy, $last_modified_ts );
 
 		// X-Robots-Tag for AI training control.
@@ -58,7 +62,8 @@ class Integrity {
 		// Content-Security-Policy for discovery data endpoints
 		header( "Content-Security-Policy: default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'" );
 
-		self::require_discovery_generation( $discovery_generation );
+		self::require_generation( 'discovery', $discovery_generation );
+		self::require_generation( 'sitemap', $sitemap_generation );
 		if ( $not_modified ) {
 			status_header( 304 );
 			exit;
@@ -66,8 +71,8 @@ class Integrity {
 	}
 
 	/** Optional publication boundary; historical callers retain their existing contract. */
-	private static function require_discovery_generation( ?int $generation ): void {
-		if ( null !== $generation && ( $generation < 0 || \Cybermaps\Core\CacheManager::get_generation( 'discovery', true ) !== $generation ) ) {
+	private static function require_generation( string $family, ?int $generation ): void {
+		if ( null !== $generation && ( $generation < 0 || \Cybermaps\Core\CacheManager::get_generation( $family, true ) !== $generation ) ) {
 			foreach ( array( 'Link', 'ETag', 'Last-Modified', 'Repr-Digest', 'Content-Digest', 'X-Markdown-Tokens' ) as $name ) {
 				header_remove( $name );
 			}

@@ -1262,7 +1262,7 @@
           "$_POST"
         ],
         "suppressions": [],
-        "file_code_sha256": "56eda0be969f35503942ec38ae31829349281266dbd69d0291f14bd959a41fb1",
+        "file_code_sha256": "e7086cc74393cadee9563ba4d430a44b243afddb6ea198dce922695b3c286120",
         "code_sha256": "beb0d671710a5e081f84a7132aa26766944686ab3692e0d822a97e8df470f7b5",
         "findings": {}
       },
@@ -1283,7 +1283,7 @@
           "// phpcs:disable WordPress.Security.NonceVerification.Missing -- This private helper is reached only after ajax_preview_config() or ajax_import_config() verifies the cybermaps_exchange_action nonce.",
           "// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- MigrationHub validates JSON and sanitizes every imported field."
         ],
-        "file_code_sha256": "56eda0be969f35503942ec38ae31829349281266dbd69d0291f14bd959a41fb1",
+        "file_code_sha256": "e7086cc74393cadee9563ba4d430a44b243afddb6ea198dce922695b3c286120",
         "code_sha256": "49e1c5b2970625b54722945523b464fe7c209d7b387a784fe2fc618c66513d29",
         "findings": {
           "WordPress.Security.NonceVerification.Missing:ERROR": 6
@@ -1306,7 +1306,7 @@
         "suppressions": [
           "// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Verified above."
         ],
-        "file_code_sha256": "56eda0be969f35503942ec38ae31829349281266dbd69d0291f14bd959a41fb1",
+        "file_code_sha256": "e7086cc74393cadee9563ba4d430a44b243afddb6ea198dce922695b3c286120",
         "code_sha256": "f45bb072a55d63c6e2dc0f50c07a1b36fb4814f7072ffe1db4999f04d0d03854",
         "findings": {}
       },
@@ -1326,7 +1326,7 @@
         "suppressions": [
           "// phpcs:disable WordPress.Security.NonceVerification.Missing -- ajax_import_config() verifies the exchange nonce before calling this helper."
         ],
-        "file_code_sha256": "56eda0be969f35503942ec38ae31829349281266dbd69d0291f14bd959a41fb1",
+        "file_code_sha256": "e7086cc74393cadee9563ba4d430a44b243afddb6ea198dce922695b3c286120",
         "code_sha256": "0a34ea41632bc411fbe011eb42cb9d8c96381f48c89cb157890d29a0648a6ed2",
         "findings": {
           "WordPress.Security.NonceVerification.Missing:ERROR": 3
@@ -1346,7 +1346,7 @@
           "$_SERVER"
         ],
         "suppressions": [],
-        "file_code_sha256": "56eda0be969f35503942ec38ae31829349281266dbd69d0291f14bd959a41fb1",
+        "file_code_sha256": "e7086cc74393cadee9563ba4d430a44b243afddb6ea198dce922695b3c286120",
         "code_sha256": "013597ca88e6d164b14cf17d102a5d121779a23f160aa2f158abccc369728c88",
         "findings": {}
       },
@@ -2831,7 +2831,7 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
         ],
-        "file_code_sha256": "7226f7beaa597a014c5216ea00002477164a37a38c8b9831be7f8c336453151b",
+        "file_code_sha256": "9e4c12b4e1e2512ff4388ef1fc5c27e00d4dedd8f7e0411d73c21b13aafd0d57",
         "code_sha256": "162ed2186e1cf9e0f018fdd54ed2d286c6da88d3d69f30d02cb62841a734fdb6",
         "findings": {}
       },
@@ -2848,7 +2848,7 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
         ],
-        "file_code_sha256": "7226f7beaa597a014c5216ea00002477164a37a38c8b9831be7f8c336453151b",
+        "file_code_sha256": "9e4c12b4e1e2512ff4388ef1fc5c27e00d4dedd8f7e0411d73c21b13aafd0d57",
         "code_sha256": "c5ea24699e23bef25790bddfd81b4dd02f9755143219c1196dc484eb06c20379",
         "findings": {}
       },
@@ -2867,7 +2867,7 @@
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Prepared cleanup queries inspect only the fixed owned table, post-meta and numeric OAuth-pointer inventories; callers bound results to at most100 rows.",
           "// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Each fixed inventory is prepared above using its typed values before execution."
         ],
-        "file_code_sha256": "7226f7beaa597a014c5216ea00002477164a37a38c8b9831be7f8c336453151b",
+        "file_code_sha256": "9e4c12b4e1e2512ff4388ef1fc5c27e00d4dedd8f7e0411d73c21b13aafd0d57",
         "code_sha256": "5209020552410d776649dbac521538c11ff6a7fc07b68b3cc34f2b2cf743e60e",
         "findings": {
           "WordPress.DB.PreparedSQL.InterpolatedNotPrepared:ERROR": 1,
@@ -2887,7 +2887,7 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
         ],
-        "file_code_sha256": "7226f7beaa597a014c5216ea00002477164a37a38c8b9831be7f8c336453151b",
+        "file_code_sha256": "9e4c12b4e1e2512ff4388ef1fc5c27e00d4dedd8f7e0411d73c21b13aafd0d57",
         "code_sha256": "f73a10b166726456826b67785abb4298a1687b1f80e2d0b25d7f7018b490ec7d",
         "findings": {}
       },
@@ -2994,7 +2994,7 @@
         "suppressions": [
           "// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception becomes escaped status data."
         ],
-        "file_code_sha256": "4ecd525801df3e2d8be663552d652c984ea6aa3384fa134b6ff1139e028ee922",
+        "file_code_sha256": "c569bb2242d5cfa0f9829c3c2e25d1ebed1398f5708c3480df2355d028f8ebf9",
         "code_sha256": "7230362ba1d4e81841e7978dcfdb1e7cfe226526c02675ffd460e29654b2654f",
         "findings": {
           "WordPress.Security.EscapeOutput.ExceptionNotEscaped:ERROR": 1
@@ -3003,7 +3003,8 @@
       "rationale": "Private structured JSON encoder called only by registered ADP news builders. The existing suppressed diagnostic is a fixed translated exception message, not emitted HTML or interpolated request data. Dynamic successful output goes through ProtocolOutput; size errors use the shared bounded problem response; static callers convert failures into contextually escaped status data. Reviewed the complete ADPNews file, dynamic/static callers and shared protocol sinks. Regression tests cover parseable endpoint bodies, registry/static parity, literal bounded summaries and failure without cached partial publication. The fixed encoding-error branch was inspected from source; tests do not directly force wp_json_encode to return false.",
       "tests": [
         "tests/Discovery/ADPNewsTest.php",
-        "tests/Discovery/DiscoveryResourceBoundsTest.php"
+        "tests/Discovery/DiscoveryResourceBoundsTest.php",
+        "tests/Discovery/GuardedPublicationCacheTest.php"
       ]
     },
     "src/Discovery/APICatalog.php::request_has_body": {
@@ -3436,7 +3437,7 @@
         "suppressions": [
           "// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Domain exception data is later JSON-encoded or escaped by status views."
         ],
-        "file_code_sha256": "f46125eb571855e7b0aea9d476e911a73eae3e9446b813e5a9afaac19d7bf1b3",
+        "file_code_sha256": "12c1f460488325eaa0f33bd9b450c046bbcf7a1a5ae61d1f015b03cc358c245a",
         "code_sha256": "9cb67da27001f831f3f7d9653cf90aa8cc80d54c4f8577eed505850d893e4d73",
         "findings": {
           "WordPress.Security.EscapeOutput.ExceptionNotEscaped:ERROR": 2
@@ -3448,7 +3449,8 @@
         "tests/Discovery/LLMSSummaryTest.php",
         "tests/Discovery/LLMSTLDRTest.php",
         "tests/Discovery/MarkdownPrivacyBoundaryTest.php",
-        "tests/Discovery/PublicationFailureBoundaryTest.php"
+        "tests/Discovery/PublicationFailureBoundaryTest.php",
+        "tests/Discovery/GuardedPublicationCacheTest.php"
       ]
     },
     "src/Discovery/LLMS.php::append_full_post": {
@@ -3459,7 +3461,7 @@
         "suppressions": [
           "// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Domain exception data is later JSON-encoded or escaped by status views."
         ],
-        "file_code_sha256": "f46125eb571855e7b0aea9d476e911a73eae3e9446b813e5a9afaac19d7bf1b3",
+        "file_code_sha256": "12c1f460488325eaa0f33bd9b450c046bbcf7a1a5ae61d1f015b03cc358c245a",
         "code_sha256": "225c518aaba8fab9e1e73b50ae380a257b99a482c205881959c8d16fe91a9734",
         "findings": {
           "WordPress.Security.EscapeOutput.ExceptionNotEscaped:ERROR": 1
@@ -3470,7 +3472,8 @@
         "tests/Content/ContentAnalyzerNativeBoundsTest.php",
         "tests/Discovery/LLMSTLDRTest.php",
         "tests/Discovery/MarkdownPrivacyBoundaryTest.php",
-        "tests/Discovery/PublicationFailureBoundaryTest.php"
+        "tests/Discovery/PublicationFailureBoundaryTest.php",
+        "tests/Discovery/GuardedPublicationCacheTest.php"
       ]
     },
     "src/Discovery/LLMS.php::require_memory_headroom": {
@@ -3481,7 +3484,7 @@
         "suppressions": [
           "// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Domain exception data is later JSON-encoded or escaped by status views."
         ],
-        "file_code_sha256": "f46125eb571855e7b0aea9d476e911a73eae3e9446b813e5a9afaac19d7bf1b3",
+        "file_code_sha256": "12c1f460488325eaa0f33bd9b450c046bbcf7a1a5ae61d1f015b03cc358c245a",
         "code_sha256": "f34783c1992e9db1c2ea2b787f0a6cb1bb70f707aca2ce49fc06b577b3d0d971",
         "findings": {
           "WordPress.Security.EscapeOutput.ExceptionNotEscaped:ERROR": 2
@@ -3492,7 +3495,8 @@
         "tests/Discovery/LLMSSummaryTest.php",
         "tests/Discovery/LLMSTLDRTest.php",
         "tests/Discovery/MarkdownPrivacyBoundaryTest.php",
-        "tests/Discovery/PublicationFailureBoundaryTest.php"
+        "tests/Discovery/PublicationFailureBoundaryTest.php",
+        "tests/Discovery/GuardedPublicationCacheTest.php"
       ]
     },
     "src/Discovery/ManagedHtaccess.php::limitation": {
@@ -3626,7 +3630,7 @@
         "suppressions": [
           "// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception-only diagnostic; JSON or escaped admin consumers own the eventual output boundary."
         ],
-        "file_code_sha256": "ac1284827defb5fc19a4fd847e6566a89bcd915ecb86625f824d6fb9d381444b",
+        "file_code_sha256": "b20fae9cefef68bacd826d7560f93c8b8ccc6cac2c9646c8ded120211064968e",
         "code_sha256": "6266f2c65d3216ec1b359bd0dd721b5284162f90059bf10f8265774d879f2b84",
         "findings": {
           "WordPress.Security.EscapeOutput.ExceptionNotEscaped:ERROR": 1
@@ -3639,7 +3643,8 @@
         "tests/Discovery/MarkdownPrivacyBoundaryTest.php",
         "tests/Discovery/PublicationFailureBoundaryTest.php",
         "tests/Discovery/PublicationRouterTest.php",
-        "tests/Discovery/PublicationSizeFailureTest.php"
+        "tests/Discovery/PublicationSizeFailureTest.php",
+        "tests/Discovery/GuardedPublicationCacheTest.php"
       ]
     },
     "src/Discovery/Robots.php::send_content_usage_header": {
@@ -3668,7 +3673,7 @@
         "suppressions": [
           "// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Static-sync exceptions become status data; the admin view escapes at its output boundary."
         ],
-        "file_code_sha256": "a37cb01f70ce842eb826369a501af6ce005de8ebbf9b2095f96c12857ea910be",
+        "file_code_sha256": "c0715fe0d977b5491528d43a023ea146f66217e3e80eef86ed44dccfd0dd8e3e",
         "code_sha256": "814bdd77ed3ce1ff3b06f97ec2c4b0a7f56ddf3548a6c2bd88d898d4cf7401f4",
         "findings": {
           "WordPress.Security.EscapeOutput.ExceptionNotEscaped:ERROR": 1
@@ -3676,7 +3681,8 @@
       },
       "rationale": "refresh_time_sensitive_publications constructs eligible AI selection state; the chunk callback throws a fixed translated message only when selected payload disappears. publish_for_sync catches the exception into bounded report data; AIDiscoveryStatus renders summaries through esc_html, and JSON responses retain structured encoding. TimeSensitivePublicationTest::test_transition_refresh_updates_only_affected_ai_publications and test_failed_publication_preserves_due_state_and_retry_republishes cover real bounded publication/retry. They do not trigger this specific null-payload throw or prove malicious translated diagnostic escaping; retain that explicit coverage limitation. 8.0.4 review: a sitemap-family scope uses frozen normalized names and a pure child-route matcher. Existing operation fences, hash ownership, conflict retention and persisted purge continuation still govern every deletion. Current settings block new sitemap writes and News refresh when ownership is off; RAG error data/sinks remain unchanged.",
       "tests": [
-        "tests/Discovery/TimeSensitivePublicationTest.php"
+        "tests/Discovery/TimeSensitivePublicationTest.php",
+        "tests/Discovery/GuardedPublicationCacheTest.php"
       ]
     },
     "src/Discovery/StaticOwnershipStore.php::direct_query": {
@@ -3687,7 +3693,7 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- Private helper receives fixed SQL templates; appended lock predicates are literal and all values/identifiers are prepared."
         ],
-        "file_code_sha256": "ddfc16bc1f089b8841912776e5f0dbbc8af6f250d0b2c62a63b6e89553952ef8",
+        "file_code_sha256": "656beb0628c8ec6f5110b89df7bce2a265bb89b62138f5417d87401e68378a49",
         "code_sha256": "e4f2348e1fc0eda5465879c25f0a4b32521d11dce35bb6972ef2c83270fd9561",
         "findings": {
           "WordPress.DB.PreparedSQL.NotPrepared:ERROR": 7
@@ -3707,7 +3713,7 @@
         "suppressions": [
           "// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching"
         ],
-        "file_code_sha256": "ddfc16bc1f089b8841912776e5f0dbbc8af6f250d0b2c62a63b6e89553952ef8",
+        "file_code_sha256": "656beb0628c8ec6f5110b89df7bce2a265bb89b62138f5417d87401e68378a49",
         "code_sha256": "ba929e9ee71235716c83a98dc8cebd146a9d9911dda9e511282ee7938171d7da",
         "findings": {}
       },
@@ -4042,7 +4048,7 @@
           "// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public read-only cache-busting challenge; no state mutation.",
           "// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Same read-only challenge value validated against the request header."
         ],
-        "file_code_sha256": "9036a0420a6809005178faa9a171aa4b5af8bd9e6cc4e7edb8c6e35630d7de83",
+        "file_code_sha256": "c12ec1f875889be1dfd1fc78f64474a173d94fafbdcb1af3ae181815ec75c6f4",
         "code_sha256": "74895481afdd7c8289551a04d6d62c4afa4080411d403dc5c24f6235c83cbceb",
         "findings": {
           "WordPress.Security.NonceVerification.Recommended:WARNING": 3
@@ -4069,7 +4075,7 @@
         "suppressions": [
           "// phpcs:ignore WordPress.Security.NonceVerification.Missing -- The action nonce was verified immediately above."
         ],
-        "file_code_sha256": "9036a0420a6809005178faa9a171aa4b5af8bd9e6cc4e7edb8c6e35630d7de83",
+        "file_code_sha256": "c12ec1f875889be1dfd1fc78f64474a173d94fafbdcb1af3ae181815ec75c6f4",
         "code_sha256": "5a66dd3fc8a5064ae3f09ab50b9378745ab5e6154235112daf752430692494dc",
         "findings": {}
       },
@@ -4087,7 +4093,7 @@
         "suppressions": [
           "// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.NoCaching -- Comment-driven freshness must update the exact persisted post timestamps."
         ],
-        "file_code_sha256": "9036a0420a6809005178faa9a171aa4b5af8bd9e6cc4e7edb8c6e35630d7de83",
+        "file_code_sha256": "c12ec1f875889be1dfd1fc78f64474a173d94fafbdcb1af3ae181815ec75c6f4",
         "code_sha256": "e6a36483edd0ee712747c95f097ecea57c3e4fd3400779a8b8e0b19ff69bb8e2",
         "findings": {}
       },

@@ -201,7 +201,8 @@ Rules:
     canonical Agent Skills `SKILL.md`, and its discovery index (**default**).
   - `all` — the sitemap index, every internal Core child advertised by that
     index, enabled RSS output, discovery output, localized LLMS output, and
-    eligible RAG chunks are written to disk. `robots.txt` is always dynamic.
+    eligible RAG chunks use a private generation-checked disk cache behind WordPress.
+    Only the five compatibility files are directly served from the public root. `robots.txt` is always dynamic.
 - `static_engine_mode` is the only runtime mode key. `Settings` removes the
   retired `enable_static_engine` value once; no behavior is inferred from it.
 - **Multisite is dynamic-only.** `StaticBridge::get_mode()` resolves to `off` on

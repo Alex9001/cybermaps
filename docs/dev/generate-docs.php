@@ -869,7 +869,7 @@ function extract_static_engine_modes(): array {
 				'Publishes the %d registered core compatibility files; all other supported routes remain dynamic. (Default)',
                 $target_counts['well_known']
             ),
-            'all' => 'Publishes the eligible sitemap, protocol-safe discovery, localized, and RAG inventory; protocol/MIME-sensitive routes and robots.txt remain dynamic.',
+            'all' => 'Publishes the compatibility files and privately caches eligible sitemap, discovery, localized, and RAG output. WordPress checks freshness before serving cached content.',
             default => 'Static publication mode.',
         };
         $modes[] = [

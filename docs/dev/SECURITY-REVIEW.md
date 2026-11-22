@@ -43,3 +43,21 @@ record why any remaining scanner limitation is safe. The per-release security
 review must explicitly assess this inherited inventory, not mistake it for a
 zero-findings annotation-blind audit. Official Plugin Check still requires zero
 findings on the installed ZIP.
+
+### Origin publication withdrawal in 8.1.2
+
+The existing request and SQL exceptions in the changed files retain their
+function bodies, finding sets and input contracts. The new admin migration
+notice is restricted to site managers and emits translated, escaped text.
+Settings import, export and regeneration still check their existing method,
+capability and nonce before accessing request data. Uninstall adds one owned
+option to its fixed inventory. Static cleanup selects owned records through the
+existing prepared queries and rechecks ownership before deletion.
+
+The public handlers keep their method, route and eligibility checks. Full-mode
+reads select an installation-private file using the publication generations,
+verify its recorded content hash and recheck freshness. RAG also checks current
+post eligibility. Conditional response handling checks the applicable family
+generation before accepting a validator. The withdrawal regression covers
+private and password-protected posts, queued and failed writes, an independent
+family change and a retained, administrator-edited legacy file.

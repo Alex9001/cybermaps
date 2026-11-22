@@ -49,6 +49,7 @@ final class Uninstaller {
 		'cybermaps_static_operation_lock',
 		'cybermaps_static_write_intent',
 		'cybermaps_static_generation',
+		'cybermaps_guarded_publications_cutover',
 		'cybermaps_static_ownership_revision',
 		'cybermaps_static_suspended',
 		'cybermaps_static_cleanup_after_cancel',
